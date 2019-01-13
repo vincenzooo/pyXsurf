@@ -4,12 +4,14 @@ Python library for X-Ray Optics, Metrology Data Analysis and Telescopes Design.
 ## Installation
 Download or fork the project in a folder accessible on your system.
 
-## Modules
-For each module there are examples and data in a `test` subfolder.
+## Status
 This is a release version, modules under preliminary development are excluded. I am using my beginner skills with github to keeo it self-consistent.
 First version of repository includes a lot of scripts that are not essential or well commented. 
+**TODO:** remove unessential files. Learn how to add documentation from docstring.
 
-List of modules included:
+## Modules
+
+A basic description of the different modules is:
 * **dataIO**
 Generic routines for accessing and manipulating data.
 * **notebooks**
@@ -25,6 +27,7 @@ Functions and classes acting on 3D points or surfaces.
 * **thermal**
 Functions for modelling of thermal forming of glass.
 
+Some examples and data can be found in a `test` subfolder of each module.
 
 ## Author
 Vincenzo Cotroneo
