@@ -1,0 +1,6 @@
+02_FS04c_16.jpg         Sample 1   note: microscope
+03_calib_20x.jpg        Sample 1   
+03_FS04c_16_100x.jpg    Sample 1    note: microscope  
+IMG_3747.JPG            Sample 1    
+IMG_3748.JPG            Sample 1    
+IMG_3749.JPG            Sample 1   note #3
