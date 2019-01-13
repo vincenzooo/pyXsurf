@@ -4,14 +4,15 @@ Python Library for X-Ray Optics, Metrology and Telescopes Design.
 # pyXMirror
 Library for X-Ray Optics, Metrology and Telescopes Design with auxiliary routines in python.
 
-This is a release version of the most mature modules. I am using my beginner skills with github to try and keeo it updated.
-
 ## Installation
 
 Download or fork the project in a folder accessible on your system.
 
 ## Modules
+For each module there are examples and data in a `test` subfolder.
+This is a release version, modules under preliminary development are excluded. I am using my beginner skills with github to keeo it self-consistent.
 
+List of modules included:
 ### dataIO
 Generic routines for accessing and manipulating data.
 ### pySurf
