@@ -10,17 +10,21 @@ This is a release version, modules under preliminary development are excluded. I
 First version of repository includes a lot of scripts that are not essential or well commented. 
 
 List of modules included:
-### dataIO
+* **dataIO**
 Generic routines for accessing and manipulating data.
-### pySurf
-Functions and classes acting on 3D points or surfaces.
-### pyProfile
-Equivalent of pySurf acting on Profiles.
-### plotting
-Plotting functions for pySurf data.
-
-### notebooks
+* **notebooks**
 Jupyter notebooks, not necessarily related to the libraries, include test and experiments on python.
+* **plotting**
+Plotting functions for pySurf data.
+* **pyGeo3D**
+Functions for geometry in space (lines and planes).
+* **pyProfile**
+Equivalent of pySurf acting on Profiles.
+* **pySurf**
+Functions and classes acting on 3D points or surfaces.
+* **thermal**
+Functions for modelling of thermal forming of glass.
+
 
 ## Author
 Vincenzo Cotroneo
