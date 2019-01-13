@@ -1,16 +1,13 @@
 # pyXTel
-Python Library for X-Ray Optics, Metrology and Telescopes Design.
-
-# pyXMirror
-Library for X-Ray Optics, Metrology and Telescopes Design with auxiliary routines in python.
+Python library for X-Ray Optics, Metrology Data Analysis and Telescopes Design.
 
 ## Installation
-
 Download or fork the project in a folder accessible on your system.
 
 ## Modules
 For each module there are examples and data in a `test` subfolder.
 This is a release version, modules under preliminary development are excluded. I am using my beginner skills with github to keeo it self-consistent.
+First version of repository includes a lot of scripts that are not essential or well commented. 
 
 List of modules included:
 ### dataIO
@@ -20,9 +17,11 @@ Functions and classes acting on 3D points or surfaces.
 ### pyProfile
 Equivalent of pySurf acting on Profiles.
 ### plotting
-Plotting functions for pySurf
+Plotting functions for pySurf data.
 
 ### notebooks
 Jupyter notebooks, not necessarily related to the libraries, include test and experiments on python.
 
-
+## Author
+Vincenzo Cotroneo
+vcotroneo@cfa.harvard.edu
