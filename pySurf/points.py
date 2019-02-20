@@ -587,13 +587,14 @@ def points_find_grid(points,result='shape',sort=None,steps=None):
         #determines the fastest from the smallest step.
         # if steps are the same cannot determine. Use some point at the middle
         # rather than first point to reduce chance of error
-        i = int(points.shape[0]/2)  #central index
+        i = np.array([-1,0,1])+int(points.shape[0]/2)  #central index
+        #three values of i are set to avoid it happens at at the end of a line
         d=[points[i+1,0]-points[i,0],points[i+1,1]-points[i,1]] #distances x and y from next point
         #d=[points[1,0]-points[0,0],points[1,1]-points[0,1]]
-        if np.abs(d[0])>np.abs(d[1]):  #comparison inverted on 2018/12/12 don't know why it worked before
-            fastind=1  #y in points 
-        elif np.abs(d[0])<np.abs(d[1]):
-            fastind=0   #x
+        if np.abs(min(d[0]))<np.abs(min(d[1])):  
+            fastind=0  #y in points 
+        elif np.abs(min(d[0]))>np.abs(min(d[1])):
+            fastind=1   #x
         else:
             fastind=np.nan
     elif sort == 'none':
