@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 from matplotlib import pyplot as plt
 import math
@@ -544,7 +545,7 @@ def save_points(points,filename,xgrid=None,ygrid=None,shape=None,matrix=False,fi
 
 #SHAPE AND RESAMPLING FUNCTIONS
 
-def points_find_grid(points,result='shape',sort=None,steps=None):
+def points_find_grid2(points,result='shape',sort=None,steps=None):
     """Given points as pointcloud, do some basic guess on shape and axis orientation
     of the grid. 
     Works for raster points, even irregular and non rectangular, but not for scatter 
@@ -645,6 +646,75 @@ def points_find_grid(points,result='shape',sort=None,steps=None):
             shape[slowind]=nfast
             retval=shape
     elif result=='grid':  #use points to calculate by points_find_grid
+        xs,ys,zs=np.hsplit(span(points,axis=0),3)
+        nx,ny=points_find_grid(points)[1]
+        xgrid=np.linspace(xs[0],xs[1],nx)
+        ygrid=np.linspace(ys[0],ys[1],ny) 
+        retval=[xgrid,ygrid]
+    else:
+        raise ValueError
+    
+    return fastind,tuple(retval)
+
+def points_find_grid(points,result='shape',sort=None):
+    """Given points as pointcloud, do some basic guess on shape and axis orientation
+    of the grid. Not many checks in this first version, you need to verify results.
+    Works for raster points, even irregular and non rectangular, but not for scatter (step is estimated from the first two 
+    elements, it fails if elements are not sorted, points can be
+    sorted xy or yx to avoid failure, like (xysort):
+        a = a[a[:,1].argsort()] 
+        a = a[a[:,0].argsort(kind='mergesort')] #stable sort.
+    Return a tuple (fastind,result), fastind is 1 for y and 0 for x,
+    result can be 'shape', 'step'  or 'grid'."""
+    
+    """N.B.: it fails on unsorted points:
+    ff=r'C:\\Users\Vincenzo\\Google Drive\Shared by Vincenzo\Metrology logs and data\Simulations\Coating_stress\MirrorStressIF\1mOAB_100x100\Mirror_Stress_IF_Iridium_C_total.csv'
+    pf=get_points(ff,delimiter=' ')
+    points_find_grid(pf)[1]
+    gives (10498, 100)
+    
+    it fails on some data sets, e.g. PCO1.2S02_BCB_rep2 in POOL\pipeline\surfaceNB2"""
+    
+    #2018/02/12 removed failed attempt of sorting points before result
+    #in points_find_grid2
+    
+    #determines the fastest from the smallest step.
+    # if steps are the same cannot determine.
+    d=[points[1,0]-points[0,0],points[1,1]-points[0,1]]
+    if np.abs(d[0])<np.abs(d[1]):
+        fastind=1  #y in points 
+    elif np.abs(d[0])>np.abs(d[1]):
+        fastind=0   #x
+    else:
+        fastind=np.nan
+    
+    # calculate the shape of the matrix detecting
+    # first change of sign of derivative oof scanning
+    # coordinate (end of line and return to first point) 
+    # in fast axis. 
+    sign=np.sign(d[fastind])
+    #nfast=(np.sign(np.diff(points[:,fastind]))!=sign)[0]).sum()+1
+    id=np.where(np.sign(np.diff(points[:,fastind]))!= sign)[0] #positions of change of sign, it's last point in line
+    id=np.hstack([id,[points.shape[0]-1]])
+    nslow=np.max(np.diff(id)) #diff is the length of each line
+    nfast=len(id)
+    #nslow=points.shape[0]/nfast
+    if nslow*nfast!=points.shape[0]:
+        print ("WARNING: points number doesn't match regular grid for size determined by points_find_grid")
+    
+    slowind=int(not(fastind))
+    if result=='step':
+        steps=[d[fastind],d[fastind]]
+        slowsteps=np.diff(points[id,slowind])
+        steps[slowind]=slowsteps[np.argmax(np.abs(slowsteps))]
+        retval=steps
+    elif result=='shape':
+        #here axis are switched meaning the position of index to 
+        # access the matrix, i.e. the matrix has shape (ny,nx)
+        shape=[nslow,nslow]
+        shape[slowind]=nfast
+        retval=shape
+    elif result=='grid':
         xs,ys,zs=np.hsplit(span(points,axis=0),3)
         nx,ny=points_find_grid(points)[1]
         xgrid=np.linspace(xs[0],xs[1],nx)
