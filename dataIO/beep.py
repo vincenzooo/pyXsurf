@@ -10,6 +10,7 @@ winsound.Beep(frequency, duration)
 """
 
 def beep(*args,**kwargs):
+    """Emits a sound (useful if you want to recall attention after a long run and you cannot remember the character code for it)."""
     print('\a')
     
     
