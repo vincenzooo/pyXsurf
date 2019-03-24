@@ -2,6 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from dataIO.span import span
 
 def makeGaussian(size, fwhm = 3, center=None):
     """ Make a square gaussian kernel.
@@ -21,8 +22,31 @@ def makeGaussian(size, fwhm = 3, center=None):
     
     return np.exp(-4*np.log(2) * ((x-x0)**2 + (y-y0)**2) / fwhm**2)
 
+
+
+def make_sag(nx,ny):
+    """ create sag with peak-to-valley 1."""
+    #ny,nx=d2d.data.shape
+    ss=(np.arange(ny)-ny/2.)**2 #makes a parabola centered on 0
+    ss=ss/span(ss,size=1) #rescale height to 1
+    sag=np.repeat(ss[np.newaxis, :], nx, axis=0).T #np.tile(ss,nx).reshape(ny,nx)
+    
+    return sag,np.arange(nx),np.arange(ny)
+    #return Data2D(sag,d2d.x,d2d.y,name='sag from '+d2d.name,
+    #              units=d2d.units)
+
+    
 def make_range(nx,ny):
-    """make a data,x,y from array from range."""
+    """make a data,x,y with increasing integer values for each pixel.
+    
+    example:
+
+    >>> make_range(2,3)
+    
+    (array([[0., 1.],
+        [2., 3.],
+        [4., 5.]]), array([0, 1]), array([0, 1, 2]))"""
+        
     data,x,y=np.arange(ny*nx,dtype=float).reshape(ny,nx),np.arange(nx),np.arange(ny)
     x=np.arange(nx)
     y=np.arange(ny)

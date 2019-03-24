@@ -81,7 +81,7 @@ import numpy as np
 
 from pySurf._instrument_reader import auto_reader
 from pySurf.data2D import plot_data,get_data, level_data, save_data, rotate_data, remove_nan_frame, resample_data
-from pySurf.data2D import read_data,sum_data, subtract_data, projection, crop_data, transpose_data, apply_transform, register_data
+from pySurf.data2D import read_data,sum_data, subtract_data, projection, crop_data, transpose_data, apply_transform, register_data, data_from_txt
 
 from pySurf.psd2d import psd2d,plot_psd2d,psd2d_analysis,plot_rms_power,rms_power
 
@@ -184,15 +184,16 @@ class Data2D(object):  #np.ndarrays
                 self.header=""
                 #raise 
         else:
-            if x is None:
-                x=np.arange(data.shape[1])
-            if y is None:
-                y=np.arange(data.shape[0])
+            if data is not None:
+                if x is None:
+                    x=np.arange(data.shape[1])
+                if y is None:
+                    y=np.arange(data.shape[0])
         
-        # se read_data chiamasse register, andrebbe un'indentazione sotto
-        data,x,y=register_data(data,x,y,*args,**kwargs)
-            
-        self.data,self.x,self.y=data,x,y
+        if data is not None:
+            data,x,y=register_data(data,x,y,*args,**kwargs)# se read_data chiamasse register, andrebbe un'indentazione +1
+            self.data,self.x,self.y=data,x,y
+        
         self.units=units
         if name is not None:
             self.name=name
@@ -224,6 +225,12 @@ class Data2D(object):  #np.ndarrays
             print ("warning, multiplication between arrays was never tested")
             assert scale.shape == self.data.shape
             self.data=self.data*scale
+        elif isinstance(scale,Data2D):
+            tmp=scale.resample(self)
+            res=self.copy()
+            res.data=self.data*tmp.data
+        else:
+            raise ValueError('Multiply Data2D by wrong format!')
         return res
         
     def __rmul__(self,scale,*args,**kwargs):
@@ -253,7 +260,10 @@ class Data2D(object):  #np.ndarrays
                 title = self.name
         plt.title(title)
         return res
-            
+
+    def load(self,filename,*args,**kwargs):
+        self.data,self.x,self.y = data_from_txt(filename,*args,**kwargs)
+        
     def save(self,filename,*args,**kwargs):
         return save_data(filename,self.data,self.x,self.y,*args,**kwargs)
     save.__doc__=save_data.__doc__
@@ -300,6 +310,9 @@ class Data2D(object):  #np.ndarrays
     def resample(self,other,*args,**kwargs):
         """TODO, add option to pass x and y instead of other as an object."""
         res=self.copy()
+        if self.units is not None and other.units is not None:
+            if self.units != other.units:
+                raise ValueError('If units are defined they must match in Data2D resample.')
         res.data,res.x,res.y=resample_data(res(),other(),*args,**kwargs)  
         return res
         

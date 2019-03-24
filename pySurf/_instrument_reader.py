@@ -51,7 +51,7 @@ def csv4D_reader(wfile,ypix=None,ytox=1,header=False,delimiter=',',skip_header=1
     return data,x,y 
     
 def points_reader(wfile,*args,**kwargs):
-    """Read a processed points file as csv output of analysis routines."""
+    """Read a processed points file in format x,y,z as csv output of analysis routines."""
     w0=get_points(wfile,*args,**kwargs)
     w=w0.copy()
     x,y=points_find_grid(w,'grid')[1]
