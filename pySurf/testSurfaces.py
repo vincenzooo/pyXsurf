@@ -26,14 +26,13 @@ def makeGaussian(size, fwhm = 3, center=None):
 
 def make_sag(nx,ny):
     """ create sag with peak-to-valley 1."""
-    #ny,nx=d2d.data.shape
+    
     ss=(np.arange(ny)-ny/2.)**2 #makes a parabola centered on 0
     ss=ss/span(ss,size=1) #rescale height to 1
     sag=np.repeat(ss[np.newaxis, :], nx, axis=0).T #np.tile(ss,nx).reshape(ny,nx)
     
     return sag,np.arange(nx),np.arange(ny)
-    #return Data2D(sag,d2d.x,d2d.y,name='sag from '+d2d.name,
-    #              units=d2d.units)
+
 
     
 def make_range(nx,ny):

@@ -266,7 +266,7 @@ class Data2D(object):  #np.ndarrays
         #assert self.units == other.units
         #res=Data2D(*subtract_data(self(),other(),*args,**kwargs),units=self.units)
         res=self.__add__(self,-other,*args,**kwargs)
-        if hasattr(other,name):
+        if hasattr(other,'name'):
             res.name = self.name + " - " + other.name
         return res
         
