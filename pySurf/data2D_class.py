@@ -207,30 +207,7 @@ class Data2D(object):  #np.ndarrays
         return self.data,self.x,self.y
 
     def __add__(self,other,*args,**kwargs):
-        res = self.copy()
-        if isinstance(other,Data2D):
-            if other.units is not None:
-                assert self.units == other.units
-            res=Data2D(*sum_data(self(),other(),*args,**kwargs),units=self.units,name=self.name + " + " + other.name)
-        elif len(np.shape(other))<=1:  #add scalar
-            if np.size(other) == 1:
-                res.data = res.data +other
-            else:
-                raise ValueError ("wrong number of elements in Data2D sum")
-        elif len(np.shape(other))==2:  #sum with matrix
-            #completely untested
-            
-            if other.shape != self.data.shape:
-                raise ValueError ('Different size in sum')
-            res.data=res.data+other
-        else:
-            raise ValueError('Multiply Data2D by wrong format!')
-
-        return res    
-        
-    def __radd__(self,other):
-        return self.__add__(other)
-        
+        return Data2D(*sum_data(self(),other(),*args,**kwargs),units=self.units,name=self.name + " + " + other.name)
         
     def __mul__(self,scale,*args,**kwargs):
         res = self.copy()
@@ -247,7 +224,7 @@ class Data2D(object):  #np.ndarrays
             #completely untested
             print ("warning, multiplication between arrays was never tested")
             assert scale.shape == self.data.shape
-            res.data=res.data*scale
+            self.data=self.data*scale
         elif isinstance(scale,Data2D):
             tmp=scale.resample(self)
             res=self.copy()
@@ -263,11 +240,9 @@ class Data2D(object):  #np.ndarrays
         return self.__mul__(-1)
         
     def __sub__(self,other,*args,**kwargs):
-        #assert self.units == other.units
-        #res=Data2D(*subtract_data(self(),other(),*args,**kwargs),units=self.units)
-        res=self.__add__(self,-other,*args,**kwargs)
-        if hasattr(other,'name'):
-            res.name = self.name + " - " + other.name
+        assert self.units == other.units
+        res=Data2D(*subtract_data(self(),other(),*args,**kwargs),units=self.units)
+        res.name = self.name + " - " + other.name
         return res
         
     def __truediv__(self,other):
