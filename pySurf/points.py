@@ -646,7 +646,8 @@ def points_find_grid2(points,result='shape',sort=None,steps=None):
             shape[slowind]=nfast
             retval=shape
     elif result=='grid':  #use points to calculate by points_find_grid
-        xs,ys,zs=np.hsplit(span(points,axis=0),3)
+        #xs,ys,zs=np.hsplit(span(points,axis=0),3)
+        xs,ys,zs=span(points,axis=0)
         nx,ny=points_find_grid(points)[1]
         xgrid=np.linspace(xs[0],xs[1],nx)
         ygrid=np.linspace(ys[0],ys[1],ny) 
@@ -715,7 +716,8 @@ def points_find_grid(points,result='shape',sort=None):
         shape[slowind]=nfast
         retval=shape
     elif result=='grid':
-        xs,ys,zs=np.hsplit(span(points,axis=0),3)
+        #xs,ys,zs=np.hsplit(span(points,axis=0),3)
+        xs,ys,zs=span(points,axis=0)
         nx,ny=points_find_grid(points)[1]
         xgrid=np.linspace(xs[0],xs[1],nx)
         ygrid=np.linspace(ys[0],ys[1],ny) 
