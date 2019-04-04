@@ -264,39 +264,56 @@ def fit_cone(points,guessValue=None):
 
 def fit_cone(pts,odr2,zscale=1.,keepnan=False,**kwargs):
     """   fit pts and return residuals. Info are printed. odr2 is starting guess.
-    typically:
-    odr2=(span(xg).sum()/2.,220.,0,0.) #use nominal value for guess direction
-    fom,deltaR,pars=fit_cone(pts,odr2,fit_func)
+    
+    fom,deltaR,pars=fit_cone(pts,odr2,fom_func)
     zscale is the factor to multiply data to obtain same units as x and y, 
     e.g. 1000. for x and y in mm and z in um. Output is in same unit as input.
     pts and deltaR enter and exit with z in microns
     parameters for optimization can be passed as keyword arguments, e.g.:
-    fom,deltaR,pars=fit_cone(pts,odr2,fit_func,options={'maxiter':500},method='Nelder-Mead')
+    
+    #evaluate fom without optimization fit_cone/fit_cylinder
+    deltaR,o = fom_function(pts,odr,zscale=1000.,options={'radius':radius})
+    
+    # fit from starting guess value odr0
+    deltaR,odr=fit_cylinder(c,odr0,zscale=1000.,options={'maxiter':500},
+        method='Nelder-Mead') 
+        
+    typically:
+    odr2=(span(xg).sum()/2.,220.,0,0.) #use nominal value for guess direction.
+    
+    See developer notes in code.
     """
     
-    fit_func=cone_error3
+    fom_func=cone_error3
     pts=pts/[1,1,zscale] #data are um, convert to mm before fit
 
-    #filter for nans, note that this is done here rather than in fit_func so it
+    #filter for nans, note that this is done here rather than in fom_func so it
     #is performed only once.
     mask=~np.isnan(pts[:,2])
     
     #find odr from optimization if maxiter is set otherwise use
-    mi=None
+    # input parameters `odr`. Needs an absurde dictionary with key `options`
+    #  use `fit_cone(...,options={'maxiter':500})` Will run optimization
+    #  only if this is set to a number, otherwise will just evaluate
+    #  the fom. It's an ugly workaround mishandling **kwargs.
+    # done for not knowing it better.
+    
+    mi=None  #mi=maxiter if called with fit_cone(..,maxiter=int)
     if 'options' in kwargs:
         mi=kwargs['options'].pop('maxiter',None) 
-    if mi:
-        result=minimize(fit_func,x0=(odr2),
+    if mi:  
+        result=minimize(fom_func,x0=(odr2),
                 args=(pts[mask,:],),
                 **kwargs)   #options={'maxiter':500},
                             #method='Nelder-Mead')#,callback=p)
         odr=result.x
     else:
+        print('Dictionary `options` ')
         #if set to 0 r unset do not perform optimization
         odr=odr2
         
     s=span(pts,axis=0)    
-    fom,deltaR,coeff=fit_func(odr,pts[mask,:],retall=True)
+    fom,deltaR,coeff=fom_func(odr,pts[mask,:],retall=True)
     deltaR[:,2]=deltaR[:,2]*zscale
     if keepnan:
         pts[mask,2]=deltaR[:,2]
@@ -307,7 +324,7 @@ def fit_cone(pts,odr2,zscale=1.,keepnan=False,**kwargs):
     direction=direction/np.sqrt((direction**2).sum())  
     
     print ('-----------------------------------')
-    print ('Results of fit on region (function: %s):'%fit_func)
+    print ('Results of fit on region (function: %s):'%fom_func)
     print ('X: [%6.3f,%6.3f]'%tuple(s[0]))
     print ('Y: [%6.3f,%6.3f]'%tuple(s[1]))
     print ('data range: [%6.3f,%6.3f]'%tuple(s[2]))
@@ -334,7 +351,7 @@ def fit_cone(pts,odr2,zscale=1.,keepnan=False,**kwargs):
 def fit_cylinder(pts,odr2,zscale=1.,keepnan=False,align=False,**kwargs):  
     """   fit pts and return residuals. Info are printed. 
     odr2: starting guess. typically: odr2=(span(xg).sum()/2.,R,0,0.) 
-        fom,deltaR,pars=fit_cylinder(pts,odr2,fit_func)
+        fom,deltaR,pars=fit_cylinder(pts,odr2,fom_func)
     zscale: factor to divide z data to obtain same units as x and y, 
         e.g. 1000. for x and y in mm and z in um. Output is in same unit as input.
     parameters for optimization with scipy.optimize.minimize can be passed as keyword arguments, 
@@ -344,10 +361,10 @@ def fit_cylinder(pts,odr2,zscale=1.,keepnan=False,align=False,**kwargs):
     if align is set True, rotate data to align axis and return residuals on rotated grid (can be resampled on data or viceversa
     with resample_points)-- NOT WORKING
     """    
-    fit_func=cylinder_error3
+    fom_func=cylinder_error3
     pts=pts/[1,1,zscale] #data are um, convert to mm before fit
     
-    #filter for nans, note that this is done here rather than in fit_func so it
+    #filter for nans, note that this is done here rather than in fom_func so it
     #is performed only once.
     mask=~np.isnan(pts[:,2])
     
@@ -360,7 +377,7 @@ def fit_cylinder(pts,odr2,zscale=1.,keepnan=False,align=False,**kwargs):
         
     if mi is not None:
         if mi != 0:
-            result=minimize(fit_func,x0=(odr2),
+            result=minimize(fom_func,x0=(odr2),
                     args=(pts[mask,:]),
                     **kwargs)   #options={'maxiter':500},
                                 #method='Nelder-Mead')#,callback=p)
@@ -372,23 +389,23 @@ def fit_cylinder(pts,odr2,zscale=1.,keepnan=False,align=False,**kwargs):
         odr=odr2
         
     s=span(pts,axis=0)    
-    fom,deltaR,coeff=fit_func(odr,pts[mask,:],radius=radius,retall=True)  #calculate for best fit parameters
+    fom,deltaR,coeff=fom_func(odr,pts[mask,:],radius=radius,retall=True)  #calculate for best fit parameters
     deltaR[:,2]=deltaR[:,2]*zscale    #output is in same units as input
     if keepnan:
         pts[mask,2]=deltaR[:,2]
         deltaR=pts
     
-    #fit_func, s, zscale, odr, fom, coeff
+    #fom_func, s, zscale, odr, fom, coeff
     
     print ('-----------------------------------')
-    print ('Results of fit on region (function: %s):'%fit_func)
+    print ('Results of fit on region (function: %s):'%fom_func)
     print ('X: [%6.3f,%6.3f]'%tuple(s[0]))
     print ('Y: [%6.3f,%6.3f]'%tuple(s[1]))
     print ('data range: [%6.3f,%6.3f]'%tuple(s[2]))
     print ("---")
     if mi:
         print (result )      
-    print ('(gle of cyl axis with y axis (deg):')
+    print ('(Angle of cyl axis with y axis (deg):')
     vy=np.sqrt(1-(odr[-2:]**2).sum())
     print (np.arccos(vy)*180/np.pi)
     print ('Rotation about z axis from y axis(deg):')
@@ -408,7 +425,7 @@ def fit_cylinder(pts,odr2,zscale=1.,keepnan=False,align=False,**kwargs):
     
     
 if __name__=='__main__':
-    fit_func=cone_error    #this is the function giving the FOM to be minimized
+    fom_func=cone_error    #this is the function giving the FOM to be minimized
     def p(x): print (x) #,cylinder_error(x,points)
     outSubfix='_cone' #the name of output file is the datafile with this subfix added
     datafile=r'test\test_fitCylinder\OP2S04OP2S04b\04_OP2S04_xyscan_Height_transformed.dat'
@@ -424,14 +441,14 @@ if __name__=='__main__':
     pts[:,2]=pts[:,2]/1000.
     c=crop_points(pts,(-28,33),(-50,50))    #[0:-1:1000,:]
     odr2=(33,220.,0,0,220)
-    result=minimize(fit_func,x0=(odr2[0:-1],),args=(c,),options={'maxiter':1000},callback=p,method='Nelder-Mead')
+    result=minimize(fom_func,x0=(odr2[0:-1],),args=(c,),options={'maxiter':1000},callback=p,method='Nelder-Mead')
     print ('-----------------------------------')
     print ('Results of fit on subset of points:')
     print (result)
     
     #create output results applying the value from fit to all points
     odr=result.x
-    fom,deltaR,coeff=fit_func(odr,pts,retall=True)
+    fom,deltaR,coeff=fom_func(odr,pts,retall=True)
     origin=(odr[0],0,odr[1])
     direction=(odr[2],1.,odr[3])
     deltaR[:,2]=deltaR[:,2]*1000
