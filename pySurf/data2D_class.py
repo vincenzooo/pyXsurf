@@ -81,7 +81,8 @@ import numpy as np
 
 from pySurf._instrument_reader import auto_reader
 from pySurf.data2D import plot_data,get_data, level_data, save_data, rotate_data, remove_nan_frame, resample_data
-from pySurf.data2D import read_data,sum_data, subtract_data, projection, crop_data, transpose_data, apply_transform, register_data, data_from_txt
+from pySurf.data2D import read_data,sum_data, subtract_data, projection, crop_data, transpose_data, apply_transform
+from pySurf.data2D import slope_2D, register_data, data_from_txt
 
 from pySurf.psd2d import psd2d,plot_psd2d,psd2d_analysis,plot_rms_power,rms_power
 
@@ -250,11 +251,12 @@ class Data2D(object):  #np.ndarrays
         
         
     def plot(self,title=None,*args,**kwargs):
-        
+        #import pdb
+        #pdb.set_trace()
         stats=kwargs.pop('stats',2) #to change the default behavior
         nsigma=kwargs.pop('nsigma',3) #to change the default behavior
         res=plot_data(self.data,self.x,self.y,units=self.units,
-            stats=stats,*args,**kwargs)
+            stats=stats,nsigma=nsigma,*args,**kwargs)
         if title is None:
             if self.name is not None:
                 title = self.name
@@ -371,7 +373,26 @@ class Data2D(object):  #np.ndarrays
         res =data_histostats(self.data,self.x,self.y,units=self.units)
         plt.title(self.name)
         return res
-    
+
+    def slope(self,*args,**kwargs):
+        #import pdb
+        #pdb.set_trace()
+        scale=kwargs.pop('scale',None)
+        if self.units is not None:
+            if scale is None:
+                if self.units[0]==self.units[1]:  #check if x and y in mm and z in um.
+                    if self.units[0]=='mm' :
+                        if self.units[0]=='mm' and self.units[2]=='um': scale=(1.,1.,1000.)
+                else:
+                    raise ValueError("x and y different units in slope calculation")
+        else:
+            scale=(1.,1.,1.)
+        
+
+        say,sax=slope_2D(self.data,self.x,self.y,scale=scale,*args,**kwargs)
+        
+        return Data2D(*sax,units=[self.units[0],self.units[1],'arcsec'],name=self.name + ' xslope'),Data2D(*say,units=[self.units[0],self.units[1],'arcsec'],name=self.name + ' yslope')
+        
 from scripts.dlist import add_markers, align_interactive  #functions operating on Data2D
     
 

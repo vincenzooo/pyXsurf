@@ -797,6 +797,8 @@ def calculate_slope_2D(wdata,x,y,scale=(1.,1.,1.)):
     return slope in x and y respectively.
     Set scale to (dx,dy,1000.) for z in micron, x,y in mm."""    
     
+    print("WARNING: calculate_slope_2D doesn't have a standard interface and will be removed, use slope_2D")
+    
     dx=np.diff(x)#[:,np.newaxis]
     dy=np.diff(y) [:,np.newaxis]  #original
      
@@ -807,6 +809,25 @@ def calculate_slope_2D(wdata,x,y,scale=(1.,1.,1.)):
     #slopeaz=grad[1][:-1,:]/scale[-1]*206265/dx    
     
     return slopeax,slopeaz
+    
+def slope_2D(wdata,x,y,scale=(1.,1.,1.)):
+    """calculate slope maps in x and y.
+    return slope in x and y respectively.
+    Set scale to (dx,dy,1000.) for z in micron, x,y in mm. (?does it mean  1,1,1000?)"""    
+
+    dx=np.diff(x)#[:,np.newaxis]
+    dy=np.diff(y) [:,np.newaxis]  #original 
+    
+    grad=np.gradient(wdata)  #0->axial(along y), 1->az (along x)
+    slopeax=grad[0][:-1,:]/scale[-1]*206265/dy  #in arcseconds from um  #original
+    yax=y[:-1]+dy.ravel()/2
+    
+    slopeaz=grad[1][:,:-1]/scale[-1]*206265/dx  
+    xaz=x[:-1]+dx/2
+    #slopeax=grad[0][:,:-1]/scale[-1]*206265/dy  #in arcseconds from um
+    #slopeaz=grad[1][:-1,:]/scale[-1]*206265/dx    
+    
+    return (slopeax,x,yax),(slopeaz,xaz,y)
 
 def get_stats(wdata,x=None,y=None,units=None):
     """"""
@@ -878,14 +899,16 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     #    **pop_kw(kwargs,{'aspect':'equal',
     #                'origin':"lower",
     #                'interpolation':"none"}))
-    
+    #print(kwargs)
+
     if nsigma is not None:
+
         if isinstance(nsigma,dict):
             clim=remove_outliers(data,span=True,**nsigma)
         else:
             clim=remove_outliers(data,span=True,nsigma=nsigma)
         plt.clim(*clim)
-        print('clim',clim)
+        #print('clim',clim)
         
     plt.xlabel('X'+(" ("+units[0]+")" if units[0] is not None else ""))
     plt.ylabel('Y'+(" ("+units[1]+")" if units[1] is not None else ""))
@@ -1061,8 +1084,7 @@ def plot_slope_slice(wdata,x,y,scale=(1.,1.,1.),vrange=None,srange=None,filter=F
         else:
             psrange=None
         
-    plt.clf()
-    #plt.suptitle('PCO1S16')
+    plt.clf()    
     ax1=plt.subplot(221)
     #import pdb
     #pdb.set_trace()
@@ -1071,6 +1093,7 @@ def plot_slope_slice(wdata,x,y,scale=(1.,1.,1.),vrange=None,srange=None,filter=F
     plt.xlabel('X(mm)')
     plt.ylabel('Y(mm)')
     plt.colorbar()
+    
     ax2=plt.subplot(222,sharey=ax1)
     plt.plot(np.nanstd(slopeaz,axis=1),y)
     isbad=np.isnan(np.nanstd(slopeaz,axis=1)) #boolean array True on cols with nans
@@ -1081,6 +1104,7 @@ def plot_slope_slice(wdata,x,y,scale=(1.,1.,1.),vrange=None,srange=None,filter=F
     plt.title('total slope rms %6.3f arcsec'%np.nanstd(slopeaz))
     plt.ylabel('Y(mm)')
     plt.xlabel('Slice X Slope rms (arcsec)')
+    
     ax3=plt.subplot(223,sharex=ax1)
     plt.plot(x,np.nanstd(slopeax,axis=0))
     isbad=np.isnan(np.nanstd(slopeax,axis=0)) #boolean array True on cols with nans
@@ -1094,6 +1118,7 @@ def plot_slope_slice(wdata,x,y,scale=(1.,1.,1.),vrange=None,srange=None,filter=F
     plt.tight_layout()
     plt.colorbar().remove() #dirty trick to adjust size to other panels
     #display(plt.gcf())
+    
     ax4=plt.subplot(224)
     #histogram
     plt.hist(np.nanstd(slopeax,axis=0)[~np.isnan(np.nanstd(slopeax,axis=0))],bins=100,label='AX slope',alpha=0.2,color='r',normed=True);
@@ -1131,16 +1156,19 @@ def plot_slope_2D(wdata,x,y,scale=(1.,1.,1.),vrange=None,srange=None,filter=Fals
     plt.ylabel('Y(mm)')
     plt.colorbar()
     plt.clim(vrange)
+    
     ax2=plt.subplot(222,sharey=ax1)
     plt.imshow(slopeaz,extent=(span(x)[0],span(x)[1],span(y)[0],span(y)[1]),aspect='auto',origin='lower')
     plt.colorbar().set_label('arcsec', rotation=270)
     plt.clim(psrange)
     plt.title('Azimuthal slope')
+    
     ax3=plt.subplot(223,sharex=ax1)
     plt.imshow(slopeax,extent=(span(x)[0],span(x)[1],span(y)[0],span(y)[1]),aspect='auto',origin='lower')
     plt.colorbar().set_label('arcsec', rotation=270)
     plt.clim(psrange)
     plt.title('Axial slope')
+    
     ax4=plt.subplot(224)
     #histogram
     plt.hist(slopeax[~np.isnan(slopeax)],bins=100,label='AX slope',alpha=0.2,color='r',normed=True);
