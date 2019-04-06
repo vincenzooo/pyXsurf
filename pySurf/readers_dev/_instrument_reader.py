@@ -8,7 +8,6 @@
 
 import numpy as np
 from matplotlib import pyplot as plt
-from pySurf.data2D import crop_data, remove_nan_frame, plot_data
 from astropy.io import fits
 from pySurf.points import get_points
 from pySurf.points import crop_points
@@ -17,7 +16,7 @@ from pySurf.points import resample_grid
 from pySurf.read_sur_files import readsur
 from utilities.imaging.man import stripnans
 from dataIO.read_pars_from_namelist import read_pars_from_namelist
-from pySurf.data2D import register_data, data_from_txt
+
 import pdb
 import os
 
@@ -37,6 +36,7 @@ def csv4D_reader(wfile,ypix=None,ytox=1,header=False,delimiter=',',skip_header=1
         zscale=np.float(head['wavelength'])
     except KeyError:
         zscale=1.
+    from pySurf.data2D import data_from_txt
     #data=np.genfromtxt(wfile,delimiter=delimiter,skip_header=12)
     data=data_from_txt(wfile,delimiter=delimiter,skip_header=skip_header)[0]
     
@@ -51,7 +51,7 @@ def csv4D_reader(wfile,ypix=None,ytox=1,header=False,delimiter=',',skip_header=1
     return data,x,y 
     
 def points_reader(wfile,*args,**kwargs):
-    """Read a processed points file as csv output of analysis routines."""
+    """Read a processed points file in format x,y,z as csv output of analysis routines."""
     w0=get_points(wfile,*args,**kwargs)
     w=w0.copy()
     x,y=points_find_grid(w,'grid')[1]
@@ -192,12 +192,13 @@ def auto_reader(wfile):
     
     return reader
 
-def test_zygo():
+def test_zygo(wfile=None):
     import os
     import matplotlib.pyplot as plt
     from  pySurf.data2D import plot_data
-    relpath=r'test\input_data\zygo_data\171212_PCO2_Zygo_data.asc'
-    wfile= os.path.join(os.path.dirname(__file__),relpath)
+    if wfile is  None:
+        relpath=r'test\input_data\zygo_data\171212_PCO2_Zygo_data.asc'
+        wfile= os.path.join(os.path.dirname(__file__),relpath)
     (d1,x1,y1)=csvZygo_reader(wfile,ytox=220/1000.,center=(0,0))
     (d2,x2,y2)=csvZygo_reader(wfile,ytox=220/1000.,center=(0,0),intensity=True)
     plt.figure()
@@ -227,6 +228,7 @@ if __name__=='__main__':
         Zygo cannot be called directly with intensity keyword set to True without making a specific case from the other readers, 
         while this can be done using read_data. """
     
+    from pySurf.data2D import plot_data
     tests=[[sur_reader,
     r'test\input_data\profilometer\04_test_directions\05_xysurf_pp_Intensity.sur'
     ,{'center':(10,15)}],[points_reader,
