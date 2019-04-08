@@ -17,14 +17,9 @@ def span(array:np.array,
         index:bool=False)->np.array:
     """
     Returns min and max of an array together as a array of couples (or their indices or interval size).
-		Work like a np.min/max array, with the value being a couple (min/max) rather than a scalar.
     Args:
         size: If set, return the size of the interval instead of the span.
         index: If set, return indices instead of elements.
-		
-	Return:
-		Array of same rank as original array having same axis length. The axis selected in `axis` is
-			removed and a last axis with dimension 2 (min and max) is appended as last.
     
     Example:    
     
@@ -51,7 +46,7 @@ def span(array:np.array,
     This has the effect to have a couple where the value returned by
       min and max would be a single value and the rank of the array is not changed.
     
-    Note that the intent of the function is not to return a result that can be addressed as a 2-element list to give min and max as entire arrays equal to array.min and array.max (this would correspond to add the 2-element axis	as first). 
+    Note that the intent of the function is not to return a result that can be addressed as a 2-element list to give min and max as entire arrays (equal to array.min and array.max). 
     For this behavior on ndim arrays, use instead directly np.nanmin and np.nanmax. 
     
     In general, indexing span as list will have same effect it has on input array, and iteratively with the last axis being a couple [min,max] instead of a single value.
@@ -65,8 +60,6 @@ def span(array:np.array,
         print ('X: [%6.3f,%6.3f]'%tuple(s[0]))
         print ('Y: [%6.3f,%6.3f]'%tuple(s[1]))
         print ('data range: [%6.3f,%6.3f]'%tuple(s[2]))
-		
-	See developer notes in code for more changes and history related to indexing and axis.
         
     """    
         
