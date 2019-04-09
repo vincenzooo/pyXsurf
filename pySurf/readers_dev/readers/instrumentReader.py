@@ -1,4 +1,7 @@
 """
+
+2019/04/09 wrapped functions moved to readers. Only unwrapped functione remain here.
+
 2018/06/05 v3 the most used reading functions are replaced by a wrapper around read_data that provides a temporary interface. 
 read_data distributes passed parameters to the reader and to the data registration (data2D.register_data) providing a temporary interface. 
 Removed original code for functions.
@@ -43,6 +46,10 @@ import pdb
 #from pySurf._instrument_reader import read_data
 #from pySurf._instrument_reader import reader_dic 
 #from pySurf._instrument_reader import points_reader
+
+from pySurf.data2D import read_data
+'''
+there were two versions, turned out to be identical, moved to data2D 2019/04/19
 
 def read_data(file,reader,register=True,*args,**kwargs):
     """non essendo sicuro dell'interfaccia per ora faccio cosi'.
@@ -135,47 +142,8 @@ def xread_data(file,reader,register=True,*args,**kwargs):
         data,x,y=register_data(data,x,y,scale=scale,crop=crop,
         center=center,strip=strip)
     return data,x,y
-    
-def matrixZygo_reader(wfile,*args,**kwargs):
-    """temporary wrapper for new readers, replace call to matrixZygo_reader
-    with calls to read_data(wfile,reader=csvZygo_reader)"""
-    from pySurf._instrument_reader import csvZygo_reader
-    return read_data(wfile,csvZygo_reader,*args,**kwargs)
+'''    
 
-def matrix_reader(wfile,*args,**kwargs):
-    """temporary wrapper for new readers, replace call to matrix4D_reader
-    with calls to read_data(wfile,reader=matrix4D_reader)"""
-    from pySurf._instrument_reader import data_from_txt
-    return read_data(wfile,data_from_txt,*args,**kwargs)
-   
-def matrix4D_reader(wfile,*args,**kwargs):
-    """temporary wrapper for new readers, replace call to matrix4D_reader
-    with calls to read_data(wfile,reader=matrix4D_reader)"""
-    from pySurf._instrument_reader import csv4D_reader
-    
-    #import pdb
-    #pdb.set_trace()
-    return read_data(wfile,csv4D_reader,*args,**kwargs)
-    
-    
-def matrixsur_reader(wfile,*args,**kwargs):
-    """temporary wrapper for new readers, replace call to matrixsur_reader
-    with calls to read_data(wfile,reader=sur_reader)"""
-    from pySurf._instrument_reader import sur_reader
-    return read_data(wfile,sur_reader,*args,**kwargs)
-
-    
-def fits_reader(wfile,*args,**kwargs):
-    """temporary wrapper for new readers, replace call to fits_reader
-    with calls to read_data(wfile,reader=fits_reader)"""
-    from pySurf._instrument_reader import fits_reader
-    return read_data(wfile,fits_reader,*args,**kwargs)
-
-def points_reader(wfile,*args,**kwargs):
-    """temporary wrapper for points readers, read and register
-    points and convert to 2D data"""
-    from pySurf._instrument_reader import points_reader
-    return read_data(wfile,points_reader,*args,**kwargs)
 
 ### UNWRAPPED FUNCTIONS:    
 def FEAreader(FEAfile):
@@ -190,6 +158,51 @@ def FEAreader(FEAfile):
     z=dz  #here I keep only the deformation, and ignore nominal cylinder shape
     p=np.vstack([x,y,dz]).T*1000. #convert to mm, all coordinates
     return p 
+
+
+def csv4D_reader(wfile,ypix=None,ytox=1,header=False,delimiter=',',skip_header=12,*args,**kwargs):
+    """2019/04/09 moved here from _instrument_reader.
+    this is an example of function that should be assembled from read_data
+    """
+    from format_reader import read_csv_data
+    
+    (data,x,y),h=read_csv_data(wfile,matrix=True,addaxis=False,delimiter=delimiter,skip_header=skip_header)
+    
+    from io import StringIO
+    head=read_pars_from_namelist(StringIO(''.join(h)),':') #this returns a dictionary, order is lost if header is returned.
+    #head='\n'.join([": ".join((k,v)) for (k,v) in head.items()])+'\n'
+   
+    #return header if old flag header is set
+    if kwargs.pop('header',False):
+        return head
+    
+    #extract relevant parameters from header
+    if ypix == None:
+        try:
+            ypix=np.float(head['xpix'])
+        except KeyError:
+            ypix=1.
+    
+    try:
+        zscale=np.float(head['wavelength'])
+    except KeyError:
+        zscale=1.
+        
+    #adjust data and return     
+    #data=np.genfromtxt(wfile,delimister=delimiter,skip_header=12)
+    #data=data_from_txt(wfile,delimiter=delimiter,skip_header=skip_header)[0]
+    
+    #this defines the position of row/columns, starting from 
+    # commented 2018/08/28 x and y read directly
+    ny,nx=data.shape
+    x=np.arange(nx)*ypix*ytox*nx/(nx-1)
+    y=np.arange(ny)*ypix*ny/(ny-1)
+    data=data*zscale
+    #data.header=head
+    
+    return data,x,y 
+    
+    
     
 def getdata(fitsfile):
     """return x,y (vectors) and data (matrix) from fits file."""
@@ -316,7 +329,6 @@ def fitsCCI_reader(fitsfile,center=None,head=False):
     else:
         return data,x,y
 
-    
 def bin_reader(wfile,index=0,ytox=1.,zscale=1.,crop=[None,None,None],center=None):
     """Read a binary .npy file containing a list of lists in form (imdata, dx).
     Can crop data and translate on three coordinates. crop is calculated on raw data,

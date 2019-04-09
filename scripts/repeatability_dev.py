@@ -19,7 +19,7 @@ import json
 import pandas as pd
 from plotting.backends import maximize
 from pySurf.data2D_class import Data2D
-from pySurf.instrumentReader import fitsWFS_reader
+from pySurf.instrumentReader import fitsWFS_reader,matrix4D_reader
 from dataIO.fn_add_subfix import fn_add_subfix
 """2019/04/08 from meassy script/repeatability, function that need to be sorted and moved to repeatability. When a function is needed by e.g. a notebook, move it from repeatability_dev to repeatability."""
 
@@ -36,6 +36,7 @@ from pySurf.data2D_class import align_interactive
 from plotting.multiplots import commonscale
 from config.interface import conf_from_json
 
+from scripts.repeatability import dcouples_plot
 
     
 def plot_cross_diff_rms(stats):
@@ -186,6 +187,55 @@ def process_set(flist,m_trans=None,m_arr=None,outfolder=None):
     pstats = pd.DataFrame(columns=stats.columns,data=np.array(rmslist).reshape(1,-1),index=[k])
     
     return pstats
+    
+def process_set2(flist,names,outname,crop=None,dis=True):
+    # from C1S15_4D_DI_calibration_181031.ipynb
+    # called with:
+    ypix=None #0.127901442999 #mm  
+    ytox=220./200.  
+    zscale=None #0.6328
+    scale=(1000,-1000,0.001)
+
+    outfolder=os.path.dirname(outname)
+    outname=os.path.basename(outname)
+    
+    dlist=[Data2D(*matrix4D_reader(wf2,scale=scale,zscale=zscale,
+       ypix=ypix,ytox=ytox,center=(0,0),strip=True),name=n,units=['mm','mm','um']) 
+       for wf2,n in zip(flist,names)]
+    np.mean(dlist).save(os.path.join(outfolder,outname+'_avg.dat'))
+    
+    plt.close('all')
+    sx,sy=find_grid_size(len(dlist),3)
+    f,axes=plt.subplots(sx,sy,sharex=True,sharey=True)
+    for ax,d in zip(axes.flatten(),dlist):
+        plt.sca(ax)
+        d.plot()
+        plt.clim(*remove_outliers(d.data,nsigma=2,itmax=3,span=1))
+    for ax in axes.flatten()[:len(dlist)-1:-1]:
+        f.delaxes(ax)
+
+    maximize()
+    plt.pause(0.1)
+    plt.tight_layout(rect=[0,0,1,0.9])
+    plt.suptitle ('Surfaces')
+    if dis:
+        display(plt.gcf())
+    
+    plt.savefig(os.path.join(outfolder,outname+'.png'))
+    
+    m_repr=[dcouples_plot([dd for dd in dlist])]
+    if dis:
+        display(plt.gcf())
+    plt.savefig(os.path.join(outfolder,'diff_'+outname+'.png'))
+    
+    if crop is not None:
+        dc=[d.crop(*crop).level() for d in dlist]
+        m_repr=[dcouples_plot([dd for dd in dc])]
+        if dis:
+            display(plt.gcf())
+        plt.savefig(os.path.join(outfolder,'diff_'+outname+'_crop.png'))
+       
+    return dlist
     
 ## FUNCTIONS TO HANDLE MULTIPLE FILES    
     
