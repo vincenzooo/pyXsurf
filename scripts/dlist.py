@@ -17,13 +17,66 @@ from pySurf.points import matrix_to_points2
 from copy import deepcopy
 from dataIO.span import span
 from pySurf.data2D import projection
-
+from pySurf.data2D_class import Data2D
 from plotting.multiplots import find_grid_size, subplot_grid    
 from plotting.backends import maximize
 from dataIO.outliers import remove_outliers
 from plotting.add_clickable_markers import add_clickable_markers2
 from pySurf.affine2D import find_affine, find_rototrans
 
+def load_dlist(rfiles,reader=None,*args,**kwargs):
+    """Extracted from plot_repeat. Read a set of rfiles to a dlist.
+    readers and additional arguments can be passed as scalars or lists.
+    
+    You can pass additional arguments to the reader in different ways:
+     - pass them individually, they will be used for all readers
+         load_dlist(.. ,option1='a',option2=1000)
+     - to have individual reader parameters pass them as dictionaries (a same number as rfiles), 
+         load_dlist(.. ,{option1='a',option2=1000},{option1='b',option3='c'},..)    
+         
+    Example:
+        dlist=load_dlist(rfiles,reader=fitsWFS_reader,scale=(-1,-1,1),
+                units=['mm','mm','um'])
+                
+        dlist2=load_dlist(rfiles,fitsWFS_reader,[{'scale':(-1,-1,1),
+                'units':['mm','mm','um']},{'scale':(1,1,-1),
+                'units':['mm','mm','um']},{'scale':(-1,-1,1),
+                'units':['mm','mm','$\mu$m']}])
+    2019/04/08 made function general from plot_repeat, moved to dlist.
+    """
+    
+    import pdb
+    #pdb.set_trace()
+    
+    if reader is None:
+        reader=auto_reader
+    if np.size(reader) ==1:
+        reader=[reader]*len(rfiles)
+
+    if len(kwargs) >0 : #passed explicit parameters for all readers
+        kwargs=[kwargs]*len(rfiles)
+    else:
+        if np.size(args) ==1: 
+            kwargs=[args]*len(rfiles)   
+        else:
+            if np.size(args) != len(rfiles):
+                raise ValueError
+    
+    #kwargs here is a list of dictionaries {option:value}, matching the readers
+    dlist=[Data2D(file=wf1,reader=r,**k) for wf1,r,k in zip(rfiles,reader,kwargs)]
+    
+    return dlist
+    
+def test_load_dlist():  
+
+    dlist=load_dlist(rfiles,reader=fitsWFS_reader,scale=(-1,-1,1),
+            units=['mm','mm','um'])
+            
+    dlist2=load_dlist(rfiles,fitsWFS_reader,[{'scale':(-1,-1,1),
+            'units':['mm','mm','um']},{'scale':(1,1,-1),
+            'units':['mm','mm','um']},{'scale':(-1,-1,1),
+            'units':['mm','mm','$\mu$m']}])
+    return dlist
 
 def add_markers(dlist):
     """interactively set markers, when ENTER is pressed,
