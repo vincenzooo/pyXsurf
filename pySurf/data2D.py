@@ -223,7 +223,7 @@ def level_data(data,x=None,y=None,degree=(1,1),byline=False,fit=False,*arg,**kwa
 ## 2D FUNCTIONS
 
 def transpose_data(data,x,y):
-    """Transpose data and coordinates, return new data,x,y.
+    """Transpose (in matrix sense) data and coordinates, switching x and y, return new data,x,y.
     
     return a view, see np.ndarray.T and np.ndarray.transpose for details"""
     
@@ -380,29 +380,20 @@ def save_data(filename,data,x=None,y=None,fill_value=np.nan,addaxis=True,makedir
     
     np.savetxt(filename,data,**kwargs)
 
-def register_data(data,x,y,crop=None,center=None,
-    strip=False,scale=(1,1,1.),*args,**kwargs):
-    """Read a data matrix file in format accepted by a reader with appropriated options. Returns data,x,y.
+def register_data(data,x,y,scale=(1,1,1.),
+    strip=False,crop=None,center=None,*args,**kwargs):
+    """get data,x,y and register them using usual set of parameters.
     
-    Can crop data and translate on three coordinates. crop is calculated on raw data,
-    center is the position of the central point after crop and scaling.
-    If strip is set, nan are stripped and center is calculated on valid data only.
-    Scale is applies to data after format-specific options, but before centering. 
+    registering operation are performed in the following order and are:
+        scale: scale the three axis of the `scale` factor, if sign is changed, reorder.
+        strip: if True, strip all nans at the border of the data.
+        crop: list of ranges (3 axis) to pass to data2D.crop_data 
+        center: position of final center (0,0) in x and y data coordinates
     
-    It can be used e.g. to invert x axis as in measuring 220 mm mandrel with 1 m CGH (scale=(-1,1,1)).    
+    unexpected parameters passed to register_data are ignored (*args and **kwargs are not used, just suppress error).
     
-    Each reader is a function that handles a set of format-specific parameters. All paramenters that can be derived from file header must be handled by the reader. 
-    This is pretty much the only limitation, any function with at least one parameter
-        (typically filename) returning a triple data,x,y can be used as reader function.
-    If reader is not provided, a guess is attempted.
-    reader-specific parameters:
-    load4D:
-        ypix is the size of pixel in vertical direction.
-        ytox the conversion factor (typically given by radius of test optics/radius of CGH).
-        
-    *args and **kwargs are not used, just put here to suppress error if additional parameters are passed.
-
-"""
+    Note that read_data already calls register (after stripping common arguments) careful not to call twice.    
+    """
     
     x=x*scale[0]
     y=y*scale[1]
@@ -448,15 +439,23 @@ def data_equal(d1,d2,nanstrict=False):
     raise NotImplementedError
     
 def read_data(file,reader,*args,**kwargs):
-    """non essendo sicuro dell'interfaccia per ora faccio cosi'.
-    The function first calls the data reader, then applies the register_data function to address changes of scale etc.
-        This works well, however read_data must filter the keywords for the reader and for the register and
-        this is hard coded, that is neither too elegant or maintainable. Note however that with this structure it is 
+
+    """read data from a file using a given reader with custom options in args, kwargs.
+    
+    The function calls reader, but, before this, strips all options that are recognized by register_data,
+      all remaining unkown parameters are passed to reader.
+    Then register_data is called with the previously stored settings (or defaults if not present).
+    
+    This was made to hide messy code beyond interface. See old notes below, internal behavior can be better fixed e.g. by using dataIO.dicts.pop_kw and inspect.signature and fixing header interface.
+    
+    Old notes say:
+
+        Division of parameters is hard coded, that is neither too elegant or maintainable. Note however that with this structure it is 
         possible to call the read_data procedure with specific parameters, for example in example below, the reader for 
         Zygo cannot be called directly with intensity keyword set to True without making a specific case from the other readers, 
-        while this can be done using read_data. """
-    
-    """this is an ugly way to deal with the fact that return
+        while this can be done using read_data. 
+        
+        this is an ugly way to deal with the fact that return
     arguments are different if header is set, so when assigned to a variable as in patch routines in pySurf instrumentReader it fails.
     Workaround has been calling directly read_data, not optimal."""
     if kwargs.pop('header',False):
@@ -615,7 +614,20 @@ def grid_in_poly(x,y,verts):
     
 def crop_data(data,x,y,xrange=None,yrange=None,zrange=None,mask=False,poly=None,
         interactive=False,*args,**kwargs):
-    """return data,x,y """
+		
+    """return data,x,y of cropped data inside axis ranges, polygons, or interactively
+        selected rectangular region. 
+		
+		axis ranges are passed as a 2-element vector of which each can be None
+			or None, where None indicates automatic range (adjust to data).
+		If mask is set to True, return a boolean mask of the cropped region.
+		poly is a list of vertex for a polygon. 
+		
+		If interactive is True, allows interactive selection with:
+		Zoom to the region to crop, and/or use CTRL+leftClick to add points and create
+        an polygonal selection. CTRL+rightClick remove the nearest point. Press ENTER when done.
+		
+		"""
     
     outmask=np.ones(np.shape(data),dtype=bool)
         

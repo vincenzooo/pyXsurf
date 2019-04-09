@@ -56,17 +56,22 @@ def csv_zygo_reader(wfile,*args,**kwargs):
 	
 
 
-# location of test input and output data,
-#  for economy during development, hard coded path.
-testfolder=r'G:\My Drive\libraries\python\userKov3\pySurf\test' 
+## location of test input and output data,
+##  for economy during development, hard coded path.
+#testfolder=r'G:\My Drive\libraries\python\userKov3\pySurf\test' 
 	
-def test_reader(file,reader,outfolder=None,**kwargs):
-    """called without `raw` flag, return data,x,y"""
+def test_reader(file,reader,outfolder=None,infolder=None,**kwargs):
+    """called without `raw` flag, return data,x,y. Infolder is taken
+	  from file or can be passed (e.g. to point to local test data)."""
+	
     import os
     import matplotlib.pyplot as plt
     from  pySurf.data2D import plot_data
+	
+	if infolder is None:
+		infolder=os.path.dirname(file) 
     
-    df=os.path.join(testfolder,file)
+    df=os.path.join(infolder,file)
     res,header=reader(df,**kwargs)
     print("returned values",[r.shape for r in res],header)
     
@@ -75,7 +80,7 @@ def test_reader(file,reader,outfolder=None,**kwargs):
         if outfolder == "" : 
             display(plt.gcf()) 
         else: 
-            outname=os.path.join(testfolder,outfolder,os.path.basename(df))
+            outname=os.path.join(infolder,outfolder,os.path.basename(df))
             os.makedirs(os.path.dirname(outname),exist_ok=True)
             plt.savefig(fn_add_subfix(outname,'','.png'))
     return res,header

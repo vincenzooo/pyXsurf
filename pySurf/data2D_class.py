@@ -77,14 +77,19 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 #from pySurf._instrument_reader import read_data, csvZygo_reader,csv4D_reader,sur_reader,auto_reader
 
 from pySurf._instrument_reader import auto_reader
-from pySurf.data2D import plot_data,get_data, level_data, save_data, rotate_data, remove_nan_frame, resample_data
-from pySurf.data2D import read_data,sum_data, subtract_data, projection, crop_data, transpose_data, apply_transform
-from pySurf.data2D import slope_2D, register_data, data_from_txt
+from pySurf.data2D import plot_data,get_data, level_data, save_data, rotate_data, resample_data
+from pySurf.data2D import read_data,sum_data, subtract_data, projection, crop_data, transpose_data
+from pySurf.data2D import slope_2D, register_data, data_from_txt, data_histostats
+
+from pySurf import data2D
+import dataIO
 
 from pySurf.psd2d import psd2d,plot_psd2d,psd2d_analysis,plot_rms_power,rms_power
+
 
 from pySurf.points import matrix_to_points2
 
@@ -93,9 +98,27 @@ from dataIO.span import span
 from dataIO.fn_add_subfix import fn_add_subfix
 
 import pdb
-
+import inspect  # to use with importing docstring
 from pySurf.affine2D import find_affine
 
+
+def update_docstring(func,source):
+    """given a current function and a source function, update current function docstring
+     appending signature and docstring of source.
+     
+     It provides a decorator @update_docstring(source) update the decorated
+       function docstring. User should take care to create docstring of decorated function
+       only as preamble to source docstrings, e.g.:
+       this is func function, derived from source function by modifying the usage of parameter foo.
+       parameter foo is changed of sign."""
+    doc0="" if func.__doc__ is None else func.__doc__
+    func.__doc__='\n'.join([doc0,source.__name__+str(inspect.signature(source)),source.__doc__])
+    return func
+
+def doc_from(source):
+    """intent is to use partial to obtain a decorator from update_docstring.
+    not sure it is the right way."""
+    partial(update_docstring,func=func)
 
 
 class Data2D(object):  #np.ndarrays
@@ -191,9 +214,10 @@ class Data2D(object):  #np.ndarrays
                 if y is None:
                     y=np.arange(data.shape[0])
         
-        if data is not None:
-            data,x,y=register_data(data,x,y,*args,**kwargs)# se read_data chiamasse register, andrebbe un'indentazione +1
-            self.data,self.x,self.y=data,x,y
+            if data is not None:
+                data,x,y=register_data(data,x,y,*args,**kwargs)# se read_data chiamasse register, andrebbe un'indentazione +1
+            
+        self.data,self.x,self.y=data,x,y
         
         self.units=units
         if name is not None:
@@ -251,6 +275,9 @@ class Data2D(object):  #np.ndarrays
         
         
     def plot(self,title=None,*args,**kwargs):
+        """plot using data2d.plot_data and setting automatically labels and colorscales.
+           by default data are filtered at 3 sigma with 2 iterations for visualization.
+           Additional arguments are passed to plot."""
         #import pdb
         #pdb.set_trace()
         stats=kwargs.pop('stats',2) #to change the default behavior
@@ -262,37 +289,49 @@ class Data2D(object):  #np.ndarrays
                 title = self.name
         plt.title(title)
         return res
-
+    plot=update_docstring(plot,plot_data)
+        
     def load(self,filename,*args,**kwargs):
+        """A simple file loader using data_from_txt"""
         self.data,self.x,self.y = data_from_txt(filename,*args,**kwargs)
+    load=update_docstring(load,data_from_txt)
         
     def save(self,filename,*args,**kwargs):
+        """Save data using data2d.save_data"""
         return save_data(filename,self.data,self.x,self.y,*args,**kwargs)
     save.__doc__=save_data.__doc__
     
+    from functools import update_wrapper
+    #@update_wrapper(rotate_data)  #this doesn't work as I would like
     def rotate(self,angle,*args,**kwargs):
+        """call data2D.rotate_data, which rotate array of an arbitrary angle in degrees in direction
+        (from first to second axis)."""
         res = self.copy()
         res.data,res.x,res.y=rotate_data(self.data,self.x,self.y,angle,*args,**kwargs) 
         return res
-
+    rotate=update_docstring(rotate,rotate_data)
+        
     def rot90(self,k=1,*args,**kwargs):
-        """uses numpy.rot90 to rotate array of an integer multiple of 90 degrees in direction
+        """call data2D.rotate_data, which uses numpy.rot90 to rotate array of an integer multiple of 90 degrees in direction
         (from first to second axis)."""
         res = self.copy()
         res.data,res.x,res.y=rotate_data(*res(),k=k,*args,**kwargs)
             
         return res
-        
+    rot90=update_docstring(rot90,rotate_data)
+    
     def transpose(self):
         res = self.copy()
         res.data,res.x,res.y = transpose_data(self.data,self.x,self.y)
         return res
+    transpose=update_docstring(transpose,transpose_data)
     
     def apply_transform(self,*args,**kwargs):
         res = self.copy()
-        res.data,res.x,res.y=apply_transform(self.data,self.x,self.y,*args,**kwargs)
+        res.data,res.x,res.y=app_trans(self.data,self.x,self.y,*args,**kwargs)
         return res
-        
+    apply_transform=update_docstring(apply_transform,data2D.apply_transform)
+    
     def apply_to_data(self,func,*args,**kwargs):
         """apply a function from 2d array to 2d array to data."""
         res = self.copy()
@@ -300,14 +339,17 @@ class Data2D(object):  #np.ndarrays
         return res
     
     def crop(self,*args,**kwargs):
+        """crop data making use of function data2D.crop_data, where data,x,y are taken from a"""
         res=self.copy()
         res.data,res.x,res.y=crop_data(self.data,self.x,self.y,*args,**kwargs) 
-        return res
-
+        return res #
+    crop=update_docstring(crop,crop_data)
+    
     def level(self,*args,**kwargs):
         res=self.copy()
         res.data,res.x,res.y=level_data(self.data,self.x,self.y,*args,**kwargs) 
         return res
+    level=update_docstring(level,level_data)
     
     def resample(self,other,*args,**kwargs):
         """TODO, add option to pass x and y instead of other as an object."""
@@ -317,6 +359,7 @@ class Data2D(object):  #np.ndarrays
                 raise ValueError('If units are defined they must match in Data2D resample.')
         res.data,res.x,res.y=resample_data(res(),other(),*args,**kwargs)  
         return res
+    resample=update_docstring(resample,resample_data)
         
     def psd(self,wfun=None,rmsnorm=True,analysis=False,subfix='',name=None,*args,**kwargs):
         """return a PSD2D object with 2D psd of self.
@@ -332,15 +375,17 @@ class Data2D(object):  #np.ndarrays
         newname = name if name is not None else fn_add_subfix(self.name,subfix)
         
         return PSD2D(p,self.x,f,units=self.units,name=newname)
-        
+    psd=update_docstring(psd,psd2d)
+ 
     def remove_nan_frame(self,*args,**kwargs):
         res = self.copy()
         res.data,res.x,res.y=remove_nan_frame(self.data,self.x,self.y,*args,**kwargs)  
         return res       
-        
+    remove_nan_frame=update_docstring(remove_nan_frame,data2D.remove_nan_frame)
+    
     def topoints(self):
-        return matrix_to_points2(self.data,self.x,self.y) 
-         
+        """convenience function to get points using matrix_to_points2."""
+        return matrix_to_points2(self.data,self.x,self.y)        
         
     def std(self,axis=None):
         """return standard deviation of data excluding nans"""
@@ -368,12 +413,14 @@ class Data2D(object):  #np.ndarrays
     def remove_outliers(self,*args,**kwargs):
         """use dataIO.remove_outliers to remove outliers"""
         self.data=self.data[remove_outliers(self.data,mask=True,*args,**kwargs)]
+    remove_outliers=update_docstring(remove_outliers,dataIO.outliers.remove_outliers)     
         
     def histostats(self,*args,**kwargs):
         res =data_histostats(self.data,self.x,self.y,units=self.units)
         plt.title(self.name)
         return res
-
+    histostats=update_docstring(histostats,data_histostats)     
+    
     def slope(self,*args,**kwargs):
         #import pdb
         #pdb.set_trace()
@@ -392,7 +439,9 @@ class Data2D(object):  #np.ndarrays
         say,sax=slope_2D(self.data,self.x,self.y,scale=scale,*args,**kwargs)
         
         return Data2D(*sax,units=[self.units[0],self.units[1],'arcsec'],name=self.name + ' xslope'),Data2D(*say,units=[self.units[0],self.units[1],'arcsec'],name=self.name + ' yslope')
-        
+    slope=update_docstring(slope,slope_2D) 
+    
+    
 from scripts.dlist import add_markers, align_interactive  #functions operating on Data2D
     
 
