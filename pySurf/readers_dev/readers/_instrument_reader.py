@@ -8,48 +8,24 @@
 
 import numpy as np
 from matplotlib import pyplot as plt
-from pySurf.data2D import crop_data, remove_nan_frame, plot_data
-from astropy.io import fits
-from pySurf.points import get_points
-from pySurf.points import crop_points
-from pySurf.points import points_find_grid
-from pySurf.points import resample_grid
-from pySurf.read_sur_files import readsur
-from utilities.imaging.man import stripnans
-from dataIO.read_pars_from_namelist import read_pars_from_namelist
-from pySurf.data2D import register_data, data_from_txt
 import pdb
 import os
 
+from dataIO.read_pars_from_namelist import read_pars_from_namelist
+#from pySurf.data2D import data_from_txt #
 
-def csv4D_reader(wfile,ypix=None,ytox=1,header=False,delimiter=',',skip_header=12,*args,**kwargs):
-    head=read_pars_from_namelist(wfile,': ') #this returns a dictionary, order is lost if header is returned.
-    if header: 
-        return '\n'.join([": ".join((k,v)) for (k,v) in head.items()])+'\n'
-    
-    if ypix == None:
-        try:
-            ypix=np.float(head['xpix'])
-        except KeyError:
-            ypix=1.
-    
-    try:
-        zscale=np.float(head['wavelength'])
-    except KeyError:
-        zscale=1.
-    #data=np.genfromtxt(wfile,delimiter=delimiter,skip_header=12)
-    data=data_from_txt(wfile,delimiter=delimiter,skip_header=skip_header)[0]
-    
-    #this defines the position of row/columns, starting from 
-    # commented 2018/08/28 x and y read directly
-    ny,nx=data.shape
-    x=np.arange(nx)*ypix*ytox*nx/(nx-1)
-    y=np.arange(ny)*ypix*ny/(ny-1)
-    data=data*zscale
-    #data.header=head
-    
-    return data,x,y 
-    
+from format_reader import read_csv_data
+from format_reader import read_fits as fits_reader
+from format_reader import read_sur as sur_reader
+from format_reader import read_csv_points as points_reader
+
+'''
+
+# moved to format_reader
+#to read_csv_points
+from pySurf.points import points_find_grid
+from pySurf.points import get_points
+from pySurf.points import resample_grid
 def points_reader(wfile,*args,**kwargs):
     """Read a processed points file as csv output of analysis routines."""
     w0=get_points(wfile,*args,**kwargs)
@@ -57,7 +33,8 @@ def points_reader(wfile,*args,**kwargs):
     x,y=points_find_grid(w,'grid')[1]
     pdata=resample_grid(w,matrix=True)
     return pdata,x,y
-
+#to read_sur
+from pySurf.read_sur_files import readsur
 def sur_reader(wfile,header=False,*args,**kwargs):
     """read .sur binary files."""
     head=readsur(wfile,*args,**kwargs)
@@ -66,6 +43,29 @@ def sur_reader(wfile,header=False,*args,**kwargs):
     data,x,y=head.points,head.xAxis,head.yAxis
     del(head.points,head.xAxis,head.yAxis) #remove data after they are extracted from header to save memory.
     return data,x,y
+'''
+'''   
+
+# to raed_fits
+from astropy.io import fits
+def fits_reader(fitsfile,header=False):
+    """ Generic fits reader, returns data,x,y.
+    
+    header is ignored. If `header` is set to True is returned as dictionary."""
+    
+    a=fits.open(fitsfile)
+    head=a[0].header
+    if header: return head
+    
+    data=a[0].data
+    a.close()
+    
+    x=np.arange(data.shape[1])
+    y=np.arange(data.shape[0])
+    
+    return data,x,y
+  
+''' 
 
 def csvZygo_reader(wfile,intensity=False,header=False,*args,**kwargs):
     """read .csv zygo files.
@@ -145,52 +145,8 @@ def csvZygo_reader(wfile,intensity=False,header=False,*args,**kwargs):
     
     return  (d1,x,y) if intensity else (d2,x,y)   
 
-    '''   
-def fits_reader(wfile,ypix=1.,ytox=1.,header=False):
-    """reads a generic matrix from a fits file (no x and y or header information are extracted)."""
-    
-    aa=fits.open(wfile)
-    head=aa[0].header
-    if header: return head
-    
-    data=-aa[0].data
-    aa.close()
-
-    ny,nx=data.shape
-    x=np.arange(nx)*ypix*ytox*nx/(nx-1)
-    y=np.arange(ny)*ypix*ny/(ny-1)
-    #data.header=head
-    return data,x,y  
-'''    
-
-def fits_reader(fitsfile,header=False):
-    """ Generic fits reader, returns data,x,y.
-    
-    header is ignored. If `header` is set to True is returned as dictionary."""
-    
-    a=fits.open(fitsfile)
-    head=a[0].header
-    if header: return head
-    
-    data=a[0].data
-    a.close()
-    
-    x=np.arange(data.shape[1])
-    y=np.arange(data.shape[0])
-    
-    return data,x,y
-
-def auto_reader(wfile):
-    """guess a reader for wfile. Return reader routine."""
-    ext=os.path.splitext(wfile)[-1]
-    try:
-        reader=reader_dic[ext]
-    except KeyError:
-        print ('fileformat ``%s``not recognized for file %s'%(ext,file))
-        print ('Use generic text reader')
-        reader=points_reader  #generic test reader, replace with asciitables    
-    
-    return reader
+from pySurf.data2D import plot_data
+from readers import auto_reader
 
 def test_zygo():
     import os
@@ -210,13 +166,7 @@ def test_zygo():
     plot_data(d2,x2,y2,aspect='equal')
     return (d1,x1,y1),(d2,x2,y2)
 
-#used by auto_reader to open according to extension
-reader_dic={'.asc':csvZygo_reader,
-            '.csv':csv4D_reader,
-            #'.fits':fitsWFS_reader,
-            '.txt':points_reader,
-            '.sur':sur_reader,
-            '.dat':points_reader}
+
             
 if __name__=='__main__':
     """It is based on a tentative generic function read_data accepting among arguments a specific reader. 

@@ -1,8 +1,12 @@
 def read_pars_from_namelist(filename,separator="="):
     '''Read a set of parameters from a (fortran-like) namelist in file FILENAME.
-    Return a dictionary. All values are read as strings.'''
-
-    l=open(filename,'r').readlines()
+    Return a dictionary. All values are read as strings.
+    A file-object like io.StringIO(filetext) can be used in place of a real file.'''
+    
+    if hasattr(filename,'readlines'):
+        l=filename.readlines()
+    else:
+        l=open(filename,'r').readlines()
     l=[ll.strip() for ll in l if ll.count(separator) == 1 ]  #consider only valid line (one and only one = sign in the line).
     dict={}
     for ll in l:
