@@ -48,7 +48,7 @@ def removemis(D2D,func):
     res=D2D.copy() #avoid modification inplace
     res.data=res.data-func(res.data)[0]
     return res
-
+    
 def plot_data_repeat_leveling(dlist,outfile=None,dis=True,name = ""):
     """Create a multiplot on a grid with plots of all data with
     same leveling: raw, conical, cyliindrical, sag removed by line
@@ -146,8 +146,6 @@ def plot_repeat(rfiles,outfile=None,dis=True,name = "",plot_func=plot_data_repea
     data rather than on file extracting the data part in outer routine plot_data_repeat_leveling
     in ."""
     
-    
-    
     plt.close('all')
     
     dlist=[Data2D(file=wf1,reader=fitsWFS_reader,scale=(-1,-1,1),
@@ -191,3 +189,5 @@ def dcouples_plot(dlist,level=True,dis=False):
 
     #return [d.std() for d in [diff21,diff31,diff32]]
     return dcouples
+
+

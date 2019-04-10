@@ -18,11 +18,6 @@ from copy import deepcopy
 from dataIO.span import span
 from pySurf.data2D import projection
 from pySurf.data2D_class import Data2D
-from plotting.multiplots import find_grid_size, subplot_grid    
-from plotting.backends import maximize
-from dataIO.outliers import remove_outliers
-from plotting.add_clickable_markers import add_clickable_markers2
-from pySurf.affine2D import find_affine, find_rototrans
 
 def load_dlist(rfiles,reader=None,*args,**kwargs):
     """Extracted from plot_repeat. Read a set of rfiles to a dlist.
@@ -77,6 +72,7 @@ def test_load_dlist():
             'units':['mm','mm','um']},{'scale':(-1,-1,1),
             'units':['mm','mm','$\mu$m']}])
     return dlist
+
 
 def add_markers(dlist):
     """interactively set markers, when ENTER is pressed,

@@ -84,3 +84,36 @@ def test_reader(file,reader,outfolder=None,infolder=None,**kwargs):
             os.makedirs(os.path.dirname(outname),exist_ok=True)
             plt.savefig(fn_add_subfix(outname,'','.png'))
     return res,header
+	
+def csv_points_reader(wfile,*args,**kwargs):
+    """Read a processed points file in format x,y,z as csv output of analysis routines."""
+    w0=get_points(wfile,*args,**kwargs)
+    w=w0.copy()
+    x,y=points_find_grid(w,'grid')[1]
+    pdata=resample_grid(w,matrix=True)
+    return pdata,x,y
+
+def csv_zygo_reader(wfile,*args,**kwargs):
+    """Read a processed points file in format x,y,z as csv output of analysis routines."""
+    w0=get_points(wfile,*args,**kwargs)
+    w=w0.copy()
+    x,y=points_find_grid(w,'grid')[1]
+    pdata=resample_grid(w,matrix=True)
+    return pdata,x,y
+
+
+eegKeys = ["FP3", "FP4"]
+gyroKeys = ["X", "Y"]
+
+# 'Foo' is ignored
+data = {"FP3": 1, "FP4": 2, "X": 3, "Y": 4, "Foo": 5}
+
+filterByKey = lambda keys: {x: data[x] for x in keys}
+eegData = filterByKey(eegKeys)
+gyroData = filterByKey(gyroKeys)
+
+print(eegData, gyroData) # ({'FP4': 2, 'FP3': 1}, {'Y': 4, 'X': 3})
+
+filterByKey2 = lambda data,keys : {key: data[key] for key in keys if key in data}
+
+print (filterByKey(eegKeys)) # {'FP4': 2, 'FP3': 1}
