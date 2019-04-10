@@ -336,7 +336,6 @@ def rotate_data(data,x=None,y=None,ang=0,k=None,center=None,
     
     return a3,xout,yout
 
-    
 
 def save_data(filename,data,x=None,y=None,fill_value=np.nan,addaxis=True,makedirs=False,**kwargs):
     """save data as matrix on a file. 
@@ -437,6 +436,109 @@ def register_data(data,x,y,scale=(1,1,1.),
 def data_equal(d1,d2,nanstrict=False):
     """Compare two data keeping nans into account."""
     raise NotImplementedError
+
+    
+def read_data(file,reader,**kwargs):
+
+    """read data from a file using a given reader with custom options in args, kwargs.
+    
+    The function calls reader, but, before this, strips all options that are recognized by register_data,
+      all remaining unkown parameters are passed to reader.
+    Then register_data is called with the previously stored settings (or defaults if not present).
+    
+    This was made to hide messy code beyond interface. See old notes below, internal behavior can be better fixed e.g. by using dataIO.dicts.pop_kw and inspect.signature and fixing header interface.
+    
+    Old notes say:
+
+        Division of parameters is hard coded, that is neither too elegant or maintainable. Note however that with this structure it is 
+        possible to call the read_data procedure with specific parameters, for example in example below, the reader for 
+        Zygo cannot be called directly with intensity keyword set to True without making a specific case from the other readers, 
+        while this can be done using read_data. 
+        
+        this is an ugly way to deal with the fact that return
+    arguments are different if header is set, so when assigned to a variable as in patch routines in pySurf instrumentReader it fails.
+    Workaround has been calling directly read_data, not optimal.
+    
+    2019/04/09 merged from data2D and instrumentReader to data2D. Mostly code from data2D and comments
+        from instrumentReader. code commented with ## was excluded."""        
+    
+    #filters register_data parameters cleaning args
+    # done manually, can use `dataIO.dicts.pop_kw`.
+    scale=kwargs.pop('scale',(1,1,1))
+    crop=kwargs.pop('crop',None)
+    #zscale=kwargs.pop('zscale',None) this is removed and used only for reader
+    # functions where a conversion is needed (e.g. wavelength)
+    center=kwargs.pop('center',None)
+    strip=kwargs.pop('strip',False)
+    ##regdic={'scale':scale,'crop':crop,'center':center,'strip':strip}
+    
+    #kwargs=pop_kw(kwargs,['scale','crop','center','strip'],
+    #    [(1,1,1),None,None,False])
+    
+    #get_data using format_reader
+    data,x,y=reader(file,**kwargs)
+    
+    return register_data(data,x,y,scale=scale,crop=crop,
+        center=center,strip=strip,**kwargs)
+        
+    ## #try to modify kwargs 
+    ## for k in list(kwargs.keys()): kwargs.pop(k)  #make it empty
+    ## #kwargs.update(regdic)
+    ## for k in regdic.keys():kwargs[k]=regdic[k] 
+    ## if register:
+    ##    data,x,y=register_data(data,x,y,scale=scale,crop=crop,
+    ##    center=center,strip=strip)
+    ## return data,x,y
+    
+''' merged 2019/04/09
+def read_data(file,reader,register=True,*args,**kwargs):
+    #from instrumentReader
+    """non essendo sicuro dell'interfaccia per ora faccio cosi'.
+    The function first calls the (raw) data reader, then applies the register_data function to address changes of scale etc,
+    arguments are filtered and passed each one to the proper routine.
+    18/06/18 add all optional parameters, if reader is not passed,
+    only registering is done. note that already if no register_data
+    arguments are passed, registration is skipped.
+    18/06/18 add action argument. Can be  'read', 'register' or 'all' (default, =read and register). This is useful to give fine control, for example to modify x and y after reading and still make it possible to register data (e.g. this is done in 
+    Data2D.__init__).
+    
+    implementation:
+    This works well, however read_data must filter the keywords for the reader and for the register and
+    this is hard coded, that is neither too elegant or maintainable. Note however that with this structure it is 
+    possible to call the read_data procedure with specific parameters, for example in example below, the reader for 
+    Zygo cannot be called directly with intensity keyword set to True without making a specific case from the other readers, 
+    while this can be done using read_data. """
+    
+    """this is an ugly way to deal with the fact that return
+    arguments are different if header is set, so when assigned to a variable as in patch routines in pySurf instrumentReader it fails.
+    Workaround has been calling directly read_data, not optimal."""
+    if kwargs.pop('header',False):
+        try:
+            return reader(file,header=True)
+        except TypeError:  #unexpected keyword if header is not implemented
+            return None
+    
+    
+    #filters register_data parameters cleaning args
+    # done manually, there is a function in dataIO.
+    scale=kwargs.pop('scale',(1,1,1))
+    crop=kwargs.pop('crop',None)
+    center=kwargs.pop('center',None)
+    strip=kwargs.pop('strip',False)
+    regdic={'scale':scale,'crop':crop,'center':center,'strip':strip}
+    
+    data,x,y=reader(file,*args,**kwargs)
+    
+    #try to modify kwargs 
+    for k in list(kwargs.keys()): kwargs.pop(k)  #make it empty
+    #kwargs.update(regdic)
+    for k in regdic.keys():kwargs[k]=regdic[k] 
+    if register:
+        data,x,y=register_data(data,x,y,scale=scale,crop=crop,
+        center=center,strip=strip)
+    return data,x,y
+
+    
     
 def read_data(file,reader,*args,**kwargs):
 
@@ -474,7 +576,7 @@ def read_data(file,reader,*args,**kwargs):
     data,x,y=reader(file,*args,**kwargs)
     return register_data(data,x,y,scale=scale,crop=crop,
         center=center,strip=strip)
-
+'''
             
 # this is old version before read_data. Note that x and y have no effect, has a autocrop parameter that removes nans.
 # pass options to np.genfromtxt
@@ -482,17 +584,20 @@ def get_data(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,addaxis
     """replaced by data_from_txt."""
     print ('this routine was replaced by `data_from_txt`, update code')
  
-def data_from_txt(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,addaxis=False,center=None,skip_header=None,delimiter=' ',autocrop=False):
+def data_from_txt(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,addaxis=False,center=None,skip_header=None,delimiter=' ',strip=False):
     """read matrix from text file. Return data,x,y
-    center is the position of the center of the image in final coordinates (changed on 2016/08/10, it was '(before any scaling or rotation) in absolute coordinates.') If None coordinates are left unchanged.
+    This shouldn't be used, there are smarter ways of doing it using read_data and readers, 
+      however, this is a quick way to get data from text if you don't know what I am talking about.
+      
+    center: is the position of the center of the image in final coordinates (changed on 2016/08/10, it was '(before any scaling or rotation) in absolute coordinates.') If None coordinates are left unchanged.
         Set to (0,0) to center the coordinate system to the data.
-    addaxis (if matrix is set) can be set to read values for axis in first row and column
+    addaxis: (if matrix is set) can be set to read values for axis in first row and column
         (e.g. if points were saved with default addaxis=True in save_data.
-    autocrop remove frame of nans (external rows and columns made all of nans),
+    strip (renamed from autocrop): remove frame of nans (external rows and columns made all of nans),
         note it is done before centering. To include all data in centering, crop data
         at a second time with remove_nan_frame
     """
-
+    #pdb.set_trace()
     #2014/04/29 added x and y as preferred arguments to xrange and yrange (to be removed).
     if skip_header is None: 
         skip=0 
@@ -509,7 +614,7 @@ def data_from_txt(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,ad
         x=np.arange(mdata.shape[1])
         y=np.arange(mdata.shape[0])
 
-    if autocrop:
+    if strip:
         mdata,x,y=remove_nan_frame(mdata,x,y)
         
     if center is not None:
