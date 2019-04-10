@@ -146,8 +146,6 @@ def plot_repeat(rfiles,outfile=None,dis=True,name = "",plot_func=plot_data_repea
     data rather than on file extracting the data part in outer routine plot_data_repeat_leveling
     in ."""
     
-    
-    
     plt.close('all')
     
     dlist=[Data2D(file=wf1,reader=fitsWFS_reader,scale=(-1,-1,1),
