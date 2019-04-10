@@ -215,7 +215,8 @@ class Data2D(object):  #np.ndarrays
                     y=np.arange(data.shape[0])
         
             if data is not None:
-                data,x,y=register_data(data,x,y,*args,**kwargs)# se read_data chiamasse register, andrebbe un'indentazione +1
+                data,x,y=register_data(data,x,y,*args,**kwargs)# se read_data calls register, this
+                #goes indented.
             
         self.data,self.x,self.y=data,x,y
         
