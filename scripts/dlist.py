@@ -9,7 +9,6 @@ import numpy as np
 from pySurf._instrument_reader import auto_reader
 from pySurf.data2D import plot_data,get_data, level_data, save_data, rotate_data, remove_nan_frame, resample_data
 from pySurf.data2D import read_data,sum_data, subtract_data, projection, crop_data, transpose_data, apply_transform, register_data
-
 from pySurf.psd2d import psd2d,plot_psd2d,psd2d_analysis,plot_rms_power,rms_power
 
 from pySurf.points import matrix_to_points2
@@ -18,6 +17,7 @@ from copy import deepcopy
 from dataIO.span import span
 from pySurf.data2D import projection
 from pySurf.data2D_class import Data2D
+from pySurf.affine2D import find_rototrans,find_affine
 
 def load_dlist(rfiles,reader=None,*args,**kwargs):
     """Extracted from plot_repeat. Read a set of rfiles to a dlist.
