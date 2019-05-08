@@ -133,14 +133,18 @@ def cone_error3(odr=(0,220.,0,0),points=None,coeff=None,retall=False,extra=False
     extra is equivalent to retall, renamed 2018/02/15 kept for backward compatibility
     """
     
+    import pdb
+    #pdb.set_trace()
+    points=points[~np.isnan(points[:,2]),:]
+    
     #ca 400 ms per loop
     origin=np.array((odr[0],0,odr[1])) #point of axis at y=0
     direction=np.array((odr[2],np.sqrt(1-odr[2]**2-odr[3]**2),odr[3])) # director cosines, cy is assumed positive
     #direction=direction/np.sqrt((direction**2).sum())
-    direction=direction/(np.sqrt(np.sum(direction**2)))
+    direction=direction/(np.sqrt(np.nansum(direction**2))) #normalize
     x,y,z=np.hsplit(points,3)
     Paxis=closest_point_on_line(points,direction,origin)
-    Paxdist=np.sqrt(np.sum((Paxis-origin)**2,axis=1))*np.sign(Paxis[:,1]-origin[1])
+    Paxdist=np.sqrt(np.nansum((Paxis-origin)**2,axis=1))*np.sign(Paxis[:,1]-origin[1])
     #Paxdist=np.sqrt(((Paxis-origin)**2).sum(axis=1))*np.sign(Paxis[:,1]-origin[1])
     
     #d: on axis coordinate of points
@@ -324,7 +328,7 @@ def fit_cone(pts,odr2,zscale=1.,keepnan=False,**kwargs):
     direction=direction/np.sqrt((direction**2).sum())  
     
     print ('-----------------------------------')
-    print ('Results of fit on region (function: %s):'%fom_func)
+    print ('Results of fit with function: "%s" on region:'%fom_func)
     print ('X: [%6.3f,%6.3f]'%tuple(s[0]))
     print ('Y: [%6.3f,%6.3f]'%tuple(s[1]))
     print ('data range: [%6.3f,%6.3f]'%tuple(s[2]))
@@ -398,7 +402,7 @@ def fit_cylinder(pts,odr2,zscale=1.,keepnan=False,align=False,**kwargs):
     #fom_func, s, zscale, odr, fom, coeff
     
     print ('-----------------------------------')
-    print ('Results of fit on region (function: %s):'%fom_func)
+    print ('Results of fit with function: "%s" on region:'%fom_func)
     print ('X: [%6.3f,%6.3f]'%tuple(s[0]))
     print ('Y: [%6.3f,%6.3f]'%tuple(s[1]))
     print ('data range: [%6.3f,%6.3f]'%tuple(s[2]))
