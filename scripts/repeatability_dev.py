@@ -79,74 +79,11 @@ def plot_cross_diff_rms(stats):
 
 # PLOTTING FOR SINGLE SET OF FILES
 
-def plot_data_repeat(dlist,name="",num=None,*args,**kwargs):
-    """"given a list of Data2D objects dlist, plots them as subplots in maximized window. 
-    returns stats.
-    """
 
-    res=[]
-    plt.clf()
-    #fig,axes=plt.subplots(1,len(dlist),num=1)
-    xs,ys=find_grid_size(len(dlist),3,square=False)
-    fig,axes=plt.subplots(xs,ys,num=num)
-    axes=axes.flatten()
-    maximize()
-    
-    for i,(ll,ax) in enumerate(zip(dlist,axes)):
-        plt.subplot(xs,ys,i+1,sharex=axes[0],sharey=axes[0])
-        ll.plot(stats=True,*args,**kwargs)
-        res.append(ll.std())
-        #plt.clim([-3,3])
-        plt.clim(*(np.nanmean(ll.data)+np.nanstd(ll.data)*np.array([-1,1])))
-    plt.suptitle(name+' RAW (plane level)')
-    for ax in axes[:len(dlist)-1:-1]:
-        fig.delaxes(ax)
-        #plt.pause(0.1)
-        
-    commonscale(plt.gcf())
-        
-    return res       
     
 
 
 
-def plot_rep_diff(dlist,outfile=None,dis=True):
-    """Get three 2d arrays in a list. Calculate rotating differences for different component
-    removal: plane, cylinder, cone, legendre.
-    returns an 4 element list with the 4 possible removal for the 3 combinations of files to diff  """
-
-    res=[]    
-    
-    plt.close('all')
-    plt.figure(1)
-    res.append(dcouples_plot(dlist))
-    plt.suptitle('Differences RAW')
-    if outfile is not None:
-        plt.savefig(fn_add_subfix(outfile,'_raw','.png',pre='raw\\diff_'))
-    if dis: display(plt.gcf())    
-    
-    plt.figure(2)
-    res.append(dcouples_plot([removemis(dd,fit.fitCylMisalign) for dd in dlist]))
-    plt.suptitle('Differences CYL removed')
-    if outfile is not None:
-        plt.savefig(fn_add_subfix(outfile,'_cyl','.png',pre='cyl\\diff_'))
-    if dis: display(plt.gcf())    
-
-    plt.figure(3)
-    res.append(dcouples_plot([removemis(dd,fit.fitConeMisalign) for dd in dlist]))
-    plt.suptitle('Differences CONE removed')
-    if outfile is not None:
-        plt.savefig(fn_add_subfix(outfile,'_cone','.png',pre='cone\\diff_'))
-    if dis: display(plt.gcf())    
-
-    plt.figure(4)
-    res.append(dcouples_plot([dd.level((2,2)) for dd in dlist]))
-    plt.suptitle('Differences 2,2 Legendre removed')
-    if outfile is not None:
-        plt.savefig(fn_add_subfix(outfile,'_leg','.png',pre='leg\\diff_'))
-    if dis: display(plt.gcf())    
-    
-    return res
 
 def process_set(flist,m_trans=None,m_arr=None,outfolder=None):
     rmslist=[]       
