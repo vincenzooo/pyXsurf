@@ -35,4 +35,4 @@ Some examples and data can be found in a `test` subfolder of each module.
 
 ## Author
 Vincenzo Cotroneo
-vcotroneo@cfa.harvard.edu
+vincenzo.cotroneo@inaf.it
