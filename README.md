@@ -9,7 +9,7 @@ This is a release version, modules under preliminary development are excluded.
 I am using my beginner skills with github to keep it self-consistent.
 
 First version of repository includes a lot of scripts that are not essential or well commented. 
-Until documentation is minimal, I want to include only most consolidated functions.
+Documentation is minimal, until it gets more comprehensive, I want to include only most consolidated functions.
 
 **TODO:** remove unessential files. Learn how to add documentation from docstring.
 
