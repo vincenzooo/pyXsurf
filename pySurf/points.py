@@ -10,7 +10,8 @@ from copy import deepcopy
 from dataIO.span import span,span_from_pixels
 from .plane_fit import plane_fit
 from astropy.io import fits
-from matplotlib.mlab import griddata
+#from matplotlib.mlab import griddata
+from scipy.interpolate import griddata
 from dataIO.running_mean import running_mean
 from scipy import stats
 from plotting.add_clickable_markers import add_clickable_markers2
