@@ -1,0 +1,4 @@
+*.pyc
+.spyproject/
+.DS_Store/
+
