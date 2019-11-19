@@ -25,10 +25,13 @@ def makeGaussian(size, fwhm = 3, center=None):
 
 
 def make_sag(nx,ny):
-    """ create sag with peak-to-valley 1."""
+    """ create surface with sag along y with peak-to-valley 1.
+    Note that this is the range of data, not of the surface (i.e. if 
+    number of points in y is even, the analytical minimum of the surface lies
+    between the two central pixels and it is not included in data)"""
     
-    ss=(np.arange(ny)-ny/2.)**2 #makes a parabola centered on 0
-    ss=ss/span(ss,size=1) #rescale height to 1
+    ss=(np.arange(ny)-(ny-1)/2.)**2 #makes a parabola centered on 0
+    ss=ss/span(ss,size=1)-np.min(ss) #rescale height to 1
     sag=np.repeat(ss[np.newaxis, :], nx, axis=0).T #np.tile(ss,nx).reshape(ny,nx)
     
     return sag,np.arange(nx),np.arange(ny)
@@ -59,9 +62,12 @@ def make_prof_legendre(x,coeff,inanp=[]):
     return yp
 
 def make_surf_legendre(x,y,coeff,inanp=[],inanl=[]):
+    """Create a test surface from profiles along x, created with
+    legendre polynomial with coefficients 'coeff'. 
+    """
        
     data=np.empty((len(y),len(x)))
-    nrep=len(x)/len(coeff)
+    nrep=len(x)//len(coeff)
     for i,cc in enumerate(coeff):
         yp=make_prof_legendre(y,cc,)
         data[:,i*nrep:(i+1)*nrep]=yp[:,None]
