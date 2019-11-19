@@ -14,7 +14,7 @@ from pySurf.points import crop_points
 from pySurf.points import points_find_grid
 from pySurf.points import resample_grid
 from pySurf.read_sur_files import readsur
-from utilities.imaging.man import stripnans
+#from utilities.imaging.man import stripnans
 from dataIO.read_pars_from_namelist import read_pars_from_namelist
 
 import pdb
@@ -130,6 +130,7 @@ def csvZygo_reader(wfile,intensity=False,header=False,*args,**kwargs):
     datasets=[np.array(aa.split(),dtype=int)  for aa in ' '.join(map(str.strip,d)).split('#')[:-1]]
     #here rough test to plot things
     d1,d2=datasets  #d1 intensity, d2 phase
+    if d1.size
     d1,d2=d1.astype(float).reshape(ny,nx),d2.astype(float).reshape(*connected_size[::-1])
     d1[d1>65535]=np.nan
     d2[d2>=2147483640]=np.nan
