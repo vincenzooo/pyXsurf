@@ -24,6 +24,7 @@ from IPython.display import display
 from dataIO.fn_add_subfix import fn_add_subfix
 from dataIO.span import span, span_from_pixels
 from dataIO.outliers import remove_outliers, EmptyRangeWarning
+from dataIO import outliers
 from dataIO.dicts import strip_kw,pop_kw
 import logging
 import os
