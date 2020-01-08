@@ -296,6 +296,7 @@ class Data2D(object):  #np.ndarrays
         plt.title(title)
         return res
     plot=update_docstring(plot,plot_data)
+    
 
     def load(self,filename,*args,**kwargs):
         """A simple file loader using data_from_txt"""

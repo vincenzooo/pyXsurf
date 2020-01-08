@@ -16,6 +16,7 @@ self.data=newdata makes a method a procedure, self.copy().data=newdata; return r
 
 import matplotlib.pyplot as plt
 import numpy as np
+import warnings
 #from pySurf.points import *
 #from pySurf.psd2d import *
 from pyProfile.profile import polyfit_profile
@@ -970,7 +971,7 @@ def data_histostats(data,x=None,y=None,bins=100,normed=True,units=None,loc=0,*ar
     res = plt.hist(data[np.isfinite(data)],bins=bins,normed=normed,*args,**kwargs)
     plt.xlabel('Units of '+units[2])
     plt.ylabel('Fraction of points #')
-    legend=get_stats(data,x,y,units=units,level=2)+"\n"+'x_span: %.3g\ny_span: %.3g\nN: %i'%(span(x,size=1),
+    legend="\n".join(get_stats(data,x,y,units=units))+"\n"+'x_span: %.3g\ny_span: %.3g\nN: %i'%(span(x,size=1),
         span(y,size=1),np.size(data))
     l=legendbox(legend,loc=loc,framealpha=0.2)
     #plt.legend(loc=0)
@@ -1032,11 +1033,13 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
             else:
                 clim=remove_outliers(data,span=True,nsigma=nsigma)
             
-            if issubclass(w,outliers.EmptyRangeWarning):
-                warnings.warn('Range after filtering was empty, plotting full set of data.',EmptyPlotRangeWarning)
+            #pdb.set_trace()
+            if w:
+                if issubclass(w,outliers.EmptyRangeWarning):
+                    warnings.warn('Range after filtering was empty, plotting full set of data.',EmptyPlotRangeWarning)
                 clim=span(data,span=True)
                 
-    plt.clim(*clim)
+        plt.clim(*clim)
     #print('clim',clim)
 
     plt.xlabel('X'+(" ("+units[0]+")" if units[0] is not None else ""))
@@ -1057,9 +1060,7 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     if stats:
         legend=get_stats(data,x,y,units=units)
         if stats==2:
-            legend.extend(["x_span: %.3g %s"%(span(x,size=1),
-            units[0]),"y_span: %.3g %s"%(span(y,size=1),units[1]),
-            "size: %i"%np.size(data)])
+            legend.extend(["x_span: %.3g %s"%(span(x,size=1),(units[0] if units[0] else "")),"y_span: %.3g %s"%(span(y,size=1),(units[1] if units[1] else "")),"size: %i"%np.size(data)])
         l=legendbox(legend,loc=loc,framealpha=framealpha)
         #pdb.debug()
         #for k,v in largs.items():
