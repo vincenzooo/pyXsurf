@@ -45,11 +45,11 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
     #pdb.set_trace()
 
     if reader is None:
-        reader=auto_reader
+        reader=auto_reader(rfiles[0])
     if np.size(reader) ==1:
         reader=[reader]*len(rfiles)
 
-    if len(kwargs) >0 : #passed explicit parameters for all readers
+    if kwargs : #passed explicit parameters for all readers
         kwargs=[kwargs]*len(rfiles)
     else:
         if np.size(args) ==1:
@@ -59,6 +59,7 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
                 raise ValueError
 
     #kwargs here is a list of dictionaries {option:value}, matching the readers
+    #pdb.set_trace()
     dlist=[Data2D(file=wf1,reader=r,**k) for wf1,r,k in zip(rfiles,reader,kwargs)]
 
     return dlist
