@@ -6,7 +6,7 @@ Created on Fri Jun  8 00:36:57 2018
 """
 
 import matplotlib.pyplot as plt
-import numpy
+import numpy as np
 
 def original_make_caption():
     if mode=='tagcode': #single string (e.g. for filenames)
@@ -32,7 +32,9 @@ def legendbox(text,ax=None,loc=0,*args,**kwargs):
 
     #plt.plot([1,2],[2,3],label='cane')
     #plt.legend(loc=1) 
-
+    import pdb 
+    #pdb.set_trace()
+    if np.size(text) == 1 and not isinstance(text, list): text = [text]
     if ax is None:
         ax=plt.gca()
     p = [Patch(label=ll,visible=False) for ll in text]

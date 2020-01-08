@@ -4,8 +4,9 @@ from typing import Callable
 import warnings
 
 class EmptyRangeWarning(RuntimeWarning):
-    def __init__(self, *args, **kwargs):
-        super().__init__( *args, **kwargs)
+    pass
+    #def __init__(self, *args, **kwargs):
+    #    super().__init__( *args, **kwargs)
 
 def remove_outliers(data: np.array,
                     nsigma: float = 3,
