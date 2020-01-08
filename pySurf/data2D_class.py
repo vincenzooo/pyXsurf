@@ -190,7 +190,7 @@ class Data2D(object):  #np.ndarrays
             xrange=span(x) if x is not None else None
             yrange=span(y) if y is not None else None
             if reader is None:
-                reader=auto_reader(file)
+                reader=auto_reader(file) #returns a reader
             data,x,y=read_data(file,reader=reader,*args,**kwargs) #calling without arguments skips register, however skips also reader argumnets, temporarily arranged with pop in read_data to strip all arguments for
                 #register data and pass the rest to reader
             #pdb.set_trace()
