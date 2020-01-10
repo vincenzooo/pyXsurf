@@ -9,7 +9,7 @@ import numpy as np
 from pySurf._instrument_reader import auto_reader
 from pySurf.data2D import plot_data,get_data, level_data, save_data, rotate_data, remove_nan_frame, resample_data
 from pySurf.data2D import read_data,sum_data, subtract_data, projection, crop_data, transpose_data, apply_transform, register_data
-from plotting.multiplots import find_grid_size
+from plotting.multiplots import find_grid_size, compare_images
 from pySurf.psd2d import psd2d,plot_psd2d,psd2d_analysis,plot_rms_power,rms_power
 
 from pySurf.points import matrix_to_points2
@@ -88,7 +88,7 @@ def mark_data(datalist,outfile=None,deg=1,levelfunc=None,propertyname='markers',
     except NameError:
         logger=logging.getLogger()
         logger.setLevel(logging.DEBUG)
-
+    #datalist = [d() for d in datalist]]
     axes=list(compare_images([[levellegendre(y,wdata,deg=6),x,y] for (wdata,x,y) in datalist],
         commonscale=True,direction=direction))
     fig=plt.gcf()
