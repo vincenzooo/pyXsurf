@@ -186,6 +186,7 @@ def extract_psd(dlist,rmsthr=0.07,rmsrange=None,prange=None,ax2f=None,dis=False)
     plt.clf()
     labels=[d.name for d in dlist]
     m_tot=[]
+    #gives error, m_psd is a list of PSD2D objects, there is no f,p, check psd2an
     for (f,p),l in zip(m_psd,labels):
         ptot=projection(p,axis=1)
         #plot_psd(f,ptot,label=l,units=d.units)
