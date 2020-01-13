@@ -252,7 +252,7 @@ def apply_transform(data,x,y,trans=None):
 
 def rotate_data(data,x=None,y=None,ang=0,k=None,center=None,
     fill_value=np.nan,usepoints=False,*args,**kwargs):
-    """Rotate clockwise by an angle in degree. Non optimized version using points functions.
+    """Rotate anticlockwise by an angle in degree. Non optimized version using points functions.
     2018/10/31 added k parameters allowing 90 deg rotations with np.rot90. k is the number
         of anticlockwise rotations about center. Note there is not resampling, so it can be inaccurate if
         center is not on pixel center.
@@ -285,7 +285,7 @@ def rotate_data(data,x=None,y=None,ang=0,k=None,center=None,
         #doesn't work well for some reason (nan?)
         from pySurf.points import matrix_to_points2,rotate_points,resample_grid
         p=matrix_to_points2(data,x,y)
-        p=rotate_points(p,-ang/180*np.pi,center=center,*args,**kwargs)
+        p=rotate_points(p,ang/180*np.pi,center=center,*args,**kwargs)
         #res=resample_grid(p,x,y,matrix=True),x,y  #this is wrong, needs to rescale on grid on rotated range
         #similar to data rotation, for now use autoresample
         res=points_autoresample(p)
@@ -293,7 +293,7 @@ def rotate_data(data,x=None,y=None,ang=0,k=None,center=None,
         return res
 
     if k is not None:
-        assert ang is None
+        assert ang is 0
 
         ##alg 1: basic rotation with maximum inplace operations, messes up sign of axis, raises ambiguity on how to plot with plot_data
         #data=np.rot90(data,k,axes=(1,0))
