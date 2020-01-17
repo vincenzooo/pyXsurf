@@ -46,7 +46,7 @@ def pop_kw(kws,defaults=None,keylist=None):
 
         #pop 'cat' and 'sheep' if they are in kwargs or take them from defaults if there,
         #  put them in res
-        >>> res=pop_kw(kwargs,['cat','sheep'],defs)
+        >>> res=pop_kw(kwargs, defaults = defs, keylist = ['cat','sheep'])
         >>> kwargs
         Out[103]: {}
         >>> res
@@ -61,7 +61,7 @@ def pop_kw(kws,defaults=None,keylist=None):
 
        import inspect
        pars=list(inspect.signature(f1).parameters) #give list of all accepted parameters in f1
-       res1=f1(arg1,**pop_kw(kwargs,pars)) #note that pars will have keys 'args' and 'kwargs' if
+       res1=f1(arg1,**pop_kw(kwargs,keylist = pars)) #note that pars will have keys 'args' and 'kwargs' if
                             # f1 accepts arbitrary arguments. kws and defaults with same name can be
                             #  in conflict
 
@@ -70,7 +70,7 @@ def pop_kw(kws,defaults=None,keylist=None):
         def example_pop_kw(**kwargs):
 
             # here if passed directly with `res0=f1(arg1,**kwargs)` gives error because mes2 is not a defined parameter
-            res1=f1(arg1,**pop_kw(kwargs,['mes1'],{'mes1':'blah!'})) #only mes1 is passed to res1 with default if not in kwargs:
+            res1=f1(arg1,**pop_kw(kwargs,{'mes1':'blah!'},['mes1'])) #only mes1 is passed to res1 with default if not in kwargs:
             res2=f2(arg1,**kwargs)  #other remaining kwargs can be safely passed to f2
 
     Completely reviewed 2019/04/08, changed interface and function of keylist.
@@ -207,7 +207,7 @@ def test_pop_kw():
     defs={'dog':'barf','sheep':'bee'}
     keys=['cat','sheep']
     print('start -> kwargs = {},\n keylist = {},\n defaults = {}\n'.format(kwargs,keys,defs))
-    res=pop_kw(kwargs,defs,keys)
+    res=pop_kw(kwargs,defaults=defs,keys)
     print("\nResult: ",res)
     # {'sheep': 'bee', 'cat': 'miao', 'dog': 'bau'}
     print('end ->\n kwargs = {},\n keylist = {},\n defaults = {}'.format(kwargs,keys,defs))

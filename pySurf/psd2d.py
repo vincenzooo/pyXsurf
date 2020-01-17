@@ -395,8 +395,15 @@ def psd_analysis(*args,**kwargs):
     f,p2=psd2d_analysis(*args,**strip_kw(kwargs,psd2d_analysis),title="")
     p=projection(p2,axis=1)
     plt.figure()
-    u = kwargs.get('units',None)
-    plot_psd(f,p,units=[u[0],u[1]] if u else u,title= title, **kwargs)
+    #u = kwargs.get('units',None)
+    #t = kwargs.get('title',None)
+    kw = strip_kw(kwargs,plot_psd)
+    u = kw['units'] if 'units' in kw else None
+    if u is not None:
+        kw ['units'] = u 
+    plot_psd(f,p,**kw)
+
+    #plot_psd(f,p,units=[u[0],u[1]] if u else u, title= t, **kwargs)
     return f,p
 
 
