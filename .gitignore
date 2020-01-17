@@ -1,5 +1,7 @@
 /__pycache__
 /.*
 .*
+.*/
+!.gitignore
 *.pyc
 workspace.ini

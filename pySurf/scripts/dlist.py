@@ -1,6 +1,9 @@
 
 
 """functions operating on a list of Data2D objects"""
+# turned into a class derived from list 2020/01/16, no changes to interface,
+# everything should work with no changes.
+
 import os
 import matplotlib.pyplot as plt
 import numpy as np
@@ -19,6 +22,13 @@ from dataIO.span import span
 from pySurf.data2D import projection
 from pySurf.data2D_class import Data2D
 from pySurf.affine2D import find_rototrans,find_affine
+
+class Dlist(list):
+    """A list of pySurf.Data2D objects on which unknown operations are performed serially."""
+
+    #automatically vectorize all unknown properties
+    def __getattr__(self, name):
+        return [getattr(i,name) for i in self]
 
 def load_dlist(rfiles,reader=None,*args,**kwargs):
     """Extracted from plot_repeat. Read a set of rfiles to a dlist.
@@ -64,7 +74,7 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
 
     return dlist
 
-def test_load_dlist():
+def test_load_dlist(rfiles):
 
     dlist=load_dlist(rfiles,reader=fitsWFS_reader,scale=(-1,-1,1),
             units=['mm','mm','um'])
@@ -73,7 +83,7 @@ def test_load_dlist():
             'units':['mm','mm','um']},{'scale':(1,1,-1),
             'units':['mm','mm','um']},{'scale':(-1,-1,1),
             'units':['mm','mm','$\mu$m']}])
-    return dlist
+    return dlist,dlist2
 
 
 def mark_data(datalist,outfile=None,deg=1,levelfunc=None,propertyname='markers',direction=0):

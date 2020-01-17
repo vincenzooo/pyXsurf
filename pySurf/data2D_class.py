@@ -89,7 +89,7 @@ from pySurf.data2D import slope_2D, register_data, data_from_txt, data_histostat
 from pySurf import data2D
 import dataIO
 
-from pySurf.psd2d import psd2d,plot_psd2d,psd2d_analysis,plot_rms_power,rms_power
+from pySurf.psd2d import psd2d,plot_psd2d,psd2d_analysis,psd_analysis,plot_rms_power,rms_power
 
 
 from pySurf.points import matrix_to_points2
@@ -281,7 +281,7 @@ class Data2D(object):  #np.ndarrays
         """plot using data2d.plot_data and setting automatically labels and colorscales.
            by default data are filtered at 3 sigma with 2 iterations for visualization.
            Additional arguments are passed to plot."""
-        
+
         nsigma0=1  #default number of stddev for color scale
         #import pdb
         #pdb.set_trace()
@@ -296,7 +296,7 @@ class Data2D(object):  #np.ndarrays
         plt.title(title)
         return res
     plot=update_docstring(plot,plot_data)
-    
+
 
     def load(self,filename,*args,**kwargs):
         """A simple file loader using data_from_txt"""
@@ -375,7 +375,7 @@ class Data2D(object):  #np.ndarrays
         subfix and name are used to control the name of returned object."""
 
         if analysis:
-            f,p=psd2d_analysis(self.data,self.x,self.y,wfun=wfun,units=self.units,*args,**kwargs)
+            f,p=psd_analysis(self.data,self.x,self.y,wfun=wfun,units=self.units,*args,**kwargs)
         else:
             f,p=psd2d(self.data,self.x,self.y,wfun=wfun,norm=1,rmsnorm=rmsnorm)
 
@@ -414,7 +414,7 @@ class Data2D(object):  #np.ndarrays
         """interactively set markers and align self to other.
         Alignment is performed using the transformation returned by
            find_transform(markers1,markers2) after markers are interactively set.
-        Return aligned Data2D object. 
+        Return aligned Data2D object.
         There is an experimental version for dlist in scripts."""
         from pySurf.scripts.dlist import add_markers
         m1,m2=add_markers([self,other])
@@ -458,10 +458,11 @@ class PSD2D(Data2D):
     """It is a type of data 2D with customized behavoiur and additional properties
     and methods."""
     def __init__(self,*args,**kwargs):
+        ''' super is called implicitly
         """needs to be initialized same way as Data2D"""
         #if a surface or a wdata,x,y are passed, these are interpreted as
-        Data2D.__init__(self,*args,**kwargs)
-
+        super().__init__(*args,**kwargs)
+        '''
     def plot(self,*args,**kwargs):
         u=kwargs.pop('units',self.units)
         return plot_psd2d(self.y,self.data,self.x,units=u,*args,**kwargs)

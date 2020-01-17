@@ -47,7 +47,7 @@ import itertools
 class EmptyPlotRangeWarning(EmptyRangeWarning):
     def __init__(self, *args, **kwargs):
         super().__init__( *args, **kwargs)
-        
+
 ## SEMI-OBSOLETE LEVELING WITH 1D AUXILIARY FUNCTIONS
 ## STILL ONLY WAY TO HANDLE GENERIC (non-legendre) leveling by line,
 ##   code needs review for the part where the leveling function needs x,
@@ -991,7 +991,8 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     (used only if stats are plotted).
         (e.g. {'color':'r'}
     Returns axim as returned by plt.imshow.
-    nsigma set colorscale to this multiple of data standard deviation. 
+    nsigma set colorscale to this multiple of data standard deviation.
+    In alternative can be a dictionary containing arguments for remove_outliers. 
     If None (default) range is not changed from matplotlib defaults.
     If dict, a nummber of parameters for can be passed to remove_outliers.remove_outliers to determine color range (data are left intact)."""
 
@@ -1027,18 +1028,18 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
 
     if nsigma is not None:
         with warnings.catch_warnings(record=True) as w:
-        
+
             if isinstance(nsigma,dict): #if more than one option were passed
                 clim=remove_outliers(data,span=True,**nsigma)
             else:
                 clim=remove_outliers(data,span=True,nsigma=nsigma)
-            
+
             #pdb.set_trace()
             if w:
                 if issubclass(w,outliers.EmptyRangeWarning):
                     warnings.warn('Range after filtering was empty, plotting full set of data.',EmptyPlotRangeWarning)
                 clim=span(data,span=True)
-                
+
         plt.clim(*clim)
     #print('clim',clim)
 
