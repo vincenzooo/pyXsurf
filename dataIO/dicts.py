@@ -3,21 +3,6 @@ import warnings
 import inspect
 import os
 
-def make_file_dict(filelist,delimiter='_',index=0):
-    """make dictionary from full path file names
-    grouping filenames in lists with same key.
-    key is obtained by file base name by string.split
-    on delimiter (case insensitive)."""
-
-    filedic={}
-    for d in filelist:
-        k=os.path.basename(d).lower().split(delimiter)[index]
-        try:
-            filedic[k].append(d)
-        except KeyError:
-            filedic[k]=[d]
-
-    return filedic
 
 
 filterByKey2 = lambda data,keys : {key: data[key] for key in keys if key in data}
@@ -146,6 +131,25 @@ def strip_kw(kws,funclist,split=False,**kwargs):
 
     return res
 
+def print_tree(tree, depth = 0):
+    """print dictionary as tree, recursively calling itself,
+    based on http://www.siafoo.net/snippet/91"""
+    if tree == None or len(tree) == 0:
+        #print () #"--" * depth)
+        pass
+    else:
+        for key, val in tree.items():
+            #print ("\t" * depth, key)
+            #printTree(lst_view_path(val), depth+1)    
+            
+            
+            if isinstance(val,dict): #folder:
+                print ("\t" * depth+'|', key.upper(),"----\\")  #print ("\t" * depth, key.upper())
+                print_tree(val, depth+1)    
+            else:  #file:
+                print ("\t" * depth+'|', key,':',val[:6])  #print ("\t" * depth, key,':',val[:6])
+               
+ 
 def test_filterByKey():
 	eegKeys = ["FP3", "FP4"]
 	gyroKeys = ["X", "Y"]
@@ -207,7 +211,7 @@ def test_pop_kw():
     defs={'dog':'barf','sheep':'bee'}
     keys=['cat','sheep']
     print('start -> kwargs = {},\n keylist = {},\n defaults = {}\n'.format(kwargs,keys,defs))
-    res=pop_kw(kwargs,defaults=defs,keys)
+    res=pop_kw(kwargs,defaults=defs,keylist=keys)
     print("\nResult: ",res)
     # {'sheep': 'bee', 'cat': 'miao', 'dog': 'bau'}
     print('end ->\n kwargs = {},\n keylist = {},\n defaults = {}'.format(kwargs,keys,defs))

@@ -391,7 +391,7 @@ def psd_analysis(*args,**kwargs):
     """Refer to `psd2d analysis`. Do and returns the same thing and in addtion plots linear psd (avg of 2d).
     Accept parameters for psd2d_analysis and plot_psd.
     """
-
+    
     f,p2=psd2d_analysis(*args,**strip_kw(kwargs,psd2d_analysis),title="")
     p=projection(p2,axis=1)
     plt.figure()
@@ -400,8 +400,10 @@ def psd_analysis(*args,**kwargs):
     kw = strip_kw(kwargs,plot_psd)
     u = kw['units'] if 'units' in kw else None
     if u is not None:
-        kw ['units'] = u 
-    plot_psd(f,p,**kw)
+        kw ['units'] = [u[0],u[3]] 
+    
+    pdb.set_trace()
+    plot_psd(f,p,units=u,**kw)
 
     #plot_psd(f,p,units=[u[0],u[1]] if u else u, title= t, **kwargs)
     return f,p

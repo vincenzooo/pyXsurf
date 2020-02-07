@@ -1035,10 +1035,11 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
                 clim=remove_outliers(data,span=True,nsigma=nsigma)
 
             #pdb.set_trace()
-            if w:
-                if issubclass(w,outliers.EmptyRangeWarning):
+            if w[0]:
+                #pdb.set_trace()
+                if isinstance(w,outliers.EmptyRangeWarning):
                     warnings.warn('Range after filtering was empty, plotting full set of data.',EmptyPlotRangeWarning)
-                clim=span(data,span=True)
+                clim=span(data)
 
         plt.clim(*clim)
     #print('clim',clim)
