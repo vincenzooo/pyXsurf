@@ -146,13 +146,19 @@ def csvZygo_reader(wfile,intensity=False,header=False,*args,**kwargs):
 
     datasets=[np.array(aa.split(),dtype=int)  for aa in ' '.join(map(str.strip,d)).split('#')[:-1]]
     #here rough test to plot things
-    d1,d2=datasets  #d1 intensity, d2 phase
-    d1,d2=d1.astype(float).reshape(ny,nx),d2.astype(float).reshape(*connected_size[::-1])
+    d1,d2=datasets  #d1 intensity, d2 phase as 1-d arrays
+    
+    d1,d2=d1.astype(float),d2.astype(float)
+    if np.size(d1) > 0: d1 = d1.reshape(ny,nx)
+    if np.size(d2) > 0: d2 = d2.reshape(*connected_size[::-1])
+    
     d1[d1>65535]=np.nan
     d2[d2>=2147483640]=np.nan
     d2=d2*IntfScaleFactor*Obliquity/R*zscale #in um
 
-    dd2=d1*np.nan #d1 is same size as sensor
+    #pdb.set_trace()
+    
+    dd2=np.zeros([ny,nx])*np.nan #d1 is same size as sensor
     dd2[origin[1]:origin[1]+connected_size[1],origin[0]:origin[0]+connected_size[0]]=d2
     d2=dd2
 

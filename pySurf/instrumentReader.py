@@ -145,7 +145,7 @@ def matrixZygo_reader(wfile,*args,**kwargs):
 def matrix_reader(wfile,*args,**kwargs):
     """temporary wrapper for new readers, replace call to matrix4D_reader
     with calls to read_data(wfile,reader=matrix4D_reader)"""
-    from pySurf._instrument_reader import data_from_txt
+    from pySurf.data2D import data_from_txt
     return read_data(wfile,data_from_txt,*args,**kwargs)
 
 def matrix4D_reader(wfile,*args,**kwargs):
