@@ -4,9 +4,6 @@ from dataIO.span import span
 import matplotlib.pyplot as plt
 from pySurf.data2D import projection
 
-
-
-
 def psd2prof(f,p,phase=None,N=None):
     """build a profile from PSD, if phase (in rad) is not passed use random 
     values. A real profile of npoints is assumed. Note that profiles with 
@@ -190,7 +187,8 @@ import pdb
 def plot_psd(f,p,units=None,label=None,span=0,psdrange=None,
     includezerofreq=False,*args,**kwargs):
     """Plot a PSD on logaritmic axis with standard labels.
-    Units are passed in terms of profile units. If span is set, plots psd
+    Units can be passed as profile units (2-el) or x,y,z (3-el, only last two are used). 
+    If span is set, plots psd
     range according to span settings of data2D.projection."""
     #Note: title is not implemented because it can be a suptitle, so it is left to set
     # to caller routine. Take care to manage multiple plotting as list or successive calls.
@@ -208,6 +206,7 @@ def plot_psd(f,p,units=None,label=None,span=0,psdrange=None,
             p=p[1:,...]
             
     if units is None: units=['[X]','[Y]','[Z]']
+    if len(units)==2: units = [None,units[0],units[1]]
     #print ("FIX THIS ROUTINE BEFORE USING IT, see newview_plotter")
     plt.ylabel('axial PSD ('+units[2]+'$^2$ '+units[1]+')')
     plt.xlabel('Freq. ('+units[1]+'$^{-1}$)')

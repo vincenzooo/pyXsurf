@@ -206,7 +206,7 @@ def levellegendre(x,y,deg,nanstrict=False):
     result=y-datarec
     return result #y-datarec
 
-def level_data(data,x=None,y=None,degree=(1,1),byline=False,fit=False,*arg,**kwarg):
+def level_data(data,x=None,y=None,degree=(1,1),axis=None,byline=False,fit=False,*arg,**kwarg):
     """use RA routines to remove degree 2D legendres or levellegendre if leveling by line.
     Degree can be scalar (it is duplicated) or 2-dim vector. must be scalar if leveling by line.
     leveling by line also hondle nans.
@@ -217,14 +217,18 @@ def level_data(data,x=None,y=None,degree=(1,1),byline=False,fit=False,*arg,**kwa
     if x is None:  x = np.arange(data.shape[1])
     if y is None:  y = np.arange(data.shape[0])
     if byline:
+        print ("WARNING: data2D.level_data argument byline was replaced by AXIS, correct your code: replace `byline=True` with `axis=0` (along vertical lines) in calls.")
+        leg = level_data(data,x,y,degree,axis=0,fit=True,*args,**kwargs)
+    elif axis == 0:   #along y (level vertical lines independently. Operations for any value of parameters are performed here.
         if np.size(degree)!=1:
-            raise ValueError("for `byline` leveling degree must be scalar: %s"%degree)
-        leg=fitlegendre(y,data,degree,*arg,**kwarg)  #levellegendre(x, y, deg, nanstrict=False)
-
-        #pdb.set_trace()
-    else:
+            raise ValueError("for line leveling (axis != None) degree must be scalar: %s"%degree)
+        leg=fitlegendre(y,data,degree,*arg,**kwarg)  #levellegendre(x, y, deg, nanstrict=False)    
+    elif axis == 1: #level horizontal lines by double transposition
+        leg = level_data(data.T,y,x,degree,axis=0,fit=True,*args,**kwargs).T
+    elif axis is None: #plane level
         if np.size(degree)==1: degree=np.repeat(degree,2)
         leg=legendre2d(data,degree[0],degree[1],*arg,**kwarg)[0] #legendre2d(d, xo=2, yo=2, xl=None, yl=None)
+    
     return (leg if fit else data-leg),x,y
 
 ## 2D FUNCTIONS
@@ -1027,6 +1031,7 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     #print(kwargs)
 
     if nsigma is not None:
+        #pdb.set_trace()
         with warnings.catch_warnings(record=True) as w:
 
             if isinstance(nsigma,dict): #if more than one option were passed
@@ -1035,7 +1040,7 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
                 clim=remove_outliers(data,span=True,nsigma=nsigma)
 
             #pdb.set_trace()
-            if w[0]:
+            if len(w)>0: #w[0]:
                 #pdb.set_trace()
                 if isinstance(w,outliers.EmptyRangeWarning):
                     warnings.warn('Range after filtering was empty, plotting full set of data.',EmptyPlotRangeWarning)
@@ -1052,8 +1057,11 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     s=ax.get_position().size
     #im_ratio = data.shape[0]/data.shape[1]   #imperfect solution
     im_ratio = s[0]/s[1] # attempt improvement
+    ## im_ratio aggiusta cb a occupare frazione di ?
+    ## ma puo' dare problemi per aree peculiari
     cb = plt.colorbar(axim,fraction=0.046*im_ratio, pad=0.04)
     #cb=plt.colorbar()
+    
     if units[2] is not None:
         cb.ax.set_title(units[2])
         #cb.ax.set_xlabel(units[2],rotation=0)
@@ -1073,6 +1081,7 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
         plt.title(title)
     if outfile is not None:
         plt.savefig(outfile)
+    
     return axim
 
 def xplot_data(data,x,y,title=None,outfile=None,*args,**kwargs):

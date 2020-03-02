@@ -1,4 +1,14 @@
 """
+2020/02/29 sto definendo meglio la struttura.
+_instrument_reader contiene i raw reader, che restituiscono data,x,y come
+letti da file con le informazioni necessarie. Questi hanno argomento header, che permette di restituire l'header.
+
+Le funzioni contenute in questo modo devono permettere di restituire funzioni Reader derivate da raw_reader applicando read_data(che esegue registrazioni e allineamento posteriori ai raw e come preprocessing).
+Una funzione reader Reader fissa alcuni argomenti per un raw reader e/o per read_data (che devono poi essere overridable alla chiamata).
+
+---------------
+
+
 2018/06/05 v3 the most used reading functions are replaced by a wrapper around read_data that provides a temporary interface.
 read_data distributes passed parameters to the reader and to the data registration (data2D.register_data) providing a temporary interface.
 Removed original code for functions.
@@ -140,6 +150,7 @@ def matrixZygo_reader(wfile,*args,**kwargs):
     """temporary wrapper for new readers, replace call to matrixZygo_reader
     with calls to read_data(wfile,reader=csvZygo_reader)"""
     from pySurf._instrument_reader import csvZygo_reader
+    #pdb.set_trace()
     return read_data(wfile,csvZygo_reader,*args,**kwargs)
 
 def matrix_reader(wfile,*args,**kwargs):

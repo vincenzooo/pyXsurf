@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+It is a library of functions for manipulation or related to optics, acting on a couple of lists x and y, of same length, representing a profile. 
+
 Created on Sun Mar 06 16:06:48 2016
 
 @author: Vincenzo Cotroneo

@@ -84,10 +84,61 @@ def datzygo_reader(wfile,header=False,*args,**kwargs):
 
     return data,x,y
 
-def csvZygo_reader(wfile,intensity=False,header=False,*args,**kwargs):
-    """read .csv zygo files.
+def csvZygo_reader(wfile,intensity=False,header=False,xyz=False,*args,**kwargs):
+
+    """read .csv zygo files (and .xyz).
 
     Height map is returned unless intensity is set to True to return Intensity map in same format.
+    Metadata are reaad from header, some can be overridden by
+      arguments in kwargs:
+      
+      ypix defaults to CameraRes
+      ytox defaults to 1. 
+      zscale defaults to WavelengthIn*1000000. #original unit is m, convert to um
+    
+    ### XYZ format:
+    XYZ Data File Connected Phase Data
+    The data in this section is organized by phase origin. Each line contains three pieces of
+    data. The first two columns contain the column (y) and row (x) location of the data,
+    beginning at the phase origin. The third number on the line can be either the character
+    string “No Data” or a floating-point number corresponding to the measurement in
+    microns. To convert these measurements to ‘zygos’, use the following formula. (The
+    names in parenthesis refer to the Binary Data Format field names)
+    The data in the file is in microns. To convert to meters:
+    For Low resolution (0) phase data:
+    Multiply third column data in by:
+     (4096/ (IntfScaleFactor*ObliquityFactor*WavelengthIn*1000000))
+    For High resolution (1) phase data:
+    Multiply third column data by:
+     (32768/ (IntfScaleFactor*ObliquityFactor*WavelengthIn*1000000))
+    The PhaseRes is the first value of the eleventh line of the header. Convert the result to an
+    integer to be stored in the binary file. This will cause round-off error, but amounts to a
+    less than one Angstrom variance from the original data. 
+
+    ### ASCII data format:
+    This section describes the format of a MetroPro ASCII data file. The file is made up of
+    three parts: header, intensity data, and phase data. Each part is followed by a line
+    containing a sharp (#) character. At least one of the data sets must be present. A
+    MetroPro ASCII data file is created by using the dat_to_asc conversion utility. 
+    
+    -----------------
+    
+    ASCII Data File Intensity Data
+    Each data point is an integer. The data is written 10 data points per line in row-major
+    order. Acceptable values are from 0 to the value specified in IntensRange. An invalid
+    point is indicated by a value ≥ 65535. A line containing only a sharp character (#) is
+    output after the data. The number of intensity data points is:
+    IntensWidth * IntensHeight * NBuckets
+    ASCII Data File Connected Phase Data
+    Each data point is an integer. The data is written 10 data points per line in row-major
+    order. Acceptable values are in the range from -2097152 to +2097151. An invalid point
+    is indicated by a value ≥ 2147483640. A line containing only a sharp character (#) is
+    output after the data. The number of connected phase data points is:
+    PhaseWidth * PhaseHeight
+    The phase data points are in internal units representing a scaled number of fringes. To
+    convert a value to waves, multiple by (S * O)/R.
+    Where: S = IntfScaleFactor, O
+    
     """
 
     with open(wfile) as myfile:
@@ -142,9 +193,21 @@ def csvZygo_reader(wfile,intensity=False,header=False,*args,**kwargs):
     #pdb.set_trace()
     ypix=kwargs.pop('ypix',CameraRes)
     ytox=kwargs.pop('ytox',1.)
-    zscale=kwargs.pop('zscale',WavelengthIn*1000000.)#original unit is m, convert to um
+    if xyz:
+        zscale=kwargs.pop('zscale',1.) # assume already in um    
+    else:
+        zscale=kwargs.pop('zscale',WavelengthIn*1000000.)#original unit is m, convert to um
 
-    datasets=[np.array(aa.split(),dtype=int)  for aa in ' '.join(map(str.strip,d)).split('#')[:-1]]
+    #pdb.set_trace()
+    if xyz:
+        tmp = [dd.replace('No Data','nan') for dd in d[:-1]]
+        tmp = np.array([l.split() for l in tmp],dtype='float')
+        from pySurf.points import resample_grid
+        tmp = resample_grid(tmp,matrix=True)
+        datasets=[np.array([]),tmp]
+        #return datasets[-1]
+    else:
+        datasets=[np.array(aa.split(),dtype=int)  for aa in ' '.join(map(str.strip,d)).split('#')[:-1]]
     #here rough test to plot things
     d1,d2=datasets  #d1 intensity, d2 phase as 1-d arrays
     
@@ -153,8 +216,9 @@ def csvZygo_reader(wfile,intensity=False,header=False,*args,**kwargs):
     if np.size(d2) > 0: d2 = d2.reshape(*connected_size[::-1])
     
     d1[d1>65535]=np.nan
-    d2[d2>=2147483640]=np.nan
-    d2=d2*IntfScaleFactor*Obliquity/R*zscale #in um
+    if not xyz:
+        d2[d2>=2147483640]=np.nan
+        d2=d2*IntfScaleFactor*Obliquity/R*zscale #in um
 
     #pdb.set_trace()
     

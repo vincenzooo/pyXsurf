@@ -30,6 +30,9 @@ class Dlist(list):
     def __getattr__(self, name):
         return [getattr(i,name) for i in self]
 
+ 
+
+
 def load_dlist(rfiles,reader=None,*args,**kwargs):
     """Extracted from plot_repeat. Read a set of rfiles to a dlist.
     readers and additional arguments can be passed as scalars or lists.
@@ -52,14 +55,16 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
     """
 
     import pdb
-    #pdb.set_trace()
+    
 
     if reader is None:
         reader=auto_reader(rfiles[0])
+        
     if np.size(reader) ==1:
         reader=[reader]*len(rfiles)
-
+    '''
     if kwargs : #passed explicit parameters for all readers
+        pdb.set_trace()
         kwargs=[kwargs]*len(rfiles)
     else:
         if np.size(args) ==1:
@@ -67,9 +72,22 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
         else:
             if np.size(args) != len(rfiles):
                 raise ValueError
+    '''
 
-    #kwargs here is a list of dictionaries {option:value}, matching the readers
+    if kwargs : #passed explicit parameters for all readers
+        #pdb.set_trace()
+        #vectorize all values
+        for k,v in kwargs.items():
+            if (np.size(v) == 1):
+                kwargs[k]=[v]*len(rfiles)    
+            elif (len(v) != len(rfiles)):
+                kwargs[k]=[v]*len(rfiles)
+    
     #pdb.set_trace()
+    #transform vectorized kwargs in list of kwargs
+    kwargs=[{k:v[i] for k,v in kwargs.items()} for i in np.arange(len(rfiles))]
+    
+    #kwargs here is a list of dictionaries {option:value}, matching the readers
     dlist=[Data2D(file=wf1,reader=r,**k) for wf1,r,k in zip(rfiles,reader,kwargs)]
 
     return dlist
