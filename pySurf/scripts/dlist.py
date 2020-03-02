@@ -29,6 +29,12 @@ class Dlist(list):
     #automatically vectorize all unknown properties
     def __getattr__(self, name):
         return [getattr(i,name) for i in self]
+    
+    
+def topoints(data):
+    """convert a dlist to single set of points containing all data."""
+    plist = [d.level((2,2)).topoints() for d in data]    
+    return np.vstack(plist)
 
  
 
