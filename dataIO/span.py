@@ -88,7 +88,13 @@ def span(array:np.array,
 
 #    index introduced 2018/02/09
 #    axis introduced 2015/12/17"""
-
+    
+    # questo risolve errore se si passa array vuoto.
+    # Ancora, se passata lista [array([]),array]
+    #   da errore poco chiaro (non si dovrebbe fare comunque).
+    if np.size(array)==0:
+        return array
+    
     if index:
         return ispan(array,size=size,axis=axis)
     min=np.nanmin(array,axis=axis)

@@ -730,6 +730,15 @@ def points_find_grid(points,result='shape',sort=None):
     return fastind,tuple(retval)
 
 def rebin_points(tpoints,matrix=False,steps=None,*args,**kwargs):
+    """Use `stats.binned_statistic_2d` to create a new surface from original points
+    divided in bins centered on xy of final points. Points in a bin can be averaged
+    (default) or binned statistics options can be used to obtain result values.
+    
+    It is theoretically the best way to create a surface on a grid with minimal loss of information,
+    however it can be tricky, both for estimating errors (or values on empty bins) and for 
+    transformations (e.g. crop )."""
+    
+    
     x,y,z=list(zip(*tpoints))
     #T=kwargs.pop('transpose',False)
     xr=span(x)
@@ -860,9 +869,10 @@ def extract_profile(points,xy0,xy1=None,npoints=100,along=True):
     Return a couple of vectors x, y, z. The number of points can be set, otherwise is set
     accordingly to the longest profile dimension.
     If along is set (default), a two-dim x-z profile is returned with x distancce
-    along the profile from xy0."""
+    along the profile from xy0.
+    If called without second argument, extract point."""
     if xy1 is None: #extract point
-        return
+        raise NotImplementedError
 
     xx=np.linspace(xy0[0],xy1[0],npoints)
     yy=np.linspace(xy0[1],xy1[1],npoints)
