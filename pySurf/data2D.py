@@ -1326,6 +1326,27 @@ def test_fails_leveling():
     #wdata,x,y=a[0]-legendre2d(a[0],2,1)[0],a[1],a[2]  #simple way to remove plane
     rem4=removelegendre(y,4)  #remove first 4 legendre components
     ldata=level_by_line(wdata,rem4)
+    
+    
+def test_plot_data_aspect():
+    """test for plots with different aspect ratios."""
+    a = np.arange(3000).reshape(60,50)
+    plt.figure('regular, aspect=equal')
+    plot_data(a)
+    plt.figure('regular, aspect=auto')
+    plot_data(a,aspect='auto')    
+    
+    a = np.arange(3000).reshape(6,500)
+    plt.figure('wide, aspect=equal')
+    plot_data(a)
+    plt.figure('wide, aspect=auto')
+    plot_data(a,aspect='auto')
+    
+    a = np.arange(3000).reshape(500,6)
+    plt.figure('tall, aspect=equal')
+    plot_data(a)
+    plt.figure('tall, aspect=auto')
+    plot_data(a,aspect='auto')
 
 
 
