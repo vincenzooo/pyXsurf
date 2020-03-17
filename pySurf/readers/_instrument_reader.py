@@ -315,6 +315,31 @@ def test_zygo_binary (wfile=None):
     plot_data(d1,x1,y1,aspect='equal')
     return (d1,x1,y1)
 
+def test_reader(file,reader,outfolder=None,infolder=None,**kwargs):
+    """called without `raw` flag, return data,x,y. Infolder is taken
+      from file or can be passed (e.g. to point to local test data)."""
+    
+    import os
+    import matplotlib.pyplot as plt
+    from  pySurf.data2D import plot_data
+    
+    if infolder is None:
+        infolder=os.path.dirname(file) 
+    
+    df=os.path.join(infolder,file)
+    res,header=reader(df,**kwargs)
+    print("returned values",[r.shape for r in res],header)
+    
+    plot_data(res[0],res[1],res[2])
+    if outfolder is not None:
+        if outfolder == "" : 
+            display(plt.gcf()) 
+        else: 
+            outname=os.path.join(infolder,outfolder,os.path.basename(df))
+            os.makedirs(os.path.dirname(outname),exist_ok=True)
+            plt.savefig(fn_add_subfix(outname,'','.png'))
+    return res,header
+    
 
 #used by auto_reader to open according to extension
 reader_dic={'.asc':csvZygo_reader,
