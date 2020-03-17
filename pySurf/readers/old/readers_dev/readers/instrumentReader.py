@@ -42,10 +42,10 @@ from utilities.imaging.man import stripnans
 from dataIO.read_pars_from_namelist import read_pars_from_namelist
 import pdb
 
-#from pySurf._instrument_reader import *
-#from pySurf._instrument_reader import read_data
-#from pySurf._instrument_reader import reader_dic 
-#from pySurf._instrument_reader import points_reader
+#from pySurf.readers._instrument_reader import *
+#from pySurf.readers._instrument_reader import read_data
+#from pySurf.readers._instrument_reader import reader_dic 
+#from pySurf.readers._instrument_reader import points_reader
 
 from pySurf.data2D import read_data
 '''

@@ -25,7 +25,7 @@ import os
 import copy as cp
 
 from pySurf.data2D_class import Data2D,PSD2D
-from pySurf.instrumentReader import matrixZygo_reader
+from pySurf.readers.instrumentReader import matrixZygo_reader
 from plotting.backends import maximize
 from plotting.fignumber import fignumber
 #from pySurf.psd2d import rms_power,plot_rms_power

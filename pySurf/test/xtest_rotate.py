@@ -174,7 +174,7 @@ def rot01(img, angle, pivot):
     return imgP[pads[0][0]: -pads[0][1], pads[1][0]: -pads[1][1]] 
 
 
-#from pySurf.instrumentReader import points_reader
+#from pySurf.readers.instrumentReader import points_reader
 
 #infolder=r'test\input_data\profilometer\04_test_directions'
 #infile='07_xysurf_mp_Intensity.txt'

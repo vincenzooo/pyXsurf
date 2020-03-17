@@ -19,7 +19,7 @@ import json
 import pandas as pd
 from plotting.backends import maximize
 from pySurf.data2D_class import Data2D
-from pySurf.instrumentReader import fitsWFS_reader
+from pySurf.readers.instrumentReader import fitsWFS_reader
 from dataIO.fn_add_subfix import fn_add_subfix
 from utilities.imaging import fitting as fit
 from dateutil.parser import parse
@@ -196,7 +196,7 @@ def plot_repeat(rfiles,outfile=None,dis=True,name = "",plot_func=plot_data_repea
 
 
     
-from pySurf._instrument_reader import auto_reader
+from pySurf.readers._instrument_reader import auto_reader
 
     
 def dcouples_plot(dlist,level=True,dis=False):

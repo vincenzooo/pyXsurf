@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-from pySurf._instrument_reader import auto_reader
+from pySurf.readers._instrument_reader import auto_reader
 from pySurf.data2D import plot_data,get_data, level_data, save_data, rotate_data, remove_nan_frame, resample_data
 from pySurf.data2D import read_data,sum_data, subtract_data, projection, crop_data, transpose_data, apply_transform, register_data
 from plotting.multiplots import find_grid_size, compare_images
