@@ -27,9 +27,26 @@ class Dlist(list):
     """A list of pySurf.Data2D objects on which unknown operations are performed serially."""
 
     #automatically vectorize all unknown properties
-    def __getattr__(self, name):
-        return [getattr(i,name) for i in self]
+#    def __getattr__(self, name):
+#        return [getattr(i,name) for i in self]
     
+    def __getattr__(self,name):  #originariamente usava __getattribute__, che riceve attributo
+        # prima di chiamarlo (quindi anche se gia' esistente).
+        attr = object.__getattr__(self, name)
+        if hasattr(attr, '__call__'):
+            def newfunc(*args, **kwargs):
+                print('before calling %s' %attr.__name__)
+                result = attr(*args, **kwargs)
+                print('done calling %s' %attr.__name__)
+                return result
+            return newfunc
+        else:
+            return attr
+        
+    def topoints(self):
+        """convert a dlist to single set of points containing all data."""
+        plist = [d.level((2,2)).topoints() for d in data]    
+        return np.vstack(plist)   
     
 def topoints(data):
     """convert a dlist to single set of points containing all data."""
