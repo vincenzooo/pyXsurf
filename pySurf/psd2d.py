@@ -469,7 +469,7 @@ def avgpsd(fitsfile,correct=False,reader=None,level=None,nsigma=3,rotate=False,*
     includes reading and outliers removal.
     Reader is a function of fitsfile that returns x,y,data."""
     if reader is None:  #I don't care it's not pythonic, simplest way to avoid circular imports.
-        from .instrumentReader import getdata
+        from pySurf.readers.instrumentReader import getdata
         reader=getdata
 
     x,y,data=reader(fitsfile) #x and y in mm, data in um

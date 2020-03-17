@@ -1,6 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from pySurf.instrumentReader import matrixZygo_reader
+from pySurf.readers.instrumentReader import matrixZygo_reader
 from pySurf.data2D import plot_data,removelegendre,level_by_line,projection
 from pySurf.data2D import levellegendre,save_data,get_data
 from pySurf.psd2d import psd2d_analysis,rms_power

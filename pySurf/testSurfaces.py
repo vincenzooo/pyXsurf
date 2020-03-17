@@ -1,4 +1,5 @@
-"""Artificially generated test surfaces."""
+"""Artificially generated test surfaces.
+Can be incorporated in readers."""
 
 import numpy as np
 import matplotlib.pyplot as plt

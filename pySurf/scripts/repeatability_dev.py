@@ -19,7 +19,7 @@ import json
 import pandas as pd
 from plotting.backends import maximize
 from pySurf.data2D_class import Data2D
-from pySurf.instrumentReader import fitsWFS_reader,matrix4D_reader
+from pySurf.readers.instrumentReader import fitsWFS_reader,matrix4D_reader
 from dataIO.fn_add_subfix import fn_add_subfix
 """2019/04/08 from meassy script/repeatability, function that need to be sorted and moved to repeatability. When a function is needed by e.g. a notebook, move it from repeatability_dev to repeatability."""
 

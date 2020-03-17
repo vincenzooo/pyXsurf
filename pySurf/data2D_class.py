@@ -79,9 +79,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-#from pySurf._instrument_reader import read_data, csvZygo_reader,csv4D_reader,sur_reader,auto_reader
+#from pySurf.readers._instrument_reader import read_data, csvZygo_reader,csv4D_reader,sur_reader,auto_reader
 
-from pySurf._instrument_reader import auto_reader
+from pySurf.readers._instrument_reader import auto_reader
 from pySurf.data2D import plot_data,get_data, level_data, save_data, rotate_data, resample_data
 from pySurf.data2D import read_data,sum_data, subtract_data, projection, crop_data, transpose_data
 from pySurf.data2D import slope_2D, register_data, data_from_txt, data_histostats
@@ -174,7 +174,7 @@ class Data2D(object):  #np.ndarrays
     def __init__(self,data=None,x=None,y=None,file=None,reader=None,units=None,name=None,*args,**kwargs):
         """can be initialized with data; data,x,y; file; file, x, y.
         if x and y are provided, they override x and y if matching number of elements, or used as range if two element."""
-        #from pySurf.instrumentReader import reader_dic
+        #from pySurf.readers.instrumentReader import reader_dic
         import pdb
         #pdb.set_trace()
 
@@ -512,7 +512,7 @@ def test_rot90():
 def test_class_init():
     """test init and plot"""
     from pathlib import PureWindowsPath
-    from pySurf.instrumentReader import matrixZygo_reader
+    from pySurf.readers.instrumentReader import matrixZygo_reader
     from dataIO.fn_add_subfix import fn_add_subfix
     relpath=PureWindowsPath(r'test\input_data\zygo_data\171212_PCO2_Zygo_data.asc')
     outpath=PureWindowsPath(r'test\results\data2D_class')
