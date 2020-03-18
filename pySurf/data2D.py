@@ -1320,7 +1320,7 @@ def test_remove_nan_frame():
 
 def test_fails_leveling():
     """reproduce warning about fit"""
-    from pySurf.instrumentReader import matrixZygo_reader
+    from readers.instrumentReader import matrixZygo_reader
     f='G:\\My Drive\\Shared by Vincenzo\\Slumping\\Coating Metrology\\newview\\20180330_slumped\\07_PCO1.3S04.asc'
     wdata,x,y=matrixZygo_reader(f,scale=(1000.,1000,1.),center=(0,0))
     #wdata,x,y=a[0]-legendre2d(a[0],2,1)[0],a[1],a[2]  #simple way to remove plane

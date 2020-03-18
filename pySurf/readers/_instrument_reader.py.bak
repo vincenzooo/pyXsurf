@@ -215,15 +215,6 @@ def csvZygo_reader(wfile,intensity=False,header=False,xyz=False,*args,**kwargs):
     if np.size(d1) > 0: d1 = d1.reshape(ny,nx)
     if np.size(d2) > 0: d2 = d2.reshape(*connected_size[::-1])
     
-'''    
-	datasets=[np.array(aa.split(),dtype=int)  for aa in ' '.join(map(str.strip,d)).split('#')[:-1]]
-    #here rough test to plot things
-    d1,d2=datasets  #d1 intensity, d2 phase
-    d1,d2=d1.astype(float).reshape(ny,nx),d2.astype(float).reshape(*connected_size[::-1])
-    d1[d1>65535]=np.nan
-    d2[d2>=2147483640]=np.nan
-    d2=d2*IntfScaleFactor*Obliquity/R*zscale #in um
-'''
     d1[d1>65535]=np.nan
     if not xyz:
         d2[d2>=2147483640]=np.nan
