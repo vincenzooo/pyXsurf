@@ -597,7 +597,7 @@ def get_data(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,addaxis
 
 def data_from_txt(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,addaxis=False,center=None,skip_header=None,delimiter=' ',strip=False):
     """read matrix from text file. Return data,x,y
-    This shouldn't be used, there are smarter ways of doing it using read_data and readers,
+    This shouldn't be called directly, there are smarter ways of doing it using read_data and readers,
       however, this is a quick way to get data from text if you don't know what I am talking about.
 
     center: is the position of the center of the image in final coordinates (changed on 2016/08/10, it was '(before any scaling or rotation) in absolute coordinates.') If None coordinates are left unchanged.

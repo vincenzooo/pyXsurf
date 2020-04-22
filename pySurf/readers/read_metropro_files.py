@@ -2033,6 +2033,8 @@ class BinaryReader:
 # TODO: Add options for reading virgo maps, and .xyz zygo
     # maps (need .xys file for this). Binary ligo-maps?
     # The intensity data is not used to anything here. Remove
+    
+    
     # or add to pykat?
     
     

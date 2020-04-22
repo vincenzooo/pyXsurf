@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib.pyplot as plt
+import os
 import pdb
 
 def fread(fid, nelements, dtype):
@@ -172,11 +174,12 @@ def readsur(filepath,raw=False):
 if __name__=="__main__":
     
     from pySurf.data2D import plot_data
-    
-    df=r'test\input_data\profilometer\04_test_directions\05_xysurf_pp_Height.sur'
+    from test_readers import testfolder
+    df=os.path.join(testfolder,r'input_data\profilometer\04_test_directions\05_xysurf_pp_Height.sur')
     res=readsur(df)
     plt.figure()
     plot_data(res.points,res.xAxis,res.yAxis)
+    plt.show()
     
     
     
