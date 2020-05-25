@@ -12,7 +12,7 @@
      
 2018/09/26 New refactoring of data reader. Vincenzo Cotroneo vcotroneo@cfa.harvard.edu"""
 
-
+import numpy as np
 from matplotlib import pyplot as plt
 import os
 from astropy.io import fits
@@ -26,7 +26,7 @@ from pySurf.readers.read_metropro_files import readMetroProData
 #from utilities.imaging.man import stripnans
 
 
-from test_readers import testfolder
+from .test_readers import testfolder
 
 import pdb
 
@@ -242,7 +242,7 @@ def fits_reader(fitsfile,header=False):
 
     return data,x,y
 
-from read_sur_files import readsur
+from .read_sur_files import readsur
 
 
 def read_sur(file,header=False):

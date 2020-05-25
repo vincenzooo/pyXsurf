@@ -7,6 +7,7 @@
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+import pdb
 
 
 from pySurf.readers._instrument_reader import auto_reader
@@ -23,6 +24,59 @@ from pySurf.data2D import projection
 from pySurf.data2D_class import Data2D
 from pySurf.affine2D import find_rototrans,find_affine
 
+class superlist(list):
+    """Test class that vectorizes methods."""
+    
+    def __getattr__(self,name):  #originariamente usava __getattribute__, che riceve attributo
+        # prima di chiamarlo (quindi anche se gia' esistente).
+        #attr = [obj.__getattr__(self, name) for obj in self] #questo non funziona
+        attr = [object.__getattribute__(name) for object in self]
+        
+        """
+        if hasattr(attr[0], '__call__'):
+            attr=attr[0]
+            def newfunc(*args, **kwargs):
+                #pdb.set_trace()
+                print('before calling %s' %attr.__name__)
+                result = attr(*args, **kwargs)
+                print('done calling %s' %attr.__name__)
+                return result
+            return newfunc
+        else:
+            return [a for a in attr]
+        """
+        
+        result = []
+        for a in attr:
+            #print('loop ',a)
+            #pdb.set_trace()
+            if hasattr(a, '__call__'):
+                result=np.vectorize(a)
+                """
+                def newfunc(*args, **kwargs):
+                    #pdb.set_trace()
+                    print('before calling %s' %a.__name__)
+                    result = a(*args, **kwargs)
+                    print('done calling %s' %a.__name__)
+                    return result
+                result.append(newfunc)
+                """
+            else:
+                result.append(a)
+
+        return result  #it works as a property. As method, this returns a list of methods, but since the method is called as sl.method(),
+        #gives an error as it tries to call the list.
+        # deve ritornare una funzione che ritorna una lista.
+        
+def test_superlist():
+    s = superlist([np.arange(4),np.arange(3)])
+    print('original data:')
+    print(s)
+    print('\ntest property (np.shape):')
+    print(s.shape)
+    print('\ntest method (np.flatten):')
+    print(s.flatten())
+
 class Dlist(list):
     """A list of pySurf.Data2D objects on which unknown operations are performed serially."""
 
@@ -32,9 +86,12 @@ class Dlist(list):
     
     def __getattr__(self,name):  #originariamente usava __getattribute__, che riceve attributo
         # prima di chiamarlo (quindi anche se gia' esistente).
-        attr = object.__getattr__(self, name)
-        if hasattr(attr, '__call__'):
+        #attr = object.__getattr__(self, name) #questo non funziona
+        attr = [object.__getattribute__(name) for object in self]
+        
+        if hasattr(attr[0], '__call__'):
             def newfunc(*args, **kwargs):
+                pdb.set_trace()
                 print('before calling %s' %attr.__name__)
                 result = attr(*args, **kwargs)
                 print('done calling %s' %attr.__name__)
@@ -48,9 +105,12 @@ class Dlist(list):
         plist = [d.level((2,2)).topoints() for d in data]    
         return np.vstack(plist)   
     
-def topoints(data):
-    """convert a dlist to single set of points containing all data."""
-    plist = [d.level((2,2)).topoints() for d in data]    
+def topoints(data,level=None):
+    """convert a dlist to single set of points containing all data.
+    if level is passed, points are leveled and the value is passed as argument (e.g. level=(2,2) levels sag along two axis)."""
+    if level is not None:
+        plist = [d.level((2,2)) for d in data] 
+    plist = [d.topoints() for d in data]    
     return np.vstack(plist)
 
  

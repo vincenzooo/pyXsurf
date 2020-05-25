@@ -30,9 +30,9 @@ from pySurf.affine2D import find_affine, find_rototrans
 from plotting.multiplots import find_grid_size, subplot_grid
 import itertools
 
-from pySurf.data2D_class import align_interactive
+#from pySurf.data2D_class import align_interactive
 from plotting.multiplots import commonscale
-from config.interface import conf_from_json
+#from config.interface import conf_from_json
 
 """2019/04/08 from messy script/repeatability, here sorted function that have been used. When a function is needed by e.g. a notebook, move it here from repeatability_dev.
 
