@@ -463,6 +463,8 @@ class PSD2D(Data2D):
         #if a surface or a wdata,x,y are passed, these are interpreted as
         super().__init__(*args,**kwargs)
         '''
+        super().__init__(*args,**kwargs)
+                
     def plot(self,*args,**kwargs):
         u=kwargs.pop('units',self.units)
         return plot_psd2d(self.y,self.data,self.x,units=u,*args,**kwargs)
