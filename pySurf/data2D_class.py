@@ -81,7 +81,7 @@ import numpy as np
 
 #from pySurf.readers._instrument_reader import read_data, csvZygo_reader,csv4D_reader,sur_reader,auto_reader
 
-from pySurf.readers._instrument_reader import auto_reader
+from pySurf.readers.format_reader import auto_reader
 from pySurf.data2D import plot_data,get_data, level_data, save_data, rotate_data, resample_data
 from pySurf.data2D import read_data,sum_data, subtract_data, projection, crop_data, transpose_data
 from pySurf.data2D import slope_2D, register_data, data_from_txt, data_histostats
