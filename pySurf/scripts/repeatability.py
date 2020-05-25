@@ -196,7 +196,7 @@ def plot_repeat(rfiles,outfile=None,dis=True,name = "",plot_func=plot_data_repea
 
 
     
-from pySurf.readers._instrument_reader import auto_reader
+from pySurf.readers.format_reader import auto_reader
 
     
 def dcouples_plot(dlist,level=True,dis=False):

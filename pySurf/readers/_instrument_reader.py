@@ -8,7 +8,7 @@ experimental instrument reader module to provide common interface to several ins
     2018/09/26 note that these routines shouldn't take *args,**kwargs arguments, unless they need to pass it to another
         function or want to be forgiving of wrong argument passed to them."""
 
-from dataIO.read_pars_from_namelist import read_pars_from_namelist
+
 import numpy as np
 import os
 
@@ -29,49 +29,6 @@ def fits_reader(wfile,ypix=1.,ytox=1.,header=False):
     #data.header=head
     return data,x,y
 '''
-
-def csv4D_reader(wfile,ypix=None,ytox=None,header=False,delimiter=',',endline=True,skip_header=12,*args,**kwargs):
-    """read csv data in 4sight 4D format.
-    12 lines header with info in namelist format, uses `xpix`, `aspect` and `wavelength` if available.
-    Note that standard csv format ends line with `,` which adds an extra column.
-    This is automatically removed if `endline` is set to True."""
-
-    head=read_pars_from_namelist(wfile,': ') #this returns a dictionary, order is lost if header is returned.
-    if header:
-        return '\n'.join([": ".join((k,v)) for (k,v) in head.items()])+'\n'
-
-    if ypix == None:
-        try:
-            ypix=np.float(head['xpix'])
-        except KeyError:
-            ypix=1.
-
-    if ytox == None:
-        try:
-            ytox=np.float(head['aspect'])
-        except KeyError:
-            ytox=1.
-
-    try:
-        zscale=np.float(head['wavelength'])
-    except KeyError:
-        zscale=1.
-    from pySurf.data2D import data_from_txt
-    #data=np.genfromtxt(wfile,delimiter=delimiter,skip_header=12)
-    data=data_from_txt(wfile,delimiter=delimiter,skip_header=skip_header)[0]
-
-    #this defines the position of row/columns, starting from
-    # commented 2018/08/28 x and y read directly
-    if endline:
-        data=data[:,:-1]
-    ny,nx=data.shape
-    x=np.arange(nx)*ypix*ytox*nx/(nx-1)
-    y=np.arange(ny)*ypix*ny/(ny-1)
-    data=data*zscale
-    #data.header=head
-
-
-    return data,x,y
 
 def test_zygo(wfile=None):
     import os
@@ -108,25 +65,5 @@ def test_zygo_binary (wfile=None):
     plt.title('map')
     plot_data(d1,x1,y1,aspect='equal')
     return (d1,x1,y1)
-
-#used by auto_reader to open according to extension
-reader_dic={#'.asc':csvZygo_reader,
-            '.csv':csv4D_reader} #,
-            #'.fits':fitsWFS_reader,
-            #'.txt':points_reader,
-            #'.sur':sur_reader,
-            #'.dat':datzygo_reader}
-
-def auto_reader(wfile):
-    """guess a reader for wfile. Return reader routine."""
-    ext=os.path.splitext(wfile)[-1]
-    try:
-        reader=reader_dic[ext]
-    except KeyError:
-        print ('fileformat ``%s``not recognized for file %s'%(ext,file))
-        print ('Use generic text reader')
-        reader=points_reader  #generic test reader, replace with asciitables
-
-    return reader
 
 

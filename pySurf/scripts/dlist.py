@@ -10,7 +10,7 @@ import numpy as np
 import pdb
 
 
-from pySurf.readers._instrument_reader import auto_reader
+from pySurf.readers.format_reader import auto_reader
 from pySurf.data2D import plot_data,get_data, level_data, save_data, rotate_data, remove_nan_frame, resample_data
 from pySurf.data2D import read_data,sum_data, subtract_data, projection, crop_data, transpose_data, apply_transform, register_data
 from plotting.multiplots import find_grid_size, compare_images
@@ -24,58 +24,6 @@ from pySurf.data2D import projection
 from pySurf.data2D_class import Data2D
 from pySurf.affine2D import find_rototrans,find_affine
 
-class superlist(list):
-    """Test class that vectorizes methods."""
-    
-    def __getattr__(self,name):  #originariamente usava __getattribute__, che riceve attributo
-        # prima di chiamarlo (quindi anche se gia' esistente).
-        #attr = [obj.__getattr__(self, name) for obj in self] #questo non funziona
-        attr = [object.__getattribute__(name) for object in self]
-        
-        """
-        if hasattr(attr[0], '__call__'):
-            attr=attr[0]
-            def newfunc(*args, **kwargs):
-                #pdb.set_trace()
-                print('before calling %s' %attr.__name__)
-                result = attr(*args, **kwargs)
-                print('done calling %s' %attr.__name__)
-                return result
-            return newfunc
-        else:
-            return [a for a in attr]
-        """
-        
-        result = []
-        for a in attr:
-            #print('loop ',a)
-            #pdb.set_trace()
-            if hasattr(a, '__call__'):
-                result=np.vectorize(a)
-                """
-                def newfunc(*args, **kwargs):
-                    #pdb.set_trace()
-                    print('before calling %s' %a.__name__)
-                    result = a(*args, **kwargs)
-                    print('done calling %s' %a.__name__)
-                    return result
-                result.append(newfunc)
-                """
-            else:
-                result.append(a)
-
-        return result  #it works as a property. As method, this returns a list of methods, but since the method is called as sl.method(),
-        #gives an error as it tries to call the list.
-        # deve ritornare una funzione che ritorna una lista.
-        
-def test_superlist():
-    s = superlist([np.arange(4),np.arange(3)])
-    print('original data:')
-    print(s)
-    print('\ntest property (np.shape):')
-    print(s.shape)
-    print('\ntest method (np.flatten):')
-    print(s.flatten())
 
 class Dlist(list):
     """A list of pySurf.Data2D objects on which unknown operations are performed serially."""
@@ -89,7 +37,7 @@ class Dlist(list):
         #attr = object.__getattr__(self, name) #questo non funziona
         attr = [object.__getattribute__(name) for object in self]
         
-        if hasattr(attr[0], '__call__'):
+        if hasattr(attr, '__call__'):
             def newfunc(*args, **kwargs):
                 pdb.set_trace()
                 print('before calling %s' %attr.__name__)
