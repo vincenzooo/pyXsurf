@@ -206,7 +206,7 @@ def levellegendre(x,y,deg,nanstrict=False):
     result=y-datarec
     return result #y-datarec
 
-def level_data(data,x=None,y=None,degree=(1,1),axis=None,byline=False,fit=False,*arg,**kwarg):
+def level_data(data,x=None,y=None,degree=(1,1),axis=None,byline=False,fit=False,*args,**kwargs):
     """use RA routines to remove degree 2D legendres or levellegendre if leveling by line.
     Degree can be scalar (it is duplicated) or 2-dim vector. must be scalar if leveling by line.
     leveling by line also hondle nans.
@@ -216,20 +216,22 @@ def level_data(data,x=None,y=None,degree=(1,1),axis=None,byline=False,fit=False,
 
     if x is None:  x = np.arange(data.shape[1])
     if y is None:  y = np.arange(data.shape[0])
+    #note that x and y are not changed by leveling operations. These are performed on 2d array.
     if byline:
         print ("WARNING: data2D.level_data argument byline was replaced by AXIS, correct your code: replace `byline=True` with `axis=0` (along vertical lines) in calls.")
         leg = level_data(data,x,y,degree,axis=0,fit=True,*args,**kwargs)
     elif axis == 0:   #along y (level vertical lines independently. Operations for any value of parameters are performed here.
         if np.size(degree)!=1:
             raise ValueError("for line leveling (axis != None) degree must be scalar: %s"%degree)
-        leg=fitlegendre(y,data,degree,*arg,**kwarg)  #levellegendre(x, y, deg, nanstrict=False)    
+        leg=fitlegendre(y,data,degree,*args,**kwargs)  #levellegendre(x, y, deg, nanstrict=False)    
     elif axis == 1: #level horizontal lines by double transposition
-        leg = level_data(data.T,y,x,degree,axis=0,fit=True,*args,**kwargs).T
+        leg = level_data(data.T,y,x,degree,axis=0,fit=True,*args,**kwargs)[0].T
     elif axis is None: #plane level
         if np.size(degree)==1: degree=np.repeat(degree,2)
-        leg=legendre2d(data,degree[0],degree[1],*arg,**kwarg)[0] #legendre2d(d, xo=2, yo=2, xl=None, yl=None)
+        leg=legendre2d(data,degree[0],degree[1],*args,**kwargs)[0] #legendre2d(d, xo=2, yo=2, xl=None, yl=None)
     
-    return (leg if fit else data-leg),x,y
+    return (leg if fit else data-leg),x,y #fails with byline 
+    #return (leg[0] if fit else data-leg[0]),x,y
 
 ## 2D FUNCTIONS
 
@@ -1303,6 +1305,67 @@ def leveldata(*args,**kwargs):
 
 ##TEST FUNCTIONS
 
+def load_test_data():
+    """load a standard Zygo file for tests."""
+    
+    from pathlib import PureWindowsPath,Path
+    from pySurf.readers.instrumentReader import matrixZygo_reader
+    
+    relpath=PureWindowsPath(r'test\input_data\zygo_data\171212_PCO2_Zygo_data.asc')
+    wfile= Path(os.path.dirname(__file__)) / relpath
+    (d1,x1,y1)=matrixZygo_reader(wfile,ytox=220/1000.,center=(0,0))
+    
+    return d1,x1,y1
+
+def test_leveling(d=None):
+    """plot a set of images, representative of data leveled with different combinations of parameters.
+    d is Data2D object.
+    """
+    from IPython import get_ipython
+    from IPython.display import display
+    #from pySurf.data2D import load_test_data,plot_data
+    
+    #get_ipython().run_line_magic('matplotlib', 'inline')
+    
+    if d is None:
+        data,x,y = load_test_data()
+    else:
+        data,x,y = d
+        
+    #from pySurf.data2D import level_data,plot_data
+    plt.close('all')
+    plt.figure()
+    plot_data(*level_data(data,x,y,5),stats=True,title='level, 5 degree scalar arg.') #,byline=True
+    display(plt.gcf())
+    plt.clf()
+    plot_data(*level_data(data,x,y,(5,5)),stats=True,title='level, (5,5) degree scalar arg.') #,byline=True
+    display(plt.gcf())
+    plt.clf()
+    plot_data(*level_data(data,x,y,(0,5)),stats=True,title='level, (0,5) degree arg.')
+    display(plt.gcf())
+    plt.clf()
+    plot_data(*level_data(data,x,y,5,axis=0),stats=True,title='level, 5 degree arg., axis=0')
+    display(plt.gcf())
+    plt.clf()
+    plot_data(*level_data(data,x,y,5,axis=1),stats=True,title='level, 5 degree arg., axis=1')
+
+    display(plt.gcf())
+    plt.clf()
+    plot_data(*level_data(data,x,y,5,fit=True),stats=True,title='fit, 5 degree scalar arg.')
+    display(plt.gcf())
+    plt.clf()
+    plot_data(*level_data(data,x,y,(5,5),fit=True),stats=True,title='fit, (5,5) degree scalar arg.')
+    display(plt.gcf())
+    plt.clf()
+    plot_data(*level_data(data,x,y,(0,5),fit=True),stats=True,title='fit, (0,5) degree arg.')
+    display(plt.gcf())
+    plt.clf()
+    plot_data(*level_data(data,x,y,5,axis=0,fit=True),stats=True,title='fit, 5 degree arg., axis=0')
+    display(plt.gcf())
+    plt.clf()
+    plot_data(*level_data(data,x,y,5,axis=1,fit=True),stats=True,title='fit, 5 degree arg., axis=1')
+    display(plt.gcf())
+    
 def test_remove_nan_frame():
     a=np.arange(12).reshape(3,4).astype(float)
     a[0,:]=np.nan
@@ -1310,13 +1373,10 @@ def test_remove_nan_frame():
     y=np.arange(3)
     from pySurf.data2D import remove_nan_frame
     print('initial:\n',a,x,y)
-
     print("result:\n",remove_nan_frame(a,x,y))
     print("final values (array is nont modified):\n",a,x,y)
     print('Returns values.')
     return a,x,y
-
-
 
 def test_fails_leveling():
     """reproduce warning about fit"""

@@ -33,7 +33,7 @@ testfolder = r'..\test'
 #testfolder os.path.dirname(__file__) #to set it as relative to this file path.
 
 import os
-from format_reader import read_sur
+#from format_reader import read_sur
 import numpy as np
 import matplotlib.pyplot as plt
 from pySurf.data2D import plot_data
@@ -84,7 +84,7 @@ if __name__=='__main__':
         Zygo cannot be called directly with intensity keyword set to True without making a specific case from the other readers,
         while this can be done using read_data. """
 
-    from test_readers import testfolder
+    #from test_readers import testfolder
     from pySurf.data2D import plot_data, read_data
     
     tests=[[sur_reader,

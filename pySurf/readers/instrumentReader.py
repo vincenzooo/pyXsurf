@@ -1,6 +1,7 @@
 """
-2020/03/17 
+2020/05/13 change import calls to use pySurf.readers.format_reader instead of _instrument_reader
 
+2020/03/17 
 
 2020/02/29 sto definendo meglio la struttura.
 _instrument_reader contiene i raw reader, che restituiscono data,x,y come
@@ -152,7 +153,7 @@ def xread_data(file,reader,register=True,*args,**kwargs):
 def matrixZygo_reader(wfile,*args,**kwargs):
     """temporary wrapper for new readers, replace call to matrixZygo_reader
     with calls to read_data(wfile,reader=csvZygo_reader)"""
-    from pySurf.readers._instrument_reader import csvZygo_reader
+    from pySurf.readers.format_reader import csvZygo_reader
     #pdb.set_trace()
     return read_data(wfile,csvZygo_reader,*args,**kwargs)
 
@@ -165,7 +166,7 @@ def matrix_reader(wfile,*args,**kwargs):
 def matrix4D_reader(wfile,*args,**kwargs):
     """temporary wrapper for new readers, replace call to matrix4D_reader
     with calls to read_data(wfile,reader=matrix4D_reader)"""
-    from pySurf.readers._instrument_reader import csv4D_reader
+    from pySurf.readers.format_reader import csv4D_reader
 
     #import pdb
     #pdb.set_trace()
@@ -175,24 +176,24 @@ def matrix4D_reader(wfile,*args,**kwargs):
 def matrixsur_reader(wfile,*args,**kwargs):
     """temporary wrapper for new readers, replace call to matrixsur_reader
     with calls to read_data(wfile,reader=sur_reader)"""
-    from pySurf.readers._instrument_reader import sur_reader
+    from pySurf.readers.format_reader import sur_reader
     return read_data(wfile,sur_reader,*args,**kwargs)
 
 def matrixdat_reader(wfile,*args,**kwargs):
     """temporary wrapper for zygo metropro .dat binary files"""
-    from pySurf.readers._instrument_reader import datzygo_reader
+    from pySurf.readers.format_reader import datzygo_reader
     return read_data(wfile,datzygo_reader,*args,**kwargs)
 
 def fits_reader(wfile,*args,**kwargs):
     """temporary wrapper for new readers, replace call to fits_reader
     with calls to read_data(wfile,reader=fits_reader)"""
-    from pySurf.readers._instrument_reader import fits_reader
+    from pySurf.readers.format_reader import fits_reader
     return read_data(wfile,fits_reader,*args,**kwargs)
 
 def points_reader(wfile,*args,**kwargs):
     """temporary wrapper for points readers, read and register
     points and convert to 2D data"""
-    from pySurf.readers._instrument_reader import points_reader
+    from pySurf.readers.format_reader import points_reader
     return read_data(wfile,points_reader,*args,**kwargs)
 
 ### UNWRAPPED FUNCTIONS:
@@ -349,7 +350,7 @@ def test_datzygo_reader (wfile=None):
     import os
     import matplotlib.pyplot as plt
     from  pySurf.data2D import plot_data
-    from pySurf.readers._instrument_reader import datzygo_reader
+    from pySurf.readers.format_reader import datzygo_reader
 
     if wfile is  None:
         #relpath

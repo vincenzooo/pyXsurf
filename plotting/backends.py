@@ -1,6 +1,17 @@
 import matplotlib
 import matplotlib.pyplot as plt
 
+
+
+def demo_display(testfunc):
+    """A wrapper function that makes the wrapped function work independently on environment (Ipython, Jupyter notebook, or shell). Use as a decorator on test functions to generate an output appropriate for the situation."""
+    
+    pass
+
+def test_demo_display():
+    pass
+
+
 def maximize(backend=None,fullscreen=False,verbose=False):
     """Maximize window independently on backend.
     

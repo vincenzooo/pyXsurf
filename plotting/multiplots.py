@@ -5,6 +5,7 @@ from dataIO.span import span
 from plotting.fignumber import fignumber
 from plotting.add_clickable_markers import add_clickable_markers2
 from pySurf.data2D import plot_data
+import pdb
 
 
 def smartcb(ax=None):
@@ -185,7 +186,19 @@ def xfind_grid_size(number, smax=0):
 
 
 def subplot_grid(number,size=0,smax=0,*args,**kwargs):
-    """return a generator that plots n plots. It has advantage wrt plt.subplots of 
+    
+    """
+    Create a set of n=`number` subplots in a figure, automatically 
+    chosing the shape of the grid. Returns figure and list of axis.
+    Note that empty subplots (e.g. the 9th in a grid of 3x3 subplots when `number=8`) are not created.
+    
+    size: if this is provided, is used as size of the subplot grid. 
+    smax: used in `find_grid_size` to limit the extension along axis for the subplot grid. See `find_grid_size` help.
+    num: if integer is passed, plot on the corresponding figure. if None is passed, create a new one. TBD: pass a figure obj.
+    
+    
+    2020/05/14 fixed bug on subplots removal, updated doc from:
+    return a generator that plots n plots. It has advantage wrt plt.subplots of 
     not creating empty axes. The idea of making a generator is weird.
     modified to fig,axes as equivalent to plt.subplots 2018/09/06.
     Usage:
@@ -221,10 +234,14 @@ def subplot_grid(number,size=0,smax=0,*args,**kwargs):
     #equivalent one-liner:
     #axes = [plt.subplot(gridsize[0], gridsize[1], i+1,*args,**kwargs) for i in range(number)]
     """    
+    num = kwargs.get('num',plt.gcf().number)
+    fig,axes=plt.subplots(*gridsize,num=num,*args,**kwargs)
+    #pdb.set_trace()
+    axes=axes.flatten().tolist()
     
-    fig,axes=plt.subplots(*gridsize,*args,**kwargs)
-    axes=axes.flatten()
-    for a in axes[np.arange(len(axes))>5]: a.remove()
+    for i in np.arange(number,len(axes)): #a in axes[(np.arange(len(axes))+1)>number]: 
+        a=axes.pop(i)
+        a.remove()
     
     return fig,axes
 
@@ -654,23 +671,32 @@ def test_associate_zoom():
 
 def test_subplot_grid():
     """test/example for subplot_grid"""
-
+    
+    plt.ion()
+    
     #from plotting.multiplots import subplot_grid
     x=np.array([1,2,3])
     plt.figure(1)
     plt.clf()
-    for i,a in enumerate(subplot_grid(3)):
+    plt.suptitle('subplot_grid(3)')
+    for i,a in enumerate(subplot_grid(3)[1]):
+        a.set_title('x**%i'%i)
         a.plot(x, x**i)
+    plt.tight_layout()
 
     plt.figure(2)
     plt.clf()
-    for i,a in enumerate(subplot_grid(3)):
+    for i,a in enumerate(subplot_grid(3)[1]):
         plt.plot(x,x**i)
 
     plt.figure(3)
     plt.clf()
-    axes=[a.plot(x,x**i) for i,a in enumerate(subplot_grid(3))]
+    axes=[a.plot(x,x**i) for i,a in enumerate(subplot_grid(3)[1])]
 
+    plt.figure(5)
+    f,s=subplot_grid(8)
+    for i,ss in enumerate(s):
+        ss.plot(np.array([1,2,3])+i,[3,4,5])
 
 
 if __name__=='__main__':

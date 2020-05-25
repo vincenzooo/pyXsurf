@@ -10,6 +10,7 @@ experimental instrument reader module to provide common interface to several ins
 
 from dataIO.read_pars_from_namelist import read_pars_from_namelist
 import numpy as np
+import os
 
 '''
 def fits_reader(wfile,ypix=1.,ytox=1.,header=False):
@@ -61,13 +62,14 @@ def csv4D_reader(wfile,ypix=None,ytox=None,header=False,delimiter=',',endline=Tr
 
     #this defines the position of row/columns, starting from
     # commented 2018/08/28 x and y read directly
+    if endline:
+        data=data[:,:-1]
     ny,nx=data.shape
     x=np.arange(nx)*ypix*ytox*nx/(nx-1)
     y=np.arange(ny)*ypix*ny/(ny-1)
     data=data*zscale
     #data.header=head
-    if endline:
-        data=data[:,:-1]
+
 
     return data,x,y
 

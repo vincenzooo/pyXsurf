@@ -509,16 +509,13 @@ def test_rot90():
     c.plot()
     plt.title('rotated k=2 about (10,5)')
 
-def test_class_init():
+def test_class_init(wfile=None):
     """test init and plot"""
-    from pathlib import PureWindowsPath
-    from pySurf.readers.instrumentReader import matrixZygo_reader
     from dataIO.fn_add_subfix import fn_add_subfix
-    relpath=PureWindowsPath(r'test\input_data\zygo_data\171212_PCO2_Zygo_data.asc')
-    outpath=PureWindowsPath(r'test\results\data2D_class')
-
-    wfile= Path(os.path.dirname(__file__)) / relpath
-    (d1,x1,y1)=matrixZygo_reader(wfile,ytox=220/1000.,center=(0,0))
+    from pathlib import PureWindowsPath
+    from pySurf.data2D import load_test,data
+    
+    d1,x1,y1 = load_test_data(wfile,*args,**kwargs)
 
     plt.figure(1)
     plt.clf()
