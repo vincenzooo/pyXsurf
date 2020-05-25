@@ -65,8 +65,10 @@ def pop_kw(kws,defaults=None,keylist=None):
     res={}
     keys=list(defaults.keys())
     for k in keys:
+        print("%s %s %s %s"%(k,defaults[k],res,kws))
         res[k]=kws.pop(k,defaults[k])
-
+    print("final: %s %s"%(res,kws))
+    
     if keylist is not None:
         if isinstance(keylist,str): keylist=[keylist] #make list if only one element
         for k in keylist:
@@ -107,7 +109,10 @@ def pop_kw(kws,defaults=None,keylist=None):
 	'''
 
 def strip_kw(kws,funclist,split=False,**kwargs):
-    """was in theory a safer version of the first pop_kw.
+    """ Enhanced version of pop_kw, kw can be extracted from inspection of a function (or a list  of functions.
+    
+    Old notes:
+        was in theory a safer version of the first pop_kw.
            I am not sure in what it was supposed to be "safer",
        but it was accepting functions as input.
 	   It might have been used a negligible amount of times.
@@ -121,7 +126,7 @@ def strip_kw(kws,funclist,split=False,**kwargs):
         f=inspect.getfullargspec(func)
         defaults=kwargs
         l = len(f.defaults) if f.defaults is not None else 0
-        fdic=dict(zip(f.args[-l:],defaults))
+        fdic=dict(zip(f.args[-l:],f.defaults))
         res.append(pop_kw(kws,fdic))
 
     if not split:  #merge dictionaries, don't ask me how
@@ -190,17 +195,21 @@ def example_pop_kw():
     function('This is:',mes1='mes1!',mes2='mese2!')
 
 #from dataIO.dicts import pop_kw, strip_kw
-def test_pop_kw():
+def test_pop_kw(function=pop_kw):#function = None):
+
+    """run a set of dict stripping tests using a function with interface compatible with `pop_kw`.
+    uses pop_kw if function is not provided."""
 
     from inspect import signature
-    print (signature(pop_kw))
-    print (pop_kw.__doc__)
+    
+    print (signature(function))
+    print (function.__doc__)
 
     print("Without keylist return a dictionary using only keys in defaults, used keys are removed from kwargs:\n")
     kwargs={'dog':'bau','cat':'miao','cow':'muu'}
     defs={'dog':'barf','sheep':'bee'}
     print('start -> kwargs = {},\n defaults = {}'.format(kwargs,defs))
-    res=pop_kw(kwargs,defaults=defs)  #remove from kwargs the keys in defs assigning default if they don't exist in kwargs
+    res=function(kwargs,defaults=defs)  #remove from kwargs the keys in defs assigning default if they don't exist in kwargs
     print("\nResult: ",res)
     # {'sheep': 'bee', 'dog': 'bau'}
     print('end ->\n kwargs = {},\n defaults = {}'.format(kwargs,defs))
@@ -211,7 +220,7 @@ def test_pop_kw():
     defs={'dog':'barf','sheep':'bee'}
     keys=['cat','sheep']
     print('start -> kwargs = {},\n keylist = {},\n defaults = {}\n'.format(kwargs,keys,defs))
-    res=pop_kw(kwargs,defaults=defs,keylist=keys)
+    res=function(kwargs,defaults=defs,keylist=keys)
     print("\nResult: ",res)
     # {'sheep': 'bee', 'cat': 'miao', 'dog': 'bau'}
     print('end ->\n kwargs = {},\n keylist = {},\n defaults = {}'.format(kwargs,keys,defs))
@@ -223,13 +232,14 @@ def test_pop_kw():
     defs={'dog':'barf','sheep':'bee'}
     keys = ['nsigma','units','gatto']
     print('start ->\n kwargs = {},\n keylist = {},\n defaults = {}\n'.format(kwargs,keys,defs))
-    res=pop_kw(kwargs,defs,keys) #gatto doesn't exist in kwargs
+    res=function(kwargs,defs,keys) #gatto doesn't exist in kwargs
     print("\nResult: ",res)
     # ignoring key invalid in dict {'units': 'mm', 'nsigma': 1}:
     #'
     #{'sheep': 'bee', 'dog': 'bau'}
     print('end ->\n kwargs = {},\n keylist = {},\n defaults = {}'.format(kwargs,keys,defs))
     print("#------------")
+
 
 if __name__=="__main__":
     test_pop_kw()

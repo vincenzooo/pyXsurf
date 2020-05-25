@@ -391,7 +391,7 @@ def psd_analysis(*args,**kwargs):
     """Refer to `psd2d analysis`. Do and returns the same thing and in addtion plots linear psd (avg of 2d).
     Accept parameters for psd2d_analysis and plot_psd.
     """
-    
+   
     f,p2=psd2d_analysis(*args,**strip_kw(kwargs,psd2d_analysis),title="")
     p=projection(p2,axis=1)
     plt.figure()
