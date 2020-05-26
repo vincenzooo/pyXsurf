@@ -211,12 +211,15 @@ class Data2D(object):  #np.ndarrays
                 #raise
         else:
             if data is not None:
+                if len(data.shape) != 2:
+                    #pdb.set_trace()
+                    print('WARNING: data are not bidimensional, results can be unpredictable!')
                 if x is None:
                     x=np.arange(data.shape[1])
                 if y is None:
                     y=np.arange(data.shape[0])
 
-            if data is not None:
+            #if data is not None:
                 data,x,y=register_data(data,x,y,*args,**kwargs)# se read_data calls register, this
                 #goes indented.
 
@@ -375,7 +378,7 @@ class Data2D(object):  #np.ndarrays
         subfix and name are used to control the name of returned object."""
 
         if analysis:
-            f,p=psd_analysis(self.data,self.x,self.y,wfun=wfun,units=self.units,*args,**kwargs)
+            f,p=psd2d_analysis(self.data,self.x,self.y,wfun=wfun,units=self.units,title='',*args,**kwargs)
         else:
             f,p=psd2d(self.data,self.x,self.y,wfun=wfun,norm=1,rmsnorm=rmsnorm)
 
@@ -454,11 +457,12 @@ class Data2D(object):  #np.ndarrays
 
 
 from pySurf.psd2d import psd2d,plot_psd2d
+
 class PSD2D(Data2D):
     """It is a type of data 2D with customized behavoiur and additional properties
     and methods."""
     def __init__(self,*args,**kwargs):
-        ''' super is called implicitly
+        ''' super is called implicitly (?non vero)
         """needs to be initialized same way as Data2D"""
         #if a surface or a wdata,x,y are passed, these are interpreted as
         super().__init__(*args,**kwargs)

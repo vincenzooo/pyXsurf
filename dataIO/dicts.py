@@ -7,7 +7,7 @@ import os
 
 filterByKey2 = lambda data,keys : {key: data[key] for key in keys if key in data}
 
-def pop_kw(kws,defaults=None,keylist=None):
+def pop_kw(kws,defaults=None,keylist=None,exclude=None):
     """A multiple pop function for a dictionary, hopefully useful to filter kws and manage function **kwargs parameters.
 
     Return a dictionary of values corresponding to kws[k] for k in keylist by popping
@@ -58,16 +58,23 @@ def pop_kw(kws,defaults=None,keylist=None):
             res1=f1(arg1,**pop_kw(kwargs,{'mes1':'blah!'},['mes1'])) #only mes1 is passed to res1 with default if not in kwargs:
             res2=f2(arg1,**kwargs)  #other remaining kwargs can be safely passed to f2
 
+    2020/05/26 added `exclude` keywork, as a consequence of adding to strip_kw.
     Completely reviewed 2019/04/08, changed interface and function of keylist.
 
 
     """
     res={}
     keys=list(defaults.keys())
+    
+    if exclude is None: exclude = [] #makes a list, so I can use `in`
     for k in keys:
-        print("%s %s %s %s"%(k,defaults[k],res,kws))
-        res[k]=kws.pop(k,defaults[k])
-    print("final: %s %s"%(res,kws))
+        #print("%s %s %s %s"%(k,defaults[k],res,kws))
+        if k in exclude:
+            pass
+            #print ('Excluded')
+        else:
+            res[k]=kws.pop(k,defaults[k])
+    #print("final: %s %s"%(res,kws))
     
     if keylist is not None:
         if isinstance(keylist,str): keylist=[keylist] #make list if only one element
@@ -108,8 +115,16 @@ def pop_kw(kws,defaults=None,keylist=None):
     return res
 	'''
 
-def strip_kw(kws,funclist,split=False,**kwargs):
-    """ Enhanced version of pop_kw, kw can be extracted from inspection of a function (or a list  of functions.
+def strip_kw(kws,funclist,split=False,exclude=None,**kwargs):
+    """ Enhanced version of pop_kw, kw can be extracted from inspection of a function (or a list  of functions).
+    Defaults can be passed as kwargs.
+    `exclude` is a list of keys that are kept in kws unchanged
+       and not returned.
+    
+    2020/05/26 added `exclude`.
+    Use case is presented from problems with psd_analysis.
+    `psd2d.psd_analysis` calls `strip_kw(kwargs,psd2d_analysis,title="")`. 
+    `ps2d_analysis` has keyword `units`, that is not used in this case (used, only if called with `analysis=True`). Here we want to preserve `units` to strip it later.
     
     Old notes:
         was in theory a safer version of the first pop_kw.
@@ -120,14 +135,15 @@ def strip_kw(kws,funclist,split=False,**kwargs):
        sub_kw=strip_kw(kws,[sub],def1=val1,def2=val2)"""
 
     res=[]
-    if callable(funclist): #if scalar, makes it a one element list
-        funclist=[funclist]
+    if callable(funclist): #if scalar, makes funclist a one element list
+        funclist=[funclist]    
+        
     for func in funclist:
         f=inspect.getfullargspec(func)
         defaults=kwargs
         l = len(f.defaults) if f.defaults is not None else 0
         fdic=dict(zip(f.args[-l:],f.defaults))
-        res.append(pop_kw(kws,fdic))
+        res.append(pop_kw(kws,fdic,exclude=exclude))
 
     if not split:  #merge dictionaries, don't ask me how
         tmp = {}
@@ -240,6 +256,18 @@ def test_pop_kw(function=pop_kw):#function = None):
     print('end ->\n kwargs = {},\n keylist = {},\n defaults = {}'.format(kwargs,keys,defs))
     print("#------------")
 
+    print("Use `exclude`, keys in this list are left untouched in kwargs.\n")
+
+    kwargs={'dog':'bau','cat':'miao','cow':'muu'}
+    defs={'dog':'barf','sheep':'bee'}
+    exclude = ['dog']
+    print('start ->\n kwargs = {},\n exclude = {},\n defaults = {}\n'.format(kwargs,exclude,defs))
+    res=function(kwargs,defs,exclude=exclude) #gatto doesn't exist in kwargs
+    print("\nResult: ",res)
+    # res =  {'sheep': 'bee'} #dog is not modified or popped
+    # kwargs = {'dog': 'bau', 'cat': 'miao', 'cow': 'muu'}
+    print('end ->\n kwargs = {},\n exclude = {},\n defaults = {}'.format(kwargs,exclude,defs))
+    print("#------------")
 
 if __name__=="__main__":
     test_pop_kw()
