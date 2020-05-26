@@ -55,10 +55,10 @@ def plot_data_repeat(dlist,name="",num=None,*args,**kwargs):
     """
 
     res=[]
-    plt.clf()
     #fig,axes=plt.subplots(1,len(dlist),num=1)
     xs,ys=find_grid_size(len(dlist),3,square=False)
-    fig,axes=plt.subplots(xs,ys,num=num)
+    fig,axes=plt.subplots(xs,ys,num=num,clear=True)
+    plt.close() #prevent from showing inline in notebook with %matplotlib inline
     axes=axes.flatten()
     maximize()
     
@@ -213,6 +213,7 @@ def dcouples_plot(dlist,level=True,dis=False):
     
     xs,ys=find_grid_size(len(dcouples),square=True)[::-1]
     fig,axes=plt.subplots(xs,ys)
+    plt.close() #prevent from showing inline in notebook with %matplotlib inline
     if len(np.shape(axes))>1:
         axes=axes.flatten()
     elif len(np.shape(axes))==0:

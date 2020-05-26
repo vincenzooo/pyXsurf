@@ -388,22 +388,29 @@ def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,rmsrange=None,pran
     return f,p
 
 def psd_analysis(*args,**kwargs):
-    """Refer to `psd2d analysis`. Do and returns the same thing and in addtion plots linear psd (avg of 2d).
-    Accept parameters for psd2d_analysis and plot_psd.
     """
-   
-    f,p2=psd2d_analysis(*args,**strip_kw(kwargs,psd2d_analysis),title="")
+    Convenience function to plot average psd.
+    Wrapper around `psd2d analysis` analysis. Adds a plot of average PSD and return it. 
+    
+    Accept parameters for psd2d_analysis and plot_psd,
+    including `analysis=True`.
+    Call it directly to obtain 2d psd.
+    Use 
+    Use `plot_psd` from `pySurf.psd` to plot. 
+    """
+    
+    #pdb.set_trace()
+    tmp = strip_kw(kwargs,psd2d_analysis,title="",exclude=['units'])
+    f,p2=psd2d_analysis(*args,**tmp)
     p=projection(p2,axis=1)
     plt.figure()
     #u = kwargs.get('units',None)
     #t = kwargs.get('title',None)
     kw = strip_kw(kwargs,plot_psd)
-    u = kw['units'] if 'units' in kw else None
-    if u is not None:
-        kw ['units'] = [u[0],u[3]] 
+    #u = kw['units'] if 'units' in kw else None
     
-    pdb.set_trace()
-    plot_psd(f,p,units=u,**kw)
+    #pdb.set_trace()
+    plot_psd(f,p,**kw)
 
     #plot_psd(f,p,units=[u[0],u[1]] if u else u, title= t, **kwargs)
     return f,p

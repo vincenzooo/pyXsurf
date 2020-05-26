@@ -1,5 +1,6 @@
 import matplotlib
 import matplotlib.pyplot as plt
+import pdb
 
 
 
@@ -11,6 +12,26 @@ def demo_display(testfunc):
 def test_demo_display():
     pass
 
+def get_max_size():
+    """returns max size for figure, in OS independent way."""
+    try:
+        import psutil
+        if psutil.OSX:   #True (OSX is deprecated) VC:MACOS doesn't work
+            import AppKit
+            screen=AppKit.NSScreen.screens()[0]  #if multiple screens
+            xs,ys=screen.frame().size.width, screen.frame().size.height
+        elif psutil.WINDOWS: #False
+            from win32api import GetSystemMetrics
+            xs,ys=GetSystemMetrics(0),GetSystemMetrics(1)  #screen size in pixel
+        elif psutil.LINUX:   #False
+            from Xlib import display as Xd
+            resolution = Xd.Display().screen().root.get_geometry()
+            xs,ys= resolution.width,resolution.height
+    except:
+        print ("Unrecognized OS") #not tested on different backends (only Qt)
+        raise NotImplementedError
+        
+    return xs, ys    
 
 def maximize(backend=None,fullscreen=False,verbose=False):
     """Maximize window independently on backend.
@@ -33,26 +54,39 @@ def maximize(backend=None,fullscreen=False,verbose=False):
             mng.window.showMaximized()
         elif backend == 'TkAgg':
             mng.window.state('zoomed') #works fine on Windows!
+        elif backend == 'module://ipykernel.pylab.backend_inline':
+            #it was mng.resize(xsi,ysi) 
+            #added 2020/05/26
+            #works fine on Windows
+            
+            dpi = matplotlib.rcParams['figure.dpi']
+            xs,ys = get_max_size()
+            
+            xsi,ysi = xs/dpi,ys/dpi  #convert from pixel to inches for .resize
+            #xsi, ysi = xsi/2, ysi/2 #additional reduction to make fonts visible inline in a notebook
+            xsi, ysi = xsi, ysi #additional reduction to make fonts visible inline in a notebook
+            #matplotlib.rcParams['figure.figsize'] = [xsi,ysi] #questo funziona su WIN matplotlib inline 2020/05/26
+            #mng.resize(xsi,ysi)
+            params = {'legend.fontsize': 'x-large',
+            'figure.figsize': (xsi,ysi),
+            'axes.labelsize': 'x-large',
+            'axes.titlesize':'x-large',
+            'xtick.labelsize':'x-large',
+            'ytick.labelsize':'x-large'}
+            matplotlib.rcParams.update(params)
         else:
+            xs,ys = get_max_size()
             try:
-                import psutil
-                if psutil.OSX:   #True (OSX is deprecated) VC:MACOS doesn't work
-                    import AppKit
-                    screen=AppKit.NSScreen.screens()[0]  #if multiple screens
-                    xs,ys=screen.frame().size.width, screen.frame().size.height
-                elif psutil.WINDOWS: #False
-                    from win32api import GetSystemMetrics
-                    xs,ys=GetSystemMetrics(0),GetSystemMetrics(1)  #screen size in pixel
-                    
-                elif psutil.LINUX:   #False
-                    from Xlib import display as Xd
-                    resolution = Xd.Display().screen().root.get_geometry()
-                    xs,ys= resolution.width,resolution.height
-                mng.resize(xs,ys)
+                mng.resize(xs,ys) 
             except:
                 print ("Unrecognized backend: ",backend) #not tested on different backends (only Qt)
                 raise NotImplementedError
-    plt.show()
+            
+            
+
+                
+    #plt.show() #2020/05/26 removed to avoid showing empty grid in notebook inline.
+    
     plt.pause(0.1) #this is needed to make sure following processing gets applied (e.g. tight_layout)
 
     
