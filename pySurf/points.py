@@ -368,6 +368,11 @@ def get_points(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,addax
 
     This way I can e.g. open a matrix file and return points with a modified x y grid. Setting x or y to an empty object rather than to None discards axis from file and use grid indices.
 
+    addaxis: (if matrix is set) can be set to True to read values for axis in first row and column
+        (e.g. if points were saved with default addaxis=True in save_data.
+    A single axis can be extracted if addaxis is set to string 'x', 'y'.
+    `True` is equivalent to set to 'xy' (added 2020/06/18). 
+
     A complete description of the possible options is:
      read and use from file: addaxis=True, x= None
      read and discard from file, use passed: addaxis=True, x=np.array
@@ -379,11 +384,14 @@ def get_points(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,addax
         Set to (0,0) to center the coordinate system to the data.
     addaxis (if matrix is set) can be set to read values for axis in first row and column
         (e.g. if points were saved with default addaxis=True in save_points.
+    2020/06/18 changes to logic in reading axis with matrix option, it was failing when x and y not set. Added possibility of individual `addAxis`
+    TODO: reduce overlapping with `data2D.data_from_txt`.
     2018/02/17 reintroduced xrange even if discorauged. implemented x and y (unused as well) to axis, range
     or indices.
+
     """
     #import pdb
-
+    #pdb.set_trace()
     if xrange is not None or yrange is not None:
         print("WARNING: xrange and yrange options to get_points are obsolete, use x and y with two"+
                "elements to obtain same effect. Will be removed. I will correct for now")
@@ -404,37 +412,47 @@ def get_points(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,addax
 
     mdata=np.genfromtxt(filename,skip_header=skip,delimiter=delimiter)
     if (matrix):
-        if addaxis:
+        if addaxis == True: addaxis = 'xy'
+        
+        xx = None
+        yy = None
+        if addaxis == 'xy':
             yy,mdata=np.hsplit(mdata,[1])
             yy=yy[1:] #discard first corner value
             xx,mdata=np.vsplit(mdata,[1])
+        elif addaxis == 'x':
+            xx,mdata=np.vsplit(mdata,[1])
+        elif addaxis == 'y':
+            yy,mdata=np.hsplit(mdata,[1])
+        elif addaxis != False:
+            raise ValueError("Unrecognized value for addaxis (accepted values: `x`, `y`, `xy` or boolean. Passed value: "+str(addaxis))
 
         # x and y can be None or empty object(calculate from data size), M-element array (must fit data size)
         #  or range (2-el). Transform them in M-el vectors
-        if np.size(x) == 0:  #use calculated or read
-            if x is None:
-                x=xx
+        if x is None:
+            # x override xx (first line, with addAxis) if both defined
+            if xx is not None:
+                x = xx
             else:
-                x = np.arange(mdata.shape(1))
-        else:                #use provided
+                x = np.arange(mdata.shape[1])
+        else:
             if np.size(x) != mdata.shape[1]:
                 if np.size(x) == 2:
                     x=np.linspace(x[0],x[1],mdata.shape[1])
                 else:
-                    raise ValueError("X is not correct size (or 2-el array)")
-
-        if np.size(y) == 0:  #use calculated or read
-            if y is None:
-                y=yy
+                    raise ValueError("X is not correct size (or 2-el array)")            
+        if y is None:
+            # y override yy (first col, with addAxis) if both defined
+            if yy is not None:
+                y = yy
             else:
-                y = np.arange(mdata.shape(0))
-        else:                #use provided
+                y = np.arange(mdata.shape[0])
+        else:
             if np.size(y) != mdata.shape[0]:
-                if np.size(y) == 2:
+                if np.size(x) == 2:
                     y=np.linspace(y[0],y[1],mdata.shape[0])
                 else:
-                    raise ValueError("Y is not correct size (or 2-el array)")
-
+                    raise ValueError("Y is not correct size (or 2-el array)")            
         points=matrix_to_points2(mdata,x,y)
     else:
         points= mdata

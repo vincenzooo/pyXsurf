@@ -8,6 +8,7 @@ from dataIO.fn_add_subfix import fn_add_subfix
 from dataIO.dicts import strip_kw
 from pyProfile.profile import line
 from pyProfile.psd import plot_psd
+from pyProfile.psd import psd_units
 from pySurf.data2D import plot_data,projection
 from pySurf.outliers2d import remove_outliers2d
 from matplotlib.colors import LogNorm
@@ -18,23 +19,24 @@ from plotting.backends import maximize
 import pdb
 
 
+
 def psd2d(data,x,y,wfun=None,norm=1,rmsnorm=False):
+        """calculate the 2d psd. return freq and psd.
+        doesnt work with nan.
+        use 2d function for psd np.fft.rfft2 for efficiency and mimics
+            what done in pySurf.psd.psd
+        norm defines the normalization, see function psd.normPSD.
+        2017/01/11 broken interface from (x,y,data..),
+        added check to correct on the base of sizes."""
         #2017/08/01 complete refactoring, this was internal _psd2d,
         # now is made analogous of 1d pySurf.psd.psd
         # The previous psd2d was including a lot of plotting and output,
         #    it was renamed in plot_psd2d
 
-        """calculate the 2d psd. return freq and psd.
-        doesnt work with nan.
-        use 2d function for psd np.fft.rfft2 for efficiency and mimics
-            what done in pySurf.psd.psd
-        norm defines the normalization, see function normPSD.
-        2017/01/11 broken interface from (x,y,data..),
-        added check to correct on the base of sizes."""
         #attention, normalization doesn't really work with
         # window, the rms is the rms of the windowed function.
+        
         #assert data.shape[0]==data.shape[1]
-
         if wfun is None:
             win=np.ones(data.shape[0])[:,None]
         else:
@@ -67,7 +69,7 @@ def avgpsd2d(psddata,axis=1,span=False,expand=False):
     return projection(psddata,axis=axis,span=span,expand=expand)
 
 def rms_power(f,p,rmsrange=None,squeeze=True):
-    """integrate `p` (2dpsd) to calculate rms slice power in a range of freq. f is the  frequency axis for p. Accepts None as extreme of rmsrange. frequencies are assumed to be equally spaced.
+    """integrate `p` (2dpsd) to calculate rms slice power in a range of freq. f is the  frequency axis (vertically oriented in plots) for p. Accepts None as extreme of rmsrange. frequencies are assumed to be equally spaced.
     Return a vectors rms with one element for each range in rmsrange. If one element, extra dimension is
         removed unless squeeze is set (useful e.g. to call from wrapper function and get consistent behavior).
     Note that total rms is calculated as rms of column rms, calculated from PSD for each column.
@@ -203,11 +205,16 @@ def multipsd(datalist):
         pw1mavg=avgpsd2d(pw1m)  #x
         result.append(((fw1,pw1avg),(fw1m,pw1mavg)))
     return result
-
+    
 def plot_psd2d(f,p,x,prange=None,includezerofreq=False,units=None,*args,**kwargs):
     """plots a 2d psd as a surface with logaritmic color scale on the current axis. Return axis.
     If a zero frequency is present it is excluded by default from plot, unless includezerofreq is set to True.
-    Units (3-el array) is units of lengths for data (not of PSD), can be None."""
+    Units (3-el array) is units of lengths for data (not of PSD), can be None.
+    2020/07/10 uncommented call to `pySurf.data2D.plot_data` (in "functions" module `data2D`).
+    The "old" code segment called instead directly `plt.imshow`.  
+    In some sense, replicates code in `plot_data` and was not necessarily in sync
+    (e.g.: stats flag is not included here). 
+    This seems to fix the issue. """
     #2018/04/05 critical renaming of plot_psd2d(wdata,x,y..) -> psd2d_analysis
     # and _plot_psd2d(f,p,x) -> plot_psd2d consistently with other routines.
 
@@ -233,44 +240,44 @@ def plot_psd2d(f,p,x,prange=None,includezerofreq=False,units=None,*args,**kwargs
         prange=[None,None]
 
     # new:
-    """
-    ax=plot_data(p,x,f,norm=LogNorm(vmin=prange[0],vmax=prange[1]),
-    units=units,aspect='auto')
-
-    """#replaced
-    ax=plt.imshow(p,norm=LogNorm(vmin=prange[0],vmax=prange[1]),interpolation='none',
-        extent=(x[0],x[-1],f[0],f[-1]),origin='lower',aspect='auto')
-
-    plt.ylabel('Frequency'+ " ("+(units[1] if units[1] is not None else "[Y]")+"$^{-1}$)")
-    plt.xlabel('X'+ (" ("+units[0]+")" if units[0] is not None else ""))
+    
+    cbunits = psd_units(units)
+    ax = plot_data(p,x,f,norm=LogNorm(vmin=prange[0],vmax=prange[1]),
+    units=cbunits,aspect='auto',*args,**kwargs)
+    
+    cb =  plt.gca().images[-1].colorbar
+    
+    #after introducing psd_units, cbunits is always defined,
+    # conditions can be modified, but leaave like this for generality.
+    cb.ax.set_title("PSD"+(" ("+cbunits[2]+")") if cbunits[2] else "")
+    
+    #plt.ylabel('Frequency ('+cbunits[1]+")")
+    #plt.xlabel('X'+ (" ("+cbunits[0]+")" if cbunits[0] else ""))
     plt.grid(1)
-
-    cb=plt.colorbar()
-    if len(cb.get_ticks()) == 0:
-        print("""WARNING:  plot_psd2d.
-                Colorbar created with no ticks.
-                This usually happens because matplotlib adds too many ticks. Try to pass a smaller plot range in prange, or manually set tick passing parameters for plt.colorbar(ticks=t,format=matplotlib.ticker.LogFormatter())""")
-    if units[2] is not None and units[1] is not None:
-        cblu=" ("+units[1]+" "+units[2]+"$^2$)"
-    else:
-        cblu=" ([Y] [Z]$^2$)"
-    cb.ax.set_title("PSD"+cblu)
-
 
     return ax
 
 #PLOTTING
 
-def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,rmsrange=None,prange=None,fignum=5,rmsthr=None,
-    aspect='auto', ax2f=None, units=None,outname=None):
-    """ Calculates 2D PSD. If title is provided rms slice power is also calculated and plotted on three panels with figure and PSD.
+def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,
+    rmsrange=None,prange=None,fignum=5,rmsthr=None, 
+    aspect='auto', ax2f=None, units=None,outname=None,norm=1,rmsnorm=True):
+    """ Calculates 2D PSD as image obtained combining all profile PSDS calculated along vertical slices of data. Resulting image has size 
+    If title is provided rms slice power is also calculated and plotted on three panels with figure and PSD.
+    
+    Return PSD as PSD2D object. 
 
-    use plot_rms_power(f,p,rmsrange=None) to calculate rms power.
+    uses plot_rms_power(f,p,rmsrange=None) to calculate rms power.
     fignum window where to plot, if fignnum is 0 current figure is cleared,
     if None new figure is created. Default to figure 5.
-    rmsrange is one or a list of frequency ranges for plotting integrated rms.
+    rmsrange is one or a list of frequency ranges for plotting integrated rms. Can contain None to use max or min.
     If axf2 is set to boolean or array of boolean, plot slice rms for the frequencies
     associated to rmsrange on second axis. rmsrange must be set accordingly (same number of elements).
+    
+    rmsthr sets a threshold for data inclusion. If rms is above the value, the line is considered to contain invalid data and is removed from output PSD.
+    This makes it easy to average the returned PSDs.
+    Corresponding data are still visualized in central panel, but are marked with a red cross at top of y axes.
+    If multiple rms range intervals are provided, line is removed if any of them is over the threshold, but this might change in future, e.g. TODO: make it possible to add vector threshold with as many elements as rms range intervals.
 
     Set outname to empty string to plot without generating output.
 
@@ -293,16 +300,14 @@ def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,rmsrange=None,pran
     # -added title to determine if generating plot, with the intent of replacing outname.
 
 
-    if outname is not None:
+    if outname is not None:  #handle backcompatibility
         print ('psd2d_analysis WARNING: `title` replaced `outname` and output figure will be no more generated.'+
             'OUTNAME will be removed in next version, use title and save the plot after returning from routine.')
         if title is not None:
             print('outname should be not used together with title, it will be ignored.')
         else:
             title=outname
-
-    #import pdb
-    #pdb.set_trace()
+    
     if vrange is not None:
         if prange is None:
             print("""WARNING:  older versions of psd2d use vrange as range of psdvalue.
@@ -318,7 +323,7 @@ def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,rmsrange=None,pran
             print("psd2d(data,x,y)")
             x,y,wdata=wdata,x,y
 
-    f, p = psd2d(wdata, x, y, norm=1, wfun=wfun, rmsnorm=True)
+    f, p = psd2d(wdata, x, y, wfun=wfun, norm=norm, rmsnorm=rmsnorm)
 
     #generate output
     if title is not None:
@@ -371,12 +376,15 @@ def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,rmsrange=None,pran
 
         rms=plot_rms_power(ff,pp,x,rmsrange=rmsrange,ax2f=ax2f,units=units)
         #pdb.set_trace()
-        mask=np.isfinite(rms[0])
+        mask=np.isfinite(rms) #True if good. it is an array
         if rmsthr is not None:
-            mask = mask & (rms [0] < rmsthr)
-            ax3.hlines(rmsthr,*ax2.get_xlim())
-            ax2.plot(x[~mask],np.repeat(ax2.get_ylim()[1],len(x[~mask])),'rx')
-
+            mask = mask & (rms  < rmsthr)
+            ax3.hlines(rmsthr,*ax2.get_xlim()) #plot markers on rms chart
+            ax2.plot(x[~mask],np.repeat(ax2.get_ylim()[1],len(x[~mask])),'rx') #plot markers on psd2d chart
+        
+        #pdb.set_trace()
+        #questa era qui, ma dava errore perche' mask e' lineare
+        #mask = np.all(mask,axis =0) # if any of mask is False -> False
         p[:,~mask]=np.nan
         ax3.grid(1)
         #plt.tight_layout(rect=(0, 0.03, 1, 0.95) if title else (0, 0, 1, 1))
@@ -544,7 +552,7 @@ def calculatePSD(wdata,xg,yg,outname="",wfun=None,vrange=None,rmsrange=None,pran
         fx,px=psd2d(d.T,yg,xg,wfun=wfun) #psds along x, no plot
         fy,py=plot_psd2d(d,xg,yg,outname=fn_add_subfix(outname,l),wfun=wfun,
             rmsrange=rmsrange,prange=prange,vrange=vrange) #psds along y, plot
-        display(plt.gcf())
+        #display(plt.gcf())
 
         #note y goes first
         flist.extend([fy,fx])
@@ -651,7 +659,7 @@ def calculatePSD2(wdata,xg,yg,outname="",wfun=None,vrange=[None,None],rmsrange=N
         fx,px=psd2d(d.T,yg,xg,wfun=wfun) #psds along x, no plot
         fy,py=plot_psd2d(d,xg,yg,outname=fn_add_subfix(outname,l),wfun=wfun,
             rmsrange=rmsrange,prange=prange,vrange=vrange) #psds along y, plot
-        display(plt.gcf())
+        #display(plt.gcf())
 
         #note y goes first
         flist.extend([fy,fx])

@@ -1,4 +1,15 @@
 """
+2020/06/25 start to create profile class on template of data2D_class.
+N.B.: there is an important difference between profile and data2D functions
+work, and is that data2D functions accept as argument surfaces in the form (tuple)
+`(data,x,y)`, while functions in `profile` want x and y as separate arguments.
+Meaning that in this second case, passing only one argument is check with None
+as default val on second argument, rather than with inspecting the elements together.
+"""
+
+
+"""
+notes from data2D_class.py:
 2018/06/07 v1.3
 v1.2 was not convenient, switch back to same interface as 1.1:
 don't modify self, return copy.
@@ -102,8 +113,10 @@ from dataIO.fn_add_subfix import fn_add_subfix
 import pdb
 import inspect  # to use with importing docstring
 from pySurf.affine2D import find_affine
+from pyProfile import profile
 
-
+from pySurf.data2D_class import update_docstring,doc_from
+'''
 def update_docstring(func,source):
     """given a current function and a source function, update current function docstring
      appending signature and docstring of source.
@@ -121,113 +134,91 @@ def doc_from(source):
     """intent is to use partial to obtain a decorator from update_docstring.
     not sure it is the right way."""
     partial(update_docstring,func=func)
+'''
 
-
-class Data2D(object):  #np.ndarrays
-    """A class containing 2d data with x and y coordinates. It has a set of methods for analysis operations.
+class Profile(object):  #np.ndarrays
+    """A class containing x,y data. It has a set of methods for analysis and visualization.
     Function methods: return a copy with new values.
     to use as modifier (procedure), e.g.:
         a=a.level() """
 
-    """
-    def __new__(subtype, shape, dtype=float, buffer=None, offset=0,
-                strides=None, order=None, info=None):
-        # Create the ndarray instance of our type, given the usual
-        # ndarray input arguments.  This will call the standard
-        # ndarray constructor, but return an object of our type.
-        # It also triggers a call to InfoArray.__array_finalize__
-        obj = super(Data2D, subtype).__new__(subtype, shape, dtype,    #(InfoArray
-                                                buffer, offset, strides,
-                                                order)
-        # set the new 'info' attribute to the value passed
-        #obj.info = info
-        # Finally, we must return the newly created object:
-        return obj
+    """C'era qui un tentativo fallito di subclassare nd.array
+    usando __new__ e __array_finalize__."""
 
-    def __array_finalize__(self, obj):
-        # ``self`` is a new object resulting from
-        # ndarray.__new__(InfoArray, ...), therefore it only has
-        # attributes that the ndarray.__new__ constructor gave it -
-        # i.e. those of a standard ndarray.
-        #
-        # We could have got to the ndarray.__new__ call in 3 ways:
-        # From an explicit constructor - e.g. InfoArray():
-        #    obj is None
-        #    (we're in the middle of the InfoArray.__new__
-        #    constructor, and self.info will be set when we return to
-        #    InfoArray.__new__)
-        if obj is None: return
-        # From view casting - e.g arr.view(InfoArray):
-        #    obj is arr
-        #    (type(obj) can be InfoArray)
-        # From new-from-template - e.g infoarr[:3]
-        #    type(obj) is InfoArray
-        #
-        # Note that it is here, rather than in the __new__ method,
-        # that we set the default value for 'info', because this
-        # method sees all creation of default objects - with the
-        # InfoArray.__new__ constructor, but also with
-        # arr.view(InfoArray).
-        #self.info = getattr(obj, 'info', None)
-        # We do not need to return anything
-    """
 
-    def __init__(self,data=None,x=None,y=None,file=None,reader=None,units=None,name=None,*args,**kwargs):
-        """can be initialized with data; data,x,y; file; file, x, y.
-        if x and y are provided, they override x and y if matching number of elements, or used as range if two element."""
+    def __init__(self,x=None,y=None,file=None,reader=None,units=None,name=None,*args,**kwargs):
+        """can be initialized with data; x,y; file; file, x
+        if x is provided, they override x from data if matching number of elements, 
+           or used as range if two element (error is raised in case of ambiguity)."""
+        
         #from pySurf.readers.instrumentReader import reader_dic
+        from pyProfile.profile import register_profile
         import pdb
         #pdb.set_trace()
 
-        if isinstance (data,str):
+        if isinstance (y,str):
             print ('first argument is string, use it as filename')
-            file=data
-            data=None
+            file=y
+            y=None
         #pdb.set_trace()
         self.file=file #initialized to None if not provided
         if file is not None:
-            assert data is None
+            assert y is None
+            # passed file AND xrange, overrides x because only range matters.
             #store in xrange values for x if were passed
             xrange=span(x) if x is not None else None
-            yrange=span(y) if y is not None else None
             #pdb.set_trace()
+            
+            if reader is None: raise NotImplementedError("readers are not implemented yet for profiles,"+
+                "\tPass data or read from two column text file in compatible format.")
+            
+            """
             if reader is None:
                 reader=auto_reader(file) #returns a reader
-            data,x,y=read_data(file,reader,*args,**kwargs) #calling without arguments skips register, however skips also reader argumnets, temporarily arranged with pop in read_data to strip all arguments for
+            """
+            from pyProfile.profile import load_profile
+            x,y=load_profile(file,*args,**kwargs) #calling without arguments skips register, however skips also reader argumnets, temporarily arranged with pop in read_data to strip all arguments for
                 #register data and pass the rest to reader
             #pdb.set_trace()
-            if np.size(xrange) == data.shape[1]:
+            #TODO: Cleanup this part and compare with pySurf. Consider centering
+            # of axis coordinates as in grid example.
+            if np.size(xrange) == np.size(y):
+                # x is compatible with data size
+                if np.size(xrange) == 2:
+                    print ('WARNING: You passed both data and x, with size 2. There may be some ambiguity in how coordinates are handled')
                 self.x=xrange
             elif np.size(xrange) == 2:
-                x=np.linspace(*xrange,data.shape[1])
+                #here it must be intended as a range. Should check also interval centerings.
+                #it was considered somewhere in pySurf.
+                x=np.linspace(*xrange,np.size(y))
             elif xrange is not None:
                 print("wrong number of elements for x (must be 2 or xsize_data), it is instead",np.size(xrange))
                 raise ValueError
-
+            
             # set self.header to file header if implemented in reader, otherwise set to empty string""
+            #questo dovrebbe sempre fallire
             try:
                 #kwargs['header']=True
-                #self.header=reader(file,header=True,*args,**kwargs)
                 self.header=reader(file,header=True,*args,**kwargs)
             except TypeError:  #unexpected keyword if header is not implemented
                 self.header=""
                 #raise
         else:
-            if data is not None:
-                if len(data.shape) != 2:
+            if y is not None:
+                if len(y.shape) != 1:
                     #pdb.set_trace()
-                    print('WARNING: data are not bidimensional, results can be unpredictable!')
+                    print('WARNING: data are not uniidimensional, results can be unpredictable!')
                 if x is None:
-                    x=np.arange(data.shape[1])
-                if y is None:
-                    y=np.arange(data.shape[0])
+                    x=np.arange(np.size(y))
 
             #if data is not None:
-                data,x,y=register_data(data,x,y,*args,**kwargs)# se read_data calls register, this
+                x,y=register_profile(x,y,*args,**kwargs)# se load_profile calls register, this
                 #goes indented.
 
-        self.data,self.x,self.y=data,x,y
+        self.x,self.y=x,y
 
+        if np.size(units) == 1:
+            units=[units,units]
         self.units=units
         if name is not None:
             self.name=name
@@ -238,31 +229,25 @@ class Data2D(object):  #np.ndarrays
         #print(name)
 
     def __call__(self):
-        return self.data,self.x,self.y
+        return self.x,self.y
 
+    from pyProfile.profile import sum_profiles
     def __add__(self,other,*args,**kwargs):
-        return Data2D(*sum_data(self(),other(),*args,**kwargs),units=self.units,name=self.name + " + " + other.name)
+        return Profile(*sum_profiles(*self(),*other(),*args,**kwargs),units=self.units,name=self.name + " + " + other.name)
 
     def __mul__(self,scale,*args,**kwargs):
         res = self.copy()
-        if len(np.shape(scale))<=1:  #multiply by scalar(s)
-            if np.size(scale) == 3:
+        if np.size(scale)==1:
+            if isinstance(scale,Profile):
+                """if it is Profile, do pointwise multiplication rescaling on firts."""
+                raise NotImplementedError ('can be ambigous (return point to point multipl. or surface? Fix in code, at the momeb accept only x and (y) scalars.')
+                tmp=scale.resample(self)
+                res=self.copy()
+                res.y=self.y*tmp.y
+            else:
+                scale=[scale,scale]      
                 res.x = scale[0] * res.x
                 res.y = scale[1] * res.y
-                res.data = scale[2] * res.data
-            elif np.size(scale) == 1:
-                res.data = res.data * scale
-            else:
-                raise ValueError ("wrong number of elements in Data2D multiplication")
-        elif len(np.shape(scale))==2:  #multiply by matrix
-            #completely untested
-            print ("warning, multiplication between arrays was never tested")
-            assert scale.shape == self.data.shape
-            self.data=self.data*scale
-        elif isinstance(scale,Data2D):
-            tmp=scale.resample(self)
-            res=self.copy()
-            res.data=self.data*tmp.data
         else:
             raise ValueError('Multiply Data2D by wrong format!')
         return res
@@ -275,14 +260,57 @@ class Data2D(object):  #np.ndarrays
 
     def __sub__(self,other,*args,**kwargs):
         assert self.units == other.units
-        res=Data2D(*subtract_data(self(),other(),*args,**kwargs),units=self.units)
+        res=Profile(*(profile.subtract_profile(*self(),*other(),*args,**kwargs))(),units=self.units)
         res.name = self.name + " - " + other.name
         return res
 
     def __truediv__(self,other):
         return self*(1./other)
-
-
+    
+    
+    def plot(self,title=None,*args,**kwargs):
+        """plot using data2d.plot_data and setting automatically labels and colorscales.
+           by default data are filtered at 3 sigma with 2 iterations for visualization.
+           Additional arguments are passed to plot.
+        
+        Quite useless for profile, can be plot with `plt.plot(*P(),*args,**kwargs)"""
+        
+        from plotting.captions import legendbox
+        from pyProfile.profile import get_stats
+        
+        nsigma0=None  #default takes all range.
+        #import pdb
+        #pdb.set_trace()
+        stats=kwargs.pop('stats',0) #to change the default behavior
+        loc=kwargs.pop('loc',0) #location for stats legend
+        framealpha=kwargs.pop('framealpha',0.5) #transparency for stats legend
+        nsigma=kwargs.pop('nsigma',nsigma0) #to change the default behavior
+        
+        if nsigma is not None:
+            raise NotImplementedError("nsigma was passed, but outlyers filtering\n"+
+                'is not active yet.')
+        res=plt.plot(self.x,self.y,
+            *args,**kwargs)
+        if stats: #add stats to plot
+            legend=get_stats(self.x,self.y,units=self.units)
+            """
+            if stats==2:
+                legend.extend(["x_span: %.3g %s"%(span(x,size=1),(units[0] if units[0] else "")),"y_span: %.3g %s"%(span(y,size=1),(units[1] if units[1] else "")),"size: %i"%np.size(data)])
+            """
+            l=legendbox(legend,loc=loc,framealpha=framealpha)
+            
+        plt.xlabel('X'+(" ("+self.units[0]+")" if self.units[0] is not None else ""))
+        plt.ylabel('Y'+(" ("+self.units[1]+")" if self.units[1] is not None else ""))
+  
+        if title is None:
+            if self.name is not None:
+                title = self.name
+        plt.title(title)
+        return res
+    plot=update_docstring(plot,plt.plot)
+    '''
+    Useless for profile, can be plot with `plt.plot(*P(),*args,**kwargs)`
+    
     def plot(self,title=None,*args,**kwargs):
         """plot using data2d.plot_data and setting automatically labels and colorscales.
            by default data are filtered at 3 sigma with 2 iterations for visualization.
@@ -302,18 +330,20 @@ class Data2D(object):  #np.ndarrays
         plt.title(title)
         return res
     plot=update_docstring(plot,plot_data)
-
+    '''
 
     def load(self,filename,*args,**kwargs):
-        """A simple file loader using data_from_txt"""
-        self.data,self.x,self.y = data_from_txt(filename,*args,**kwargs)
+        """A simple file loader using np.genfromtxt."""
+        self.x,self.y = np.genfromtxt(filename,unpack=True,*args,**kwargs)
     load=update_docstring(load,data_from_txt)
 
+    from pyProfile.profile import save_profile
     def save(self,filename,*args,**kwargs):
         """Save data using data2d.save_data"""
-        return save_data(filename,self.data,self.x,self.y,*args,**kwargs)
-    save.__doc__=save_data.__doc__
+        return save_profile(filename,self.x,self.y,*args,**kwargs)
+    save.__doc__=save_profile.__doc__
 
+    '''
     from functools import update_wrapper
     #@update_wrapper(rotate_data)  #this doesn't work as I would like
     def rotate(self,angle,*args,**kwargs):
@@ -323,73 +353,52 @@ class Data2D(object):  #np.ndarrays
         res.data,res.x,res.y=rotate_data(self.data,self.x,self.y,angle,*args,**kwargs)
         return res
     rotate=update_docstring(rotate,rotate_data)
+    '''
 
-    def rot90(self,k=1,*args,**kwargs):
-        """call data2D.rotate_data, which uses numpy.rot90 to rotate array of an integer multiple of 90 degrees in direction
-        (from first to second axis)."""
-        res = self.copy()
-        res.data,res.x,res.y=rotate_data(*res(),k=k,*args,**kwargs)
-
-        return res
-    rot90=update_docstring(rot90,rotate_data)
-
-    def transpose(self):
-        res = self.copy()
-        res.data,res.x,res.y = transpose_data(self.data,self.x,self.y)
-        return res
-    transpose=update_docstring(transpose,transpose_data)
-
-    def apply_transform(self,*args,**kwargs):
-        res = self.copy()
-        res.data,res.x,res.y=app_trans(self.data,self.x,self.y,*args,**kwargs)
-        return res
-    apply_transform=update_docstring(apply_transform,data2D.apply_transform)
-
+    '''
     def apply_to_data(self,func,*args,**kwargs):
         """apply a function from 2d array to 2d array to data."""
         res = self.copy()
         res.data=func(self.data,*args,**kwargs)
         return res
-
+    '''
+    
+    from pyProfile.profile import crop_profile
     def crop(self,*args,**kwargs):
-        """crop data making use of function data2D.crop_data, where data,x,y are taken from a"""
+        """crop profile making use of function profile.crop_data, where x,y are taken from self."""
         res=self.copy()
-        res.data,res.x,res.y=crop_data(self.data,self.x,self.y,*args,**kwargs)
+        res.x,res.y=crop_profile(self.x,self.y,*args,**kwargs)
         return res #
-    crop=update_docstring(crop,crop_data)
-
+    crop=update_docstring(crop,crop_profile)
+    
+    from pyProfile.profile import level_profile
     def level(self,*args,**kwargs):
         res=self.copy()
-        res.data,res.x,res.y=level_data(self.data,self.x,self.y,*args,**kwargs)
+        res.x,res.y=level_profile(self.x,self.y,*args,**kwargs)
         return res
-    level=update_docstring(level,level_data)
+    level=update_docstring(level,level_profile)
 
+    from pyProfile.profile import resample_profile
     def resample(self,other,*args,**kwargs):
         """TODO, add option to pass x and y instead of other as an object."""
         res=self.copy()
         if self.units is not None and other.units is not None:
             if self.units != other.units:
-                raise ValueError('If units are defined they must match in Data2D resample.')
-        res.data,res.x,res.y=resam
-        ple_data(res(),other(),*args,**kwargs)
+                raise ValueError('If units are defined they must match in Profile.resample.')
+        res.x,res.y=resample_profile(*res(),*other(),*args,**kwargs)
         return res
-    resample=update_docstring(resample,resample_data)
+    resample=update_docstring(resample,resample_profile)
+
 
     def psd(self,wfun=None,rmsnorm=True,norm=1,analysis=False,subfix='',name=None,*args,**kwargs):
         """return a PSD2D object with 2D psd of self.
         If analysis is set True, psd2d_analysis plots are generated and related parameters
-          are passed as args. You need to pass also title, it generates output,
-          this is subject to change, at the moment, pass empty string to generate plots
-          or string to create output graphics.
-        subfix and name are used to control the name of returned object.
-        units are set in units of self because of the ambiguity mentioned in 
-        pySurf.psd2d.psd_units, and consistently with functions in `pySurf.psd2d`.
-        """
+          are passed as args.
+        subfix and name are used to control the name of returned object."""
 
         if analysis:
-            title = kwargs.pop('title',(name if name is not None else ''))
             f,p=psd2d_analysis(self.data,self.x,self.y,wfun=wfun,
-            norm=norm,rmsnorm=rmsnorm,title=title,
+            norm=norm,rmsnorm=rmsnorm,
             units=self.units,*args,**kwargs)
         else:
             f,p=psd2d(self.data,self.x,self.y,wfun=wfun,norm=norm,rmsnorm=rmsnorm)
@@ -399,19 +408,15 @@ class Data2D(object):  #np.ndarrays
         return PSD2D(p,self.x,f,units=self.units,name=newname)
     psd=update_docstring(psd,psd2d)
 
-    def remove_nan_frame(self,*args,**kwargs):
+    def remove_nan_ends(self,*args,**kwargs):
         res = self.copy()
-        res.data,res.x,res.y=data2D.remove_nan_frame(self.data,self.x,self.y,*args,**kwargs)
+        res.x,res.y=profile.remove_nan_ends(self.x,self.y,*args,**kwargs)
         return res
-    remove_nan_frame=update_docstring(remove_nan_frame,data2D.remove_nan_frame)
+    remove_nan_ends=update_docstring(remove_nan_ends,profile.remove_nan_ends)
 
-    def topoints(self):
-        """convenience function to get points using matrix_to_points2."""
-        return matrix_to_points2(self.data,self.x,self.y)
-
-    def std(self,axis=None):
+    def std(self):
         """return standard deviation of data excluding nans"""
-        return np.nanstd(self.data,axis=axis)
+        return np.nanstd(self.y)
 
     def copy(self):
         """copy.deepcopy should work well."""
@@ -420,11 +425,12 @@ class Data2D(object):  #np.ndarrays
     def printstats(self,label=None,fmt='%3.2g'):
         if label is not None:
             print(label)
-        s=("%s PV: "+fmt+", rms: "+fmt)%(self.name,span(self.data,size=True),
-                             np.nanstd(self.data))
+        s=("%s PV: "+fmt+", rms: "+fmt)%(self.name,span(self.y,size=True),
+                             np.nanstd(self.y))
         print(s)
         return s
 
+    '''
     def align_interactive(self,other,find_transform=find_affine):
         """interactively set markers and align self to other.
         Alignment is performed using the transformation returned by
@@ -470,14 +476,13 @@ class Data2D(object):  #np.ndarrays
 
         return Data2D(*sax,units=[self.units[0],self.units[1],'arcsec'],name=self.name + ' xslope'),Data2D(*say,units=[self.units[0],self.units[1],'arcsec'],name=self.name + ' yslope')
     slope=update_docstring(slope,slope_2D)
-
+    '''
 
 from pySurf.psd2d import psd2d,plot_psd2d
 
-class PSD2D(Data2D):
+class PSD(Profile):
     """It is a type of data 2D with customized behavoiur and additional properties
-    and methods.
-    """
+    and methods."""
     def __init__(self,*args,**kwargs):
         ''' super is called implicitly (?non vero)
         """needs to be initialized same way as Data2D"""
@@ -488,57 +493,23 @@ class PSD2D(Data2D):
                 
     def plot(self,*args,**kwargs):
         u=kwargs.pop('units',self.units)
-        #pdb.set_trace()
         return plot_psd2d(self.y,self.data,self.x,units=u,*args,**kwargs)
 
     def avgpsd(self,*args,**kwargs):
         """avg, returns f and p. Can use data2D.projection keywords `span` and `expand` to return PSD ranges."""
         return self.y,projection(self.data,axis=1,*args,**kwargs)
 
-    def rms_power(self,plot=False,rmsrange=None,*args,**kwargs):
+    def rms_power(self,plot=False,*args,**kwargs):
         """Calculate rms slicec power.
             If plot is set also plot the whole thing."""
 
-        #pdb.set_trace()
         if plot:
-            return plot_rms_power(self.y,self.data,self.x,units=self.units,rmsrange=rmsrange,*args,**kwargs)
+            return plot_rms_power(self.y,self.data.self.x,units=self.units,*args,**kwargs)
         else:
-            """this is obtained originally by calling rms_power, however the function deals with only scalar input for rms range.
+            """this is obtained originally by calling rms_power, however the function deals with only scalar inmot for rms range.
             Part dealing with multiple ranges is in plot_rms_power, but should be moved to rms_power."""
-            if rmsrange is not None:
-                if np.size (rmsrange) != 2:
-                    raise NotImplementedError
+            raise NotImplementedError
 
-            return rms_power(self.y,self.data,rmsrange=rmsrange,*args,**kwargs)
-            
-            
-
-def test_rot90():
-    a=np.ones(250).reshape((25,10))
-    a[6:7,6:9]=3
-    d=Data2D(a)
-
-    plt.close('all')
-    d.plot()
-    plt.title('original')
-
-    plt.figure()
-    #return a,d
-    c=d.rot90()
-    c.plot()
-    plt.title('rotated')
-
-    plt.figure()
-    #return a,d
-    c=d.rot90(k=2)
-    c.plot()
-    plt.title('rotated k=2')
-
-    plt.figure()
-    #return a,d
-    c=d.rot90(k=2,center=(10,5))
-    c.plot()
-    plt.title('rotated k=2 about (10,5)')
 
 def test_class_init(wfile=None):
     """test init and plot"""
@@ -546,29 +517,28 @@ def test_class_init(wfile=None):
     from pathlib import PureWindowsPath
     from pySurf.data2D import load_test,data
     
-    d1,x1,y1 = load_test_data(wfile,*args,**kwargs)
+    x1,y1 = load_test_data(wfile,*args,**kwargs)
 
     plt.figure(1)
     plt.clf()
     plt.suptitle(relpath)
     plt.title('use plot_data function')
-    plot_data(d1,x1,y1,aspect='equal')
+    plot_profile(x1,y1,aspect='equal')
 
-    a=Data2D(d1,x1,y1)
+    a=Profile(x1,y1)
     plt.figure(2)
     plt.clf()
     plt.title('From data')
     a.plot(aspect='equal')
 
-    b=Data2D(file=wfile,ytox=220/1000.,center=(0,0))
+    b=Profile(file=wfile,center=(0,0))
     plt.figure(3)
     plt.clf()
     plt.title('from filename')
     b.plot(aspect='equal')
 
-    b.save(os.path.join(outpath,os.path.basename(fn_add_subfix(relpath.as_posix(),"",".txt"))), makedirs=True)
-    b.remove_nan_frame()
-
+    #b.save(os.path.join(outpath,os.path.basename(fn_add_subfix(relpath.as_posix(),"",".txt"))), makedirs=True)
+    b.remove_nan_ends()
     plt.figure()
     plt.title('removed nans')
     b.plot(aspect='equal')
@@ -576,4 +546,3 @@ def test_class_init(wfile=None):
 if __name__=='__main__':
     plt.close('all')
     test_class_init()
-    test_rot90()

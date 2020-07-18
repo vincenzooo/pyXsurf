@@ -143,7 +143,7 @@ def plot_data_repeat_leveling(dlist,outfile=None,dis=True,name = ""):
         plt.subplot(xs,ys,i+1,sharex=axes[0],sharey=axes[0])
         tmp=ll.copy()
         #tmp.data=level_data(*ll(),2)[0]
-        tmp=tmp.level(2,byline=True)
+        tmp=tmp.level(2,axis=1)
         tmp.plot(stats=True)
         res[-1].append(tmp.std())
         #plt.clim([-1,1])

@@ -34,8 +34,8 @@ class Dlist(list):
     
     def __getattr__(self,name):  #originariamente usava __getattribute__, che riceve attributo
         # prima di chiamarlo (quindi anche se gia' esistente).
-        #attr = object.__getattr__(self, name) #questo non funziona
-        attr = [object.__getattribute__(name) for object in self]
+        attr = object.__getattr__(self, name) #questo non funziona
+        #attr = [object.__getattribute__(name) for object in self]
         
         if hasattr(attr, '__call__'):
             def newfunc(*args, **kwargs):
@@ -46,7 +46,7 @@ class Dlist(list):
                 return result
             return newfunc
         else:
-            return attr
+            return Dlist(attr) #attr
         
     def topoints(self):
         """convert a dlist to single set of points containing all data."""
@@ -61,8 +61,6 @@ def topoints(data,level=None):
     plist = [d.topoints() for d in data]    
     return np.vstack(plist)
 
- 
-
 
 def load_dlist(rfiles,reader=None,*args,**kwargs):
     """Extracted from plot_repeat. Read a set of rfiles to a dlist.
@@ -73,6 +71,7 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
          load_dlist(.. ,option1='a',option2=1000)
      - to have individual reader parameters pass them as dictionaries (a same number as rfiles),
          load_dlist(.. ,{option1='a',option2=1000},{option1='b',option3='c'},..)
+         in this case reader must be explicitly passed (None is acceptable value for auto).
 
     Example:
         dlist=load_dlist(rfiles,reader=fitsWFS_reader,scale=(-1,-1,1),
@@ -85,14 +84,14 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
     2019/04/08 made function general from plot_repeat, moved to dlist.
     """
 
-    import pdb
-    
-
+    #pdb.set_trace()
     if reader is None:
-        reader=auto_reader(rfiles[0])
+        #reader=auto_reader(rfiles[0])
+        reader = [auto_reader(r) for r in rfiles]
         
     if np.size(reader) ==1:
         reader=[reader]*len(rfiles)
+        
     '''
     if kwargs : #passed explicit parameters for all readers
         pdb.set_trace()
@@ -105,7 +104,9 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
                 raise ValueError
     '''
 
-    if kwargs : #passed explicit parameters for all readers
+    if kwargs : #passed explicit parameters for each reader
+        # Note, there is ambiguity when rfiles and a kwargs value have same
+        # number of elements()
         #pdb.set_trace()
         #vectorize all values
         for k,v in kwargs.items():
@@ -113,13 +114,24 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
                 kwargs[k]=[v]*len(rfiles)    
             elif (len(v) != len(rfiles)):
                 kwargs[k]=[v]*len(rfiles)
+            #else:  #non funziona perche' ovviamente anche chiamando esplicitamente, sara'
+            #  sempre di lunghezza identica a rfiles.
+            #    print ('WARNING: ambiguity detected, it is not possible to determine'+
+            #    'if `%s` values are intended as n-element value or n values for each data.\n'+
+            #    'To solve, call the function explicitly repeating the value.'%k)
+    
+    # 2020/07/10 args overwrite kwargs (try to avoid duplicates anyway).
+    # args were ignored before.
+    if not args:  #assume is correct number of elements
+        args = []*len(rfiles)
+    
     
     #pdb.set_trace()
     #transform vectorized kwargs in list of kwargs
     kwargs=[{k:v[i] for k,v in kwargs.items()} for i in np.arange(len(rfiles))]
     
     #kwargs here is a list of dictionaries {option:value}, matching the readers
-    dlist=[Data2D(file=wf1,reader=r,**k) for wf1,r,k in zip(rfiles,reader,kwargs)]
+    dlist=[Data2D(file=wf1,reader=r,**{**k, **a}) for wf1,r,k,a in zip(rfiles,reader,args,kwargs)]
 
     return dlist
 
@@ -215,14 +227,16 @@ def align_interactive(dlist,find_transform=find_affine,mref=None):
     return m_arr,m_trans
 
 def psd2an(dlist,wfun=np.hanning,
-                dis=False,ymax=0.05,outfolder="",subfix='_psd2d',*args,**kwargs):
+                ymax=None,outfolder="",subfix='_psd2d',*args,**kwargs):
     """2d psd analysis with threshold on sag removed data. Return a list of psd2d.
     ymax sets top of scale for rms right axis.
     if outfolder is provided, save psd2d_analysis plot with dlist names+subfix"""
     m_psd=[]
+    title = kwargs.pop('title','')
+    #pdb.set_trace()
     for dd in dlist:
-        m_psd.append(dd.level(2,byline=True).psd(analysis=True,
-            title=os.path.basename(outfolder),wfun=wfun,*args,**kwargs))
+        m_psd.append(dd.level(2,axis=0).psd(analysis=True,
+            title=title,wfun=wfun,*args,**kwargs))
         #psd2d_analysis(*dd.level(2,byline=True)(),
         #                 title=os.path.basename(outfolder),wfun=wfun,*args,**kwargs)
         #m_psd.append((fs,ps))
@@ -233,8 +247,10 @@ def psd2an(dlist,wfun=np.hanning,
         plt.suptitle(dd.name+' - hanning window - sag removed by line')
         if outfolder is not None:
             plt.savefig(os.path.join(outfolder,dd.name+subfix+'.png'))
-        if dis:
-            display(plt.gcf())
+        #pr=projection(pl[0].data,axis=1,span=1)
+        #plot_psd(pl[0].y,pr[0],label='avg')
+        #plot_psd(pl[0].y,pr[1],label='min')
+        #plot_psd(pl[0].y,pr[2],label='max')
     return m_psd
 
 def extract_psd(dlist,rmsthr=0.07,rmsrange=None,prange=None,ax2f=None,dis=False):

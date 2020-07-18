@@ -39,8 +39,7 @@ def normPSD(N,L=None,form=1):
     Note that in case of rfft the doubling factor is not included in norm (because part of FFT definition).
     Possible values are (ref. to Numerical recipes when possible):
     1 - units: [Y**2] no normalization. "sum squared amplitude" in NR 13.4.1
-    2 - units: [Y**2][X] This has the advantage that measurements on same range with different number of points match
-        #and it is the way it is usually plotted. The rms is the integral of PSD over frequency rather than the sum.
+    2 - units: [Y**2][X] This has the advantage that measurements on same range with different number of points match and it is the way it is usually plotted. The rms is the integral of PSD over frequency rather than the sum.
     3 - units: [Y**2] here rms is the sum of PSD, this is RA normalization (however it differs in RA when a window is used). 13.4.5 in NR.
     4 - units: [Y**2] not sure what this is for, "mean squared amplitude" in NR 13.4.2 and in formula 12.1.10 as discrete form of Parsifal's theorem.
     """
@@ -89,7 +88,81 @@ def psd(x,y,retall=False,wfun=None,norm=1,rmsnorm=False):
         return freqs,psd,np.angle(yfft)
     else:
         return freqs,psd         
+        
+def psd_units(units=[None,None,None]):
+    """return as a list of 3 strings (or None) for `units` of x,f,PSD
+    from units of x,y,data.
+    In case there is not enough information on units of data, 
+        returned units are '', '[Y]', '[Y] [Z]$^2$'.
     
+    This aims to keep some consistency in handling units, because
+    of the risk of ambiguity, e.g. m^2 vs m**2 or m$^2$,
+    or even None vs "".
+    This ambiguity is also the reason why in object version `Data2D_class.PS2D` 
+    units are kept from surface data, rather than being set to PSD units.
+    This is probably not the best way to solve the ambiguity, but this
+    function should be the preferred way to generate units for the 
+    PSD and its axis, until a better one is found. 
+    X is left blank rather than outputting '[X]' because it is identical
+        to input units and it can be inconvenient to use the string
+        in plots (e.g. "x ([X])") and the original units can be accessed
+        if desired.
+        
+    2020/07/16 moved to `pyProfile.psd` from `pySurf.psd2d`, making it valid for 2 or 3D units."""
+    
+    cbunits = [None,None,None]
+    flag2d = False  #flag to return 2-el vector
+    if np.size(units) == 1: 
+        units = np.repeat(units,3)
+    elif np.size(units) == 2:
+        flag2d=True
+        units=[None,units[0],units[1]]
+
+    units[1] = (units[1] if units[1] else "[Y]")+"$^{-1}$"
+    if units[0] is None: units[0] = "" # cbunits[0] = units[0] if units[0] else ""
+    if units[2] and units[1]:
+        units[2] = units[1]+" "+units[2]+"$^2$"  #colorbar units string
+    else:
+        units[2]=(units[1] if units[1] else "[Y]")+" [Z]$^2$"
+        #units[2]="[Y] [Z]$^2$"
+    
+    if flag2d: units=units[1:3]
+    return units
+    
+def test_psd_units():
+    """run tests with different combinations of defined and undefined units.
+    """
+    
+    testval = [[None,None],
+               ['mm',None],
+               ['mm',''],
+               ['mm','mm'], #the following fails:
+               None,  
+               'mm',
+               ['mm']]
+    
+    print ('TEST FOR 2D UNITS (PROFILE)')
+    for t in testval:
+        print ("test for: ",t)
+        print ('PSD units(x,f,PSD):\n'+'\n'.join(psd_units(t)))
+        print ('----------\n')
+
+    testval = [[None,None,None],
+               ['mm',None,None],
+               ['mm',None,''],
+               ['mm','',''],
+               ['mm','mm',''],
+               ['mm','mm','mm'],  #the following fails:
+               None,  
+               'mm',
+               ['mm']]
+               
+    print ('TEST FOR 3D UNITS (SURFACE)')
+    for t in testval:
+        print ("test for: ",t)
+        print ('PSD units(x,f,PSD):\n'+'\n'.join(psd_units(t)))
+        print ('----------\n')
+
 def components(d,win=1):
     """RA Want to return Fourier components with optional window
     Application note: These components are dependent on sampling!
@@ -346,10 +419,214 @@ def plotPSDs(psdfile1,psdfile2,title=None,outfolder=None):
     plt.legend(loc=0)
     if outfolder:
         plt.savefig(os.path.join(outfolder,title+'.png'))           
+
+
+def FFTtransform(x,y):
+    yfft  = np.fft.rfft(y) #note that rfft return exact values as fft (needs to be doubled after squaring amplitude)
+    N = len(y)
+    L=span(x,True)  
+    f = np.fft.rfftfreq(N,L/N)
+    return f,yfft
+
+def plot_transform(f,yfft,label="",euler=False,units=None,includezerofreq=False,**kwargs):
+    """units is a 2 element vector."""
+    #pdb.set_trace()
+    ax3 = plt.gca()
+    ##PLOT TRANSFORM AS EULER REPRESENTATION  
+    unitstr = psd_units(units) 
+    
+    if not includezerofreq:
+        if f[0]==0:
+            f=f[1:]
+            yfft=yfft[1:,...]
+            
+    if euler:
+        plt.title('DFT - Module and phase')
+        plt.plot(f,np.abs(yfft),label=label,**kwargs)
+        #plt.loglog() 
+        ax3.legend(loc=2)
+        #string for x is set to '' as default:
+        plt.xlabel('Freq ('+(unitstr[0] if unitstr[0] else '[X]')+'$^-1$)')
+        plt.ylabel('Module'+((' ('+unitstr[1]) if unitstr[1] else '[Y]')+'$^2$)')
+            
+        ax3b = ax3.twinx()
+        ax3.twin=ax3b
+        ax3b.plot(f,np.angle(yfft)/np.pi,'--',label=label+' Phase',
+        **kwargs)
+        ax3b.set_ylabel('Phase /$\pi$')
+        ax3b.set_ylim(-1.,1.)
+        plt.grid(1)
+        ax3b.legend(loc=1)
         
+    ##PLOT TRANSFORM AS COMPLEX NUMBER
+    else:
+        #pdb.set_trace()
+        plt.title('DFT - Real and imaginary parts')
+        ax3.plot(f,np.real(yfft),label=label+' Re',**kwargs)
+        #plt.loglog() 
+        s = span (np.real(yfft))
+        plt.ylim([s[0],s[1]]) # needed to expland scale if very small
+        #ax3.set_xlabel(unitstr[0]+'$^-1$')
+        #string for x is set to '' as default:
+        plt.xlabel('Freq. ('+(unitstr[0] if unitstr[0] else '[X]')+'$^-1$)')
+        ax3.set_ylabel('Re')
+        #for tl in ax2.get_yticklabels():
+            #tl.set_color('b')
+        ax3.legend(loc=2)
+            
+        ax2b = ax3.twinx()
+        ax2b.plot(f,np.imag(yfft),'--',label=label+' Im',**kwargs)
+        s = span (np.imag(yfft))
+        plt.ylim([s[0],s[1]]) # needed to expland scale if very small
+        ax2b.set_ylabel('Im')
+        #for tl in ax2b.get_yticklabels():
+            #tl.set_color('r')
+        plt.grid(True)
+        ax2b.legend(loc=1)
+        ax3.twin=ax2b
+    plt.tight_layout
+
+def xplot_sig_psd(x,y,label="",**kwargs):
+    """plot signal, fft and psd on three panels.
+    dft sets how the fft is plotted 
+    'realim': real and im parts,
+    'euler' argument and phase
+    'both' uses two panels (four in total).
+    """ 
+    N = len(y)
+    L=span(x,True)    
+        
+    ax1=plt.subplot(211)
+    plt.title('Signal')
+    plt.plot(x,y,**kwargs)
+    ax1.set_xlabel('mm')
+    plt.grid(1)
+    
+    ax4=plt.subplot(212) 
+    plt.title('PSD')
+    f,PSD=psd(x,y)
+    plt.plot(f,PSD,label=label,**kwargs)
+    plt.loglog()     
+    ax4.set_xlabel('mm^-1')
+    plt.grid(1)
+    plt.show()
+        
+    return ax1,ax4
+    
+def plot_sig_psd(x,y,label="",realim=False,
+    euler=False,power=True,includezerofreq=False,
+    yrange=None,prange=None,fignum=None,
+    aspect='auto', units=None,outname=None,norm=1,rmsnorm=True,**kwargs):
+    """plot signal, fft and psd on n panels according to flags, return axis.
+    for axis with a twin axis, the twin axis is appended to the first in a property 'twin'
+    parameter for plot function (styles etc., common to all plots) 
+        can be passed as kwargs
+    plots signal and  additional plots according to respective flags:
+    'realim': real and im parts,
+    'euler' argument and phase
+    'power' plot PSD calling psd with default parameters
+    """ 
+    #can be done in more advanced way with ax.change_geometry(numrows, numcols, num)
+    nsp=1+np.count_nonzero([realim,euler,psd]) #number of subplots
+    i=1 #index of subplot
+    axes=[]
+    
+    #ax1 SIGNAL
+    axes.append(plt.subplot(nsp,1,i))
+    i=i+1
+    plt.title('Signal') 
+    plt.plot(x,y,**kwargs)
+    plt.xlabel('mm')
+    plt.grid(1)
+    
+    f,yfft =  FFTtransform(x,y)
+    
+    '''
+    ##calculate
+    N = len(y)
+    L=span(x,True)    
+    #yfft  = np.fft.fft(y)
+    #yfft  = yfft[:int(np.ceil(N/2))] #select positive part of spectrum
+    yfft  = np.fft.rfft(y) #note that rfft return exact values as fft (needs to be doubled after squaring amplitude)
+    #f = np.fft.fftfreq(N,L/N)
+    #f = f[:int(np.ceil(N/2))]
+    f = np.fft.rfftfreq(N,L/N)
+    '''
+    
+    '''
+    The default normalization has the direct transforms unscaled and the inverse transforms are scaled by 1/n. It is possible to obtain unitary transforms by setting the keyword argument norm to "ortho" (default is None) so that both direct and inverse transforms will be scaled by 1/\sqrt{n}.
+    
+    N = len(y)
+    L=span(x,True)
+    #form = 1 --> normfactor = 1./N**2*L
+    
+    yfft  = np.fft.rfft(y*win) #note that rfft return exact values as fft (needs to be doubled after squaring amplitude)
+    
+    normfactor=normPSD(N,L,form=norm)
+    
+    if rmsnorm:  #normalize to rms of non windowed function. This is independent on 0 constant term, 
+    # but also alter its meaning 
+        normfactor=normfactor*np.nanstd(y)**2/np.nanstd(y*win)**2
+    
+    psd  = 2*normfactor*np.abs(yfft)**2
+    psd[0]=psd[0]/2  #the first component is not doubled
+    
+    freqs=np.fft.rfftfreq(N,np.float(L)/(N-1))
+    '''
+        
+    if realim:
+        ax2=plt.subplot(nsp,1,i)
+        axes.append(ax2)
+        i=i+1
+        plot_transform(f,yfft,label=label,includezerofreq=includezerofreq,**kwargs)
+        #for tl in ax2.get_yticklabels():
+            #tl.set_color('b')
+        
+    if euler:
+        ax3=plt.subplot(nsp,1,i)  
+        axes.append(ax3)
+        i=i+1        
+        plot_transform(f,yfft,label=label,includezerofreq=includezerofreq,euler=True,**kwargs)
+    
+    ##PLOT PSD
+    if power:
+        ax = plt.subplot(nsp,1,i)
+        axes.append(ax)
+        i=i+1
+        plt.title('PSD')
+        f,PSD=psd(x,y,**kwargs)
+        plt.plot(f,PSD,label=label,**kwargs)
+        plt.loglog()     
+        plt.xlabel('mm^-1')
+        plt.grid(1)
+        plt.ylim(prange)
+    
+    plt.tight_layout()
+    #plt.show()
+    return axes
+    
+def plot_sig_psd4(x,y,scale=1.0,label="",**kwargs):
+    """ wrapper around`plot_sig_psd4`
+    plot signal, fft and psd on three panels.
+    like `plot_sig_psd`, with fixed number of variables.
+    
+    ?? 
+    dft sets how the fft is plotted 
+    'realim': real and im parts,
+    'euler' argument and phase
+    'both' uses two panels (four in total).
+    """ 
+    
+    print ("WARNING: `plot_sig_psd4` was replaced with `plot_sig_psd`, update code!")
+    return plot_sig_psd(x,y,label=label,realim=True,
+    power=True,**kwargs)
+'''        
 def plot_sig_psd4(x,y,scale=1.0,label="",**kwargs):
     #replaced by the new plot_sig_psd
     """plot signal, fft and psd on three panels.
+    like `plot_sig_psd`, with fixed number of variables.
+    
+    ?? 
     dft sets how the fft is plotted 
     'realim': real and im parts,
     'euler' argument and phase
@@ -416,129 +693,8 @@ def plot_sig_psd4(x,y,scale=1.0,label="",**kwargs):
     plt.show()
         
     return ax1,ax2,ax3,ax4
-
-def plot_sig_psd(x,y,label="",realim=False,
-    euler=False,power=True,**kwargs):
-    """plot signal, fft and psd on n panels according to flags, return axis.
-    for axis with a twin axis, the twin axis is appended to the first in a property 'twin'
-    parameter for plot function (styles etc., common to all plots) 
-        can be passed as kwargs
-    plots signal and  additional plots according to respective flags:
-    'realim': real and im parts,
-    'euler' argument and phase
-    'power' plot PSD calling psd with default parameters
-    """ 
-    #can be done in more advanced way with ax.change_geometry(numrows, numcols, num)
-    nsp=1+np.count_nonzero([realim,euler,psd]) #number of subplots
-    i=1 #index of subplot
-    axes=[]
-    
-    N = len(y)
-    L=span(x,True)    
-    
-    #SIGNAL
-    axes.append(plt.subplot(nsp,1,i))
-    i=i+1
-    plt.title('Signal')
-    plt.plot(x,y,**kwargs)
-    plt.xlabel('mm')
-    plt.grid(1)
-
-    ##calculate
-    yfft  = np.fft.fft(y)
-    yfft  = yfft[:int(np.ceil(N/2))]
-    f = np.fft.fftfreq(N,L/N)
-    f = f[:int(np.ceil(N/2))]
-    
-    ##PLOT TRANSFORM AS COMPLEX NUMBER
-    if realim:
-        ax2=plt.subplot(nsp,1,i)
-        plt.title('DFT - Real and imaginary parts')
-        ax2.set_ylabel('time (s)')
-        ax2.plot(f,np.real(yfft),label=label+' Re',**kwargs)
-        #plt.loglog() 
-        ax2.set_xlabel('mm^-1')
-        ax2.set_ylabel('Re')
-        #for tl in ax2.get_yticklabels():
-            #tl.set_color('b')
-        ax2.legend(loc=2)
-            
-        ax2b = ax2.twinx()
-        ax2b.plot(f,np.imag(yfft),'.',label=label+' Im',**kwargs)
-        ax2b.set_ylabel('Im')
-        #for tl in ax2b.get_yticklabels():
-            #tl.set_color('r')
-        plt.grid(True)
-        ax2b.legend(loc=1)
-        ax2.twin=ax2b
-        axes.append(ax2)
-        i=i+1    
-
-    ##PLOT TRANSFORM AS EULER REPRESENTATION        
-    if euler:
-        ax3=plt.subplot(nsp,1,i)
-        plt.title('DFT - Module and phase')
-        plt.ylabel('time (s)')
-        plt.plot(f,np.abs(yfft),label=label+' Norm',**kwargs)
-        #plt.loglog() 
-        ax3.legend(loc=2)
-        plt.xlabel('mm^-1')
-        plt.ylabel('Norm')
-            
-        ax3b = ax3.twinx()
-        ax3.twin=ax3b
-        ax3b.plot(f,np.angle(yfft)/np.pi,'--',label=label+' Phase',
-        **kwargs)
-        ax3b.set_ylabel('Phase /$\pi$')
-        ax3b.set_ylim(-1.,1.)
-        plt.grid(1)
-        ax3b.legend(loc=1)
-        i=i+1
-        axes.append(ax3)
-    
-    ##PLOT PSD
-    if power:
-        axes.append(plt.subplot(nsp,1,i))
-        i=i+1
-        plt.title('PSD')
-        f,PSD=psd(x,y)
-        plt.plot(f,PSD,label=label,**kwargs)
-        plt.loglog()     
-        plt.xlabel('mm^-1')
-        plt.grid(1)
-    
-    plt.tight_layout()
-    plt.show()
-    return axes
-    
-def xplot_sig_psd(x,y,label="",**kwargs):
-    """plot signal, fft and psd on three panels.
-    dft sets how the fft is plotted 
-    'realim': real and im parts,
-    'euler' argument and phase
-    'both' uses two panels (four in total).
-    """ 
-    N = len(y)
-    L=span(x,True)    
-        
-    ax1=plt.subplot(211)
-    plt.title('Signal')
-    plt.plot(x,y,**kwargs)
-    ax1.set_xlabel('mm')
-    plt.grid(1)
-    
-    ax4=plt.subplot(212) 
-    plt.title('PSD')
-    f,PSD=psd(x,y)
-    plt.plot(f,PSD,label=label,**kwargs)
-    plt.loglog()     
-    ax4.set_xlabel('mm^-1')
-    plt.grid(1)
-    plt.show()
-        
-    return ax1,ax4
-    
-    
+'''
+  
 def testPSDest(x,y): 
     """plot 3 panels with: test profile, PSD calculated with different functions 
     and PSD calculated by piecewise matplotlib function, with different settings.
@@ -592,17 +748,20 @@ def test_psd_normalization(x,y,wfun=None,norm=1,**kwargs):
     
     f,p=psd(x,y,wfun=wfun,norm=norm,**kwargs)
     
-    print("== Quantities calculated from profile ==")
-    print("devstd**2=",np.std(y)**2, '(devstd=%f5.3)'%np.std(y))
-    print("rms**2=",(y**2/len(x)).sum())  #, '(rms=%f5.3)'%np.std(y)
-    print("== Quantities calculated from PSD ==")
-    print("sum of PSD is ",p[1:].sum())
-    print("integral of PSD (as sum*deltaf) is ",p[1:].sum()/span(x,1)) #span(x,size=1)=1/L
-    print("integral trapz: ",np.trapz(p[1:],f[1:]))
-    print("psd[0]*deltaf=%f (integral including:%f)"%(p[0]*f[1],p.sum()/span(x,1)))
-    print("#--------")
+    print ("== Quantities calculated from profile ==")
+    print ("Profile Height PV %6.3g (min: %6.3g, max: %6.3g)"%
+           (np.nanmax(y)-np.nanmin(y),np.nanmin(y),np.nanmax(y)))
+    print ("Profile Height avg.: ",np.nanmean(y))
+    print ("devstd**2=",np.std(y)**2, '(devstd=%f5.3)'%np.std(y))
+    print ("rms**2=",(y**2/len(x)).sum())  #, '(rms=%f5.3)'%np.std(y)
+    print ("\n== Quantities calculated from PSD ==")
+    print ("sum of PSD is ",p[1:].sum())
+    print ("integral of PSD (as sum*deltaf) is ",p[1:].sum()/span(x,1)) #span(x,size=1)=1/L
+    print ("integral trapz: ",np.trapz(p[1:],f[1:]))
+    print ("psd[0]*deltaf=%f (integral including:%f)"%(p[0]*f[1],p.sum()/span(x,1)))
+    print ("#--------\n")
     
-    return f,p   
+    return f,p          
     
         
 if __name__=="__main__":
@@ -614,7 +773,7 @@ if __name__=="__main__":
     ystartend=(3,20)
     #ystartend=(0,0)
     
-    x,y=make_signal(amp,L,N,nwaves,ystartend,noise)
+    x,y=make_signal(amp,L=L,N=N,nwaves=nwaves,ystartend=ystarted,noise=noise)
     ax1,ax2,ax3=testPSDest(x,y)   
     
     plt.sca(ax2)
