@@ -354,7 +354,9 @@ def fit_cone(pts,odr2,zscale=1.,keepnan=False,**kwargs):
         
 def fit_cylinder(pts,odr2,zscale=1.,keepnan=False,align=False,**kwargs):  
     """   fit pts and return residuals. Info are printed. 
-    odr2: starting guess. typically: odr2=(span(xg).sum()/2.,R,0,0.) 
+    odr2: starting guess for fom func parameters. 
+        for cylinder_error3, it is (origin_y,origin_z,direction_x,direction_z),
+        meaning for axis nearly parallel to y: odr2=(x_center,R,0.,0.) 
         fom,deltaR,pars=fit_cylinder(pts,odr2,fom_func)
     zscale: factor to divide z data to obtain same units as x and y, 
         e.g. 1000. for x and y in mm and z in um. Output is in same unit as input.
@@ -371,6 +373,8 @@ def fit_cylinder(pts,odr2,zscale=1.,keepnan=False,align=False,**kwargs):
     #filter for nans, note that this is done here rather than in fom_func so it
     #is performed only once.
     mask=~np.isnan(pts[:,2])
+    
+    if not isinstance(odr2,np.ndarray): odr2=np.array(odr2)
     
     #find odr from optimization if maxiter is set otherwise use 
     mi=None

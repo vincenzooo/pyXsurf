@@ -164,36 +164,6 @@ def fitlegendre(x,y,deg,nanstrict=False,fixnans=False):
 
     return result
 
-def plot_stats(datalist,x=None,y=None,bins=100,labels=None,*args,**kwargs):
-    """plot histogram and returns statistics. Experimental.
-    Ignore invalid values. Data are not leveled.
-    Returns array of rms.
-    Additional keywords are passed to plt.hist (might fail for duplicate keywords)
-
-    usage:
-    plt.figure('stats')
-    plt.clf()
-    stats = plot_stats ([wdata,wdata2,ddata],labels=['Original',
-    'Figured','Difference'])
-    plt.title('Height Distribution')  #change title from default
-
-    """
-
-    plt.figure('hist')
-    plt.clf()
-    plt.title('Height Distribution')
-
-    if np.array(datalist).size == 1:
-        datalist = [datalist]
-    if labels is None:
-        labels=[""]*len(datalist)
-    rms=[]
-    for d,l in zip(datalist,labels):
-        plt.hist(d[np.isfinite(d)],bins=bins,label=l+', rms=%.3g $\mu$m'%np.nanstd(d),alpha=0.2
-            ,*args,**kwargs)
-        rms.append(np.nanstd(d))
-    plt.legend(loc=0)
-    return rms
 
 def levellegendre(x,y,deg,nanstrict=False):
     """remove degree polyomial by line, evolution of leveldata using legendre functions
@@ -210,7 +180,7 @@ def level_data(data,x=None,y=None,degree=(1,1),axis=None,byline=False,fit=False,
     """use RA routines to remove degree 2D legendres or levellegendre if leveling by line.
     Degree can be scalar (it is duplicated) or 2-dim vector. must be scalar if leveling by line.
     leveling by line also hondle nans.
-    x is not used, but maintained for interface consistency.
+    x and y are not used, but maintained for interface consistency.
     fit=True returns fit component instead of residuals"""
     from utilities.imaging.fitting import legendre2d
 
@@ -228,7 +198,28 @@ def level_data(data,x=None,y=None,degree=(1,1),axis=None,byline=False,fit=False,
         leg = level_data(data.T,y,x,degree,axis=0,fit=True,*args,**kwargs)[0].T
     elif axis is None: #plane level
         if np.size(degree)==1: degree=np.repeat(degree,2)
-        leg=legendre2d(data,degree[0],degree[1],*args,**kwargs)[0] #legendre2d(d, xo=2, yo=2, xl=None, yl=None)
+        
+        ## set fixed parameters
+        totdeg = np.sum(degree)
+        
+        # make xl, yl
+        xo=degree[0]
+        yo=degree[1]
+
+        xl,yl = [f.flatten() for f in np.meshgrid(np.arange(xo+1),np.arange(yo+1))]
+        #print('\n',xl,'\n',yl)
+
+        sel = [xxl + yyl < totdeg for xxl,yyl in zip(xl,yl)]
+        #print(sel)
+        #pdb.set_trace()
+        xl=xl[sel]
+        yl=yl[sel]
+        #make xl, yl
+        
+        #list(zip(*[f.flatten() for f in np.meshgrid(np.arange(xo+1),np.arange(yo+1))]))
+        #[(0, 0), (1, 0), (0, 1), (1, 1)] #xo=1,yo=1
+
+        leg=legendre2d(data,x,y,xl=xl,yl=yl,*args,**kwargs)[0] #legendre2d(d, xo=2, yo=2, xl=None, yl=None)
     
     return (leg if fit else data-leg),x,y #fails with byline 
     #return (leg[0] if fit else data-leg[0]),x,y
@@ -400,9 +391,10 @@ def register_data(data,x,y,scale=(1,1,1.),
         scale: scale the three axis of the `scale` factor, if sign is changed, reorder.
         strip: if True, strip all nans at the border of the data.
         crop: list of ranges (3 axis) to pass to data2D.crop_data
-        center: position of final center (0,0) in x and y data coordinates
-
-    unexpected parameters passed to register_data are ignored (*args and **kwargs are not used, just suppress error).
+        center: final position of data center (0,0) in x and y data coordinates, 
+        if 2 element, center data coordinates, if 3 elements, center also data.
+        This means e.g. that data are first cropped (or cleaned of invalid data) than centered. This means that the value puts in the provided coordinate(s) the center of points after cropping operations.
+        unexpected parameters passed to register_data are ignored (*args and **kwargs are not used, just suppress error).
 
     Note that read_data already calls register (after stripping common arguments) careful not to call twice.
     """
@@ -451,12 +443,12 @@ def data_equal(d1,d2,nanstrict=False):
     raise NotImplementedError
 
 
-def read_data(file,reader,**kwargs):
+def read_data(file,rreader,**kwargs):
 
-    """read data from a file using a given reader with custom options in args, kwargs.
+    """read data from a file using a given raw reader `rreader`, with custom options in `args, kwargs`.
 
-    The function calls reader, but, before this, strips all options that are recognized by register_data,
-      all remaining unkown parameters are passed to reader.
+    The function calls raw reader, but, before this, strips all options that are recognized by register_data,
+      all remaining unkown parameters are passed to rreader.
     Then register_data is called with the previously stored settings (or defaults if not present).
 
     This was made to hide messy code beyond interface. See old notes below, internal behavior can be better fixed e.g. by using dataIO.dicts.pop_kw and inspect.signature and fixing header interface.
@@ -469,11 +461,28 @@ def read_data(file,reader,**kwargs):
         while this can be done using read_data.
 
         this is an ugly way to deal with the fact that return
-    arguments are different if header is set, so when assigned to a variable as in patch routines in pySurf instrumentReader it fails.
-    Workaround has been calling directly read_data, not optimal.
+        arguments are different if header is set, so when assigned to a variable as in patch routines in pySurf instrumentReader it fails.
+        Workaround has been calling directly read_data, not optimal.
 
-    2019/04/09 merged from data2D and instrumentReader to data2D. Mostly code from data2D and comments
-        from instrumentReader. code commented with ## was excluded."""
+        2019/04/09 merged from data2D and instrumentReader to data2D. Mostly code from data2D and comments
+            from instrumentReader. code commented with ## was excluded.
+            
+        non essendo sicuro dell'interfaccia per ora faccio cosi'.
+        The function first calls the (raw) data reader, then applies the register_data function to address changes of scale etc,
+        arguments are filtered and passed each one to the proper routine.
+        18/06/18 add all optional parameters, if reader is not passed,
+        only registering is done. note that already if no register_data
+        arguments are passed, registration is skipped.
+        18/06/18 add action argument. Can be  'read', 'register' or 'all' (default, =read and register). This is useful to give fine control, for example to modify x and y after reading and still make it possible to register data (e.g. this is done in
+        Data2D.__init__).    
+    """
+    
+    ##if kwargs.pop('header',False):
+    ##    try:
+    ##        h = reader(file,header=True)
+    ##        return h if h else ""
+    ##    except TypeError:  #unexpected keyword if header is not implemented
+    ##        return None
 
     #filters register_data parameters cleaning args
     # done manually, can use `dataIO.dicts.pop_kw`.
@@ -489,7 +498,8 @@ def read_data(file,reader,**kwargs):
     #    [(1,1,1),None,None,False])
 
     #get_data using format_reader
-    data,x,y=reader(file,**kwargs)
+    #pdb.set_trace()
+    data,x,y=rreader(file,**kwargs)
 
     return register_data(data,x,y,scale=scale,crop=crop,
         center=center,strip=strip,**kwargs)
@@ -597,9 +607,11 @@ def get_data(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,addaxis
     """replaced by data_from_txt."""
     print ('this routine was replaced by `data_from_txt`, update code')
 
-def data_from_txt(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,addaxis=False,center=None,skip_header=None,delimiter=' ',strip=False):
-    """read matrix from text file. Return data,x,y
-    This shouldn't be called directly, there are smarter ways of doing it using read_data and readers,
+def data_from_txt(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,
+    addaxis=False,center=None,skip_header=None,delimiter=' ',strip=False,**kwargs):
+    """read matrix from text file. Return data,x,y.
+    handle addaxis, center and strip nan, on top of all `np.genfromtxt` options.
+    This function shouldn't be called directly, there are smarter ways of doing it using read_data and readers,
       however, this is a quick way to get data from text if you don't know what I am talking about.
 
     center: is the position of the center of the image in final coordinates (changed on 2016/08/10, it was '(before any scaling or rotation) in absolute coordinates.') If None coordinates are left unchanged.
@@ -609,6 +621,14 @@ def data_from_txt(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,ad
     strip (renamed from autocrop): remove frame of nans (external rows and columns made all of nans),
         note it is done before centering. To include all data in centering, crop data
         at a second time with remove_nan_frame
+        
+    2020/07/10 Added kwargs even if they are not used to suppress error if unknown arguments
+        are passed, that can be convenient when kwargs for multiple subfunctions are passed
+        to the calling code. This way, kwargs that are meant for another function are tollerated,
+        even if it is suboptimal, a better filtering of kwargs should be done.
+        For example, makes it fail when called by instrument_reader.read_data with header=True,
+        because even if the function doesn't expect a header keyword, the caller routine doesn't
+        detect the error. Solution is to make the calling routine check for undefined values?
     """
     #pdb.set_trace()
     #2014/04/29 added x and y as preferred arguments to xrange and yrange (to be removed).
@@ -616,9 +636,9 @@ def data_from_txt(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,ad
         skip=0
     else:
         skip=skip_header
-
+    #pdb.set_trace()
     mdata=np.genfromtxt(filename,skip_header=skip,delimiter=delimiter)
-    if addaxis:
+    if addaxis: 
         y,mdata=np.hsplit(mdata,[1])
         y=y[1:].flatten() #discard first corner value
         x,mdata=np.vsplit(mdata,[1])
@@ -970,11 +990,42 @@ def get_stats(wdata,x=None,y=None,units=None):
     stats=['RMS:%3.3g %s'%(np.nanstd(wdata),u),'PV:%3.3g %s'%(span(wdata,size=1),u)]
     return stats
 
+def plot_stats(datalist,x=None,y=None,bins=100,labels=None,*args,**kwargs):
+    """plot histogram and returns statistics. Experimental.
+    Ignore invalid values. Data are not leveled.
+    Returns array of rms.
+    Additional keywords are passed to plt.hist (might fail for duplicate keywords)
 
-def data_histostats(data,x=None,y=None,bins=100,normed=True,units=None,loc=0,*args,**kwargs):
+    usage:
+    plt.figure('stats')
+    plt.clf()
+    stats = plot_stats ([wdata,wdata2,ddata],labels=['Original',
+    'Figured','Difference'])
+    plt.title('Height Distribution')  #change title from default
+
+    """
+
+    plt.figure('hist')
+    plt.clf()
+    plt.title('Height Distribution')
+
+    if np.array(datalist).size == 1:
+        datalist = [datalist]
+    if labels is None:
+        labels=[""]*len(datalist)
+    rms=[]
+    for d,l in zip(datalist,labels):
+        plt.hist(d[np.isfinite(d)],bins=bins,label=l+', rms=%.3g $\mu$m'%np.nanstd(d),alpha=0.2
+            ,*args,**kwargs)
+        rms.append(np.nanstd(d))
+    plt.legend(loc=0)
+    return rms
+    
+def data_histostats(data,x=None,y=None,bins=100,density=True,units=None,loc=0,*args,**kwargs):
     """wrapper around plt.hist, plot histogram of data (over existing window) adding label with stats."""
     units=units if units is not None else ['[X]','[Y]','[Z]']
-    res = plt.hist(data[np.isfinite(data)],bins=bins,normed=normed,*args,**kwargs)
+    #pdb.set_trace()
+    res = plt.hist(data[np.isfinite(data)],bins=bins,density=density,*args,**kwargs)
     plt.xlabel('Units of '+units[2])
     plt.ylabel('Fraction of points #')
     legend="\n".join(get_stats(data,x,y,units=units))+"\n"+'x_span: %.3g\ny_span: %.3g\nN: %i'%(span(x,size=1),
@@ -986,7 +1037,7 @@ def data_histostats(data,x=None,y=None,bins=100,normed=True,units=None,loc=0,*ar
 
 ## PLOT FUNCTIONS
 
-def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,loc=0,
+def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,loc=0,contour=False,colors=None,
     largs=None,framealpha=0.5,nsigma=None,*args,**kwargs):
     """Plot data using imshow and modifying some default properties.
     Units for x,y,z can be passed as 3-el array or scalar, None can be used to ignore unit.
@@ -1000,8 +1051,11 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     nsigma set colorscale to this multiple of data standard deviation.
     In alternative can be a dictionary containing arguments for remove_outliers. 
     If None (default) range is not changed from matplotlib defaults.
-    If dict, a nummber of parameters for can be passed to remove_outliers.remove_outliers to determine color range (data are left intact)."""
+    If dict, a nummber of parameters for can be passed to remove_outliers.remove_outliers to determine color range (data are left intact).
+    2020/07/14 added flag `contour` to overplot contours, and colors,
+    to be passed to `plt.contour`"""
 
+    ## SET PLOT OPTIONS
     aspect=kwargs.pop('aspect','equal')
     origin=kwargs.pop('origin',"lower")
     interpolation=kwargs.pop('interpolation',"none")
@@ -1018,42 +1072,65 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     if np.size(units)==1:
         units=np.repeat(units,3)
 
+    if nsigma is not None:
+        #pdb.set_trace()
+        #questo in qualche modo intercettava l'errore in `remove_outliers`
+        #  ma non funzionava quando il range erea buono.
+        #with warnings.catch_warnings(record=True) as w:  
+
+        if isinstance(nsigma,dict): #if more than one option were passed
+            clim=remove_outliers(data,span=True,**nsigma)
+        else:
+            clim=remove_outliers(data,span=True,nsigma=nsigma)
+
+        #pdb.set_trace()
+        """
+        if len(w)>0: #w[0]:
+            #pdb.set_trace()
+            if isinstance(w,outliers.EmptyRangeWarning):
+                warnings.warn('Range after filtering was empty, plotting full set of data.',EmptyPlotRangeWarning)
+            clim=span(data)
+        """
+        if len(clim)==0: 
+            print('Range after filtering was empty, plotting full set of data.')
+            clim=span(data)
+            
+        #plt.clim(*clim)
+    #print('clim',clim)
+    else:
+        clim=[None,None]  #set to None to handle with vmin, vmax
+
+    ## SET AXIS COORDINATES
+    #plotting is here to resolve conflict with clim
     if x is None: x = np.arange(data.shape[1])
     if y is None: y = np.arange(data.shape[0])
     assert x[-1]>x[0] and y[-1]>y[0]
 
     sx=span_from_pixels(x)
     sy=span_from_pixels(y)
+    
+    vmin=kwargs.pop('vmin',clim[0])
+    vmax=kwargs.pop('vmax',clim[1])
+    
+    ## PLOT
+    #pdb.set_trace()
     axim=plt.imshow(data,extent=(sx[0],sx[1],sy[0],sy[1]),
-        aspect=aspect,origin=origin,interpolation='none',**kwargs)
+            aspect=aspect,origin=origin,interpolation='none',
+            vmin=vmin, vmax=vmax,**kwargs) #this fails if unknown kwargs is passed.
+        
+    
+    if contour: plt.contour(x,y,data,colors=colors,**kwargs)
     #axim=plt.imshow(data,extent=(span(x)[0]-dx,span(x)[1]+dx,span(y)[0]-dy,span(y)[1]+dy),
     #    **pop_kw(kwargs,{'aspect':'equal',
     #                'origin':"lower",
     #                'interpolation':"none"}))
     #print(kwargs)
 
-    if nsigma is not None:
-        #pdb.set_trace()
-        with warnings.catch_warnings(record=True) as w:
-
-            if isinstance(nsigma,dict): #if more than one option were passed
-                clim=remove_outliers(data,span=True,**nsigma)
-            else:
-                clim=remove_outliers(data,span=True,nsigma=nsigma)
-
-            #pdb.set_trace()
-            if len(w)>0: #w[0]:
-                #pdb.set_trace()
-                if isinstance(w,outliers.EmptyRangeWarning):
-                    warnings.warn('Range after filtering was empty, plotting full set of data.',EmptyPlotRangeWarning)
-                clim=span(data)
-
-        plt.clim(*clim)
-    #print('clim',clim)
-
+    ## AXIS LABELS
     plt.xlabel('X'+(" ("+units[0]+")" if units[0] is not None else ""))
     plt.ylabel('Y'+(" ("+units[1]+")" if units[1] is not None else ""))
-
+    
+    ## ADJUST COLORBAR:
     #im_ratio = data.shape[0]/data.shape[1]   #imperfect solution found on stack overflow. Doesn't work in some cases (3 panels? logaritmic axis?)
     ax=plt.gca()  #try my variation
     s=ax.get_position().size
@@ -1063,16 +1140,17 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     ## ma puo' dare problemi per aree peculiari
     cb = plt.colorbar(axim,fraction=0.046*im_ratio, pad=0.04)
     #cb=plt.colorbar()
-    
     if units[2] is not None:
         cb.ax.set_title(units[2])
         #cb.ax.set_xlabel(units[2],rotation=0)
         #cb.ax.xaxis.set_label_position('top')
         #cb.ax.xaxis.label.set_verticalalignment('top') #leave a little bit more room
+        
+    ## LEGEND BOX    
     if stats:
         legend=get_stats(data,x,y,units=units)
         if stats==2:
-            legend.extend(["x_span: %.3g %s"%(span(x,size=1),(units[0] if units[0] else "")),"y_span: %.3g %s"%(span(y,size=1),(units[1] if units[1] else "")),"size: %i"%np.size(data)])
+            legend.extend(["avg: %.3g %s"%(np.nanmean(data),(units[2] if units[2] else "")),"x_span: %.3g %s"%(span(x,size=1),(units[0] if units[0] else "")),"y_span: %.3g %s"%(span(y,size=1),(units[1] if units[1] else "")),"size: %i"%np.size(data)])
         l=legendbox(legend,loc=loc,framealpha=framealpha)
         #pdb.debug()
         #for k,v in largs.items():
@@ -1081,7 +1159,8 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
         #plt.setp(l.get_texts(), color='r')
     if title is not None:
         plt.title(title)
-    if outfile is not None:
+        
+    if outfile is not None: #useless, just call plt.savefig
         plt.savefig(outfile)
     
     return axim

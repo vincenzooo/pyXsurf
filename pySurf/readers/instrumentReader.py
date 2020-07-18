@@ -1,4 +1,14 @@
 """
+2020/07/14 see notes on 02/29. raw readers in format_reader should
+   return data with the minimal amount of manipulation and the most general interface. All format/instrument specific aspects
+   should be handled there.
+   TODO: At the moment `header` flag (set to return header rather than data), is handled by `data2D.read_data` routine called by readers in this file, that wraps the raw reader,
+   and registers data. `Data2D.__init__` method when called with a file also fill the property `.header`, this should be handled by calling read_data with     
+   , needs to be handled here. Note that some raw readers retrieve header information independently (e.g. as property `header` of an object. In this case, all the handling is done here.
+   
+   Note also that the entire module might be unnecessary, many of the reader functions say: '''temporary wrapper for new readers, replace call to matrixZygo_reader
+    with calls to read_data(wfile,reader=csvZygo_reader)'''
+
 2020/05/13 change import calls to use pySurf.readers.format_reader instead of _instrument_reader
 
 2020/03/17 
@@ -49,6 +59,7 @@ from pySurf.points import crop_points
 from pySurf.points import points_find_grid
 from pySurf.points import resample_grid
 from .read_sur_files import readsur
+from pySurf.data2D import read_data
 #from utilities.imaging.man import stripnans
 from dataIO.read_pars_from_namelist import read_pars_from_namelist
 import pdb
@@ -57,7 +68,8 @@ import pdb
 #from pySurf.readers._instrument_reader import read_data
 #from pySurf.readers._instrument_reader import reader_dic
 #from pySurf.readers._instrument_reader import points_reader
-
+'''
+2020/07/13 removed, use alt version in data2D
 def read_data(file,reader,register=True,*args,**kwargs):
     """non essendo sicuro dell'interfaccia per ora faccio cosi'.
     The function first calls the (raw) data reader, then applies the register_data function to address changes of scale etc,
@@ -80,10 +92,10 @@ def read_data(file,reader,register=True,*args,**kwargs):
     Workaround has been calling directly read_data, not optimal."""
     if kwargs.pop('header',False):
         try:
-            return reader(file,header=True)
+            h = reader(file,header=True)
+            return h if h else ""
         except TypeError:  #unexpected keyword if header is not implemented
             return None
-
 
     #filters register_data parameters cleaning args
     # done manually, there is a function in dataIO.
@@ -93,6 +105,7 @@ def read_data(file,reader,register=True,*args,**kwargs):
     strip=kwargs.pop('strip',False)
     regdic={'scale':scale,'crop':crop,'center':center,'strip':strip}
 
+    #pdb.set_trace()
     data,x,y=reader(file,*args,**kwargs)
 
     #try to modify kwargs
@@ -103,6 +116,7 @@ def read_data(file,reader,register=True,*args,**kwargs):
         data,x,y=register_data(data,x,y,scale=scale,crop=crop,
         center=center,strip=strip)
     return data,x,y
+    '''
 
 def xread_data(file,reader,register=True,*args,**kwargs):
     """non essendo sicuro dell'interfaccia per ora faccio cosi'.
@@ -163,14 +177,15 @@ def matrix_reader(wfile,*args,**kwargs):
     from pySurf.data2D import data_from_txt
     return read_data(wfile,data_from_txt,*args,**kwargs)
 
-def matrix4D_reader(wfile,*args,**kwargs):
+def matrix4D_reader(wfile,header=False,delimiter=',',*args,**kwargs):
     """temporary wrapper for new readers, replace call to matrix4D_reader
-    with calls to read_data(wfile,reader=matrix4D_reader)"""
+    with calls to read_data(wfile,reader=matrix4D_reader).
+    """
     from pySurf.readers.format_reader import csv4D_reader
 
     #import pdb
     #pdb.set_trace()
-    return read_data(wfile,csv4D_reader,*args,**kwargs)
+    return read_data(wfile,csv4D_reader,delimiter=delimiter,*args,**kwargs)
 
 
 def matrixsur_reader(wfile,*args,**kwargs):
@@ -293,31 +308,31 @@ def fitsAFM_reader(fitsfile,sizeum=None):
     data=data*1e6  #convert from m to um
     return matrix_to_points(data,x,y)
 
-def fitsCCI_reader(fitsfile,center=None,head=False):
+def fitsCCI_reader(fitsfile,center=None,header=False):
     """return x,y (vectors) and data (matrix) from fits CCI file.
     center can be none, in which case data are not centered.
     To extract center position from header, use center=(None,None)."""
     aa=fits.open(fitsfile)
-    header=aa[0].header
+    HH=aa[0].header   # HH to avoid naming `header` too many things.
     data=aa[0].data
     aa.close()
 
-    dx=header['DX']
-    dy=header['DY']
-    x=dx*np.arange(data.shape[0])/header['XUNITRAT'] #convert in mm
-    y=dy*np.arange(data.shape[1])/header['YUNITRAT']
+    dx=HH['DX']
+    dy=HH['DY']
+    x=dx*np.arange(data.shape[0])/HH['XUNITRAT'] #convert in mm
+    y=dy*np.arange(data.shape[1])/HH['YUNITRAT']
 
     if center is not None:
         assert len(center)>=2
         if (center is None).any():
-            center=(header['XOFFSET'],header['YOFFSET'])
+            center=(HH['XOFFSET'],HH['YOFFSET'])
         x=x-(np.max(x)+np.min(x))/2.+center[0]
         y=y-(np.max(y)+np.min(y))/2.+center[1]
         if len(center)==3:
             data=data-(np.nanmax(data)+np.nanmin(data))/2.+center[2]
 
-    if head:
-        return (data,x,y),header
+    if header:
+        return HH
     else:
         return data,x,y
 

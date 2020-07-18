@@ -288,7 +288,7 @@ def build_database(confdic,outfolder=None,columns=None,dis=False,
     """Process all files and return stats database in form of pd.DataFrame from confdic. 
     plot_repeat and plot_rep_diff are used to read fits files and calculate rmss.
     If outfolder is provided, output plots are generated in functions.
-    Expect and index for columns (can be multiindex.)
+    Expect an index for columns (can be multiindex.)
     If dis is set, display (set to True for single dataset, False for multiple config processing."""
     
     def make_dates(stats):
@@ -617,8 +617,45 @@ def stats_from_json(jfile,include=None,exclude=None,outfolder=None,columns=None)
     plt.title('rms after conical correction for different samples')
     display(plt.gcf())
     return stats,dates
-
     
+"""
+EXAMPLE OF CONFIG.JSON
+
+{
+"180719_CylRef_repeat": {
+"infolder": "tests\\input_data\\180719_Repeatibility",
+"files": [
+"180719_01_CylRef_01.fits",
+"180719_02_CylRef_01.fits",
+"180719_03_CylRef_01.fits"
+],
+"outname": "testset01",
+"sample": "CylRef",
+"testtype": "repeat",
+"trans": "",
+"operator": "VC",
+"date": "2018/07/19",
+"markers": []
+},
+
+"180719_CylRef_reprod": {
+"infolder": "tests\\input_data\\180719_Repeatibility",
+"files": [
+"180719_04_CylRef_01.fits",
+"180719_05_CylRef_01.fits",
+"180719_06_CylRef_01.fits"
+],
+"outname": "testset02",
+"sample": "CylRef",
+"testtype": "reprod",
+"trans": "",
+"operator": "LS",
+"date": "2018/07/19",
+"markers": []
+}
+}
+"""   
+   
 if __name__=="__main__":
     
     plt.ion()

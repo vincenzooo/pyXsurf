@@ -37,7 +37,11 @@ def csv4D_reader(wfile,ypix=None,ytox=None,header=False,delimiter=',',endline=Tr
     """read csv data in 4sight 4D format.
     12 lines header with info in namelist format, uses `xpix`, `aspect` and `wavelength` if available.
     Note that standard csv format ends line with `,` which adds an extra column.
-    This is automatically removed if `endline` is set to True."""
+    This is automatically removed if `endline` is set to True.
+    Note also that typically instruments invert y axis, but this is not implemented at the moment. 
+    TODO: change y scale after code reorganization.
+    2020/07/14 read data directly with `np.genfromtxt`,
+    rather than uselessely launching the wrapper `data2D.data_from_txt`."""
 
     head=read_pars_from_namelist(wfile,': ') #this returns a dictionary, order is lost if header is returned.
     if header:
@@ -59,10 +63,12 @@ def csv4D_reader(wfile,ypix=None,ytox=None,header=False,delimiter=',',endline=Tr
         zscale=np.float(head['wavelength'])
     except KeyError:
         zscale=1.
-    from pySurf.data2D import data_from_txt
+    
+    #from pySurf.data2D import data_from_txt
     #data=np.genfromtxt(wfile,delimiter=delimiter,skip_header=12)
-    data=data_from_txt(wfile,delimiter=delimiter,skip_header=skip_header)[0]
-
+    #data=data_from_txt(wfile,delimiter=delimiter,skip_header=skip_header)[0]
+    data=np.genfromtxt(wfile,skip_header=skip_header,delimiter=delimiter)
+    #pdb.set_trace()
     #this defines the position of row/columns, starting from
     # commented 2018/08/28 x and y read directly
     if endline:
@@ -85,15 +91,6 @@ def points_reader(wfile,header=False,*args,**kwargs):
     x,y=points_find_grid(w,'grid')[1]
     pdata=resample_grid(w,matrix=True)
     return pdata,x,y
-
-def sur_reader(wfile,header=False,*args,**kwargs):
-    """read .sur binary files."""
-    head=readsur(wfile,*args,**kwargs)
-    if header: return head
-
-    data,x,y=head.points,head.xAxis,head.yAxis
-    del(head.points,head.xAxis,head.yAxis) #remove data after they are extracted from header to save memory.
-    return data,x.flatten(),y.flatten()   #are returned as column vector
 
 def datzygo_reader(wfile,header=False,*args,**kwargs):
     """read .dat binary files (MetroPro/Zygo)."""
@@ -289,9 +286,17 @@ def fits_reader(fitsfile,header=False):
 
 from .read_sur_files import readsur
 
+def sur_reader(wfile,header=False,*args,**kwargs):
+    """read .sur binary files."""
+    head=readsur(wfile,*args,**kwargs)
+    if header: return head
 
+    data,x,y=head.points,head.xAxis,head.yAxis
+    del(head.points,head.xAxis,head.yAxis) #remove data after they are extracted from header to save memory.
+    return data,x.flatten(),y.flatten()   #are returned as column vector
+    
 def read_sur(file,header=False):
-    """Convert `res` object returned by `readsur` reader in data,x,y"""
+    """Convert `res` object returned by `readsur` reader to data,x,y"""
     res = readsur(file,raw = False)
     data,x,y = res.points,res.xAxis,res.yAxis
     del res.points
@@ -328,10 +333,10 @@ def test_reader(file,reader,outfolder=None,infolder=None,**kwargs):
     
 #used by auto_reader to open according to extension
 reader_dic={#'.asc':csvZygo_reader,
-            '.csv':csv4D_reader} #,
+            '.csv':csv4D_reader,
             #'.fits':fitsWFS_reader,
             #'.txt':points_reader,
-            #'.sur':sur_reader,
+            '.sur':sur_reader} #,
             #'.dat':datzygo_reader}
 
 def auto_reader(wfile):
@@ -340,7 +345,7 @@ def auto_reader(wfile):
     try:
         reader=reader_dic[ext]
     except KeyError:
-        print ('fileformat ``%s``not recognized for file %s'%(ext,file))
+        print ('fileformat ``%s``not recognized for file %s'%(ext,wfile))
         print ('Use generic text reader')
         reader=points_reader  #generic test reader, replace with asciitables
 

@@ -12,6 +12,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
+import pdb
 
 
 ## profile creation
@@ -40,15 +41,25 @@ def line(x,y=None):
     else:
         return y
         
-def make_signal(amp,L,N,nwaves,ystartend=(0,0),noise=0.,minus_one=False):
-    """Build a signal of length L and number of points N, as a sum of a sinusoid, a line and a noise. minus_one remove last point (just a convenience e.g. 
-    for a periodic profile)."""
+def make_signal(amp,L=1.0,N=None,nwaves=None,phase=0,ystartend=(0,0),noise=0.,minus_one=False):
+    """
+    Build a signal of length L and number of points N, as a sum of a cosinusoid, a line and a noise. minus_one remove last point (just a convenience e.g. 
+    for a periodic profile).
+    Phase adds a phase in radians (the armonic component of signal is defined as `amp*np.sin(2*np.pi*x/L*nwaves+phase)`).
+    
+    VC 2020/07/17 make signal a cosine (it was a sine), because more consistent with real part of imaginary number.
+    VC 2020/06/27 horrible interface with args, replace with kwargs with defaults.
+    Added phase.
+    OLD CODE NEEDS TO be UPDATED! TODO: file search
+    """
     
     x=np.arange(N,dtype=float)/(N-1)*L
     l=line(x,ystartend)
-    y=amp*np.sin(2*np.pi*x/L*nwaves) + noise*np.random.random(N)+l
+    if nwaves is not None:
+        y=amp*np.cos(2*np.pi*x/L*nwaves+phase) 
+    y = y + noise*np.random.random(N)+l  #apply noise and line at once.
     if minus_one:
-        x,y=x[:-1],y[-1]
+        x,y=x[:-1],y[:-1]
     return x,y
 
 def make_circle(x,c,r,sign=1):
@@ -57,7 +68,42 @@ def make_circle(x,c,r,sign=1):
     y=np.sqrt(R**2-(x-c[0])**2)+c[1]
     return x,y*np.sign(sign)
     
+def find_internal_interval(x,y):
+    """find the largest interval of profile with all valid point.
+    See pySurf.data2D.find_internal_rectangle."""
+    raise NotImplementedError
+    #return x,y
+    
+def remove_nan_ends(x,y=None,internal=False):
+    """remove all y points at the two ends of profile that contains only nans in y. If internal is set, return the
+    internal crop (largest internal segments without nans)."""
+    
+    if y is None:
+        y = x
+        x = np.arange(np.size(y))
+    
+    #resuls are obtained by slicing,
+    nanpts=np.where(~np.isnan(y))[0] #indices of columns containing all nan
+    if np.size(nanpts)>0:  
+    
+        try:
+            istart=nanpts[nanpts==np.arange(len(nanpts))][-1]+1
+        except IndexError:
+            istart=0
+            
+        try:
+            istop=nanpts[np.arange(data.shape[1])[-len(nanpts):]==nanpts][0]
+        except IndexError:
+            istop=np.size(y)+1
+        x=x[istart:istop]
+        y=y[istart:istop]
 
+    if internal:
+        r=find_internal_interval(x,y)
+        x,y=crop_profile(x,y,*r)
+
+    return x,y
+    
 #profile fitting
 
 def polyfit_profile (x,y=None,degree=1):
@@ -78,11 +124,81 @@ def polyfit_profile (x,y=None,degree=1):
 
         
 ##PROFILE I/O
-def save_profile(filename,x,y,**kwargs):
     
+def register_profile(x,y,scale=(1,1),
+    strip=False,crop=None,center=None,*args,**kwargs):
+    """get x,y and register them using usual set of parameters.
+
+    registering operation are performed in the following order and are:
+        scale: scale the two axis of the `scale` factor, if sign is changed, reorder.
+        strip: if True, strip all nans at the border of the data.
+        crop: list of ranges (2 axis) to pass to profile.crop_profile
+        center: the final position of profile center, if 1 element, only x is centered, if 2 elements, y is centered also.
+    This means e.g. that data are first cropped (or cleaned of invalid data) than centered. This means that the value puts in the provided coordinate(s) the center of points after cropping operations.
+
+    unexpected parameters passed to register_data are ignored (*args and **kwargs are not used, just suppress error).
+
+    `load_profile` doesn't automatically call `register_data`,
+        this might be different from pySurf.
+    """
+
+    x=x*scale[0]
+    y=y*scale[1]
+    
+    #if x is inverted, invert data and orient as cartesian.
+    #this maybe can be move somewhere else, maybe in class set_data,x,y
+    # but be careful to avoid double reflection.
+    
+    if x[-1]<x[0]:
+        x=x[::-1]
+        data=np.fliplr(data)
+        x=x-min(x)
+
+    #adjust crop and scales
+    if strip:  #messes up x and y
+        #print("WARNING: strip nans is not properly implemented and messes up X and Y.")
+        x,y = remove_nan_ends(x,y)
+
+    #doing cropping here has the effect of cropping on cartesian orientation,
+    #coordinates for crop are independent on center and dependent on scale and x bin (pixel size).
+    #center is doing later, resulting in center of cropped profile only is placed in the suitable poition.
+    if crop is None:
+        crop=[None,None]
+    x,y=crop_profile(x,y,*crop)
+
+    #center data if center is None, leave unchanged
+    if center is not None:
+        assert len(center)>=1
+        x=x-(np.max(x)+np.min(x))/2.+center[0]
+        if len(center)==2:
+            y=y-(np.nanmax(y)+np.nanmin(y))/2.+center[1]
+
+    return x,y
+
+def load_profile(file,*args,**kwargs):
+    return np.genfromtxt(file,unpack=True,*args,**kwargs)
+
+
+def save_profile(filename,x,y,**kwargs):
+    """Use np.savetxt to save x and y to file """
     np.savetxt(filename,np.vstack([x,y]).T,**kwargs)
         
 #PROFILE OPERATIONS        
+
+def get_stats(x,y=None,units=None):
+    
+    """"""
+    if units is None:
+        u = ["",""]
+    elif np.size(units) == 1:
+        u=[units,units]
+    else:
+        u=units
+    assert np.size(u) == 2
+    
+    stats=['RMS:%3.3g %s'%(np.nanstd(y),u[1]),'PV_X:%3.3g %s, PV_Y:%3.3g %s'%(span(x,size=1),u[0],span(y,size=1),u[1])]
+    return stats
+    
 def level_profile (x,y=None,degree=1):
     """return profile after removal of a polynomial component.
 """
@@ -142,21 +258,58 @@ def rebin_profile(x,y,*args,**kwargs):
     y2=ss[0]
     return x2,y2  
 
-def crop_profile(x,y,xrange=None,*args,**kwargs):
+def crop_profile(x,y=None,xrange=None,yrange=None,*args,**kwargs):
+    """Crop a profile to range (can be set to None) in x and y.
+    Experimental, crop on y leaves holes in profile."""
+    #qui sarebbe utile impostare gli argomenti come x e y necessariamente args e i ranges kwargs.
+    #Si potrebbe anche implementare una funzione piu' potente come clip in IDL
+    
+    if y is None:
+        y=x
+        x=np.arange(np.size(y))
     
     if xrange is None: 
-        xrange={None,None}
+        xrange=[None,None]
     if xrange[0] is None:
         xrange[0]=np.min(x)
     if xrange[1] is None:
         xrange[1]=np.max(x)
-    
+
     sel=(x>=xrange[0])&(x<=xrange[1])
+    x=x[sel]
+    y=y[sel]
+    
+    if yrange is None: 
+        yrange=[None,None]
+    if yrange[0] is None:
+        yrange[0]=np.nanmin(y)
+    if yrange[1] is None:
+        yrange[1]=np.nanmax(y)
+
+    sel=(y>=yrange[0])&(y<=yrange[1]) 
+    
 
     return x[sel],y[sel]  
+
+def resample_profile(x1,y1,x2,y2=None):
+    """resample y1 (defined on x1) on x2.
+    Both x1 and y1 need to be set for input data,
+        x2 is returned together with interpolated values as a tuple.
+    y2 is not used and put for consistency (can be omitted).
+    
+    """
+    if np.any(np.diff(x1) <= 0): raise ValueError ('x1 must be increasing for interpolation')
+    if np.any(np.diff(x2) <= 0): raise ValueError ('x2 must be increasing for interpolation')    
+    
+    y2 = np.interp(x2,x1,y1)
+     
+    return x2,y2
+
+def sum_profiles(x1,y1,x2,y2,*args,**kwargs):
+    return x1,y1+resample_profile(x2,y2,x1)[1]  
         
 def subtract_profiles(x1,y1,x2,y2,*args,**kwargs):
-    return x1,y1-np.interp(x1,x2,y2)  
+    return x1,y1-resample_profile(x2,y2,x1)[1]  
 
 def calculate_barycenter(x,y):
     """return the x of barycenter using y as weight function."""
