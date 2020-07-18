@@ -5,17 +5,11 @@ Python library for X-Ray Optics, Metrology Data Analysis and Telescopes Design.
 Download or fork the project in a folder accessible on your system.
 
 ## Status
-This is a pre-release version, I tried to exclude modules with mature enough development and comments,
-but some still in development might be included. Some of these are not essential or well commented.
+This is a pre-release version, modules under preliminary development are excluded. 
+I am using my beginner skills with github to keep it self-consistent.
 
-For the most important functions and modules, there is a good amount of documentation in form of docstrings, 
-code comments, tests and jupyter notebooks.
-I tried to give them some structure, but I am not expert enough to automatically generate documentation (any help or directions in that sense is welcome),
-and this makes it very hard to maintain and keep updated, so I prefer for now to just keep comments updated and consistent,
-rather than giving them a correct structure.
-Hopefully one day it will get more complete and sorted, and I will be able to give it a good final structure.
-Until this happens, you can just dig through folders and code and look for files, folders and functions with 
-representative names (`test`, `tutorials` etc.).
+First version of repository includes a lot of scripts that are not essential or well commented. 
+Documentation is minimal, until it gets more comprehensive, I want to include only most consolidated functions.
 
 **TODO:** remove unessential files. Learn how to generate documentation from other functions docstring.
 
