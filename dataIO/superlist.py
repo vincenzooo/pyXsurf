@@ -108,6 +108,25 @@ class superlist3(list):
         #gives an error as it tries to call the list.
         # deve ritornare una funzione che ritorna una lista.        
 
+class superlist4(list):
+    """Test class that vectorizes methods.  """
+    
+    def __getattr__(self,name):  #originariamente usava __getattribute__, che riceve attributo
+        # prima di chiamarlo (quindi anche se gia' esistente).
+        #attr = [obj.__getattr__(self, name) for obj in self] #questo non funziona
+        attr = [object.__getattribute__(name) for object in self]
+        
+        result = []
+        for a in attr:
+            if hasattr(a, '__call__'):
+                result=np.vectorize(a)
+            else:
+                result.append(a)
+
+        return superlist4(result)  #deve restituire un istanza della classe
+                #stessa, perche' se ritorna lista non posso applicare ulteriori
+                #metodi.
+
 def test_superlist(cls,obj=None):
 
     print ('test class ',cls)

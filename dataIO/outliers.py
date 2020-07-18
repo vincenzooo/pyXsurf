@@ -9,7 +9,7 @@ class EmptyRangeWarning(RuntimeWarning):
     #    super().__init__( *args, **kwargs)
 
 def remove_outliers(data: np.array,
-                    nsigma: float = 3,
+                    nsigma: float = 3.,
                     itmax: int = 1,
                     flattening_func: Callable[[np.array],np.array] = None,
                     span: bool = False,

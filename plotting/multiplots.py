@@ -1,3 +1,6 @@
+""" vedi anche from `mpl_toolkits.axes_grid1`."""
+
+
 import math
 import numpy as np
 from matplotlib import pyplot as plt
@@ -102,7 +105,8 @@ def find_grid_size(number, smax=0, square = True, fill = False):
 from dataIO.outliers import remove_outliers
 
 def plot_difference(p1t,p4, trim = None, dis=False):
-    """plots and return difference of of two Data2D objects, return difference.
+    """plots and return difference of two Data2D objects, return difference.
+    All data are plane leveled before plots, a common color scale is set after excluding outliers. Leveled difference is returned.
     If trim is other than None, plots are adjusted on valid data x and y range,
     if Trim = True empty borders are removed also from difference data."""
     
