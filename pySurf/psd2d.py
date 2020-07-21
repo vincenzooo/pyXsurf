@@ -72,7 +72,7 @@ def rms_power(f,p,rmsrange=None,squeeze=True):
     """integrate `p` (2dpsd) to calculate rms slice power in a range of freq. f is the  frequency axis (vertically oriented in plots) for p. Accepts None as extreme of rmsrange. frequencies are assumed to be equally spaced.
     Return a vectors rms with one element for each range in rmsrange. If one element, extra dimension is
         removed unless squeeze is set (useful e.g. to call from wrapper function and get consistent behavior).
-    Note that total rms is calculated as rms of column rms, calculated from PSD for each column.
+    Note that total rms is calculated as rms of column rms, calculated from PSD for each column. If f[0] is zero, the component is excluded, unless first component of rmsrange is explicitly set to zero. If you want to include all frequencies but zero, set rms range first component to None (or rmsrange itself to None).
     Values can then differ from surface rms in case of invalid points (e.g. as consequence of the fact
     that all lines are weighted equally in line average and also invalid points are excluded).
     """
@@ -80,7 +80,10 @@ def rms_power(f,p,rmsrange=None,squeeze=True):
     if rmsrange is None:
         rmsrange=[None,None]
     if rmsrange[0] is None:
-        rmsrange[0]=np.min(f,axis=0)
+        if f[0] == 0:
+            rmsrange[0]=f[1]
+        else:
+            rmsrange[0]=np.min(f,axis=0)
     if rmsrange[1] is None:
         rmsrange[1]=np.max(f,axis=0)
 
@@ -96,7 +99,7 @@ def rms_power(f,p,rmsrange=None,squeeze=True):
 
     return rms
 
-def plot_rms_power(f,p,x=None,rmsrange=None,ax2f=None,units=None):
+def plot_rms_power(f,p,x=None,rmsrange=None,ax2f=None,units=None,*args,**kwargs):
     """Plot curves of slice rms from integration of PSD 2D over one or more ranges of frequency `rmsrange`.
     units of x,y,z (scalar or 3-element) can be provided for axis label (as unit of length, not of f,psd),
         None can be used to exclude units. Units of y are irrelevant because integrate, but kept as 3 vector for
@@ -118,18 +121,22 @@ def plot_rms_power(f,p,x=None,rmsrange=None,ax2f=None,units=None):
     loc1,loc2=(2 if np.any(ax2f) else 0),1  #these are the position for legends, set first to auto if only one needed, assigned as plt.legend(loc=loc)
     if x is None:
         x=np.arange(p.shape[1])
+        
+    #set label if not passed in kwargs:
     l='full freq. range [%4.2g : %4.2g]'%(f[0],f[-1])+((" "+units[1] if units[1] is not None else " [Y]")+"$^{-1}$")
+    kwargs['label'] = kwargs.pop('label',l)
+    
+    #calculate and plot rms
     rms=rms_power(f,p,rmsrange=None)
-    #pdb.set_trace()
-
-    plt.plot(x,rms,label=l)
+    plt.plot(x,rms,*args,**kwargs)
+    
+    
     ax3=plt.gca()
-    #pdb.set_trace()
     tit1,tit2=(['Left y axis','Right y axis'] if np.any(ax2f) else [None,None]) #legend title headers
     l1=ax3.legend(loc=loc1,title=tit1)
 
     #plt.title('Total rms power=%6.3g'%(np.sqrt((rms**2).sum()))+((" "+units[2]) if units[2] is not None else ""))  #wrong math, forgets average?
-    plt.title('Total rms power=%6.3g'%(np.sqrt(np.nansum(rms**2)))+((" "+units[2]) if units[2] is not None else ""))
+    plt.title('Total rms power=%6.3g'%(np.sqrt(np.nansum(rms**2)/(np.sum(~np.isnan(rms)))))+((" "+units[2]) if units[2] is not None else ""))
     c=plt.gca()._get_lines.prop_cycler
 
     rms_v=rms
@@ -148,7 +155,7 @@ def plot_rms_power(f,p,x=None,rmsrange=None,ax2f=None,units=None):
             #pdb.set_trace()
             rms=rms_power(f,p,rmsrange=fr,squeeze=False)
             if fr[0] is None: fr[0]=min(f)
-            if fr[1] is None: fr[0]=max(f)
+            if fr[1] is None: fr[1]=max(f)
             sty=next(c)
             l='freq. range [%4.2g:%4.2g]'%(fr[0],fr[1])
             #print(l)
@@ -234,7 +241,6 @@ def plot_psd2d(f,p,x,prange=None,includezerofreq=False,units=None,*args,**kwargs
         if f[0]==0:
             f=f[1:]
             p=p[1:,...]
-    #pdb.set_trace()
 
     if prange is None:
         prange=[None,None]
@@ -242,9 +248,10 @@ def plot_psd2d(f,p,x,prange=None,includezerofreq=False,units=None,*args,**kwargs
     # new:
     
     cbunits = psd_units(units)
+    #pdb.set_trace()
     ax = plot_data(p,x,f,norm=LogNorm(vmin=prange[0],vmax=prange[1]),
     units=cbunits,aspect='auto',*args,**kwargs)
-    
+    #pdb.set_trace()
     cb =  plt.gca().images[-1].colorbar
     
     #after introducing psd_units, cbunits is always defined,

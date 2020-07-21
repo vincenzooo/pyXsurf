@@ -178,8 +178,10 @@ def levellegendre(x,y,deg,nanstrict=False):
 
 def level_data(data,x=None,y=None,degree=(1,1),axis=None,byline=False,fit=False,*args,**kwargs):
     """use RA routines to remove degree 2D legendres or levellegendre if leveling by line.
-    Degree can be scalar (it is duplicated) or 2-dim vector. must be scalar if leveling by line.
-    leveling by line also hondle nans.
+    Degree can be scalar (it is duplicated) or 2-dim vector. must be scalar if leveling by line. Note the important difference between e.g. `degree = 2` and
+      `degree = (2,2)`. The first one uses degree as total degree, it expands then to xl,yl = [0,1,0,1,2,0],[0,0,1,1,0,2]. The second
+
+    leveling by line (controlled by axis keyword) also hondle nans.
     x and y are not used, but maintained for interface consistency.
     fit=True returns fit component instead of residuals"""
     from utilities.imaging.fitting import legendre2d
@@ -196,25 +198,24 @@ def level_data(data,x=None,y=None,degree=(1,1),axis=None,byline=False,fit=False,
         leg=fitlegendre(y,data,degree,*args,**kwargs)  #levellegendre(x, y, deg, nanstrict=False)    
     elif axis == 1: #level horizontal lines by double transposition
         leg = level_data(data.T,y,x,degree,axis=0,fit=True,*args,**kwargs)[0].T
-    elif axis is None: #plane level
-        if np.size(degree)==1: degree=np.repeat(degree,2)
+    elif axis is None: #plane level   
         
-        ## set fixed parameters
-        totdeg = np.sum(degree)
+        if np.size(degree)==1:
+            #this is enough to include everything
+            xo=degree
+            yo=degree
+        else:
+            xo,yo=degree 
         
-        # make xl, yl
-        xo=degree[0]
-        yo=degree[1]
-
-        xl,yl = [f.flatten() for f in np.meshgrid(np.arange(xo+1),np.arange(yo+1))]
-        #print('\n',xl,'\n',yl)
-
-        sel = [xxl + yyl < totdeg for xxl,yyl in zip(xl,yl)]
-        #print(sel)
-        #pdb.set_trace()
-        xl=xl[sel]
-        yl=yl[sel]
-        #make xl, yl
+        xl,yl = [f.flatten() for f in np.meshgrid(np.arange(xo+2),np.arange(yo+1))]
+        
+        if np.size(degree)==1:
+            #select use < (not <=) because I want to exclude
+            sel = [xxl + yyl <= degree for xxl,yyl in zip(xl,yl)]
+            if np.where(sel)[0].size == 0: #avoid emptying arrays if degree is 0
+                raise ValueError('someting wrong with degree settings!')
+            # make xl, yl
+            xl, yl = xl[sel],yl[sel]        
         
         #list(zip(*[f.flatten() for f in np.meshgrid(np.arange(xo+1),np.arange(yo+1))]))
         #[(0, 0), (1, 0), (0, 1), (1, 1)] #xo=1,yo=1
