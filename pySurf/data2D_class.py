@@ -290,7 +290,6 @@ class Data2D(object):  #np.ndarrays
 
         nsigma0=1  #default number of stddev for color scale
         #import pdb
-        #pdb.set_trace()
         stats=kwargs.pop('stats',2) #to change the default behavior
         nsigma=kwargs.pop('nsigma',nsigma0) #to change the default behavior
         m=self.data
@@ -394,7 +393,7 @@ class Data2D(object):  #np.ndarrays
         else:
             f,p=psd2d(self.data,self.x,self.y,wfun=wfun,norm=norm,rmsnorm=rmsnorm)
 
-        newname = name if name is not None else fn_add_subfix(self.name,subfix)
+        newname = name if name is not None else fn_add_subfix(self.file,subfix)
 
         return PSD2D(p,self.x,f,units=self.units,name=newname)
     psd=update_docstring(psd,psd2d)
