@@ -393,7 +393,7 @@ class Data2D(object):  #np.ndarrays
         else:
             f,p=psd2d(self.data,self.x,self.y,wfun=wfun,norm=norm,rmsnorm=rmsnorm)
 
-        newname = name if name is not None else fn_add_subfix(self.file,subfix)
+        newname = name if name is not None else fn_add_subfix(self.name,subfix)
 
         return PSD2D(p,self.x,f,units=self.units,name=newname)
     psd=update_docstring(psd,psd2d)
@@ -439,6 +439,7 @@ class Data2D(object):  #np.ndarrays
         """use dataIO.remove_outliers to remove outliers"""
         res=self.copy()
         m = remove_outliers(res.data,*args,**kwargs)
+        #pdb.set_trace()
         res.data[~m] = fill_value
         return res
         

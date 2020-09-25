@@ -1,7 +1,8 @@
 import numpy as np
-from dataIO.span import span as sp #to avoid conflict with argument.
+from dataIO.span import span as span # rename to span to avoid conflict with argument.
 from typing import Callable
 import warnings
+import pdb
 
 class EmptyRangeWarning(RuntimeWarning):
     pass
@@ -12,7 +13,7 @@ def remove_outliers(data: np.array,
                     nsigma: float = 3.,
                     itmax: int = 1,
                     flattening_func: Callable[[np.array],np.array] = None,
-                    span: bool = False,
+                    span: bool = False, #deprecated
                     print_partial: bool = False) -> np.array:
                     
     """ iteratively remove outliers out of an interval. Returns a mask, True on data to keep.
@@ -20,34 +21,49 @@ def remove_outliers(data: np.array,
         For each iteration, outliers outside `nsigma` standard deviations from average are removed. Loop ends after `itmax` (default 1) iterations or if convergency is reached (two consecutive iterations with same stdev).
         A flattening function (or any function that returns a modified version of data) can be passed to be performed at each iteration. At each interaction function is calculated on accepted values only.
         If at any point data is empty, an empty array is returned.
+        
+        A mask is returned by default, A copy of the original array with invalid values as nan. Values array can equivalently be obtained from mask by `np.where(mask,a,np.nan)`.
+        
+        `span` argument is deprecated and it will be removed. Please update your code to use `from dataIO.span import span; span (remove_outliers(data,...))`.
 
         """
         #see also dataIO.span.filtered_span
+        
+    if span: # useless and was giving conflict, solved by workaround below.
+        print("`span` argument is deprecated and it will be removed. Please update your code to use `from dataIO.span import span; span (remove_outliers(data,...))`.\n\nentering debugger, `c` to continue, `u` to see caller function, `l` list code.")
+        pdb.set_trace()
+    get_span = span  #rename variable
+    from dataIO.span import span
+    
     if flattening_func is not None: data=flattening_func(data)
-    mask=np.isfinite(data)  #mask keep track of good data
-    sigma=np.nanstd(data[mask])
+    
+    M = np.isfinite(data)  #mask for good data
+    sigma=np.nanstd(data[M])
     sigmast=0
     i=1
     if itmax > 0:
         while sigma != sigmast:
             sigmast=sigma
-
-            mask=mask & (np.abs(data-np.nanmean(data))<(nsigma*sigma))
-            sigma=np.nanstd(data[mask])
-            i=i+1
-            if i >= itmax or np.all(mask is False):
-                break
+            # keep in M only points in the range and recalculate sigma
+            M = M & (np.abs(data-np.nanmean(data)) < (nsigma*sigma))
+            data = np.where(M,data,np.nan)
+            if flattening_func is not None: data=flattening_func(data)
+            sigma=np.nanstd(data)
             if print_partial:
-                print (sigma,sigmast)
+                print (i,sigma,sigmast)        
+            if i >= itmax or np.all(M is False):
+                break                
+            i=i+1
     elif print_partial:
-        print ("itmax = 0, just mask valid data.")
+        print ("itmax = 0, just M valid data.")
     
-    if (~mask).all():
+    if not (M).any():
         warnings.warn('Returning empty array after filtering of outliers.',EmptyRangeWarning)
         return []
-         
-    return mask if not(span) else sp(data[mask]) 
-    
+    #pdb.set_trace()  
+    #if get_span: return span(data)
+    #return M if mask else np.where(M,data,np.nan)
+    return M
 
 if __name__ == "__main__":
     a=np.arange(10)

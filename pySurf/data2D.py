@@ -65,11 +65,11 @@ def removelegendre(x,deg):
     return rem
 
 def removesag(y):
-    """remove second degree polyomial, a possible leveling functiondata for leveldata."""
+    """convenience function. remove second degree polyomial from line, a possible leveling functiondata for leveldata."""
     return y-polyfit_profile (y,degree=2)
 
 def removept(y):
-    """remove piston and tilt, a possible leveling functiondata for leveldata."""
+    """convenienve function. remove piston and tilt from line, a possible leveling functiondata for leveldata."""
     #never tested
     y=y-line (y)
     return y-np.nanmean(y)
@@ -80,9 +80,9 @@ def level_by_line(data,function=None,axis=0,**kwargs):
     If fignum is set, plot comparison in corresponding figure.
     Function is a function of profile vector y that returns a corrected profile.
 
-    Completely useless, can be replaced by np.apply_along_axis"""
+    Completely useless, can be replaced by np.apply_along_axis or level_points."""
 
-    print ("level_by_line is completely useless function, use np.apply_along_axis.")
+    print ("level_by_line is completely useless function, use np.apply_along_axis or level_points.")
 
     def remove_line(y): #default line removal function
         return y-line(y)
@@ -96,11 +96,14 @@ def level_by_line(data,function=None,axis=0,**kwargs):
 
 #more updated leveling functions
 
-def fitlegendre(x,y,deg,nanstrict=False,fixnans=False):
+def fitlegendre(x,y=None,deg=None,nanstrict=False,fixnans=False):
     """Return a legendre fit of degree deg. Work with 1 or 2D y (if 2D, each column is independently fit
     and x is the coordinate of first axis.
     if nanstrict is True, every column containing nan (or Inf) is considered invalid and a column of nan is returned, if False, nan are excluded and fit is calculated on valid points only (note that since columns
-    are slices along first index, the option has no effect on 1D data (nans are always returned as nans)."""
+    are slices along first index, the option has no effect on 1D data (nans are always returned as nans).
+    
+    2020/09/16 modified 1D/2D mechanism, where all the code,
+    including the part in common 1D/2D was moved to the 2D specific part, while the 1D part is completely delegated to functions in `pyProfile.profile`."""
 
     '''
     note this was working with nan
@@ -113,26 +116,27 @@ def fitlegendre(x,y,deg,nanstrict=False,fixnans=False):
     return rem
     '''
 
-    #this works for 1D or 2D and fits
-    lfit=np.polynomial.legendre.legfit
-    lval=np.polynomial.legendre.legval
+    if len(y.shape)==1: 
+        result = polyfit_profile(x,y,degree=deg)
+    elif len(y.shape)==2:        
+        ## this works for 1D or 2D and fits
+        lfit=np.polynomial.legendre.legfit
+        lval=np.polynomial.legendre.legval
 
-    import pdb
-    #pdb.set_trace()
+        goodind=np.where(np.sum(~np.isfinite(y),axis=0)==0)[0] #indices of columns non containing any nan
+        ## goodind definition can be adjusted for > 2D , datarec definition is already good thanks to [...,] slice
 
-    ## goodind definition can be adjusted for > 2D , datarec definition is already good thanks to [...,] slice
-    goodind=np.where(np.sum(~np.isfinite(y),axis=0)==0)[0] #indices of columns non containing any nan
-
-    #fit legendre of degree. lval transpose data (!) so it must be transposed back if 2D
-    result=y*np.nan
-    if len(goodind)>0:
-        #this applies only to 2D data
-        datarec=lval(x,lfit(x,y[...,goodind],deg))
-        if len(y.shape)==2:
-            datarec=datarec.T
-        result[...,goodind]= datarec
-
-    if len(y.shape)==2:
+        #fit legendre of degree `deg`. `lval` transpose data (!) so it must be transposed back if 2D
+        result=y*np.nan
+        if len(goodind)>0:
+            #this applies only to 2D data
+            datarec=lval(x,lfit(x,y[...,goodind],deg))
+            if len(y.shape)==2:
+                datarec=datarec.T
+            result[...,goodind]= datarec
+        ##
+        
+    #elif len(y.shape)==2:  # moved out 2020/09/16 
         if not nanstrict:
             nancols=np.isin(np.arange(y.shape[-1]),goodind,invert=True) #boolean
             if nancols.any():
@@ -148,6 +152,9 @@ def fitlegendre(x,y,deg,nanstrict=False,fixnans=False):
             for i,(xx,col) in enumerate(zip(x[nancols],y[...,nancols])):
                 datarec[]
             """
+    """
+    # removed 2020/09/16 to rely on pyProfile
+    
     elif len(y.shape)==1:
         mask=np.isfinite(y)
         if np.logical_not(mask).all():
@@ -161,7 +168,8 @@ def fitlegendre(x,y,deg,nanstrict=False,fixnans=False):
             else:
                 result=y*np.nan
                 result[mask]=lval(x[mask],coeff)
-
+    """
+    
     return result
 
 
@@ -176,7 +184,7 @@ def levellegendre(x,y,deg,nanstrict=False):
     result=y-datarec
     return result #y-datarec
 
-def level_data(data,x=None,y=None,degree=(1,1),axis=None,byline=False,fit=False,*args,**kwargs):
+def level_data(data,x=None,y=None,degree=1,axis=None,byline=False,fit=False,*args,**kwargs):
     """use RA routines to remove degree 2D legendres or levellegendre if leveling by line.
     Degree can be scalar (it is duplicated) or 2-dim vector. must be scalar if leveling by line. Note the important difference between e.g. `degree = 2` and
       `degree = (2,2)`. The first one uses degree as total degree, it expands then to xl,yl = [0,1,0,1,2,0],[0,0,1,1,0,2]. The second
@@ -1080,9 +1088,9 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
         #with warnings.catch_warnings(record=True) as w:  
 
         if isinstance(nsigma,dict): #if more than one option were passed
-            clim=remove_outliers(data,span=True,**nsigma)
+            clim=span(np.where(remove_outliers(data,**nsigma),data,np.nan))
         else:
-            clim=remove_outliers(data,span=True,nsigma=nsigma)
+            clim=span(np.where(remove_outliers(data,nsigma=nsigma),data,np.nan))
 
         #pdb.set_trace()
         """

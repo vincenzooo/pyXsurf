@@ -199,6 +199,7 @@ def subplot_grid(number,size=0,smax=0,*args,**kwargs):
     size: if this is provided, is used as size of the subplot grid. 
     smax: used in `find_grid_size` to limit the extension along axis for the subplot grid. See `find_grid_size` help.
     num: if integer is passed, plot on the corresponding figure. if None is passed, create a new one. TBD: pass a figure obj.
+    Additional *args and **kwargs are passed to `plt.subplots`.
     
     
     2020/05/14 fixed bug on subplots removal, updated doc from:

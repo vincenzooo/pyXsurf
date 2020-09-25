@@ -1,4 +1,9 @@
 """
+2020/09/21
+Differently from what done in pySurf, here we keep reader and register mechanism separated and leave to the user the responsibility to call them. They can be put together in future if a convenient model for readers is found.
+
+`pyProfile.profile` has only a simple reader (a thin wrapper around `np.genfromtxt`) and a function `register_profile` to align and rescale x and y. Additional readers (`read_mx_profiles`, `read_xyz`) are considered experimental and kept here, even if they are functions.
+
 2020/06/25 start to create profile class on template of data2D_class.
 N.B.: there is an important difference between profile and data2D functions
 work, and is that data2D functions accept as argument surfaces in the form (tuple)
@@ -114,6 +119,10 @@ import pdb
 import inspect  # to use with importing docstring
 from pySurf.affine2D import find_affine
 from pyProfile import profile
+from pyProfile.profile import crop_profile
+from pyProfile.profile import level_profile
+from pyProfile.profile import resample_profile
+from pyProfile.profile import sum_profiles, subtract_profiles
 
 from pySurf.data2D_class import update_docstring,doc_from
 '''
@@ -135,6 +144,31 @@ def doc_from(source):
     not sure it is the right way."""
     partial(update_docstring,func=func)
 '''
+
+def read_xyz(filename,*args,**kwargs):
+    """temptative routine to read xyz files.
+    Use by reading the data and then passing them to profile.
+    It will be incorporated in some form of reader in a 
+    more mature version"""
+
+    raise NotImplementedError
+    
+def read_mx_profiles(filename,*args,**kwargs):
+    """temptative routine to read xyz files. Return a list of all profiles
+        with names from 3rd column (files are in format x,y,profilename).
+    Use by reading the data and then passing them to profile.
+    It will be incorporated in some form of reader in a 
+    more mature version"""
+
+    x,y,tag = np.genfromtxt(filename,delimiter=',',
+                            unpack=True,skip_header=1,dtype=str,*args,**kwargs)
+    x=x.astype(np.float)
+    y=y.astype(np.float)
+    labels = np.unique(tag)  # names of profiles in order
+    groups = [np.where(tag==l)[0] for l in labels] # indices of points for each profile 
+    profiles = [Profile(x[i],y[i],name=tag[i[0]]) for i in groups]
+    
+    return profiles
 
 class Profile(object):  #np.ndarrays
     """A class containing x,y data. It has a set of methods for analysis and visualization.
@@ -169,9 +203,10 @@ class Profile(object):  #np.ndarrays
             xrange=span(x) if x is not None else None
             #pdb.set_trace()
             
-            if reader is None: raise NotImplementedError("readers are not implemented yet for profiles,"+
+            if reader is not None: raise NotImplementedError("readers are not implemented yet for profiles,"+
                 "\tPass data or read from two column text file in compatible format.")
             
+            self.load(file,*args,**kwargs)
             """
             if reader is None:
                 reader=auto_reader(file) #returns a reader
@@ -230,11 +265,81 @@ class Profile(object):  #np.ndarrays
 
     def __call__(self):
         return self.x,self.y
-
-    from pyProfile.profile import sum_profiles
+    """
     def __add__(self,other,*args,**kwargs):
         return Profile(*sum_profiles(*self(),*other(),*args,**kwargs),units=self.units,name=self.name + " + " + other.name)
+    """
 
+    def __add__(self,other,*args,**kwargs):
+        
+        if isinstance(other,Profile):
+            res = sum_profiles(*self(),*other(),*args,**kwargs)
+            res = Profile(*res,units=self.units,name=self.name + " + " + other.name)
+        else:
+            try:
+                res = self.copy()
+                res.y = res.y + other
+                res.units = self.units
+            except ValueError:
+                raise ValueError("Unrecognized type in sum")
+        return res
+        
+    def __sub__(self,other,*args,**kwargs):
+        """
+        This is made on copy and paster from add. It is maybe not the most flexible way in relation with multiplication and operations with different types, but it works well enough.
+        
+        original code (handle only profile objects):       
+            res=Profile(*(subtract_profile(*self(),*other(),*args,**kwargs))(),units=self.units)
+            res.name = self.name + " - " + other.name
+            return res
+        """
+        #  y = np.genfromtxt(fn)
+        #p=Profile(np.arange(len(y)),y)
+        #p.plot(label = 'raw')
+        #
+        #p.level().plot('r',label = 'leveled')
+        #(p-p.level()).plot('r',label = 'fit')
+        #plt.legend()
+        #
+        #pdb> isinstance(other,Profile)
+        #   False
+
+        #ipdb> other
+        #   <pyProfile.profile_class.Profile object at 0x000002A55C104CF8>
+
+        #ipdb> Profile
+        #<class 'pyProfile.profile_class.Profile'>
+        """
+        print ("class: ",other.__class__)
+        # Out[65]: pyProfile.profile_class.Profile
+
+        print("check: ",other.__class__ == Profile)
+        # Out[66]: True
+
+        print ("type: ",type(other))
+        # Out[65]: pyProfile.profile_class.Profile
+
+        print("check: ",type(other) == Profile)
+        #Out[67]: True
+
+        print("check: ", isinstance(other,Profile))
+        #Out[68]: True
+        """
+        
+        #pdb.set_trace()
+        
+        if isinstance(other,Profile):
+            res = subtract_profiles(*self(),*other(),*args,**kwargs)
+            res = Profile(*res,units=self.units,name=self.name + " - " + other.name)
+        else:
+            try:
+                res = self.copy()
+                res.y = res.y - other
+                res.units = self.units
+            except ValueError:
+                raise ValueError("Unrecognized type in subtraction")
+        return res
+        
     def __mul__(self,scale,*args,**kwargs):
         res = self.copy()
         if np.size(scale)==1:
@@ -244,10 +349,11 @@ class Profile(object):  #np.ndarrays
                 tmp=scale.resample(self)
                 res=self.copy()
                 res.y=self.y*tmp.y
-            else:
-                scale=[scale,scale]      
-                res.x = scale[0] * res.x
-                res.y = scale[1] * res.y
+            else:     
+                res.y = scale * res.y 
+        elif np.size(scale)==2:      
+            res.x = scale[0] * res.x
+            res.y = scale[1] * res.y
         else:
             raise ValueError('Multiply Data2D by wrong format!')
         return res
@@ -258,15 +364,15 @@ class Profile(object):  #np.ndarrays
     def __neg__(self):
         return self.__mul__(-1)
 
-    def __sub__(self,other,*args,**kwargs):
-        assert self.units == other.units
-        res=Profile(*(profile.subtract_profile(*self(),*other(),*args,**kwargs))(),units=self.units)
-        res.name = self.name + " - " + other.name
-        return res
 
     def __truediv__(self,other):
         return self*(1./other)
-    
+        
+    def min (self):
+        return np.nanmin(self.y)
+
+    def max (self):
+        return np.nanmax(self.y)    
     
     def plot(self,title=None,*args,**kwargs):
         """plot using data2d.plot_data and setting automatically labels and colorscales.
@@ -333,7 +439,8 @@ class Profile(object):  #np.ndarrays
     '''
 
     def load(self,filename,*args,**kwargs):
-        """A simple file loader using np.genfromtxt."""
+        """A simple file loader using np.genfromtxt.
+        Load columns from file in self.x and self.y."""
         self.x,self.y = np.genfromtxt(filename,unpack=True,*args,**kwargs)
     load=update_docstring(load,data_from_txt)
 
@@ -342,6 +449,14 @@ class Profile(object):  #np.ndarrays
         """Save data using data2d.save_data"""
         return save_profile(filename,self.x,self.y,*args,**kwargs)
     save.__doc__=save_profile.__doc__
+
+    from pyProfile.profile import register_profile
+    def register(self,filename,*args,**kwargs):
+        """Use pyProfile.profile.register_profile to rescale."""
+        self.x,self.y = register_profile(x,y,*args,**kwargs)
+    load=update_docstring(register,register_profile)
+
+
 
     '''
     from functools import update_wrapper
@@ -363,22 +478,29 @@ class Profile(object):  #np.ndarrays
         return res
     '''
     
-    from pyProfile.profile import crop_profile
     def crop(self,*args,**kwargs):
         """crop profile making use of function profile.crop_data, where x,y are taken from self."""
+        
         res=self.copy()
         res.x,res.y=crop_profile(self.x,self.y,*args,**kwargs)
         return res #
     crop=update_docstring(crop,crop_profile)
     
-    from pyProfile.profile import level_profile
-    def level(self,*args,**kwargs):
+    def level(self,degree=1,zero='mean',*args,**kwargs):
+        """return a leveled profile calling profile.level_profile.
+`zero option can be 'top', 'bottom' or 'mean', and is a facility to shift curves so that their min or max value is aligned to zero."""
+        
         res=self.copy()
-        res.x,res.y=level_profile(self.x,self.y,*args,**kwargs)
+        res.x,res.y=level_profile(self.x,self.y,degree=degree,*args,**kwargs)
+        if zero == 'top':
+            res.y = res.y - np.nanmax(res.y)
+        elif zero == 'bottom':
+            res.y = res.y - np.nanmin(res.y)
+        elif zero != 'mean':
+            raise ValueError ("wrong value for `zero` option in level")
         return res
     level=update_docstring(level,level_profile)
 
-    from pyProfile.profile import resample_profile
     def resample(self,other,*args,**kwargs):
         """TODO, add option to pass x and y instead of other as an object."""
         res=self.copy()

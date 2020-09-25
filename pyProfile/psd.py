@@ -111,7 +111,8 @@ def psd_units(units=[None,None,None]):
     2020/07/16 moved to `pyProfile.psd` from `pySurf.psd2d`, making it valid for 2 or 3D units."""
     
     import copy
-    units = units.copy() #otherwise bizarre side effect
+    if units is not None:
+        units = units.copy() #otherwise bizarre side effect
     flag2d = False  #flag to return 2-el vector
     if np.size(units) == 1: 
         units = np.repeat(units,3)
