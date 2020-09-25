@@ -75,7 +75,9 @@ def rms_power(f,p,rmsrange=None,squeeze=True):
     Note that total rms is calculated as rms of column rms, calculated from PSD for each column. If f[0] is zero, the component is excluded, unless first component of rmsrange is explicitly set to zero. If you want to include all frequencies but zero, set rms range first component to None (or rmsrange itself to None).
     Values can then differ from surface rms in case of invalid points (e.g. as consequence of the fact
     that all lines are weighted equally in line average and also invalid points are excluded).
+    2020/07/21 corrected handling of zero frequency and added `includezerofreq` Flag. 
     """
+    
     #20180404 renamed _rms_power -> rms_power and rms_power -> plot_rms_power
     if rmsrange is None:
         rmsrange=[None,None]
@@ -106,7 +108,8 @@ def plot_rms_power(f,p,x=None,rmsrange=None,ax2f=None,units=None,*args,**kwargs)
         consistency with other routines.
     ax2f can be an array with same length of rmsrange set to True for frequency ranges to be plotted on 2nd
         y (right) axis. Total rms is always plotted on left axis.
-    Return a set of slice rms array (of size x), however if rmsrange is not passed returns only a single array.
+    Return a set of slice rms array (of size x), however if rmsrange is not passed returns only a single array. Zero freq is excluded.
+    2020/07/21 corrected bug on wrong rms total calculation in title. 
     """
     #20180404 renamed _rms_power -> rms_power and rms_power -> plot_rms_power
     #added units
@@ -121,6 +124,10 @@ def plot_rms_power(f,p,x=None,rmsrange=None,ax2f=None,units=None,*args,**kwargs)
     loc1,loc2=(2 if np.any(ax2f) else 0),1  #these are the position for legends, set first to auto if only one needed, assigned as plt.legend(loc=loc)
     if x is None:
         x=np.arange(p.shape[1])
+        
+    if f[0] == 0:
+        f=f[1:]
+        p=p[1:,...]
         
     #set label if not passed in kwargs:
     l='full freq. range [%4.2g : %4.2g]'%(f[0],f[-1])+((" "+units[1] if units[1] is not None else " [Y]")+"$^{-1}$")

@@ -2,10 +2,12 @@
 """
 It is a library of functions for manipulation or related to optics, acting on a couple of lists x and y, of same length, representing a profile. 
 
+It has only a simple reader (a thin wrapper around `np.genfromtxt`) and a function `register_profile` to align and rescale x and y. Since all functions act on single vectors x and y, more complex readers are not needed here and are left to profile_class. 
+
 Created on Sun Mar 06 16:06:48 2016
 
 @author: Vincenzo Cotroneo
-@email: vcotroneo@cfa.harvard.edu
+@email: vincenzo.cotroneo@inaf.it
 """
 from dataIO.span import span
 import os
@@ -41,26 +43,80 @@ def line(x,y=None):
     else:
         return y
         
-def make_signal(amp,L=1.0,N=None,nwaves=None,phase=0,ystartend=(0,0),noise=0.,minus_one=False):
+def make_signal(amp,x=None,L=None,N=None,nwaves=None,phase=0,ystartend=(0,0),noise=0.,minus_one=False):
     """
-    Build a signal of length L and number of points N, as a sum of a cosinusoid, a line and a noise. minus_one remove last point (just a convenience e.g. 
-    for a periodic profile).
+    Build a signal of length L and number of points N, as a sum of a cosinusoid, a line and a noise. minus_one remove last point (just a convenience e.g. for a periodic profile), note that in 
+    this case the returned x corresponds to values returned by
+    np.arange e .linspace, however it needs to be called with N+1
+    points, so the last one can be excluded and N points returned,
+    keeping intervals consistent (this might change in future versions).
+    Signal is generated on `x` if this is provided.
+    Otherwise it is generated on length `L` (can be range).
     Phase adds a phase in radians (the armonic component of signal is defined as `amp*np.sin(2*np.pi*x/L*nwaves+phase)`).
     
-    VC 2020/07/17 make signal a cosine (it was a sine), because more consistent with real part of imaginary number.
+    VC 2020/09/11 added option for L as range and x on which to generate signal.
+    2020/07/17 make signal a cosine (it was a sine), because more consistent with real part of imaginary number.
     VC 2020/06/27 horrible interface with args, replace with kwargs with defaults.
     Added phase.
     OLD CODE NEEDS TO be UPDATED! TODO: file search
     """
     
-    x=np.arange(N,dtype=float)/(N-1)*L
+    #pdb.set_trace()
+    
+    # L is the length (starting from zero) or the interval,
+    #    on which the signal is generated (phase and nwaves are applied wrt this interval). `x` are the datapoints on which the signal is calculated (defaults to L).
+    
+    #Note that L and nwaves (togheter with phase) determine the design parameters of the cosinusoid, while x and N the coordinates on which to calculate values.
+    
+    if x is None:
+        if N is None:
+            raise TypeError ("N is needed if x is not provided.")
+        elif L is None: #N but not L
+            L = [0, N-1]      
+    else:
+        if N is not None:
+            raise TypeError ("N is not needed if x is provided.")            
+        if L is None:
+            L = span(x)        
+    
+    #after this, if L was not None, it is set to (2-el) interval start and end for the signal generation.
+    #pdb.set_trace()
+    
+    if np.size(L) == 1:
+        assert L is not None  #E' stata aggiustata in base a x e a N.
+        L = [0,np.ravel(L)[0]] #this is to get scalar element in every case L =[5], L =[[5]], etc.. not sure it is needed and if this is a good way of doing it.
+    elif np.size(L) != 2:
+        raise ValueError ("Invalid size for L")
+
+    # generate x cocrdinates if not provided
+    if x is None:
+        x = np.linspace(L[0],L[1],N,dtype=float) #set to N integers
+        #x = np.linspace(0,L,N,dtype=float) #set to N integers
+        #x=np.arange(N,dtype=float)/(N-1)*L #set to N integers
+#x=L[0] + np.arange(N,dtype=float)/(N-1)*(L[1]-L[0]) 
+        
     l=line(x,ystartend)
     if nwaves is not None:
-        y=amp*np.cos(2*np.pi*x/L*nwaves+phase) 
+        y=amp*np.cos(2*np.pi*(x-L[0])/span(L,size=True)*nwaves+phase) 
     y = y + noise*np.random.random(N)+l  #apply noise and line at once.
     if minus_one:
         x,y=x[:-1],y[:-1]
     return x,y
+
+def test_make_Signal():# test make_signal
+    
+    x = np.linspace(-0.5,0.5,100)
+    plt.clf()
+
+    print("X span: %s N: %i"%(span(x),len(x)))
+    #plt.plot(*make_signal(2.,x,nwaves=3))
+
+    #plt.plot(*make_signal(1.,x,nwaves=3,phase=np.pi/2),'o')
+    plt.plot(*make_signal(1.,nwaves=3,L=10,N=100),'o')
+    plt.plot(*make_signal(2.,nwaves=3,L=[1,11],N=100),'x')
+    plt.plot(*make_signal(2.,nwaves=3,L=[1,11],N=100,phase=np.pi/2))
+    plt.plot(*make_signal(2.,x,nwaves=3,L=100,phase=np.pi/2))
+    #plt.plot(*make_signal(2.,nwaves=3,N=100,phase=np.pi/2))
 
 def make_circle(x,c,r,sign=1):
     """plot positive part if sign is positive, negative if negative."""
@@ -106,22 +162,51 @@ def remove_nan_ends(x,y=None,internal=False):
     
 #profile fitting
 
-def polyfit_profile (x,y=None,degree=1):
-    """return polynomial of degree that fits the profile.
-"""
+def polyfit_profile (x,y=None,degree=1,P=np.polynomial.Legendre):
+    """Use one of the poynomial bases in 
+   (default to Legendre), and return polynomial of given `degree` that fits the input profile `x`.
+    
+    Temporary function used to separate the numpy layer from the profile, as preferred implementation switched from np.polynomial functions to classes in np.polynomial.Polynomial, which is more flexible, but also has a more complex descriptor (*).
+    This function is thinly wrapped by level_profile, the two will eventually merge, maybe with a flag `fit` to return fit or residuals. 
+    
+    (*) Note that np coefficients are not directly the polynomial coefficient, e.g. [2,4] doesn't necessarily mean 2 + 4 * x 
+    There are two poorly documented parameters `window` and `domain` (both default to -1,1) which regulate the scaling of polynomial result. This means that the polynomial coefficients are first calculated on `window` (default [-1,1]) and the result returned shifted to match `domain` (equal to range of x).
+    
+    Most common usage is to set window to an interval on which the polynomial
+    base is well behaving, and domain to the range of x.
+    
+    see: https://stackoverflow.com/questions/52339907/numpy-polynomial-generation/52469490
+    https://github.com/numpy/numpy/issues/9533
+    A detailed example of why using window and domain is here:
+    https://numpy.org/doc/stable/reference/routines.polynomials.classes.html
+    
+    Some of the Polynomials bases are well-behaving, or orthonormal only on a given `window` of x (e.g. Legendre on [-1,1]), we usually want
+
+In using Chebyshev polynomials for fitting we want to use the region where x is between -1 and 1 and that is what the window specifies. However, it is unlikely that the data to be fit has all its data points in that interval, so we use domain to specify the interval where the data points lie. When the fit is done, the domain is first mapped to the window by a linear transformation and the usual least squares fit is done using the mapped data points. The window and domain of the fit are part of the returned series and are automatically used when computing values, derivatives, and such. If they aren’t specified in the call the fitting routine will use the default window and the smallest domain that holds all the data points.
+
+(that seems in contradiction with numpy documentation that states both default to one).    
+    
+"""    
+
     if y is None:
         y=x
         x=np.arange(len(y))
     
-    sel=~np.isnan(y)
-    if sel.any():
-        y0=y[sel]
-        x0=x[sel]
-        coeff=np.polyfit(x0,y0,degree)
-        return np.polyval(coeff,x)
+    goodind=~np.isnan(y) #isolate valid data
+    if goodind.any():
+        y0=y[goodind]
+        x0=x[goodind]
     else:
-        return y    
-
+        x0,y0 = x,y    
+    
+    res = P.fit(x0,y0,degree) #fit only valid data
+    #coeff=np.polyfit(x0,y0,degree)
+    
+    result = res(x) #result = np.polyval(coeff,x)
+    result[~goodind] = np.nan #set back nans if any
+    
+    return result
+ 
         
 ##PROFILE I/O
     
@@ -176,6 +261,9 @@ def register_profile(x,y,scale=(1,1),
     return x,y
 
 def load_profile(file,*args,**kwargs):
+    """The simplest file loader using np.genfromtxt.
+        Returns x and y."""
+        
     return np.genfromtxt(file,unpack=True,*args,**kwargs)
 
 
@@ -200,7 +288,8 @@ def get_stats(x,y=None,units=None):
     return stats
     
 def level_profile (x,y=None,degree=1):
-    """return profile after removal of a polynomial component.
+    """return profile after removal of a (Legendre) polynomial component.
+    polyfit_profile has an option to change the polynomial base if Legendre is not the desired base.
 """
     if y is None:
         y=x
