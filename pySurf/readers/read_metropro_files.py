@@ -1910,7 +1910,7 @@ def readMetroProData(filename):
     # Auxiliary data to return
     dxy = hData['cameraRes']
 
-    print(dxy)
+    #print(dxy)
     
     x1 = dxy * np.arange( -(len(dat[0,:])-1)/2, (len(dat[0,:])-1)/2 + 1)
     y1 = dxy * np.arange( -(len(dat[:,0])-1)/2, (len(dat[:,1])-1)/2 + 1)

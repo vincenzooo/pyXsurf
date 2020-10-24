@@ -92,7 +92,7 @@ import dataIO
 
 from pySurf.psd2d import psd2d,plot_psd2d,psd2d_analysis,psd_analysis,plot_rms_power,rms_power
 
-
+from pySurf import points
 from pySurf.points import matrix_to_points2
 
 from copy import deepcopy
@@ -435,16 +435,23 @@ class Data2D(object):  #np.ndarrays
         trans=find_transform(m1,m2)
         return self.apply_transform(trans)
 
-    def remove_outliers(self,fill_value=np.nan,*args,**kwargs):
-        """use dataIO.remove_outliers to remove outliers"""
+    def remove_outliers(self,fill_value=np.nan,mask=False,*args,**kwargs):
+        """use dataIO.remove_outliers to remove outliers from data. return a new Data2D object with outliers replaced by `fill_value`. If `mask` is set returns mask (easier than extracting it from returned object)."""
         res=self.copy()
-        m = remove_outliers(res.data,*args,**kwargs)
+        m = remove_outliers(res.data,*args,**kwargs)  #boolean mask
         #pdb.set_trace()
+        if mask: return m
         res.data[~m] = fill_value
         return res
         
     remove_outliers=update_docstring(remove_outliers,dataIO.outliers.remove_outliers)
 
+    def extract_profile(self,*args,**kwargs):
+        p=self.topoints()
+        prof = points.extract_profile(p,*args,**kwargs)
+        return prof
+    extract_profile=update_docstring(extract_profile,points.extract_profile)
+    
     def histostats(self,*args,**kwargs):
         res =data_histostats(self.data,self.x,self.y,units=self.units,*args,**kwargs)
         plt.title(self.name)
