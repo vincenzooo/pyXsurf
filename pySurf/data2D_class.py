@@ -100,28 +100,10 @@ from dataIO.span import span
 from dataIO.fn_add_subfix import fn_add_subfix
 
 import pdb
-import inspect  # to use with importing docstring
+
 from pySurf.affine2D import find_affine
 
-
-def update_docstring(func,source):
-    """given a current function and a source function, update current function docstring
-     appending signature and docstring of source.
-
-     It provides a decorator @update_docstring(source) update the decorated
-       function docstring. User should take care to create docstring of decorated function
-       only as preamble to source docstrings, e.g.:
-       this is func function, derived from source function by modifying the usage of parameter foo.
-       parameter foo is changed of sign."""
-    doc0="" if func.__doc__ is None else func.__doc__
-    func.__doc__='\n'.join([doc0,source.__name__+str(inspect.signature(source)),source.__doc__])
-    return func
-
-def doc_from(source):
-    """intent is to use partial to obtain a decorator from update_docstring.
-    not sure it is the right way."""
-    partial(update_docstring,func=func)
-
+from dataIO.functions import update_docstring
 
 class Data2D(object):  #np.ndarrays
     """A class containing 2d data with x and y coordinates. It has a set of methods for analysis operations.
@@ -427,7 +409,7 @@ class Data2D(object):  #np.ndarrays
     def align_interactive(self,other,find_transform=find_affine):
         """interactively set markers and align self to other.
         Alignment is performed using the transformation returned by
-           find_transform(markers1,markers2) after markers are interactively set.
+        find_transform(markers1,markers2) after markers are interactively set.
         Return aligned Data2D object.
         There is an experimental version for dlist in scripts."""
         from pySurf.scripts.dlist import add_markers
@@ -456,7 +438,7 @@ class Data2D(object):  #np.ndarrays
         res =data_histostats(self.data,self.x,self.y,units=self.units,*args,**kwargs)
         plt.title(self.name)
         return res
-    histostats=update_docstring(histostats,data_histostats)
+    histostats=update_docstring(histostats,data_histostats,'\n-------------\n')
 
     def slope(self,*args,**kwargs):
         #import pdb

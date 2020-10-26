@@ -43,6 +43,9 @@ from plotting.add_clickable_markers import add_clickable_markers2
 from pySurf.find_internal_rectangle import find_internal_rectangle
 import itertools
 
+from dataIO.functions import update_docstring
+
+test_folder = r'C:\Users\kovor\Documents\python\pyXTel\pySurf\test'
 
 class EmptyPlotRangeWarning(EmptyRangeWarning):
     def __init__(self, *args, **kwargs):
@@ -804,7 +807,7 @@ def crop_data(data,x,y,xrange=None,yrange=None,zrange=None,mask=False,poly=None,
     yrange=span(y) if (yrange is None) else \
         np.where([xx is None for xx in yrange],span(y),yrange)
     zrange=span(data) if zrange is None else \
-        np.where([xx is None for xx in zrange],span(z),zrange)
+        np.where([xx is None for xx in zrange],span(data),zrange)
 
     import pdb
     #spdb.set_trace()
@@ -1031,17 +1034,31 @@ def plot_stats(datalist,x=None,y=None,bins=100,labels=None,*args,**kwargs):
     return rms
     
 def data_histostats(data,x=None,y=None,bins=100,density=True,units=None,loc=0,*args,**kwargs):
-    """wrapper around plt.hist, plot histogram of data (over existing window) adding label with stats."""
+    """wrapper around plt.hist, plot histogram of data (over existing window) adding label with stats. 
+    `density` set tu True normalizes distribution to have sum equal 1. Return 3-uple according to `plt.hist`:"""
     units=units if units is not None else ['[X]','[Y]','[Z]']
     #pdb.set_trace()
     res = plt.hist(data[np.isfinite(data)],bins=bins,density=density,*args,**kwargs)
     plt.xlabel('Units of '+units[2])
     plt.ylabel('Fraction of points #')
-    legend="\n".join(get_stats(data,x,y,units=units))+"\n"+'x_span: %.3g\ny_span: %.3g\nN: %i'%(span(x,size=1),
-        span(y,size=1),np.size(data))
+    legend="\n".join(get_stats(data,x,y,units=units))
+    if x is not None:    
+        legend = legend + "\nx_span: %.3g"%(span(x,size=1))
+    if y is not None:    
+        legend = legend + "\ny_span: %.3g"%(span(y,size=1))
+    legend = legend + "\nN: %i"%(np.size(data))
+        
+    # get_stats returns a string and it's not very flexible
+    # maybe with a better implementation could add styles
+    # for plotting of vertical lines on stats.
+    plt.axvline(np.nanmean(data),label='mean: %6.3f'%np.nanmean(data),ls = '--')
     l=legendbox(legend,loc=loc,framealpha=0.2)
+    
+    plt.axvline(np.nanmean(data)-np.nanstd(data),ls=':')
+    plt.axvline(np.nanmean(data)+np.nanstd(data),ls=':')
     #plt.legend(loc=0)
     return res
+data_histostats=update_docstring(data_histostats,plt.hist)
 
 
 ## PLOT FUNCTIONS
@@ -1466,10 +1483,46 @@ def test_remove_nan_frame():
     print('Returns values.')
     return a,x,y
 
+def outliers_analysis(data,x=None,y=None,nsigma=3,itmax=5,outname=None):
+    """Perform multiple iterations of outlier removal, plotting data and histogram at each step."""
+    from dataIO.outliers import filter_outliers
+        
+    for i,m in enumerate(filter_outliers(data,nsigma=nsigma,itmax=itmax)):
+        print('iter: ',i)
+        print('outliers: ',len(np.where(~m)[0]))
+        #print('values: ',a[m])
+        #print('\n')
+        if i > 0:
+            for ii,jj in zip(*(~m).nonzero()):
+                plt.plot(x[jj],y[ii],'x')
+            if outname:
+                plt.savefig(fn_add_subfix(outname,'_%04i'%i,'.png'))
+        plt.figure()
+        plt.subplot(212)
+        data_histostats(data)
+        # if very distributed, use log scale
+        if span(data,size=True) > np.nanstd(data)*20:
+            plt.semilogy()
+        
+        plt.subplot(211)
+        data[~m]=np.nan
+        plot_data(data,x,y,stats=2,aspect='auto')
+
+
+def test_outliers_analysis():
+    """run outliers analysis and save output of tests."""
+    outfolder = os.path.join(test_folder,r'results\outliers_analysis')
+    fn = os.path.join(test_folder,r'input_data\csv\residuo MPR rispetto a parabola nominale Bianca.txt')
+    from pySurf.readers.instrumentReader import points_reader
+    data,x,y = points_reader(fn,delimiter='',skip_header=2)
+        
+    outliers_analysis(data,x,y,nsigma=3,itmax=10,outname = os.path.join(outfolder,os.path.basename(fn)))
+
+
 def test_fails_leveling():
     """reproduce warning about fit"""
     from readers.instrumentReader import matrixZygo_reader
-    f='G:\\My Drive\\Shared by Vincenzo\\Slumping\\Coating Metrology\\newview\\20180330_slumped\\07_PCO1.3S04.asc'
+    f = os.path.join(test_folder,r'input_data\newview\newview\20180330_slumped\07_PCO1.3S04.asc')
     wdata,x,y=matrixZygo_reader(f,scale=(1000.,1000,1.),center=(0,0))
     #wdata,x,y=a[0]-legendre2d(a[0],2,1)[0],a[1],a[2]  #simple way to remove plane
     rem4=removelegendre(y,4)  #remove first 4 legendre components

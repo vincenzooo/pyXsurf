@@ -26,6 +26,11 @@ def original_make_caption():
         
         
 def legendbox(text,ax=None,loc=0,*args,**kwargs):
+    """Create a legend from class matplotlib.legend.Legend and add it to axis.
+        `text` is a list of strings to be passed to `labels` parameter in Legend.
+        Unclear how line styles are set (probably none).
+        """
+
     from matplotlib.patches import Patch
     from matplotlib.legend import Legend
     #------ SAME BUT WITH CUSTOM LEGEND (DOESN'T ERASE OTHER LEGENDS)
