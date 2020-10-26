@@ -6,10 +6,9 @@ Download or fork the project in a folder accessible on your system.
 
 ## Status
 This is a pre-release version, modules under preliminary development are excluded. 
-I am using my beginner skills with github to keep it self-consistent.
 
-First version of repository includes a lot of scripts that are not essential or well commented. 
-Documentation is minimal, until it gets more comprehensive, I want to include only most consolidated functions.
+First version of repository includes several scripts that are not essential or well commented, however there is a good amount of comments in the code, and sometimes even in the right place for self-documentation to work.
+There are some tutorial and examples, but they are quite scattered around in folders `Demo`, `Tutorial`, `Test`, etc.
 
 **TODO:** remove unessential files. Learn how to generate documentation from other functions docstring.
 
