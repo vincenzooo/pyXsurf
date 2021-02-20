@@ -19,6 +19,23 @@ def smartcb(ax=None):
     cax = divider.append_axes("right", "5%", pad="3%")
     return plt.colorbar(cax=cax)
 
+def align_axis_x(ax, ax_target):
+    """Make x-axis of `ax` aligned with `ax_target` in figure. Useful to align shared
+    axis when colorbar messes up the alignment.
+    
+    from: https://stackoverflow.com/questions/46694889/matplotlib-sharex-with-colorbar-not-working
+    see also:
+    https://stackoverflow.com/questions/54473465/aligning-x-axis-with-sharex-using-subplots-and-colorbar-with-matplotlib
+    https://stackoverflow.com/questions/44682146/align-subplot-with-colorbar
+    """
+    posn_old, posn_target = ax.get_position(), ax_target.get_position()
+    ax.set_position([posn_target.x0, posn_old.y0, posn_target.width, posn_old.height])
+
+def align_axis_y(ax, ax_target):
+    """Make y-axis of `ax` aligned with `ax_target` in figure"""
+    posn_old, posn_target = ax.get_position(), ax_target.get_position()
+    ax.set_position([posn_old.x0, posn_target.y0, posn_old.width, posn_target.height])
+
 def commonscale(fig=None):
     """set scale of all axes in a figure to the range that includes all axes data."""
     rx=[]
