@@ -1,0 +1,14 @@
+ &IMPDATMERGER
+ DIRORIGIN = 'inner_dmax30                            '
+ WORKDIR = 'simX_HE2006_2gr                         '
+ DIRRISULT = 'inner_dmax30_1sel                       '
+ /
+ 
+ &IMPANRIS
+ NINTERV =          500
+ TOLL =    1.000000000000000E-014
+ COND =            4
+ YINT =    0.000000000000000E+000
+ RESNUM =            2
+ DELETETEMP =            1
+ /

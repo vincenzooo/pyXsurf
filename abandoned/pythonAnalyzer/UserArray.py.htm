@@ -1,0 +1,260 @@
+<HTML><HEAD><TITLE>UserArray.py</TITLE></HEAD>
+		  <BODY BGCOLOR=#FFFFFF>
+		  <!--header-->
+		  <!--script--><PRE><FONT COLOR=#3333CC><B>from</B></FONT> Numeric <FONT COLOR=#3333CC><B>import</B></FONT> *
+<FONT COLOR=#3333CC><B>import</B></FONT> string
+
+<FONT COLOR=#3333CC><B>class</B></FONT> <A NAME="UserArray"><FONT COLOR=#CC0000><B>UserArray</B></FONT>:
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__init__"><FONT COLOR=#CC0000><B>__init__</B></FONT>(self, data, typecode=<FONT COLOR=#3333CC><B>None</B></FONT>, copy=1):
+		<FONT COLOR=#1111CC># Needs more testing </FONT>
+		<FONT COLOR=#3333CC><B>if</B></FONT> typecode != <FONT COLOR=#3333CC><B>None</B></FONT>:
+		    data = array(data, typecode, copy=copy)
+		<FONT COLOR=#3333CC><B>else</B></FONT>:
+		    data = array(data, copy=copy)
+		self.__dict__[<FONT COLOR=#115511>"array"</FONT>] = data
+		self.__dict__[<FONT COLOR=#115511>"shape"</FONT>] = self.array.shape
+		self.__dict__[<FONT COLOR=#115511>'name'</FONT>] = string.split(str(self.__class__))[1]
+		<FONT COLOR=#3333CC><B>if</B></FONT> data.typecode() == Complex:
+		    self.__dict__[<FONT COLOR=#115511>'real'</FONT>] = self._return(self.array.real)
+		    self.__dict__[<FONT COLOR=#115511>'imag'</FONT>] = self._return(self.array.imag)
+		    self.__dict__[<FONT COLOR=#115511>'imaginary'</FONT>] = self.imag
+
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__setattr__"><FONT COLOR=#CC0000><B>__setattr__</B></FONT>(self,att,value):
+	    <FONT COLOR=#3333CC><B>if</B></FONT> att == <FONT COLOR=#115511>'shape'</FONT>:
+		self.__dict__[<FONT COLOR=#115511>'shape'</FONT>]=value
+		self.array.shape=value
+	    <FONT COLOR=#3333CC><B>else</B></FONT>:
+		<FONT COLOR=#3333CC><B>raise</B></FONT> AttributeError, <FONT COLOR=#115511>"Attribute cannot be set"</FONT>
+
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__repr__"><FONT COLOR=#CC0000><B>__repr__</B></FONT>(self):
+		<FONT COLOR=#3333CC><B>return</B></FONT> self.name+repr(self.array)[len(<FONT COLOR=#115511>"array"</FONT>):]
+
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__str__"><FONT COLOR=#CC0000><B>__str__</B></FONT>(self):
+		<FONT COLOR=#3333CC><B>return</B></FONT> str(self.array)
+
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__array__"><FONT COLOR=#CC0000><B>__array__</B></FONT>(self,t=<FONT COLOR=#3333CC><B>None</B></FONT>):
+		<FONT COLOR=#3333CC><B>if</B></FONT> t: <FONT COLOR=#3333CC><B>return</B></FONT> asarray(self.array,t)
+		<FONT COLOR=#3333CC><B>return</B></FONT> asarray(self.array)
+
+
+	<FONT COLOR=#1111CC># Array as sequence</FONT>
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__len__"><FONT COLOR=#CC0000><B>__len__</B></FONT>(self): <FONT COLOR=#3333CC><B>return</B></FONT> len(self.array)
+
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__getitem__"><FONT COLOR=#CC0000><B>__getitem__</B></FONT>(self, index): 
+		<FONT COLOR=#3333CC><B>return</B></FONT> self._return(self.array[index])
+
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__getslice__"><FONT COLOR=#CC0000><B>__getslice__</B></FONT>(self, i, j): 
+		<FONT COLOR=#3333CC><B>return</B></FONT> self._return(self.array[i:j])
+
+
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__setitem__"><FONT COLOR=#CC0000><B>__setitem__</B></FONT>(self, index, value): 
+	    self.array[index] = asarray(value,self.array.typecode())
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__setslice__"><FONT COLOR=#CC0000><B>__setslice__</B></FONT>(self, i, j, value): 
+	    self.array[i:j] = asarray(value)
+
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__abs__"><FONT COLOR=#CC0000><B>__abs__</B></FONT>(self): <FONT COLOR=#3333CC><B>return</B></FONT> self._return(absolute(self.array))
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__neg__"><FONT COLOR=#CC0000><B>__neg__</B></FONT>(self): <FONT COLOR=#3333CC><B>return</B></FONT> self._return(-self.array)
+
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__add__"><FONT COLOR=#CC0000><B>__add__</B></FONT>(self, other): 
+		<FONT COLOR=#3333CC><B>return</B></FONT> self._return(self.array+asarray(other))
+	__radd__ = __add__
+
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__sub__"><FONT COLOR=#CC0000><B>__sub__</B></FONT>(self, other): 
+		<FONT COLOR=#3333CC><B>return</B></FONT> self._return(self.array-asarray(other))
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__rsub__"><FONT COLOR=#CC0000><B>__rsub__</B></FONT>(self, other): 
+		<FONT COLOR=#3333CC><B>return</B></FONT> self._return(asarray(other)-self.array)
+
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__mul__"><FONT COLOR=#CC0000><B>__mul__</B></FONT>(self, other): 
+		<FONT COLOR=#3333CC><B>return</B></FONT> self._return(multiply(self.array,asarray(other)))
+	__rmul__ = __mul__
+
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__div__"><FONT COLOR=#CC0000><B>__div__</B></FONT>(self, other): 
+		<FONT COLOR=#3333CC><B>return</B></FONT> self._return(divide(self.array,asarray(other)))
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__rdiv__"><FONT COLOR=#CC0000><B>__rdiv__</B></FONT>(self, other): 
+		<FONT COLOR=#3333CC><B>return</B></FONT> self._return(divide(asarray(other),self.array))
+
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__mod__"><FONT COLOR=#CC0000><B>__mod__</B></FONT>(self, other): 
+		<FONT COLOR=#3333CC><B>return</B></FONT> self._return(remainder(self.array,asarray(other)))
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__rmod__"><FONT COLOR=#CC0000><B>__rmod__</B></FONT>(self, other): 
+		<FONT COLOR=#3333CC><B>return</B></FONT> self._return(remainder(asarray(other),self.array))
+
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__pow__"><FONT COLOR=#CC0000><B>__pow__</B></FONT>(self,other): 
+		<FONT COLOR=#3333CC><B>return</B></FONT> self._return(power(self.array,asarray(other)))
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__rpow__"><FONT COLOR=#CC0000><B>__rpow__</B></FONT>(self,other): 
+		<FONT COLOR=#3333CC><B>return</B></FONT> self._return(power(asarray(other),self.array))
+
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__sqrt__"><FONT COLOR=#CC0000><B>__sqrt__</B></FONT>(self): 
+		<FONT COLOR=#3333CC><B>return</B></FONT> self._return(sqrt(self.array))
+
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="tostring"><FONT COLOR=#CC0000><B>tostring</B></FONT>(self): <FONT COLOR=#3333CC><B>return</B></FONT> self.array.tostring()
+
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="byteswapped"><FONT COLOR=#CC0000><B>byteswapped</B></FONT>(self): <FONT COLOR=#3333CC><B>return</B></FONT> self._return(self.array.byteswapped())
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="astype"><FONT COLOR=#CC0000><B>astype</B></FONT>(self, typecode): <FONT COLOR=#3333CC><B>return</B></FONT> self._return(self.array.astype(typecode))
+   
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="typecode"><FONT COLOR=#CC0000><B>typecode</B></FONT>(self): <FONT COLOR=#3333CC><B>return</B></FONT> self.array.typecode()
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="itemsize"><FONT COLOR=#CC0000><B>itemsize</B></FONT>(self): <FONT COLOR=#3333CC><B>return</B></FONT> self.array.itemsize()
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="iscontiguous"><FONT COLOR=#CC0000><B>iscontiguous</B></FONT>(self): <FONT COLOR=#3333CC><B>return</B></FONT> self.array.iscontiguous()
+
+	<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="_return"><FONT COLOR=#CC0000><B>_return</B></FONT>(self, a):
+	    <FONT COLOR=#3333CC><B>if</B></FONT> len(shape(a)) == 0: 
+		<FONT COLOR=#3333CC><B>return</B></FONT> a
+	    <FONT COLOR=#3333CC><B>else</B></FONT>: 
+		r = self.__class__(())
+		r.__dict__[<FONT COLOR=#115511>'array'</FONT>] = a
+		r.__dict__[<FONT COLOR=#115511>'shape'</FONT>] = shape(a)
+		<FONT COLOR=#3333CC><B>return</B></FONT> r
+
+
+
+
+<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="is_subclass"><FONT COLOR=#CC0000><B>is_subclass</B></FONT>(a, b):
+    <FONT COLOR=#115511>"""Determine if class(a) is a subclass of class(b)."""</FONT>
+    <FONT COLOR=#3333CC><B>try</B></FONT>: <FONT COLOR=#3333CC><B>raise</B></FONT> a
+    <FONT COLOR=#3333CC><B>except</B></FONT> b.__class__: <FONT COLOR=#3333CC><B>return</B></FONT> 1
+    <FONT COLOR=#3333CC><B>except</B></FONT>: <FONT COLOR=#3333CC><B>return</B></FONT> 0
+
+<FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="arg_class"><FONT COLOR=#CC0000><B>arg_class</B></FONT>(value, *args):
+    <FONT COLOR=#115511>"""Chose array or a subclass of UserArray as a return type."""</FONT>
+    <FONT COLOR=#3333CC><B>import</B></FONT> types, Numeric
+    <FONT COLOR=#1111CC># Check if sequence, if not just return it</FONT>
+    <FONT COLOR=#3333CC><B>try</B></FONT>: len(value)
+    <FONT COLOR=#3333CC><B>except</B></FONT>: <FONT COLOR=#3333CC><B>return</B></FONT> value
+    <FONT COLOR=#1111CC># Determine return type</FONT>
+    instances = []
+    <FONT COLOR=#3333CC><B>for</B></FONT> arg <FONT COLOR=#3333CC><B>in</B></FONT> args:
+	<FONT COLOR=#3333CC><B>if</B></FONT> type(arg) == types.InstanceType:
+	    instances.append(arg)
+    <FONT COLOR=#3333CC><B>if</B></FONT> len(instances) == 0:
+	<FONT COLOR=#3333CC><B>return</B></FONT> asarray(value)
+    <FONT COLOR=#3333CC><B>else</B></FONT>:
+	<FONT COLOR=#1111CC># Return the class that is lowest in the inheritance hiearchy.</FONT>
+	lowest = instances[0]
+	<FONT COLOR=#3333CC><B>for</B></FONT> inst <FONT COLOR=#3333CC><B>in</B></FONT> instances[1:]:
+	    <FONT COLOR=#3333CC><B>if</B></FONT> is_subclass(inst, lowest):
+		lowest = inst
+	    <FONT COLOR=#3333CC><B>elif</B></FONT> <FONT COLOR=#3333CC><B>not</B></FONT> is_subclass(lowest, inst):
+		<FONT COLOR=#3333CC><B>raise</B></FONT> ValueError, <FONT COLOR=#115511>"Mismatched classes"</FONT>		
+	<FONT COLOR=#3333CC><B>return</B></FONT> lowest.__class__(value)
+
+<FONT COLOR=#3333CC><B>import</B></FONT> Numeric
+
+<FONT COLOR=#1111CC># Shadow the structural functions.</FONT>
+<FONT COLOR=#1111CC># (Function, arrays_args, input_args, output_args(no defaults...))</FONT>
+shadow_params = ((<FONT COLOR=#115511>"take"</FONT>, <FONT COLOR=#115511>"(a, indices)"</FONT>, <FONT COLOR=#115511>"a, indices, axis=0"</FONT>,<FONT COLOR=#115511>"a, indices, axis"</FONT> ),
+		 (<FONT COLOR=#115511>"reshape"</FONT>, <FONT COLOR=#115511>"(a, shape)"</FONT>, <FONT COLOR=#115511>"a, shape"</FONT>, <FONT COLOR=#115511>"a, shape"</FONT>),
+		 (<FONT COLOR=#115511>"resize"</FONT>, <FONT COLOR=#115511>"(a, shape)"</FONT>, <FONT COLOR=#115511>"a, shape"</FONT>, <FONT COLOR=#115511>"a, shape"</FONT>),
+		 (<FONT COLOR=#115511>"transpose"</FONT>, <FONT COLOR=#115511>"(a,)"</FONT>, <FONT COLOR=#115511>"a, axis=None"</FONT>, <FONT COLOR=#115511>"a, axis"</FONT>,),
+		 (<FONT COLOR=#115511>"repeat"</FONT>, <FONT COLOR=#115511>"(a, repeats)"</FONT>, <FONT COLOR=#115511>"a, repeats, axis=0"</FONT>, <FONT COLOR=#115511>"a, repeats, axis"</FONT>),
+		 (<FONT COLOR=#115511>"choose"</FONT>, <FONT COLOR=#115511>"(a,)+tuple(b)"</FONT>, <FONT COLOR=#115511>"a, b"</FONT>, <FONT COLOR=#115511>"a, b"</FONT>),
+		 (<FONT COLOR=#115511>"concatenate"</FONT>, <FONT COLOR=#115511>"tuple(a)"</FONT>, <FONT COLOR=#115511>"a, axis=0"</FONT>, <FONT COLOR=#115511>"a, axis"</FONT>),
+		 (<FONT COLOR=#115511>"diagonal"</FONT>, <FONT COLOR=#115511>"(a,)"</FONT>, <FONT COLOR=#115511>"a, k=0"</FONT>, <FONT COLOR=#115511>"a, k"</FONT>),
+		 (<FONT COLOR=#115511>"ravel"</FONT>, <FONT COLOR=#115511>"(a,)"</FONT>, <FONT COLOR=#115511>"a"</FONT>, <FONT COLOR=#115511>"a"</FONT>),
+		 (<FONT COLOR=#115511>"nonzero"</FONT>, <FONT COLOR=#115511>"(a,)"</FONT>, <FONT COLOR=#115511>"a"</FONT>, <FONT COLOR=#115511>"a"</FONT>),
+		 (<FONT COLOR=#115511>"where"</FONT>, <FONT COLOR=#115511>"(con, t, f)"</FONT>, <FONT COLOR=#115511>"con, t, f"</FONT>, <FONT COLOR=#115511>"con, t, f"</FONT>),
+		 (<FONT COLOR=#115511>"compress"</FONT>, <FONT COLOR=#115511>"(a, con)"</FONT>, <FONT COLOR=#115511>"a, con, axis=0"</FONT>, <FONT COLOR=#115511>"a, con, axis"</FONT>),
+		 (<FONT COLOR=#115511>"trace"</FONT>, <FONT COLOR=#115511>"(a,)"</FONT>, <FONT COLOR=#115511>"a, k=0"</FONT>, <FONT COLOR=#115511>"a, k"</FONT>),
+		 (<FONT COLOR=#115511>"sort"</FONT>, <FONT COLOR=#115511>"(a,)"</FONT>, <FONT COLOR=#115511>"a, axis=-1"</FONT>, <FONT COLOR=#115511>"a, axis"</FONT>),
+		 <FONT COLOR=#1111CC># not argsort</FONT>
+		 (<FONT COLOR=#115511>"searchsorted"</FONT>, <FONT COLOR=#115511>"(a, values)"</FONT>, <FONT COLOR=#115511>"a, values"</FONT>, <FONT COLOR=#115511>"a, values"</FONT>),
+		 <FONT COLOR=#1111CC># not argmax</FONT>
+		 <FONT COLOR=#1111CC># not argmin</FONT>
+		 )
+
+<FONT COLOR=#3333CC><B>for</B></FONT> param <FONT COLOR=#3333CC><B>in</B></FONT> shadow_params:
+    dict = {<FONT COLOR=#115511>"name"</FONT> : param[0],
+	    <FONT COLOR=#115511>"doc"</FONT> : globals()[param[0]].__doc__,
+	    <FONT COLOR=#115511>"arrays"</FONT> : param[1],
+	    <FONT COLOR=#115511>"inargs"</FONT> : param[2],
+	    <FONT COLOR=#115511>"outargs"</FONT> : param[3] }
+
+    exec <FONT COLOR=#115511>'def %(name)s(%(inargs)s):\n'</FONT> \
+	 <FONT COLOR=#115511>'    """%(doc)s"""\n'</FONT> \
+	 <FONT COLOR=#115511>'    return apply(arg_class,(Numeric.%(name)s(%(outargs)s),)+%(arrays)s)\n'</FONT>\
+	 % dict
+
+<FONT COLOR=#3333CC><B>class</B></FONT> <A NAME="BinaryUserFunc"><FONT COLOR=#CC0000><B>BinaryUserFunc</B></FONT>:
+    <FONT COLOR=#115511>"""Wrapper for binary ufuncs"""</FONT>
+    <FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__init__"><FONT COLOR=#CC0000><B>__init__</B></FONT>(self, ufunc):
+	self.ufunc = ufunc
+	
+    <FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__call__"><FONT COLOR=#CC0000><B>__call__</B></FONT>(self, a, b, c=<FONT COLOR=#3333CC><B>None</B></FONT>):
+	<FONT COLOR=#3333CC><B>if</B></FONT> c == <FONT COLOR=#3333CC><B>None</B></FONT>:
+	    <FONT COLOR=#3333CC><B>return</B></FONT> arg_class(self.ufunc(a,b), a, b)
+	<FONT COLOR=#3333CC><B>elif</B></FONT> type(c) == ArrayType:
+	    <FONT COLOR=#3333CC><B>return</B></FONT> arg_class(self.ufunc(a,b,c), a, b, c)
+	<FONT COLOR=#3333CC><B>else</B></FONT>:
+	    c[:] = self.ufunc(a,b)
+	    <FONT COLOR=#3333CC><B>return</B></FONT> arg_class(c, a, b, c)
+
+    <FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="reduce"><FONT COLOR=#CC0000><B>reduce</B></FONT>(self, a, axis=0):
+	<FONT COLOR=#3333CC><B>return</B></FONT> arg_class(self.ufunc.reduce(a, axis), a)
+
+    <FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="accumulate"><FONT COLOR=#CC0000><B>accumulate</B></FONT>(self, a, axis=0):
+	<FONT COLOR=#3333CC><B>return</B></FONT> arg_class(self.ufunc.accumulate(a), a)
+
+    <FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="outer"><FONT COLOR=#CC0000><B>outer</B></FONT>(self, a, b):
+	<FONT COLOR=#3333CC><B>return</B></FONT> arg_class(self.ufunc.outer(a, b), a, b)
+
+    <FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="reduceat"><FONT COLOR=#CC0000><B>reduceat</B></FONT>(self, a, indices, axis=0):
+	<FONT COLOR=#3333CC><B>return</B></FONT> arg_class(self.ufunc.reduceat(a, indices, axis), a, indices)
+
+<FONT COLOR=#3333CC><B>class</B></FONT> <A NAME="MonaryUserFunc"><FONT COLOR=#CC0000><B>MonaryUserFunc</B></FONT>:
+    <FONT COLOR=#115511>"""Wrapper for monary(?) ufuncs"""</FONT>
+    <FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__init__"><FONT COLOR=#CC0000><B>__init__</B></FONT>(self, ufunc):
+	self.ufunc = ufunc
+	
+    <FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="__call__"><FONT COLOR=#CC0000><B>__call__</B></FONT>(self, a, c=<FONT COLOR=#3333CC><B>None</B></FONT>):
+	<FONT COLOR=#3333CC><B>if</B></FONT> c == <FONT COLOR=#3333CC><B>None</B></FONT>:
+	    <FONT COLOR=#3333CC><B>return</B></FONT> arg_class(self.ufunc(a), a, b)
+	<FONT COLOR=#3333CC><B>elif</B></FONT> type(c) == ArrayType:
+	    <FONT COLOR=#3333CC><B>return</B></FONT> arg_class(self.ufunc(a,c), a, c)
+	<FONT COLOR=#3333CC><B>else</B></FONT>:
+	    c[:] = self.ufunc(a)
+	    <FONT COLOR=#3333CC><B>return</B></FONT> arg_class(c, a,c)
+
+    <FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="reduce"><FONT COLOR=#CC0000><B>reduce</B></FONT>(self, a, axis=0):
+	<FONT COLOR=#3333CC><B>raise</B></FONT> ValueError, <FONT COLOR=#115511>"reduce only supported for binary functions"</FONT>
+
+    <FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="accumulate"><FONT COLOR=#CC0000><B>accumulate</B></FONT>(self, a, axis=0):
+	<FONT COLOR=#3333CC><B>raise</B></FONT> ValueError, <FONT COLOR=#115511>"accumulate only supported for binary functions"</FONT>
+
+    <FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="outer"><FONT COLOR=#CC0000><B>outer</B></FONT>(self, a, b):
+	<FONT COLOR=#3333CC><B>raise</B></FONT> ValueError, <FONT COLOR=#115511>"outer only supported for binary functions"</FONT>
+
+    <FONT COLOR=#3333CC><B>def</B></FONT> <A NAME="reduceat"><FONT COLOR=#CC0000><B>reduceat</B></FONT>(self, a, indices, axis=0):
+	<FONT COLOR=#3333CC><B>raise</B></FONT> ValueError, <FONT COLOR=#115511>"reduceat only supported for binary functions"</FONT>
+
+
+<FONT COLOR=#3333CC><B>for</B></FONT> ufunc <FONT COLOR=#3333CC><B>in</B></FONT> (<FONT COLOR=#115511>"add"</FONT>, <FONT COLOR=#115511>"subtract"</FONT>, <FONT COLOR=#115511>"multiply"</FONT>, <FONT COLOR=#115511>"divide"</FONT>, <FONT COLOR=#115511>"remainder"</FONT>, 
+	      <FONT COLOR=#115511>"power"</FONT>,<FONT COLOR=#115511>"maximum"</FONT>, <FONT COLOR=#115511>"minimum"</FONT>,):
+    exec <FONT COLOR=#115511>"%s = BinaryUserFunc(%s)"</FONT> % ((ufunc,)*2)
+
+<FONT COLOR=#3333CC><B>for</B></FONT> ufunc <FONT COLOR=#3333CC><B>in</B></FONT> (<FONT COLOR=#115511>"arccos"</FONT>, <FONT COLOR=#115511>"arcsin"</FONT>,  <FONT COLOR=#115511>"arctan"</FONT>, <FONT COLOR=#115511>"cos"</FONT>, <FONT COLOR=#115511>"cosh"</FONT>, <FONT COLOR=#115511>"exp"</FONT>, 
+	      <FONT COLOR=#115511>"log"</FONT>, <FONT COLOR=#115511>"log10"</FONT>, <FONT COLOR=#115511>"sin"</FONT>, <FONT COLOR=#115511>"sinh"</FONT>, <FONT COLOR=#115511>"sqrt"</FONT>, <FONT COLOR=#115511>"tan"</FONT>, <FONT COLOR=#115511>"tanh"</FONT>,  <FONT COLOR=#115511>"conjugate"</FONT>):
+    exec <FONT COLOR=#115511>"%s = MonaryUserFunc(%s)"</FONT> % ((ufunc,)*2)
+
+<FONT COLOR=#1111CC>#############################################################</FONT>
+<FONT COLOR=#1111CC># Test of class UserArray</FONT>
+<FONT COLOR=#1111CC>#############################################################</FONT>
+<FONT COLOR=#3333CC><B>if</B></FONT> __name__ == <FONT COLOR=#115511>'__main__'</FONT>:
+	<FONT COLOR=#3333CC><B>import</B></FONT> Numeric
+
+	temp=reshape(arange(10000),(100,100))
+
+	ua=UserArray(temp)
+	<FONT COLOR=#1111CC># new object created begin test</FONT>
+	<FONT COLOR=#3333CC><B>print</B></FONT> dir(ua)
+	<FONT COLOR=#3333CC><B>print</B></FONT> shape(ua),ua.shape <FONT COLOR=#1111CC># I have changed Numeric.py</FONT>
+
+	ua_small=ua[:3,:5]
+	<FONT COLOR=#3333CC><B>print</B></FONT> ua_small
+	ua_small[0,0]=10  <FONT COLOR=#1111CC># this did not change ua[0,0], wich is not normal behavior</FONT>
+	<FONT COLOR=#3333CC><B>print</B></FONT> ua_small[0,0],ua[0,0]
+	<FONT COLOR=#3333CC><B>print</B></FONT> sin(ua_small)/3.*6.+sqrt(ua_small**2)
+	<FONT COLOR=#3333CC><B>print</B></FONT> less(ua_small,103),type(less(ua_small,103))
+	<FONT COLOR=#3333CC><B>print</B></FONT> type(ua_small*reshape(arange(15),shape(ua_small)))
+	<FONT COLOR=#3333CC><B>print</B></FONT> reshape(ua_small,(5,3))
+	<FONT COLOR=#3333CC><B>print</B></FONT> transpose(ua_small)
+</PRE>
+		  <!--footer-->
+		  </BODY>

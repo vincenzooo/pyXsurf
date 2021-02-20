@@ -1,0 +1,1 @@
+Here pieces of software that were lost and retrieved. Not necessarily abandoned, but need to be restored and integrated in the library. Only for internal use (I don't want to lose them again, so I keep them in the repository).
