@@ -240,10 +240,16 @@ def subplot_grid(number,size=0,smax=0,*args,**kwargs):
     #axes = [plt.subplot(gridsize[0], gridsize[1], i+1,*args,**kwargs) for i in range(number)]
     """    
     num = kwargs.get('num',plt.gcf().number)
-    fig,axes=plt.subplots(*gridsize,num=num,*args,**kwargs)
+    fig,axes=plt.subplots(*gridsize,num=num,squeeze=True,*args,**kwargs)
     #pdb.set_trace()
-    axes=axes.flatten().tolist()
+    if np.size(axes) > 1:  # flag `squeeze` returns np array with removed 
+        # empty dimensions if >1 element, otherwise scalar.
+        # I want to have it as a list (single or multi elements) 
+        axes=axes.flatten().tolist()
+    else:
+        axes = list(axes)
     
+    # remove extra axis
     for i in np.arange(number,len(axes)): #a in axes[(np.arange(len(axes))+1)>number]: 
         a=axes.pop(i)
         a.remove()
