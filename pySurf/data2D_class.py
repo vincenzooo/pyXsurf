@@ -85,6 +85,7 @@ from pySurf.readers.format_reader import auto_reader
 from pySurf.data2D import plot_data,get_data, level_data, save_data, rotate_data, resample_data
 from pySurf.data2D import read_data,sum_data, subtract_data, projection, crop_data, transpose_data
 from pySurf.data2D import slope_2D, register_data, data_from_txt, data_histostats
+from pySurf.data2D import apply_transform as apply_transform_data
 from dataIO.outliers import remove_outliers
 
 from pySurf import data2D
@@ -104,6 +105,8 @@ import pdb
 from pySurf.affine2D import find_affine
 
 from dataIO.functions import update_docstring
+from plotting.add_clickable_markers import add_clickable_markers2
+from pySurf.points import points_autoresample
 
 class Data2D(object):  #np.ndarrays
     """A class containing 2d data with x and y coordinates. It has a set of methods for analysis operations.
@@ -264,6 +267,22 @@ class Data2D(object):  #np.ndarrays
     def __truediv__(self,other):
         return self*(1./other)
 
+    def merge(self,other,topoints=False):
+        """ Return the merged data between a and b.
+        If `topoints` is True points cloud data are returned.  
+        Gaps are brutally interpolated (unless `topoints` is set)."""
+        
+        if self.units != other.units:
+            raise "incompatible units"  
+            
+        p1=self.topoints()
+        p2=other.topoints()
+        res = np.vstack([p1,p2])
+        if topoints:
+            return res
+        
+        res = points_autoresample(res)
+        return Data2D(*res,units=self.units,name=self.name + " // " + other.name)
 
     def plot(self,title=None,*args,**kwargs):
         """plot using data2d.plot_data and setting automatically labels and colorscales.
@@ -272,7 +291,7 @@ class Data2D(object):  #np.ndarrays
 
         nsigma0=1  #default number of stddev for color scale
         #import pdb
-        stats=kwargs.pop('stats',2) #to change the default behavior
+        stats=kwargs.pop('stats',[1,2,3,4]) #to change the default behavior
         nsigma=kwargs.pop('nsigma',nsigma0) #to change the default behavior
         m=self.data
         res=plot_data(self.data,self.x,self.y,units=self.units,
@@ -314,6 +333,56 @@ class Data2D(object):  #np.ndarrays
         return res
     rot90=update_docstring(rot90,rotate_data)
 
+    def shift(self,xoffset=None,yoffset=None,zoffset=None):
+        """Shift data of given offsets along one or more axes. 
+        `offsets` can be provided either as 1 (data offset), 2 (x,y) or 3 separate values, or as a single 2 (x,y) or 3 elements vector."""
+        
+        # 1,2,3
+        # None, 2, 3
+        # None, None, 3
+        # None, 2, None
+        # 1, None, None
+        # 1, None, 3
+        # 1, 2, None
+        # [1,2,3], None, None 
+        # [1,2,3], ... fallisce se non none
+        # [1,2], None, None
+        pdb.set_trace()
+        offsets = [0,0,0]
+        if yoffset is None and zoffset is None:
+            # 1, None, None
+            # [1,2,3], None, None 
+            # [1,2], None, None    
+            if xoffset is not None:
+                offsets[:np.size(xoffset)] = np.array(xoffset) 
+        else:
+            assert np.size(xoffset) == 1
+            offsets[0] = 0 if xoffset is None else xoffset
+            offsets[1] = 0 if yoffset is None else yoffset
+            offsets[2] = 0 if zoffset is None else zoffset
+            # [1,2,3], ... fallisce se non none
+            # [1,2], ... fallisce se non none
+
+        # 1,2,3
+        # None, 2, 3
+        # None, None, 3
+        # None, 2, None
+        # 1, None, 3
+        # 1, 2, None
+
+        return offsets
+
+    tv = [[1,2,3],
+        [None, 2, 3],
+        [None, None, 3],
+        [None, 2, None],
+        [1, None, None],
+        [1, None, 3],
+        [1, 2, None],
+        [[1,2,3], None, None], 
+        [[1,2,3],5,None],
+        [[1,2], None, None]]
+
     def transpose(self):
         res = self.copy()
         res.data,res.x,res.y = transpose_data(self.data,self.x,self.y)
@@ -322,9 +391,10 @@ class Data2D(object):  #np.ndarrays
 
     def apply_transform(self,*args,**kwargs):
         res = self.copy()
-        res.data,res.x,res.y=app_trans(self.data,self.x,self.y,*args,**kwargs)
+        #pdb.set_trace()
+        res.data,res.x,res.y=apply_transform_data(self.data,self.x,self.y,*args,**kwargs)
         return res
-    apply_transform=update_docstring(apply_transform,data2D.apply_transform)
+    apply_transform=update_docstring(apply_transform,apply_transform_data)
 
     def apply_to_data(self,func,*args,**kwargs):
         """apply a function from 2d array to 2d array to data."""
@@ -355,6 +425,14 @@ class Data2D(object):  #np.ndarrays
         ple_data(res(),other(),*args,**kwargs)
         return res
     resample=update_docstring(resample,resample_data)
+
+    def add_markers(self,*args,**kwargs):
+        f = plt.figure()
+        self.plot()        
+        ax = add_clickable_markers2(*args,**kwargs)
+        markers = ax.markers
+        plt.close(f)
+        return markers
 
     def psd(self,wfun=None,rmsnorm=True,norm=1,analysis=False,subfix='',name=None,*args,**kwargs):
         """return a PSD2D object with 2D psd of self.
@@ -485,7 +563,7 @@ class PSD2D(Data2D):
         return self.y,projection(self.data,axis=1,*args,**kwargs)
 
     def rms_power(self,plot=False,rmsrange=None,*args,**kwargs):
-        """Calculate rms slicec power.
+        """Calculate rms slice power by integrating .
             If plot is set also plot the whole thing."""
 
         #pdb.set_trace()
