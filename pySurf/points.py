@@ -17,6 +17,8 @@ from scipy import stats
 from plotting.add_clickable_markers import add_clickable_markers2
 
 
+verbose = False
+
 """
 Module containing functions acting on a point cloud. With the intention
 of creating a class. Points are in format (Npoints,Ndim).
@@ -393,6 +395,8 @@ def get_points(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,addax
     #import pdb
     #pdb.set_trace()
     if xrange is not None or yrange is not None:
+        if verbose: 
+            pdb.set_trace()
         print("WARNING: xrange and yrange options to get_points are obsolete, use x and y with two"+
                "elements to obtain same effect. Will be removed. I will correct for now")
         if x is None:
@@ -482,6 +486,8 @@ def save_points(filename,points,xgrid=None,ygrid=None,shape=None,matrix=False,fi
     #changed interface, set automatic correction
     if type(points)==str:
         import time
+        if verbose: 
+            pdb.set_trace()
         print("""WARNING: routine was modified to have filename as first argument, modify IMMEDIATELY
             the calling code. Corrected automatically for this time, but I will punish you waiting 5 seconds.""")
         time.sleep(5)
@@ -639,8 +645,10 @@ def points_find_grid2(points,result='shape',sort=None,steps=None):
     nfast=len(id)
     #nslow=points.shape[0]/nfast
     if nslow*nfast!=points.shape[0]:
-        print("""WARNING: points number doesn't match regular grid for size determined by points_find_grid,
-        usually OK, but please double check results.""")
+        if verbose: 
+            pdb.set_trace()
+        print("""WARNING: points number [%i] doesn't match regular grid for size determined by points_find_grid [%i x %i],
+        usually OK, but please double check results."""%(points.shape[0],nslow,nfast))
 
     if steps is not None:
         if steps==(0,0):
@@ -721,7 +729,10 @@ def points_find_grid(points,result='shape',sort=None):
     nfast=len(id)
     #nslow=points.shape[0]/nfast
     if nslow*nfast!=points.shape[0]:
-        print ("WARNING: points number doesn't match regular grid for size determined by points_find_grid")
+        if verbose: 
+            pdb.set_trace()
+        print("""WARNING: points number [%i] doesn't match regular grid for size determined by points_find_grid [%i x %i],
+        usually OK, but please double check results."""%(points.shape[0],nslow,nfast))
 
     slowind=int(not(fastind))
     if result=='step':
@@ -882,27 +893,73 @@ def points_autoresample(points,edge=0):
 
 
 
-def extract_profile(points,xy0,xy1=None,npoints=100,along=True):
+def extract_profile(points,xy0,xy1=None,npoints=None,along=True,plot=False):
     """extract a profile from xy0=(x0, y0) to xy1=(x1,y1).
     Return a couple of vectors x, y, z. The number of points can be set, otherwise is set
     accordingly to the longest profile dimension.
     If along is set (default), a two-dim x-z profile is returned with x distancce
     along the profile from xy0.
-    If called without second argument, extract point."""
+    If called without second argument, extract point.
+    #TODO, can be made faster by cropping data around profile.
+    """
+    
     if xy1 is None: #extract point
         raise NotImplementedError
-
+        
+    # npoints not provided usese coordinates
+    ## infer grid
+    _,(xg,yg) = points_find_grid(points,result='grid') #complete grid in xg,yg
+    
+    #span of extreme points
+    xs = [xy0[0],xy1[0]]  
+    ys = [xy0[1],xy1[1]]  
+    
+    #  range for crop of useful data,
+    ix = np.where((xg>=xs[0]) & (xg<=xs[1]))[0]
+    iy = np.where((yg>=ys[0]) & (yg<=ys[1]))[0]
+    #  add one points to each side
+    if len(ix) == 0:
+        ix=[(np.abs(xg - np.nanmean(xs))).argmin()]
+    if ix[0] !=0: ix = np.insert(ix,0,ix[0]-1)
+    if ix[-1] !=(len(xg)-1): ix = np.append(ix,ix[-1]+1)
+    if len(iy) == 0:
+        iy=[(np.abs(yg - np.nanmean(ys))).argmin()]
+    if iy[0] !=0: iy = np.insert(iy,0,iy[0]-1)
+    if iy[-1] !=(len(yg)-1): iy = np.append(iy,iy[-1]+1)
+    
+    if npoints is None:
+        npoints=max(len(ix),len(iy))
+    
+    #adjusted range
+    xr = span(xg[ix])
+    yr = span(yg[iy])
+    
+    pp = crop_points(points,xr,yr)
+    #points = crop_points(points,[xy0[0],xy1[0]],[xy0[1],xy1[1]])
+    
     xx=np.linspace(xy0[0],xy1[0],npoints)
     yy=np.linspace(xy0[1],xy1[1],npoints)
     r=np.sqrt((xx-xy0[0])**2+(yy-xy0[1])**2)
 
-    z=ip.griddata(points[:,0:2],points[:,-1],np.vstack([xx,yy]).T,method=method)
+    z=ip.griddata(pp[:,0:2],pp[:,-1],np.vstack([xx,yy]).T,method=method)
     if along:
-        #points=np.vstack([r,z]).T
-        points=[r,z]
-    else:
-        #points=np.hstack([xx[:,np.newaxis],yy[:,np.newaxis],z[:,np.newaxis]])
-        points=[xx,yy,z]
+        #pp=np.vstack([r,z]).T
+        pp=[r,z]
+    else:      #pp=np.hstack([xx[:,np.newaxis],yy[:,np.newaxis],z[:,np.newaxis]])
+        pp=[xx,yy,z]
+        r=xx
+
+    if plot:
+        plt.figure()
+        ax1 = plt.subplot(211)
+        plot_points(points,aspect='auto')
+        plt.plot([xy0[0],xy1[0]],[xy0[1],xy1[1]],'r')
+        xl=plt.xlim()
+        ax1 = plt.subplot(212,sharex=ax1)
+        plt.plot(r,z)
+        plt.xlim(*xl)
+        plt.grid()
+        plt.colorbar().remove() #dirty trick to adjust size to other panels
     return points #points[:,0],points[:,1]
 
 '''
