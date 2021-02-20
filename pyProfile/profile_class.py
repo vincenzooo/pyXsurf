@@ -94,10 +94,9 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-
+'''
 #from pySurf.readers._instrument_reader import read_data, csvZygo_reader,csv4D_reader,sur_reader,auto_reader
-
-from pySurf.readers.format_reader import auto_reader
+#from pySurf.readers.format_reader import auto_reader
 from pySurf.data2D import plot_data,get_data, level_data, save_data, rotate_data, resample_data
 from pySurf.data2D import read_data,sum_data, subtract_data, projection, crop_data, transpose_data
 from pySurf.data2D import slope_2D, register_data, data_from_txt, data_histostats
@@ -105,11 +104,10 @@ from dataIO.outliers import remove_outliers
 
 from pySurf import data2D
 import dataIO
+'''
 
-from pySurf.psd2d import psd2d,plot_psd2d,psd2d_analysis,psd_analysis,plot_rms_power,rms_power
+#from pySurf.psd2d import psd2d,plot_psd2d,psd2d_analysis,psd_analysis,plot_rms_power,rms_power
 
-
-from pySurf.points import matrix_to_points2
 
 from copy import deepcopy
 from dataIO.span import span
@@ -123,8 +121,11 @@ from pyProfile.profile import crop_profile
 from pyProfile.profile import level_profile
 from pyProfile.profile import resample_profile
 from pyProfile.profile import sum_profiles, subtract_profiles
+from pyProfile.psd import psd as profpsd
 
-from pySurf.data2D_class import update_docstring,doc_from
+#from pySurf.data2D_class import update_docstring,doc_from
+
+from dataIO.functions import update_docstring
 '''
 def update_docstring(func,source):
     """given a current function and a source function, update current function docstring
@@ -170,6 +171,39 @@ def read_mx_profiles(filename,*args,**kwargs):
     
     return profiles
 
+def read_mca(filename,*args,**kwargs):
+    """temptative routine to read mca files from amptek energy sensitive detector. Return a profile with metadata information in a `.header` property (temporarily a dictionary obtained from string blocks) of all profiles.
+    Like all other readers will be incorporated in some form of reader in a 
+    more mature version"""
+
+    import re
+    from scipy import interpolate
+
+    a = open(filename,'r').readlines()
+    a = [aa.strip() for aa in a if len(aa.strip())]
+
+    p=re.compile("<<.*>>")
+    i = p.match("".join(a))
+
+    itags = [i for i,l in enumerate(a) if re.compile("<<.*>>").match(l)] #posizione dei tags in linee
+    tags = [a[i] for i in itags]  #tags
+    
+    blocks = {'<<CALIBRATION>>':['LABEL - Channel','0 0.','1 1']} #default calibration if not defined in file, in a consistent format for conversion.
+    for i,t in enumerate(tags[:-1]):  #last tag is assumed to be closing tag
+        if itags[i+1] != itags[i]+1:
+            blocks [t] = a[itags[i]+1:itags[i+1]]  
+    #pdb.set_trace()
+    #print(blocks['<<CALIBRATION>>'])
+    data = [float(d) for d in blocks['<<DATA>>']  ]
+    cal = np.array([[float(dd) for dd in d.split()] for d in blocks['<<CALIBRATION>>'][1:]])
+
+    x = interpolate.interp1d(cal[:,0],cal[:,1],fill_value='extrapolate')(np.arange(len(data))) #np.interp doesn't extrapolate
+    
+    profiles = Profile(x,data,name=filename)
+    profiles.header = blocks
+    
+    return profiles
+
 class Profile(object):  #np.ndarrays
     """A class containing x,y data. It has a set of methods for analysis and visualization.
     Function methods: return a copy with new values.
@@ -187,13 +221,15 @@ class Profile(object):  #np.ndarrays
         
         #from pySurf.readers.instrumentReader import reader_dic
         from pyProfile.profile import register_profile
-        import pdb
+        
         #pdb.set_trace()
 
         if isinstance (y,str):
             print ('first argument is string, use it as filename')
             file=y
             y=None
+        else:
+            y=np.array(y) #onvert to array if not
         #pdb.set_trace()
         self.file=file #initialized to None if not provided
         if file is not None:
@@ -442,7 +478,7 @@ class Profile(object):  #np.ndarrays
         """A simple file loader using np.genfromtxt.
         Load columns from file in self.x and self.y."""
         self.x,self.y = np.genfromtxt(filename,unpack=True,*args,**kwargs)
-    load=update_docstring(load,data_from_txt)
+    load=update_docstring(load,np.genfromtxt)
 
     from pyProfile.profile import save_profile
     def save(self,filename,*args,**kwargs):
@@ -512,23 +548,13 @@ class Profile(object):  #np.ndarrays
     resample=update_docstring(resample,resample_profile)
 
 
-    def psd(self,wfun=None,rmsnorm=True,norm=1,analysis=False,subfix='',name=None,*args,**kwargs):
-        """return a PSD2D object with 2D psd of self.
-        If analysis is set True, psd2d_analysis plots are generated and related parameters
-          are passed as args.
-        subfix and name are used to control the name of returned object."""
+    def psd(self,wfun=None,rmsnorm=True,norm=1):
+        """return a PSD object with psd of self. """
 
-        if analysis:
-            f,p=psd2d_analysis(self.data,self.x,self.y,wfun=wfun,
-            norm=norm,rmsnorm=rmsnorm,
-            units=self.units,*args,**kwargs)
-        else:
-            f,p=psd2d(self.data,self.x,self.y,wfun=wfun,norm=norm,rmsnorm=rmsnorm)
+        f,p=profpsd(self.x,self.y,wfun=wfun,norm=norm,rmsnorm=rmsnorm)
 
-        newname = name if name is not None else fn_add_subfix(self.name,subfix)
-
-        return PSD2D(p,self.x,f,units=self.units,name=newname)
-    psd=update_docstring(psd,psd2d)
+        return PSD(p,self.x,f,units=self.units,name="")
+    psd=update_docstring(psd,profpsd)
 
     def remove_nan_ends(self,*args,**kwargs):
         res = self.copy()
@@ -600,10 +626,10 @@ class Profile(object):  #np.ndarrays
     slope=update_docstring(slope,slope_2D)
     '''
 
-from pySurf.psd2d import psd2d,plot_psd2d
+#from pySurf.psd2d import psd2d,plot_psd2d
 
 class PSD(Profile):
-    """It is a type of data 2D with customized behavoiur and additional properties
+    """It is a type of profile with customized behavoiur and additional properties
     and methods."""
     def __init__(self,*args,**kwargs):
         ''' super is called implicitly (?non vero)
@@ -616,22 +642,20 @@ class PSD(Profile):
     def plot(self,*args,**kwargs):
         u=kwargs.pop('units',self.units)
         return plot_psd2d(self.y,self.data,self.x,units=u,*args,**kwargs)
-
-    def avgpsd(self,*args,**kwargs):
-        """avg, returns f and p. Can use data2D.projection keywords `span` and `expand` to return PSD ranges."""
-        return self.y,projection(self.data,axis=1,*args,**kwargs)
-
+    
     def rms_power(self,plot=False,*args,**kwargs):
-        """Calculate rms slicec power.
-            If plot is set also plot the whole thing."""
-
+        """Calculate rms slice power as integral of psd. If plot is set also plot the whole thing."""
+        
+        raise NotImplementedError
+        
+        '''
         if plot:
             return plot_rms_power(self.y,self.data.self.x,units=self.units,*args,**kwargs)
         else:
             """this is obtained originally by calling rms_power, however the function deals with only scalar inmot for rms range.
             Part dealing with multiple ranges is in plot_rms_power, but should be moved to rms_power."""
             raise NotImplementedError
-
+        '''
 
 def test_class_init(wfile=None):
     """test init and plot"""
