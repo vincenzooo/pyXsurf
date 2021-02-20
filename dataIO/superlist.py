@@ -4,7 +4,7 @@ Extensible vectorizable list.
 
 In final version has list properties `iterators`,
 `aggregator`,`expanded` containing methods that are vectorized in different ways. Iterator is default, return a list with each element obtained by applying its method with same name to each element of `superlist`. 
-Aggregator accumulate a binary operation, returning a single value. Expanded return a single element by passing the contant of `superlist` as n elements to the element method. 
+Aggregator accumulate a binary operation, returning a single value. Expanded return a single element by passing the content of `superlist` as n elements to the element method. 
 Note that passing parameters must be handled accordingly. In particular a list of parameters or a single value can be passed to iterators, however this can create ambiguity. For example, an element method can accept list or single values, so it is not clear when a list is passed to superlist, if this means that the same list is passed to all elements as list argument of element method, rather than passing each element of list argument as scalar argument of elements method. There is no ambiguity if a list of lists or a list with len different from number of superlist elements, this should be checked, otherwise a warning should be visualized telling about the possible ambiguity and default action (possibly passing one value per element, call with nested list [[element]] to apply as list to all values).
 
 In this experimental version, different ways to access object methods are tested.

@@ -8,6 +8,8 @@ Created on Fri Jun  8 00:36:57 2018
 import matplotlib.pyplot as plt
 import numpy as np
 
+import pdb 
+
 def original_make_caption():
     if mode=='tagcode': #single string (e.g. for filenames)
         #teh string manipulation is to avoid leading and ending underscores if head or tail are not set
@@ -37,7 +39,7 @@ def legendbox(text,ax=None,loc=0,*args,**kwargs):
 
     #plt.plot([1,2],[2,3],label='cane')
     #plt.legend(loc=1) 
-    import pdb 
+    
     #pdb.set_trace()
     if np.size(text) == 1 and not isinstance(text, list): text = [text]
     if ax is None:
