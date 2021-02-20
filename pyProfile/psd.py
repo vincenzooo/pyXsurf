@@ -2,7 +2,7 @@ from pyProfile.profile import line, make_signal
 import numpy as np
 from dataIO.span import span
 import matplotlib.pyplot as plt
-from pySurf.data2D import projection
+#from pySurf.data2D import projection
 
 def psd2prof(f,p,phase=None,N=None):
     """build a profile from PSD, if phase (in rad) is not passed use random 
@@ -58,9 +58,11 @@ def normPSD(N,L=None,form=1):
     return factor
     
 def psd(x,y,retall=False,wfun=None,norm=1,rmsnorm=False):
-    """return frequencies and PSD of a profile in mm^2, with x in mm and y in um.
+    """return frequencies and PSD of a profile.
+    
     If retall is set, also the phase is returned.
     PSD is squared FFT divided by step size. Profile is assumed real, so only positive freqs are used, doubling PSD values. Return value has ceil(N/2) elements (always odd).
+    See `np.fft.rfftfreq` for details.
     wfun is a function that given the number of points return a vector with values for the window. Note that normalization is quite arbitrary, usually it's rescaled later with rmsnorm.
     2017/07/30 if rmsnorm is set True, PSD is normalized to (multiplied by) rms calculated from profile (must be same if no window applied). 
     2016/03/26 this psd i return to old normalizaiton "time-integral squared magnitude", multiplying by dx.
