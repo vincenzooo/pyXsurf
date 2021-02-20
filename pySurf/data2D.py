@@ -44,6 +44,7 @@ from pySurf.find_internal_rectangle import find_internal_rectangle
 import itertools
 
 from dataIO.functions import update_docstring
+from dataIO.arrays import stats
 
 test_folder = r'C:\Users\kovor\Documents\python\pyXTel\pySurf\test'
 
@@ -258,7 +259,6 @@ def apply_transform(data,x,y,trans=None):
 
     return data,x,y
 
-
 def rotate_data(data,x=None,y=None,ang=0,k=None,center=None,
     fill_value=np.nan,usepoints=False,*args,**kwargs):
     """Rotate anticlockwise by an angle in degree. Non optimized version using points functions.
@@ -270,7 +270,7 @@ def rotate_data(data,x=None,y=None,ang=0,k=None,center=None,
     Added 2018/12/12
     args and kwargs are passed to the function that handles the rotation.
 
-    See also comments on resampling in apply_transform.
+    See also comments on resampling in `data2D.apply_transform`.
 
     rot90 determination of rotated axis can probably be extended to general case, but in the meanwhile
     the implementation based on points offers an accurate interpolation (even if slower),
@@ -768,16 +768,16 @@ def crop_data(data,x,y,xrange=None,yrange=None,zrange=None,mask=False,poly=None,
     """return data,x,y of cropped data inside axis ranges, polygons, or interactively
         selected rectangular region.
 
-		axis ranges are passed as a 2-element vector of which each can be None
-			or None, where None indicates automatic range (adjust to data).
-		If mask is set to True, return a boolean mask of the cropped region.
-		poly is a list of vertex for a polygon.
+        axis ranges are passed as a 2-element vector of which each can be None
+            or None, where None indicates automatic range (adjust to data).
+        If mask is set to True, return a boolean mask of the cropped region.
+        poly is a list of vertex for a polygon.
 
-		If interactive is True, allows interactive selection with:
-		Zoom to the region to crop, and/or use CTRL+leftClick to add points and create
+        If interactive is True, allows interactive selection with:
+        Zoom to the region to crop, and/or use CTRL+leftClick to add points and create
         an polygonal selection. CTRL+rightClick remove the nearest point. Press ENTER when done.
 
-		"""
+        """
 
     outmask=np.ones(np.shape(data),dtype=bool)
 
@@ -991,16 +991,46 @@ def slope_2D(wdata,x,y,scale=(1.,1.,1.)):
 
     return (slopeax,x,yax),(slopeaz,xaz,y)
 
-def get_stats(wdata,x=None,y=None,units=None):
-    """"""
-    if units is None:
-        u = ""
-    elif isinstance(units,str):
-        u=units
-    else:
-        u=units[-1] if units[-1] is not None else ""
-    stats=['RMS:%3.3g %s'%(np.nanstd(wdata),u),'PV:%3.3g %s'%(span(wdata,size=1),u)]
-    return stats
+
+def get_stats(wdata,x=None,y=None,units=None,vars=None,string=False):
+    """ Return selected statistics for each of data,x,y as numeric array or string, wrapping `dataIO.stats`.  
+    
+    `vars `, `units` and `string` have same meaning and usage as in wrapped function `stats`. `vars` can be passed as 3-element list to individually set which stats to print (`None` for complete stats, `[]` to exclude all).
+    
+    Note that span doesn't exclude nan data, put flag to tune this option.
+    """
+    
+    if units is None or not string:
+        u = ["","",""]
+    elif isinstance(units,str): #assumes z
+        u = ["","",units]
+    elif len(units) == 2: #x,y, no z
+        u = [units[0],units[1],""]
+    elif len(units) == 1: # z, no x,y
+        u = ["","",units[0]]  
+    elif len(units) == 3:
+        u = units
+    else:  # if 3 units are already ok
+        raise ValueError ("Unrecognized units.")
+    
+    #pdb.set_trace()
+    try:
+        if len(vars[0]) == 0: #[], TypeError if None
+            vars=[vars]
+    except TypeError:  #
+        vars=[vars,vars,vars]
+    
+    #
+    st=[stats(wdata,units=u[2],string=string,vars=vars[0])]
+    if x is not None: 
+        st.append(stats(x,units=u[0],vars=vars[1],string=string))
+    if y is not None:    
+        st.append(stats(y,units=u[1],vars=vars[2],string=string))
+    
+    return st
+'''
+## Differenza tra data_histostats e plot_stats ?? 
+## Rimosso 2020/11/05
 
 def plot_stats(datalist,x=None,y=None,bins=100,labels=None,*args,**kwargs):
     """plot histogram and returns statistics. Experimental.
@@ -1021,7 +1051,7 @@ def plot_stats(datalist,x=None,y=None,bins=100,labels=None,*args,**kwargs):
     plt.clf()
     plt.title('Height Distribution')
 
-    if np.array(datalist).size == 1:
+    if np.array(datalist).size == 1: #non funziona mica!
         datalist = [datalist]
     if labels is None:
         labels=[""]*len(datalist)
@@ -1031,8 +1061,9 @@ def plot_stats(datalist,x=None,y=None,bins=100,labels=None,*args,**kwargs):
             ,*args,**kwargs)
         rms.append(np.nanstd(d))
     plt.legend(loc=0)
-    return rms
-    
+    return rms 
+'''
+
 def data_histostats(data,x=None,y=None,bins=100,density=True,units=None,loc=0,*args,**kwargs):
     """wrapper around plt.hist, plot histogram of data (over existing window) adding label with stats. 
     `density` set tu True normalizes distribution to have sum equal 1. Return 3-uple according to `plt.hist`:"""
@@ -1041,12 +1072,9 @@ def data_histostats(data,x=None,y=None,bins=100,density=True,units=None,loc=0,*a
     res = plt.hist(data[np.isfinite(data)],bins=bins,density=density,*args,**kwargs)
     plt.xlabel('Units of '+units[2])
     plt.ylabel('Fraction of points #')
-    legend="\n".join(get_stats(data,x,y,units=units))
-    if x is not None:    
-        legend = legend + "\nx_span: %.3g"%(span(x,size=1))
-    if y is not None:    
-        legend = legend + "\ny_span: %.3g"%(span(y,size=1))
-    legend = legend + "\nN: %i"%(np.size(data))
+    
+    stats = get_stats(data,x,y,units=units,string=True)
+    legend=["\n".join(s) for s in stats] 
         
     # get_stats returns a string and it's not very flexible
     # maybe with a better implementation could add styles
@@ -1063,8 +1091,7 @@ data_histostats=update_docstring(data_histostats,plt.hist)
 
 ## PLOT FUNCTIONS
 
-def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,loc=0,contour=False,colors=None,
-    largs=None,framealpha=0.5,nsigma=None,*args,**kwargs):
+def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,vars=None,loc=0,contour=False,colors=None,largs=None,framealpha=0.5,nsigma=None,*args,**kwargs):
     """Plot data using imshow and modifying some default properties.
     Units for x,y,z can be passed as 3-el array or scalar, None can be used to ignore unit.
     Broadcast all imshow arguments.
@@ -1078,6 +1105,7 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     In alternative can be a dictionary containing arguments for remove_outliers. 
     If None (default) range is not changed from matplotlib defaults.
     If dict, a nummber of parameters for can be passed to remove_outliers.remove_outliers to determine color range (data are left intact).
+    2020/11/05 updated all stats functions.
     2020/07/14 added flag `contour` to overplot contours, and colors,
     to be passed to `plt.contour`"""
 
@@ -1174,9 +1202,32 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
         
     ## LEGEND BOX    
     if stats:
-        legend=get_stats(data,x,y,units=units)
-        if stats==2:
-            legend.extend(["avg: %.3g %s"%(np.nanmean(data),(units[2] if units[2] else "")),"x_span: %.3g %s"%(span(x,size=1),(units[0] if units[0] else "")),"y_span: %.3g %s"%(span(y,size=1),(units[1] if units[1] else "")),"size: %i"%np.size(data)])
+        if hasattr(stats, '__iter__'):
+            # is iterable(stats): #stats is used as list of variables to get statistics.          
+            # stats = 1 vars = None  -->  [None,"",""]
+            # stats = True          -->   [None,"",""]
+            # stats = [None,"",""]  -->   [None,"",""]
+            # stats = None          -->   [None,"",""]
+            # stats = False         -->   no stats
+            stats = [None,"",""]
+            if vars is None:
+                vars = [None,"",""]
+            s = get_stats(data,x,y,units=units,string=True,vars=stats)
+            legend=["\n".join(ss) for ss in s]
+        elif stats==1: #backwards compatibility
+            legend=[]
+            print("option stats==1 is obsolete. Please replace it with a dictionary including options for `get_stats`. c to continue, q to quit.")
+            legend.extend(["avg: %.3g %s"%(np.nanmean(data),(units[2] if units[2] else "")),
+                           "PV: %.3g %s"%(span(data,size=True),(units[2] if units[2] else ""))])            
+        elif stats==2: #backwards compatibility
+            legend=[]
+            print("option stats==2 is obsolete. Please replace it with a dictionary including options for `get_stats`. c to continue, q to quit.")
+            #pdb.set_trace()
+            legend.extend(["avg: %.3g %s"%(np.nanmean(data),(units[2] if units[2] else "")),
+                           "PV: %.3g %s"%(span(data,size=True),(units[2] if units[2] else "")),
+                           "x_span: %.3g %s"%(span(x,size=1),(units[0] if units[0] else "")),
+                           "y_span: %.3g %s"%(span(y,size=1),(units[1] if units[1] else "")),
+                           "size: %i"%np.size(data)])          
         l=legendbox(legend,loc=loc,framealpha=framealpha)
         #pdb.debug()
         #for k,v in largs.items():
