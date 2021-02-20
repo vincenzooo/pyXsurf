@@ -13,11 +13,13 @@ import pdb
 from pySurf.readers.format_reader import auto_reader
 from pySurf.data2D import plot_data,get_data, level_data, save_data, rotate_data, remove_nan_frame, resample_data
 from pySurf.data2D import read_data,sum_data, subtract_data, projection, crop_data, transpose_data, apply_transform, register_data
-from plotting.multiplots import find_grid_size, compare_images
+from plotting.multiplots import find_grid_size, compare_images, subplot_grid
 from pySurf.psd2d import psd2d,plot_psd2d,psd2d_analysis,plot_rms_power,rms_power
+from plotting.backends import maximize
+from plotting.add_clickable_markers import add_clickable_markers2
+
 
 from pySurf.points import matrix_to_points2
-
 from copy import deepcopy
 from dataIO.span import span
 from pySurf.data2D import projection
@@ -34,15 +36,15 @@ class Dlist(list):
     
     def __getattr__(self,name):  #originariamente usava __getattribute__, che riceve attributo
         # prima di chiamarlo (quindi anche se gia' esistente).
-        attr = object.__getattr__(self, name) #questo non funziona
-        #attr = [object.__getattribute__(name) for object in self]
-        
-        if hasattr(attr, '__call__'):
+        #attr = object.__getattr__(self, name) #questo non funziona
+        attr = [object.__getattribute__(name) for object in self]
+        #pdb.set_trace()
+        if hasattr(attr[0], '__call__'):
             def newfunc(*args, **kwargs):
-                pdb.set_trace()
-                print('before calling %s' %attr.__name__)
+                #pdb.set_trace()
+                #print('before calling %s' %attr.__name__)
                 result = attr(*args, **kwargs)
-                print('done calling %s' %attr.__name__)
+                #print('done calling %s' %attr.__name__)
                 return result
             return newfunc
         else:
@@ -60,7 +62,6 @@ def topoints(data,level=None):
         plist = [d.level((2,2)) for d in data] 
     plist = [d.topoints() for d in data]    
     return np.vstack(plist)
-
 
 def load_dlist(rfiles,reader=None,*args,**kwargs):
     """Extracted from plot_repeat. Read a set of rfiles to a dlist.
@@ -201,15 +202,19 @@ def add_markers(dlist):
     #set_alignment_markers(tmp)
     xs,ys=find_grid_size(len(dlist),5)[::-1]
 
+    # differently from plt.subplots, axes are returned as list,
+    # beacause unused axes were removed (in future if convenient it could
+    # make return None for empty axes)
     fig,axes=subplot_grid(len(dlist),(xs,ys),sharex='all',sharey='all')
 
-    axes=axes.flatten()
+    #axes=axes.flatten()  #not needed because a list
     maximize()
     for i,(d,ax) in enumerate(zip(dlist,axes)):
         plt.sca(ax)
-        ll=d.level(4,byline=True)
+        #ll=d.level(4,byline=True)
+        ll = d
         ll.plot()
-        plt.clim(*remove_outliers(ll.data,nsigma=2,itmax=1,span=True))
+        #plt.clim(*remove_outliers(ll.data,nsigma=2,itmax=1,span=True))
         add_clickable_markers2(ax,hold=(i==(len(dlist)-1)))
 
     return [np.array(ax.markers) for ax in axes]
