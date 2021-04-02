@@ -204,6 +204,7 @@ def read_mca(filename,*args,**kwargs):
     
     return profiles
 
+    
 class Profile(object):  #np.ndarrays
     """A class containing x,y data. It has a set of methods for analysis and visualization.
     Function methods: return a copy with new values.
@@ -482,7 +483,7 @@ class Profile(object):  #np.ndarrays
 
     from pyProfile.profile import save_profile
     def save(self,filename,*args,**kwargs):
-        """Save data using data2d.save_data"""
+        """Save data using `pyProfile.profile.save_profile`."""
         return save_profile(filename,self.x,self.y,*args,**kwargs)
     save.__doc__=save_profile.__doc__
 
@@ -641,7 +642,7 @@ class PSD(Profile):
                 
     def plot(self,*args,**kwargs):
         u=kwargs.pop('units',self.units)
-        return plot_psd2d(self.y,self.data,self.x,units=u,*args,**kwargs)
+        return plot_psd(self.y,self.x,units=u,*args,**kwargs)
     
     def rms_power(self,plot=False,*args,**kwargs):
         """Calculate rms slice power as integral of psd. If plot is set also plot the whole thing."""
@@ -657,6 +658,10 @@ class PSD(Profile):
             raise NotImplementedError
         '''
 
+    def save(self,filename,*args,**kwargs):
+        """Save psd."""
+        self.save(filename,header='# f[%s] PSD[%s]'%self.units)
+    
 def test_class_init(wfile=None):
     """test init and plot"""
     from dataIO.fn_add_subfix import fn_add_subfix
