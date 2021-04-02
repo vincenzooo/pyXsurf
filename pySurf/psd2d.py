@@ -346,7 +346,12 @@ def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,
             units=np.repeat(units,3)
 
         if prange is None:
-            prange=span(p)
+            if f[0] == 0:
+                prange=span(p[1:,:])
+            else:
+                prange=span(p)
+        if prange[0]<1e-20:  #arbitrary small value
+            print("WARNING: low limit detected in prange, can cause problems with log color scale.")
         if vrange is None:
             vrange=span(wdata)
 

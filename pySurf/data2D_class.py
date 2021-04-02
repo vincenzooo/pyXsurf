@@ -294,6 +294,7 @@ class Data2D(object):  #np.ndarrays
         stats=kwargs.pop('stats',[1,2,3,4]) #to change the default behavior
         nsigma=kwargs.pop('nsigma',nsigma0) #to change the default behavior
         m=self.data
+        #pdb.set_trace()
         res=plot_data(self.data,self.x,self.y,units=self.units,
             stats=stats,nsigma=nsigma,*args,**kwargs)
         if title is None:
@@ -444,14 +445,14 @@ class Data2D(object):  #np.ndarrays
         units are set in units of self because of the ambiguity mentioned in 
         pySurf.psd2d.psd_units, and consistently with functions in `pySurf.psd2d`.
         """
-
+        
         if analysis:
             title = kwargs.pop('title',(name if name is not None else ''))
             f,p=psd2d_analysis(self.data,self.x,self.y,wfun=wfun,
             norm=norm,rmsnorm=rmsnorm,title=title,
             units=self.units,*args,**kwargs)
         else:
-            f,p=psd2d(self.data,self.x,self.y,wfun=wfun,norm=norm,rmsnorm=rmsnorm)
+            f,p=psd2d(self.data,self.x,self.y,wfun=wfun,norm=norm,rmsnorm=rmsnorm,*args,**kwargs)
 
         newname = name if name is not None else fn_add_subfix(self.name,subfix)
 
