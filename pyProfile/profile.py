@@ -266,6 +266,9 @@ def load_profile(file,*args,**kwargs):
         
     return np.genfromtxt(file,unpack=True,*args,**kwargs)
 
+def merge_profile(x1,y1,x2,y2):
+    """stitch profiles"""
+    raise NotImplementedError("see example of psd merging in G:\My Drive\progetti\read_nid.ipynb")
 
 def save_profile(filename,x,y,**kwargs):
     """Use np.savetxt to save x and y to file """

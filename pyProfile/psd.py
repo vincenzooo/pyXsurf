@@ -342,7 +342,8 @@ def make_psd_plots(toplot,units=None,outfile=None):
         plt.savefig(outfile)
         print("results saved in %s"%outfile)
         #plt.savefig(fn_add_subfix(ff,'_psdcomp','.png'))
-
+    import matplotlib
+    matplotlib.rcParams.update(matplotlib.rcParamsDefault)
     
 def linearTrend(x,y): 
     """test linear trend"""
