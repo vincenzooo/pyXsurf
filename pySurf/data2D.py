@@ -46,6 +46,8 @@ import itertools
 from dataIO.functions import update_docstring
 from dataIO.arrays import stats
 
+from pyProfile.profile import PSF_spizzichino,line
+
 test_folder = r'C:\Users\kovor\Documents\python\pyXTel\pySurf\test'
 
 class EmptyPlotRangeWarning(EmptyRangeWarning):
@@ -1304,6 +1306,15 @@ def compare_2images(data,ldata,x=None,y=None,fignum=None,titles=None,vmin=None,v
     return ax1,ax2
 '''
 
+def psf2d(y,wdata,alpha,xout,nskip=1):
+    """return a 2d psf for axial profiles on wdata with coordinate y.
+    """
+    psf2d=[]
+    for col in wdata[:,::nskip].T:
+        yout=PSF_spizzichino(y,col/1000.,alpha=alpha,xout=xout)[1]
+        psf2d.append(yout)
+    return np.array(psf2d).T
+    #return xout*206265.,np.array(yout)
 
 def compare_2images(data,ldata,x=None,y=None,fignum=None,titles=None,vmin=None,vmax=None,
     commonscale=False):
