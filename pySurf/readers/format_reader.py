@@ -33,6 +33,38 @@ from .test_readers import testfolder
 import pdb
 
 
+def points_reader(wfile,header=False,*args,**kwargs):
+    """Read a processed points file in format x,y,z as csv output of analysis routines."""
+    if header: return None
+    w0=get_points(wfile,*args,**kwargs)
+    w=w0.copy()
+    x,y=points_find_grid(w,'grid')[1]
+    pdata=resample_grid(w,matrix=True)
+    return pdata,x,y
+
+def datzygo_reader(wfile,header=False,*args,**kwargs):
+    """read .dat binary files (MetroPro/Zygo)."""
+    d1,head,d3,d4=readMetroProData(wfile,*args,**kwargs)
+    if header: return head
+    try:
+        x0=head['X0']
+    except KeyError:
+        x0=0
+    try:
+        y0=head['Y0']
+    except KeyError:
+        y0=0
+    try:
+        xyscale=head['cameraRes']
+    except KeyError:
+        xyscale=1.
+    
+    #data,x,y=d1,x0+np.arange(np.shape(d1)[1]),y0+np.arange(np.shape(d1)[0])    
+    data,x,y=d1,x0*xyscale+d3,y0*xyscale+d4
+
+    return data,x,y
+
+
 def csv4D_reader(wfile,ypix=None,ytox=None,header=False,delimiter=',',endline=True,skip_header=12,*args,**kwargs):
     """read csv data in 4sight 4D format.
     12 lines header with info in namelist format, uses `xpix`, `aspect` and `wavelength` if available.
@@ -82,31 +114,6 @@ def csv4D_reader(wfile,ypix=None,ytox=None,header=False,delimiter=',',endline=Tr
 
     return data,x,y
 
-
-def points_reader(wfile,header=False,*args,**kwargs):
-    """Read a processed points file in format x,y,z as csv output of analysis routines."""
-    if header: return None
-    w0=get_points(wfile,*args,**kwargs)
-    w=w0.copy()
-    x,y=points_find_grid(w,'grid')[1]
-    pdata=resample_grid(w,matrix=True)
-    return pdata,x,y
-
-def datzygo_reader(wfile,header=False,*args,**kwargs):
-    """read .dat binary files (MetroPro/Zygo)."""
-    d1,head,d3,d4=readMetroProData(wfile,*args,**kwargs)
-    if header: return head
-    try:
-        x0=head['X0']
-    except KeyError:
-        x0=0
-    try:
-        y0=head['Y0']
-    except KeyError:
-        y0=0
-    data,x,y=d1,x0+np.arange(np.shape(d1)[1]),y0+np.arange(np.shape(d1)[0])
-
-    return data,x,y
 
 def csvZygo_reader(wfile,intensity=False,header=False,xyz=False,*args,**kwargs):
 
