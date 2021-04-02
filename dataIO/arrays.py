@@ -8,7 +8,8 @@ def stats (data,units=None,string=False,fmt=None,vars=None):
     string if set to True return stats as strings. In this case a string `units` can be used to add a postfix to statistics. A finer control can be obtained by passing in `fmt` a list of format strings for each var.
     
     vars is a list of indices that select the variables to be included, wrt a list:
-        1 - mean
+        0 - mean
+        1 - stddev
         2 - PV
         3 - min
         4 - max
@@ -17,7 +18,7 @@ def stats (data,units=None,string=False,fmt=None,vars=None):
     Note that span doesn't exclude nan data, put flag to tune this option.
     """
     # pdb.set_trace()
-    st = [np.nanstd(data),span(data,size=True),*span(data),np.size(data)]
+    st = [np.nanmean(data),np.nanstd(data),span(data,size=True),*span(data),np.size(data)]
     
     if string:
         if units is None: 
@@ -26,6 +27,7 @@ def stats (data,units=None,string=False,fmt=None,vars=None):
             units = " "+units
         if fmt is None:
             fmt = ['mean: %.3g'+units,
+                   'StdDev: %.3g'+units,
                    'PV: %.3g'+units,
                    'min: %.3g'+units,
                    'max: %.3g'+units,
@@ -33,7 +35,7 @@ def stats (data,units=None,string=False,fmt=None,vars=None):
         
         st = [f%val for f,val in zip (fmt,st)]
         
-    if vars is None: vars = [0,1,2,3,4]
+    if vars is None: vars = [0,1,2,3,4,5]
     #pdb.set_trace()
     try:
         _ = len(vars[0]) == 0 #[], TypeError if None
@@ -41,7 +43,7 @@ def stats (data,units=None,string=False,fmt=None,vars=None):
         vars=[vars]
     
     #try:
-    if isinstance(vars,str):
+    if isinstance(vars,str):  #?
         vars=[vars]        
     #except:
     #    print('cane')
