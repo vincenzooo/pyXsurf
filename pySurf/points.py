@@ -11,7 +11,7 @@ from dataIO.span import span,span_from_pixels
 from pySurf.plane_fit import plane_fit
 from astropy.io import fits
 #from matplotlib.mlab import griddata
-from scipy.interpolate import griddata
+#from scipy.interpolate import griddata
 from dataIO.running_mean import running_mean
 from scipy import stats
 from plotting.add_clickable_markers import add_clickable_markers2
@@ -903,13 +903,33 @@ def extract_profile(points,xy0,xy1=None,npoints=None,along=True,plot=False):
     #TODO, can be made faster by cropping data around profile.
     """
     
-    if xy1 is None: #extract point
-        raise NotImplementedError
-        
-    # npoints not provided usese coordinates
+    # npoints not provided uses coordinates
     ## infer grid
     _,(xg,yg) = points_find_grid(points,result='grid') #complete grid in xg,yg
-    
+
+    if xy1 is None: #extract point
+        if len(np.shape(xy0)) == 1:
+            xy1 = xy0
+        else:
+            #iterate
+            profiles = [extract_profile(points,p[0],p[1],npoints=npoints,
+                along=along,plot=(i==0 & plot)) for i,p in enumerate(xy0)]
+            if plot :
+                ax1 = plt.gcf().axes[0]
+                ax2 = plt.gcf().axes[-1]
+                for p,prof in zip(xy0[1:],profiles[1:]):
+                    #ax1 = plt.subplot(211,label='surf')
+                    plt.sca(ax1)
+                    p0,p1=p
+                    plt.plot([p0[0],p1[0]],[p0[1],p1[1]])
+                    #ax2 = plt.subplot(212,label='profs') #,sharex=ax1)       
+                    plt.sca(ax2)
+                    #pdb.set_trace()
+                    r= prof[0]
+                    z= prof[-1]
+                    plt.plot(r,z)
+            return profiles
+            
     #span of extreme points
     xs = [xy0[0],xy1[0]]  
     ys = [xy0[1],xy1[1]]  
@@ -929,6 +949,9 @@ def extract_profile(points,xy0,xy1=None,npoints=None,along=True,plot=False):
     
     if npoints is None:
         npoints=max(len(ix),len(iy))
+    else:
+        if xy0 == xy1:
+            raise ValueError("npoints cannot be provided for single point")
     
     #adjusted range
     xr = span(xg[ix])
@@ -936,6 +959,9 @@ def extract_profile(points,xy0,xy1=None,npoints=None,along=True,plot=False):
     
     pp = crop_points(points,xr,yr)
     #points = crop_points(points,[xy0[0],xy1[0]],[xy0[1],xy1[1]])
+    
+    if xy0 == xy1:
+        return ip.griddata(pp[:,0:2],pp[:,-1],xy0,method=method)
     
     xx=np.linspace(xy0[0],xy1[0],npoints)
     yy=np.linspace(xy0[1],xy1[1],npoints)
@@ -950,17 +976,26 @@ def extract_profile(points,xy0,xy1=None,npoints=None,along=True,plot=False):
         r=xx
 
     if plot:
-        plt.figure()
+        #plt.figure()
         ax1 = plt.subplot(211)
         plot_points(points,aspect='auto')
         plt.plot([xy0[0],xy1[0]],[xy0[1],xy1[1]],'r')
         xl=plt.xlim()
-        ax1 = plt.subplot(212,sharex=ax1)
+        ax2 = plt.subplot(212) #,sharex=ax1)
+        if not along:
+            ax1.get_shared_x_axes().join(ax1, ax2)
         plt.plot(r,z)
-        plt.xlim(*xl)
+        #plt.xlim(*xl)
         plt.grid()
-        plt.colorbar().remove() #dirty trick to adjust size to other panels
-    return points #points[:,0],points[:,1]
+        #plt.colorbar().remove() #dirty trick to adjust size to other panels
+        #this works better
+        #pdb.set_trace()
+        box1 = ax1.get_position()
+        box2 = ax2.get_position()
+        ax2.set_position([box1.x0, box2.y0, box1.width , box2.height])
+        #pdb.set_trace()
+    
+    return pp #points[:,0],points[:,1]
 
 '''
 def plot_markers(m,subplots=0,points=None,w=None,**kwargs):
@@ -1063,25 +1098,29 @@ def plot_points(points,xgrid=None,ygrid=None,shape=None,units=None,resample=True
             bar=False
             #plt.imshow(z,extent=[xr[0],xr[1],yr[0],yr[1]],interpolation='none',aspect=aspect,
             #origin='lower', **kwargs)
-
+    
     plt.xlabel('X'+(" ("+units[0]+")" if units[0] is not None else ""))
     plt.ylabel('Y'+(" ("+units[1]+")" if units[1] is not None else ""))
-
+    
     if stats:
         from plotting.captions import legendbox
         from pySurf.data2D import get_stats
+        if scatter:
+            xgrid,ygrid=x,y
         legendbox(get_stats(z,xgrid,ygrid))
-
+    
     if bar:
         cb=plt.colorbar()
         if units[2] is not None:
             cb.ax.set_title(units[2])
-
-    plt.gca().autoscale(False)
+    
+    #plt.gca().autoscale(False) #2021/03/29, not sure what this was for, 
+    #   it was giving wrong plot with scatter = True, removed.
     #plt.show()
     #plt.ion()
+    
     return z
-
+    
 
 def subtract_points(p1,p2,xysecond=False,resample=True):
     """Subtract second set of points after interpolation on first set coordinates.
