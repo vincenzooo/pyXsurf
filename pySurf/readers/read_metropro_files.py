@@ -1909,7 +1909,8 @@ def readMetroProData(filename):
     dat = dat[::-1,:]
     # Auxiliary data to return
     dxy = hData['cameraRes']
-
+    #import pdb
+    #pdb.set_trace()
     #print(dxy)
     
     x1 = dxy * np.arange( -(len(dat[0,:])-1)/2, (len(dat[0,:])-1)/2 + 1)
@@ -1930,6 +1931,14 @@ def readHeaderMP(f):
     hData['format'] = f.read('int16')
     hData['size'] = f.read('int32')
     # Check if the magic string and format are known ones.
+    # from MxReference 0550_C:
+    #There are only three recognized combinations of these values as shown in the following table:
+    #magic_number (hex) header_format header_size (bytes)
+    #0x881B036F 1 834
+    #0x881B0370 2 834
+    #0x881B0371 3 4096
+    #Reader software that is rigorous should read all three values and validate them per the above
+    #table.
     if not (hData['format'] >= 1 and hData['format']<=3 and
             hData['magicNum']-hData['format'] == int('881B036E',16)):
         hData['format'] = -1

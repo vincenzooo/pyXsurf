@@ -9,7 +9,7 @@ except ImportError:
 config = ConfigParser()
 
 # parse existing file
-config.read('test.ini')
+config.read('test2.ini')
 
 # read values from a section
 string_val = config.get('section_a', 'string_val')
