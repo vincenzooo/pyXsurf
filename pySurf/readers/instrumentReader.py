@@ -180,6 +180,9 @@ def matrix_reader(wfile,*args,**kwargs):
 def matrix4D_reader(wfile,header=False,delimiter=',',*args,**kwargs):
     """temporary wrapper for new readers, replace call to matrix4D_reader
     with calls to read_data(wfile,reader=matrix4D_reader).
+    
+    read csv data with parameters extracted from header as saved by 4D.
+    
     """
     from pySurf.readers.format_reader import csv4D_reader
 
