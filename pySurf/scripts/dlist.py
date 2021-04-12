@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pdb
 
-
 from pySurf.readers.format_reader import auto_reader
 from pySurf.data2D import plot_data,get_data, level_data, save_data, rotate_data, remove_nan_frame, resample_data
 from pySurf.data2D import read_data,sum_data, subtract_data, projection, crop_data, transpose_data, apply_transform, register_data
@@ -18,14 +17,17 @@ from pySurf.psd2d import psd2d,plot_psd2d,psd2d_analysis,plot_rms_power,rms_powe
 from plotting.backends import maximize
 from plotting.add_clickable_markers import add_clickable_markers2
 
-
 from pySurf.points import matrix_to_points2
 from copy import deepcopy
 from dataIO.span import span
+from dataIO.fn_add_subfix import fn_add_subfix
 from pySurf.data2D import projection
 from pySurf.data2D_class import Data2D
+from pySurf.data2D import levellegendre
 from pySurf.affine2D import find_rototrans,find_affine
+from pySurf.readers.instrumentReader import fitsWFS_reader
 
+from IPython.display import display
 
 class Dlist(list):
     """A list of pySurf.Data2D objects on which unknown operations are performed serially."""
@@ -52,7 +54,7 @@ class Dlist(list):
         
     def topoints(self):
         """convert a dlist to single set of points containing all data."""
-        plist = [d.level((2,2)).topoints() for d in data]    
+        plist = [d.level((2,2)).topoints() for d in self]    
         return np.vstack(plist)   
     
 def topoints(data,level=None):
@@ -173,7 +175,7 @@ def mark_data(datalist,outfile=None,deg=1,levelfunc=None,propertyname='markers',
 
     for a in axes:
         a.images[0].set_clim(-0.01,0.01)
-        add_clickable_markers2(ax=a,propertyname=propertyname,block=True)
+        add_clickable_markers2(ax=a,propertyname=propertyname) #,block=True)
 
     #display(plt.gcf())
 
@@ -267,14 +269,15 @@ def extract_psd(dlist,rmsthr=0.07,rmsrange=None,prange=None,ax2f=None,dis=False)
     labels=[d.name for d in dlist]
     m_tot=[]
     #gives error, m_psd is a list of PSD2D objects, there is no f,p, check psd2an
-    for (f,p),l in zip(m_psd,labels):
+    for P,l in zip(m_psd,labels):
+        (f,p) = P()
         ptot=projection(p,axis=1)
         #plot_psd(f,ptot,label=l,units=d.units)
-        np.savetxt(fn_add_subfix(d.name,'_calib_psd','.dat',
-            pre=outfolder+os.path.sep),np.vstack([fs,ptot]).T,
-            header='SpatialFrequency(%s^-1)\tPSD(%s^2 %s)'%(u[0],u[2],u[0]))
+        #np.savetxt(fn_add_subfix(P.name,'_calib_psd','.dat',
+        #    pre=outfolder+os.path.sep),np.vstack([fs,ptot]).T,
+        #    header='SpatialFrequency(%s^-1)\tPSD(%s^2 %s)'%(u[0],u[2],u[0]))
         m_tot.append((f,ptot))
-    plt.title(outname)
+    # plt.title(outname)
 
     plt.legend(loc=0)
     if dis:

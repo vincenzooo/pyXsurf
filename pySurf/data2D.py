@@ -9,9 +9,6 @@ A flag is called as
 
 In python I need to look at code or docstring to understand if a value is modified and this can also not be consistent (some method can work as functions, others as procedures.
 self.data=newdata makes a method a procedure, self.copy().data=newdata; return res is a function
-
-
-
 """
 
 import matplotlib.pyplot as plt
@@ -36,7 +33,8 @@ from scipy import ndimage
 from plotting.captions import legendbox
 from astropy.io import fits
 from pySurf.testSurfaces import make_prof_legendre, make_surf_legendre
-
+from pySurf.points import points_find_grid
+from pySurf.points import resample_grid
 
 from pySurf.points import points_in_poly, points_autoresample
 from plotting.add_clickable_markers import add_clickable_markers2
@@ -65,7 +63,6 @@ def removelegendre(x,deg):
     
     Note: this is superseded by levellegendre
     """
-    
     print ("removelegendre is obsolete, use levellegendre instead.")
     lfit=np.polynomial.legendre.legfit
     lval=np.polynomial.legendre.legval
@@ -74,23 +71,30 @@ def removelegendre(x,deg):
     return rem
 
 def removesag(y):
-    """Convenience function. remove second degree polyomial from line, a possible leveling functiondata for leveldata."""
+    """Convenience function to remove second degree polyomial from line.
+        
+    A possible leveling functiondata for leveldata.
+    """
     return y-polyfit_profile (y,degree=2)
 
 def removept(y):
-    """Convenienve function. remove piston and tilt from line, a possible leveling functiondata for leveldata."""
+    """Convenienve function to remove piston and tilt from line.
+        
+    A possible leveling functiondata for leveldata.
+    """
     #never tested
     y=y-line (y)
     return y-np.nanmean(y)
 
 def level_by_line(data,function=None,axis=0,**kwargs):
-    """remove line through extremes line by line (along vertical lines).
+    """Remove line through extremes line by line (along vertical lines).
+    
     The returned array has 0 at the ends, but not necessarily zero mean.
     If fignum is set, plot comparison in corresponding figure.
     Function is a function of profile vector y that returns a corrected profile.
 
-    Completely useless, can be replaced by np.apply_along_axis or level_points."""
-
+    Completely useless, can be replaced by np.apply_along_axis or level_points.
+    """
     print ("level_by_line is completely useless function, use np.apply_along_axis or level_points.")
 
     def remove_line(y): #default line removal function
@@ -106,14 +110,20 @@ def level_by_line(data,function=None,axis=0,**kwargs):
 #more updated leveling functions
 
 def fitlegendre(x,y=None,deg=None,nanstrict=False,fixnans=False):
-    """Return a legendre fit of degree deg. Work with 1 or 2D y (if 2D, each column is independently fit
-    and x is the coordinate of first axis.
-    if nanstrict is True, every column containing nan (or Inf) is considered invalid and a column of nan is returned, if False, nan are excluded and fit is calculated on valid points only (note that since columns
-    are slices along first index, the option has no effect on 1D data (nans are always returned as nans).
+    """Return a legendre fit of degree deg.
+       
+    Work with 1 or 2D y (if 2D, each column is independently fit and x is 
+    the coordinate of first axis).
+    if nanstrict is True, every column containing nan (or Inf) is considered 
+    invalid and a column of nan is returned, if False, nan are excluded and fit 
+    is calculated on valid points only (note that since columns
+    are slices along first index, the option has no effect on 1D data 
+    (nans are always returned as nans).
     
     2020/09/16 modified 1D/2D mechanism, where all the code,
-    including the part in common 1D/2D was moved to the 2D specific part, while the 1D part is completely delegated to functions in `pyProfile.profile`."""
-
+    including the part in common 1D/2D was moved to the 2D specific part, 
+    while the 1D part is completely delegated to functions in `pyProfile.profile`.
+    """
     '''
     note this was working with nan
     def removelegendre(x,deg):
@@ -183,10 +193,15 @@ def fitlegendre(x,y=None,deg=None,nanstrict=False,fixnans=False):
 
 
 def levellegendre(x,y,deg,nanstrict=False):
-    """remove degree polyomial by line, evolution of leveldata using legendre functions
+    """Remove degree polyomial by line.
+    
+    Evolution of leveldata using legendre functions
     that work also 2D. nr. of terms fitted in legendre is deg+1 (piston->deg=0).
-    For 2D data, data are passed as second argument (y) and y coordinates passed as first (x) (legendre are leveled along columns). Nanstrict excludes the lines containing nans, otherwise only good points are considered."""
-
+    For 2D data, data are passed as second argument (y) and y coordinates passed 
+    as first (x) (legendre are leveled along columns). 
+    Nanstrict excludes the lines containing nans, 
+    otherwise only good points are considered.
+    """
     datarec=fitlegendre(x,y,deg,nanstrict=nanstrict)
 
     #result[...,goodind]= y[...,goodind]-datarec #remove poly by line
@@ -194,13 +209,15 @@ def levellegendre(x,y,deg,nanstrict=False):
     return result #y-datarec
 
 def level_data(data,x=None,y=None,degree=1,axis=None,byline=False,fit=False,*args,**kwargs):
-    """use RA routines to remove degree 2D legendres or levellegendre if leveling by line.
+    """Use RA routines to remove degree 2D legendres or levellegendre if leveling by line.
+    
     Degree can be scalar (it is duplicated) or 2-dim vector. must be scalar if leveling by line. Note the important difference between e.g. `degree = 2` and
       `degree = (2,2)`. The first one uses degree as total degree, it expands then to xl,yl = [0,1,0,1,2,0],[0,0,1,1,0,2]. The second
 
     leveling by line (controlled by axis keyword) also hondle nans.
     x and y are not used, but maintained for interface consistency.
-    fit=True returns fit component instead of residuals"""
+    fit=True returns fit component instead of residuals
+    """
     from utilities.imaging.fitting import legendre2d
 
     if x is None:  x = np.arange(data.shape[1])
@@ -247,15 +264,18 @@ def level_data(data,x=None,y=None,degree=1,axis=None,byline=False,fit=False,*arg
 def transpose_data(data,x,y):
     """Transpose (in matrix sense) data and coordinates, switching x and y, return new data,x,y.
 
-    return a view, see np.ndarray.T and np.ndarray.transpose for details"""
-
+    return a view, see np.ndarray.T and np.ndarray.transpose for details.
+    """
     data=data.T
     x,y=y,x
     return data,x,y
 
 def apply_transform(data,x,y,trans=None):
-    """applies a 3D transformation (from Nx3 to Nx3) to data.
-    TODO: add option to set final resampling grid keeping initial sampling, initial number of points or on custom grid (use points.resample_grid, resample_data)."""
+    """Apply a 3D transformation (from Nx3 to Nx3) to data.
+    
+    TODO: add option to set final resampling grid keeping initial sampling, 
+    initial number of points or on custom grid (use points.resample_grid, resample_data).
+    """
     from pySurf.points import matrix_to_points2,points_autoresample
 
     if trans is not None:
@@ -266,10 +286,13 @@ def apply_transform(data,x,y,trans=None):
 
 def rotate_data(data,x=None,y=None,ang=0,k=None,center=None,
     fill_value=np.nan,usepoints=False,*args,**kwargs):
-    """Rotate anticlockwise by an angle in degree. Non optimized version using points functions.
-    2018/10/31 added k parameters allowing 90 deg rotations with np.rot90. k is the number
-        of anticlockwise rotations about center. Note there is not resampling, so it can be inaccurate if
-        center is not on pixel center.
+    """Rotate anticlockwise by an angle in degree.
+    
+    Non optimized version using points functions.
+    2018/10/31 added k parameters allowing 90 deg rotations with np.rot90. 
+    k is the number of anticlockwise rotations about center. 
+    Note there is not resampling, so it can be inaccurate if center is not 
+    on pixel center.
 
     rotate_Data was intended to work using scipy.ndimage.interpolation.rotate but this failed.
     Added 2018/12/12
@@ -280,9 +303,7 @@ def rotate_data(data,x=None,y=None,ang=0,k=None,center=None,
     rot90 determination of rotated axis can probably be extended to general case, but in the meanwhile
     the implementation based on points offers an accurate interpolation (even if slower),
       can be enabled setting flag `usepoints`.
-
     """
-
     #establish data coordinates if not provided
     if x is None:
         x=np.arange(data.shape[1],dtype=float)
@@ -318,7 +339,7 @@ def rotate_data(data,x=None,y=None,ang=0,k=None,center=None,
         # data are copied on return, without it (alg 2), rotated data would be still a view of the original data.
         data=np.rot90(data,k,axes=(1,0),*args,**kwargs)
         for i in range(k):
-            xlim,ylim=span(x),span(y)
+            # xlim,ylim=span(x),span(y)
             x2=center[0]+center[1]-y
             y2=center[1]-center[0]+x
             x2.sort()
@@ -359,10 +380,13 @@ def rotate_data(data,x=None,y=None,ang=0,k=None,center=None,
 
 
 def save_data(filename,data,x=None,y=None,fill_value=np.nan,addaxis=True,makedirs=False,**kwargs):
-    """save data as matrix on a file.
-    Can save as fits if the extension is .fits, but this should be probably moved elsewhere,
+    """Save data as matrix on a file.
+    
+    Can save as fits if the extension is .fits,
+    but this should be probably moved elsewhere,
     otherwise uses np.saavetxt to save as text.
-    kwargs are passed to np.savetxt or hdu.writeto"""
+    kwargs are passed to np.savetxt or hdu.writeto
+    """
     #2016/10/21 rewritten routine to use points_find_grid
     #2014/08/08 default fill_value modified to nan.
     #20140420 moved filename to second argument for consistency.
@@ -402,7 +426,7 @@ def save_data(filename,data,x=None,y=None,fill_value=np.nan,addaxis=True,makedir
 
 def register_data(data,x,y,scale=(1,1,1.),
     strip=False,crop=None,center=None,*args,**kwargs):
-    """get data,x,y and register them using usual set of parameters.
+    """Get data,x,y and register them using usual set of parameters.
 
     registering operation are performed in the following order and are:
         scale: scale the three axis of the `scale` factor, if sign is changed, reorder.
@@ -415,7 +439,6 @@ def register_data(data,x,y,scale=(1,1,1.),
 
     Note that read_data already calls register (after stripping common arguments) careful not to call twice.
     """
-
     x=x*scale[0]
     y=y*scale[1]
     data=data*scale[2]   #*zscale
@@ -461,8 +484,7 @@ def data_equal(d1,d2,nanstrict=False):
 
 
 def read_data(file,rreader,**kwargs):
-
-    """read data from a file using a given raw reader `rreader`, with custom options in `args, kwargs`.
+    """Read data from a file using a given raw reader `rreader`, with custom options in `args, kwargs`.
 
     The function calls raw reader, but, before this, strips all options that are recognized by register_data,
       all remaining unkown parameters are passed to rreader.
@@ -493,7 +515,6 @@ def read_data(file,rreader,**kwargs):
         18/06/18 add action argument. Can be  'read', 'register' or 'all' (default, =read and register). This is useful to give fine control, for example to modify x and y after reading and still make it possible to register data (e.g. this is done in
         Data2D.__init__).    
     """
-    
     ##if kwargs.pop('header',False):
     ##    try:
     ##        h = reader(file,header=True)
@@ -620,13 +641,24 @@ def read_data(file,reader,*args,**kwargs):
 
 # this is old version before read_data. Note that x and y have no effect, has a autocrop parameter that removes nans.
 # pass options to np.genfromtxt
-def get_data(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,addaxis=False,center=None,skip_header=None,delimiter=' ',autocrop=False):
+def get_data(*args,**kwargs):
+    """Old version.
+    """
+    '''
+    def get_data(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,
+             addaxis=False,center=None,skip_header=None,delimiter=' ',
+             autocrop=False):
+    '''
+    from pySurf.data2D import data_from_txt
+    
     """replaced by data_from_txt."""
     print ('this routine was replaced by `data_from_txt`, update code')
+    return data_from_txt(*args,**kwargs)
 
 def data_from_txt(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,
     addaxis=False,center=None,skip_header=None,delimiter=' ',strip=False,**kwargs):
-    """read matrix from text file. Return data,x,y.
+    """Read matrix from text file. Return data,x,y.
+    
     handle addaxis, center and strip nan, on top of all `np.genfromtxt` options.
     This function shouldn't be called directly, there are smarter ways of doing it using read_data and readers,
       however, this is a quick way to get data from text if you don't know what I am talking about.
@@ -676,14 +708,14 @@ def data_from_txt(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,
 
 
 def resample_data(d1,d2,method='mc',onfirst=False):
-
-    """resample d1 [Ny' x Nx'] on x and y from d2[Nx x Ny], where d1 and d2
-    are passed as list of data,x,y.
+    """Resample d1 [Ny' x Nx'] on x and y from d2[Nx x Ny].
+    
+    d1 and d2 are passed as list of data,x,y.
     Return a [Nx x Ny] data.
     onfirst allow to resample second array on first (same as swapping args).
     To get a (plottable) matrix of data use:
-    plt.imshow(rpoints[:,2].reshape(ygrid.size,xgrid.size))."""
-
+    plt.imshow(rpoints[:,2].reshape(ygrid.size,xgrid.size)).
+    """
     from scipy.interpolate import interp1d
 
     if onfirst:
@@ -696,7 +728,7 @@ def resample_data(d1,d2,method='mc',onfirst=False):
         x1,y1=np.arange(d1.shape[1]),np.arange(d1.shape[0])
 
     try:
-        data2,x2,y2=d2 #grid for resampling. data is useless.
+        _,x2,y2=d2 #grid for resampling. data is useless.
     except ValueError:
     #x and y not defined, use data1.
         x2,y2=np.linspace(*span(x1),d2.shape[1]),np.linspace(*span(y1),d2.shape[0])
@@ -719,7 +751,8 @@ def resample_data(d1,d2,method='mc',onfirst=False):
         #old not working z=ip.griddata(np.meshgrid(x1,y1),data1,(x2,y2),method='linear') #this is super slow,
     elif method == 'mc':  #map_coordinates
         def indint (x1,x2):
-            """interpolate x2 on x1 returning interpolated index value.
+            """Interpolate x2 on x1 returning interpolated index value.
+            
             Es.: x2=[1.5,5.5,9.5]; x1=[1.,2.,9.,10.]  --> [0.5,1.5,2.5]"""
             #replaced with scipy.interpolate.interp1d that allows extrapolation, this guarantees that output has correct number of points even if ranges are not contained one into the other (they are "intersecting").
             f=interp1d(x2,np.arange(len(x2)),fill_value='extrapolate')
@@ -738,8 +771,8 @@ def subtract_data(d1,d2,xysecond=False,resample=True):
     on first, unless resample is set to False (in that case, data arrays are assumed
     having same size and subtracted.
     If xySecond is set to True results are calculated on xy of 2nd array,
-    equivalent to -(subtract_data(d2-d1))."""
-
+    equivalent to -(subtract_data(d2-d1)).
+    """
     #if resample: d2=resample_data(d2,d1,onfirst=not(xysecond)) #if xysecond resample on d2, but still subtract d2 from d1.
 
     if xysecond:
@@ -753,37 +786,33 @@ def subtract_data(d1,d2,xysecond=False,resample=True):
 
 def sum_data(d1,d2,xysecond=False,resample=True):
     """Sum two data sets after interpolation on first set coordinates.
-    If xySecond is set to True results are calculated on xy of 2nd array."""
-
+    
+    If xySecond is set to True results are calculated on xy of 2nd array.
+    """
     if resample: d2=resample_data(d2,d1,onfirst=xysecond)
 
     return d1[0]+d2[0],d1[1],d1[2]
 
-
-
 def grid_in_poly(x,y,verts):
-    """data is not needed. Example of usage?"""
-
+    """Data is not needed. Example of usage?"""
+    
     p=np.array([xy.flatten() for xy in np.array(np.meshgrid(x,y))]).T
     return np.reshape(points_in_poly(p,verts),(len(y),len(x)))
 
 def crop_data(data,x,y,xrange=None,yrange=None,zrange=None,mask=False,poly=None,
-        interactive=False,*args,**kwargs):
+    interactive=False,*args,**kwargs):
+    """Return data,x,y of cropped data inside axis ranges, polygons, or interactively
+    selected rectangular region.
 
-    """return data,x,y of cropped data inside axis ranges, polygons, or interactively
-        selected rectangular region.
+    axis ranges are passed as a 2-element vector of which each can be None
+        or None, where None indicates automatic range (adjust to data).
+    If mask is set to True, return a boolean mask of the cropped region.
+    poly is a list of vertex for a polygon.
 
-        axis ranges are passed as a 2-element vector of which each can be None
-            or None, where None indicates automatic range (adjust to data).
-        If mask is set to True, return a boolean mask of the cropped region.
-        poly is a list of vertex for a polygon.
-
-        If interactive is True, allows interactive selection with:
-        Zoom to the region to crop, and/or use CTRL+leftClick to add points and create
-        an polygonal selection. CTRL+rightClick remove the nearest point. Press ENTER when done.
-
-        """
-
+    If interactive is True, allows interactive selection with:
+    Zoom to the region to crop, and/or use CTRL+leftClick to add points and create
+    an polygonal selection. CTRL+rightClick remove the nearest point. Press ENTER when done.
+    """
     outmask=np.ones(np.shape(data),dtype=bool)
 
     if interactive:
@@ -842,8 +871,8 @@ def crop_data(data,x,y,xrange=None,yrange=None,zrange=None,mask=False,poly=None,
 
 
 def crop_data0(data,x,y,xrange=None,yrange=None,zrange=None):
-
-    """original version before adding polygonal and interactive selection."""
+    """Original version before adding polygonal and interactive selection.
+    """
     #set ranges handling possible Nones in extremes
     if xrange is None:
         xrange=span(x)
@@ -856,7 +885,7 @@ def crop_data0(data,x,y,xrange=None,yrange=None,zrange=None):
     if zrange is None:
         zrange=span(data)
     else:
-        zrange = np.where([xx is None for xx in zrange],span(z),zrange)
+        zrange = np.where([xx is None for xx in zrange],span(data),zrange)
     import pdb
 
     #spdb.set_trace()
@@ -868,9 +897,10 @@ def crop_data0(data,x,y,xrange=None,yrange=None,zrange=None):
     return data,x,y
 
 def remove_nan_frame(data,x,y,internal=False):
-    """remove all external rows and columns that contains only nans. If internal is set, return the
-    internal crop (largest internal rectangle without nans on the frame)."""
-
+    """Remove all external rows and columns that contains only nans. 
+    If internal is set, return the
+    internal crop (largest internal rectangle without nans on the frame).
+    """
     #resuls are obtained by slicing,
     nancols=np.where(np.sum(~np.isnan(data),axis=0)==0)[0] #indices of columns containing all nan
     if len(nancols)>0:
@@ -907,11 +937,12 @@ def remove_nan_frame(data,x,y,internal=False):
     return data,x,y
 
 def projection(data,axis=0,span=False,expand=False):
-
     """return average along axis. default axis is 0, profile along x.
     keywords give extended results:
-    span: if set, return  3 vectors [avg, min, max] with min and max calculated pointwise along same direction.
-    expand: instead of a single vector with point-wise minima, returns lists of all vectors having at least one point
+    span: if set, return  3 vectors [avg, min, max] with min and max calculated 
+    pointwise along same direction.
+    expand: instead of a single vector with point-wise minima, returns lists of 
+    all vectors having at least one point
         that is minimum (maximum) between all vectors parallel to axis. Overrides span.
     ex:
     a=array([[21, 16,  3, 14],
@@ -933,7 +964,6 @@ def projection(data,axis=0,span=False,expand=False):
      array([[21, 16,  3, 14],[ 0,  3, 21, 16]]),
      array([[22, 17,  6, 15],[ 0,  3, 21, 16]])]
     """
-
     pm=np.nanmean(data,axis=axis)
 
     if expand:
@@ -1487,12 +1517,12 @@ def levelpoints(w0):
 
 ## BACKCOMPATIBILITY
 def plot_surface_analysis(*args,**kwargs):
-    from scripts.plot_surface_analysis import plot_surface_analysis
+    from pySurf.scripts.plot_surface_analysis import plot_surface_analysis
     print("function plot_surface_analysis was moved to scripts.plot_surface_analysis, please update import in code as from scripts.plot_surface_analysis import plot_surface_analysis.")
     return plot_surface_analysis (*args,**kwargs)
 
 def leveldata(*args,**kwargs):
-    from scripts.plot_surface_analysis.leveldata import leveldata
+    from pySurf.scripts.plot_surface_analysis import leveldata
     print("function leveldata was moved to scripts.plot_surface_analysis, please update import in code as from scripts.plot_surface_analysis import leveldata.")
     return leveldata (*args,**kwargs)
 
@@ -1609,7 +1639,7 @@ def test_outliers_analysis():
 
 def test_fails_leveling():
     """reproduce warning about fit"""
-    from readers.instrumentReader import matrixZygo_reader
+    from .readers.instrumentReader import matrixZygo_reader
     f = os.path.join(test_folder,r'input_data\newview\newview\20180330_slumped\07_PCO1.3S04.asc')
     wdata,x,y=matrixZygo_reader(f,scale=(1000.,1000,1.),center=(0,0))
     #wdata,x,y=a[0]-legendre2d(a[0],2,1)[0],a[1],a[2]  #simple way to remove plane
