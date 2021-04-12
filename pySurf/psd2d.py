@@ -1,26 +1,24 @@
-from astropy.io import fits
-from pyProfile.psd import plot_sig_psd,normPSD
+from pyProfile.psd import plot_sig_psd, normPSD
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 from dataIO.span import span
 from dataIO.fn_add_subfix import fn_add_subfix
 from dataIO.dicts import strip_kw
-from pyProfile.profile import line
+# from pyProfile.profile import line
 from pyProfile.psd import plot_psd
 from pyProfile.psd import psd_units
-from pySurf.data2D import plot_data,projection
+from pySurf.data2D import plot_data, projection
 from pySurf.outliers2d import remove_outliers2d
 from matplotlib.colors import LogNorm
 from utilities.imaging import fitting as fit
-from IPython.display import display
+# from IPython.display import display
 from plotting.fignumber import fignumber
 from plotting.backends import maximize
 import pdb
 
 
-
-def psd2d(data,x,y,wfun=None,norm=1,rmsnorm=False):
+def psd2d(data, x, y, wfun=None, norm=1, rmsnorm=False):
         """calculate the 2d psd. return freq and psd.
         doesnt work with nan.
         use 2d function for psd np.fft.rfft2 for efficiency and mimics
@@ -258,12 +256,13 @@ def plot_psd2d(f,p,x,prange=None,includezerofreq=False,units=None,*args,**kwargs
     #pdb.set_trace()
     ax = plot_data(p,x,f,norm=LogNorm(vmin=prange[0],vmax=prange[1]),
     units=cbunits,aspect='auto',*args,**kwargs)
+    plt.ylabel('freq. ('+cbunits[1]+')')
     #pdb.set_trace()
     cb =  plt.gca().images[-1].colorbar
     
     #after introducing psd_units, cbunits is always defined,
     # conditions can be modified, but leaave like this for generality.
-    cb.ax.set_title("PSD"+(" ("+cbunits[2]+")") if cbunits[2] else "")
+    #cb.ax.set_title("PSD"+(" ("+cbunits[2]+")") if cbunits[2] else "")
     
     #plt.ylabel('Frequency ('+cbunits[1]+")")
     #plt.xlabel('X'+ (" ("+cbunits[0]+")" if cbunits[0] else ""))
@@ -350,8 +349,8 @@ def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,
                 prange=span(p[1:,:])
             else:
                 prange=span(p)
-        if prange[0]<1e-20:  #arbitrary small value
-            print("WARNING: low limit detected in prange, can cause problems with log color scale.")
+                if prange[0]<1e-20:  #arbitrary small value
+                    print("WARNING: low limit detected in prange, can cause problems with log color scale.")
         if vrange is None:
             vrange=span(wdata)
 
@@ -368,6 +367,7 @@ def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,
         #plot Surface
         ax1=plt.subplot(311)
         plot_data(wdata,x,y,aspect=aspect,vmin=vrange[0],vmax=vrange[1],units=units,title='Surface',stats=True)
+        plt.xlabel(None)
         plt.grid(1)
 
         ################
@@ -382,8 +382,8 @@ def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,
             for fr in np.array(rmsrange):  #I want fr to be array type, even if I don't care about rmsrange this does the job
                 ax2.hlines(fr[fr != None],*((span(x)-x.mean())*1.1+x.mean()))
         ax2.set_xlabel("")
-
-        plt.subplots_adjust(top=0.85)
+        plt.xlabel(None)
+        #plt.subplots_adjust(top=0.85)
 
         ################
         #plot rms slice
@@ -407,7 +407,24 @@ def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,
         p[:,~mask]=np.nan
         ax3.grid(1)
         #plt.tight_layout(rect=(0, 0.03, 1, 0.95) if title else (0, 0, 1, 1))
-        plt.colorbar().remove() #dirty trick to adjust size to other panels
+        
+        # replaced with more evolved interactive resize:
+        #  plt.colorbar().remove() #dirty trick to adjust size to other panels
+        def resize(event):
+            box1 = ax1.get_position()
+            box2 = ax2.get_position()
+            box3 = ax3.get_position()
+            ax2.set_position([box1.x0, box2.y0, box1.width , box2.height])
+            ax2.set_adjustable("box",share=True)
+            ax3.set_position([box1.x0, box3.y0, box1.width , box3.height])
+            ax3.set_adjustable("box",share=True)
+
+        cid = fig.canvas.mpl_connect('draw_event', resize)
+        cid2 = fig.canvas.mpl_connect('resize_event', resize)
+
+        resize(None)
+
+        #plt.tight_layout()
 
         if outname:    #kept for compatibility, will be removed in next version
             plt.savefig(fn_add_subfix(outname,'_2dpsd','.png'))

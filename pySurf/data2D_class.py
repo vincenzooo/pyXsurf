@@ -4,7 +4,10 @@ v1.2 was not convenient, switch back to same interface as 1.1:
 don't modify self, return copy.
 
 2018/06/06 v 1.2
-After attempt to modify interface in a way that modify self, switch back to same interface as 1.1. It is inconvenient to have always to create a copy, in particular in interactive mode when same operation can be repeated multiple times you need to inizialize data every time (e.g. rotate).
+After attempt to modify interface in a way that modify self, 
+switch back to same interface as 1.1. It is inconvenient to have always to create a copy,
+in particular in interactive mode when same operation can be repeated multiple times 
+you need to inizialize data every time (e.g. rotate).
 
 2018/06/06 v1.1
 methods are written to consistently return a copy without modifying self.
