@@ -61,8 +61,11 @@ class EmptyPlotRangeWarning(EmptyRangeWarning):
 """This is the old leveling. level_by_line """
 
 def removelegendre(x,deg):
-    """remove degree polyomial, a possible leveling function for leveldata.
-    Note: this is superseded by levellegendre"""
+    """Remove degree polyomial, a possible leveling function for leveldata.
+    
+    Note: this is superseded by levellegendre
+    """
+    
     print ("removelegendre is obsolete, use levellegendre instead.")
     lfit=np.polynomial.legendre.legfit
     lval=np.polynomial.legendre.legval
@@ -71,11 +74,11 @@ def removelegendre(x,deg):
     return rem
 
 def removesag(y):
-    """convenience function. remove second degree polyomial from line, a possible leveling functiondata for leveldata."""
+    """Convenience function. remove second degree polyomial from line, a possible leveling functiondata for leveldata."""
     return y-polyfit_profile (y,degree=2)
 
 def removept(y):
-    """convenienve function. remove piston and tilt from line, a possible leveling functiondata for leveldata."""
+    """Convenienve function. remove piston and tilt from line, a possible leveling functiondata for leveldata."""
     #never tested
     y=y-line (y)
     return y-np.nanmean(y)
@@ -1489,7 +1492,7 @@ def plot_surface_analysis(*args,**kwargs):
     return plot_surface_analysis (*args,**kwargs)
 
 def leveldata(*args,**kwargs):
-    from scripts.leveldata import leveldata
+    from scripts.plot_surface_analysis.leveldata import leveldata
     print("function leveldata was moved to scripts.plot_surface_analysis, please update import in code as from scripts.plot_surface_analysis import leveldata.")
     return leveldata (*args,**kwargs)
 
