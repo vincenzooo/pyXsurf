@@ -1,14 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-
-# In[14]:
-from pySurf.psd2d import psd2d, plot_psd2d, avgpsd2d
-from pySurf.data2D import crop_data
-from pySurf.psd2d import calculatePSD
-from pySurf.instrumentReader import matrix4D_reader
-from pySurf.data2D_class import Data2D
-from plotting.multiplots import compare_images
 from IPython import get_ipython
 
 # 2021/04/05 Tutorial on basic functions, first attempt of using VScode
@@ -18,6 +10,18 @@ get_ipython().run_line_magic('pylab', '')
 
 get_ipython().run_line_magic('load_ext', 'autoreload')
 get_ipython().run_line_magic('autoreload', '2')
+
+
+
+
+# In[14]:
+import numpy as np
+
+
+# from pySurf.psd2d import calculatePSD
+from pySurf.readers.instrumentReader import matrix4D_reader
+from pySurf.data2D_class import Data2D
+from plotting.multiplots import compare_images
 
 
 # ## Introduction

@@ -1,37 +1,28 @@
-from pySurf.psd2d import psd2d, plot_psd2d
 import os
+import pdb
+from copy import deepcopy
+
+import dataIO
 import matplotlib.pyplot as plt
 import numpy as np
-
-from pySurf.readers.format_reader import auto_reader
-from pySurf.data2D import plot_data, level_data, save_data, rotate_data
-from pySurf.data2D import resample_data, crop_data, transpose_data
-from pySurf.data2D import read_data, sum_data, subtract_data, projection
-from pySurf.data2D import slope_2D, register_data, data_from_txt
-from pySurf.data2D import data_histostats
-from pySurf.data2D import apply_transform as apply_transform_data
-from dataIO.outliers import remove_outliers
-
-from pySurf import data2D
-import dataIO
-
-from pySurf.psd2d import psd2d_analysis
-from pySurf.psd2d import plot_rms_power, rms_power
-
-from pySurf import points
-from pySurf.points import matrix_to_points2
-
-from copy import deepcopy
-from dataIO.span import span
 from dataIO.fn_add_subfix import fn_add_subfix
-
-import pdb
-
-from pySurf.affine2D import find_affine
-
 from dataIO.functions import update_docstring
+from dataIO.outliers import remove_outliers
+from dataIO.span import span
 from plotting.add_clickable_markers import add_clickable_markers2
-from pySurf.points import points_autoresample
+
+from pySurf import data2D, points
+from pySurf.affine2D import find_affine
+from pySurf.data2D import apply_transform as apply_transform_data
+from pySurf.data2D import (crop_data, data_from_txt, data_histostats,
+                           level_data, plot_data, projection, read_data,
+                           register_data, resample_data, rotate_data,
+                           save_data, slope_2D, subtract_data, sum_data,
+                           transpose_data)
+from pySurf.points import matrix_to_points2, points_autoresample
+from pySurf.psd2d import (plot_psd2d, plot_rms_power, psd2d, psd2d_analysis,
+                          rms_power)
+from pySurf.readers.format_reader import auto_reader
 
 """
 2018/06/07 v1.3
@@ -120,9 +111,7 @@ def __array_finalize__(self, obj):
 
 
 class Data2D(object):  # np.ndarrays
-    
-    """A class containing 2D data with x and y coordinates. It has a set of methods
-    for analysis operations.
+    """A class containing 2D data with x and y coordinates and methods for analysis.
 
     Args:
         object ([type]): [description]
@@ -196,8 +185,9 @@ class Data2D(object):  # np.ndarrays
         *args,
         **kwargs
     ):
-        
         """
+        A class for 2D data with coordinates and their analysis.
+        
         Can be initialized with data | data, x, y | file | file, x, y.
         if x and y are coordinates if match number of elements, 
             or used as range if two element. 
@@ -543,8 +533,7 @@ class Data2D(object):  # np.ndarrays
                 raise ValueError(
                     "If units are defined they must match in Data2D resample."
                 )
-        res.data, res.x, res.y = resam
-        ple_data(res(), other(), *args, **kwargs)
+        res.data, res.x, res.y = resample_data(res(), other(), *args, **kwargs)
         return res
 
     resample = update_docstring(resample, resample_data)
@@ -788,17 +777,21 @@ def test_rot90():
     plt.title("rotated k=2 about (10,5)")
 
 
-def test_class_init(wfile=None):
+def test_class_init(wfile=None, *args, **kwargs):
     """test init and plot"""
-    from dataIO.fn_add_subfix import fn_add_subfix
     from pathlib import PureWindowsPath
-    from pySurf.data2D import load_test, data
+
+    from dataIO.fn_add_subfix import fn_add_subfix
+    
+    from pySurf.data2D import load_test_data
+
+    # from pySurf.data2D import data, load_test
 
     d1, x1, y1 = load_test_data(wfile, *args, **kwargs)
 
     plt.figure(1)
     plt.clf()
-    plt.suptitle(relpath)
+    # plt.suptitle(relpath)
     plt.title("use plot_data function")
     plot_data(d1, x1, y1, aspect="equal")
 
