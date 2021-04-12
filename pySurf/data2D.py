@@ -1111,6 +1111,8 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     2020/07/14 added flag `contour` to overplot contours, and colors,
     to be passed to `plt.contour`"""
 
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
+    
     ## SET PLOT OPTIONS
     aspect=kwargs.pop('aspect','equal')
     origin=kwargs.pop('origin',"lower")
@@ -1186,22 +1188,43 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     plt.xlabel('X'+(" ("+units[0]+")" if units[0] is not None else ""))
     plt.ylabel('Y'+(" ("+units[1]+")" if units[1] is not None else ""))
     
-    ## ADJUST COLORBAR:
+    ## ADJUST COLORBAR:\
+    '''
     #im_ratio = data.shape[0]/data.shape[1]   #imperfect solution found on stack overflow. Doesn't work in some cases (3 panels? logaritmic axis?)
+    
     ax=plt.gca()  #try my variation
     s=ax.get_position().size
+
+    
     #im_ratio = data.shape[0]/data.shape[1]   #imperfect solution
     im_ratio = s[0]/s[1] # attempt improvement
     ## im_ratio aggiusta cb a occupare frazione di ?
-    ## ma puo' dare problemi per aree peculiari
+    ## ma puo' dare problemi per aree peculiari    
     cb = plt.colorbar(axim,fraction=0.046*im_ratio, pad=0.04)
-    #cb=plt.colorbar()
+    '''
+    
+    cb=plt.colorbar()
+    '''
+    divider = make_axes_locatable(plt.gca())
+    bax = divider.append_axes("right", size="5%", pad=0.05) 
+    cb = plt.colorbar(axim,cax=bax) 
+    '''
+
     if units[2] is not None:
         cb.ax.set_title(units[2])
         #cb.ax.set_xlabel(units[2],rotation=0)
         #cb.ax.xaxis.set_label_position('top')
         #cb.ax.xaxis.label.set_verticalalignment('top') #leave a little bit more room
-        
+    """
+    
+    ### 2021/04/11 new version using divider. Try to precent problem with
+    #        additional axis sized on the base of first ones.
+
+    divider = make_axes_locatable(plt.gca())
+    ax1     = divider.append_axes("right", size="5%", pad=0.05) 
+    plt.colorbar(axim,cax=ax1)  # fondamentale qui usare cax
+    """
+    
     ## LEGEND BOX    
     if stats:
         if hasattr(stats, '__iter__'):
