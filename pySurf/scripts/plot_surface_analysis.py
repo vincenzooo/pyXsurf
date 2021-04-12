@@ -1,9 +1,16 @@
+"""
+Plot_surface_analysis and leveling.
+
+functions to plot and compare data, to be removed.
+"""
+
+
 import numpy as np
 from matplotlib import pyplot as plt
 from pySurf.readers.instrumentReader import matrixZygo_reader
 from pySurf.data2D import plot_data,removelegendre,level_by_line,projection
 from pySurf.data2D import levellegendre,save_data,get_data
-from pySurf.psd2d import psd2d_analysis,rms_power
+# from pySurf.psd2d import psd2d_analysis,rms_power
 from utilities.imaging.fitting import legendre2d
 from dataIO.fn_add_subfix import fn_add_subfix
 from dataIO.span import filtered_span
@@ -14,14 +21,17 @@ from dataIO.span import span
 import os
 import pdb
 from scipy.stats import ttest_ind
-from pySurf.data2D import plot_surface_analysis
-from pySurf.psd2d import psd_variability
+# from pySurf.data2D import plot_surface_analysis
+# from pySurf.psd2d import psd_variability
 from  plotting.backends import maximize
+from plotting.multiplots import compare_images
 
 def plot_surface_analysis(wdata,x,y,label="",outfolder=None,nsigma_crange=1,fignum=None,
     figsize=(9.6,6.7),psdrange=None,levelingfunc=None,frange=None):
-    """create preview plots for data. This is two panels of raw and filtered data 
-    (second order removed) + histogram of height distribution + PSD. 
+    """Create two panel preview plots for data. 
+    
+    This is two panels of raw and filtered data (second order removed) + histogram 
+       of height distribution + PSD. 
     Label is typically the filename and is used to generate title and output filenames.
     fignum and figsize are for PSD2D figure (fignum=0 clear and reuse current figure, 
     None create new).
@@ -80,7 +90,8 @@ def plot_surface_analysis(wdata,x,y,label="",outfolder=None,nsigma_crange=1,fign
     
     #FREQUENCY AND PSD ANALYSIS
     if fignum==0:   #this is the figure created by psd2d_analysis
-        fig=plt.clf()
+        plt.clf()
+        fig = plt.gcf()
     #pdb.set_trace()
     stax=plt.gca()   #preserve current axis
     f,p=psd2d_analysis(ldata,x,y,title=label,
@@ -134,6 +145,7 @@ def leveldata(wdata,xwg,ywg):
     extremes, not on zero piston/tilt""" 
     #import pdb
     #pdb.set_trace()
+    from pySurf.data2D import removesag
     
     #create data
     lwdata=level_by_line(wdata.copy())

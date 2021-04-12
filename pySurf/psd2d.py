@@ -1,3 +1,6 @@
+
+
+
 from pyProfile.psd import plot_sig_psd, normPSD
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,11 +18,17 @@ from utilities.imaging import fitting as fit
 # from IPython.display import display
 from plotting.fignumber import fignumber
 from plotting.backends import maximize
+from pySurf.scripts.plot_surface_analysis import leveldata
+from pySurf.data2D import levellegendre, level_by_line
+from pySurf.data2D import get_data
+from plotting.multiplots import compare_images
+
 import pdb
 
 
 def psd2d(data, x, y, wfun=None, norm=1, rmsnorm=False):
-        """calculate the 2d psd. return freq and psd.
+        """Calculate the 2d psd. return freq and psd.
+        
         doesnt work with nan.
         use 2d function for psd np.fft.rfft2 for efficiency and mimics
             what done in pySurf.psd.psd
@@ -731,7 +740,7 @@ def calculatePSD2(wdata,xg,yg,outname="",wfun=None,vrange=[None,None],rmsrange=N
     return outarr
 
 
-
+'''
 def plot_profile_outliers(data,x,y,ldata,i=1000):
     print("obsolete, this routine will be removed from psd2d")
     plt.figure(2)
@@ -754,68 +763,9 @@ def plot_profile_outliers(data,x,y,ldata,i=1000):
     plt.ylabel('(mm $\mu$m^2)')
     plt.xlabel('mm^-1')
     plt.legend(loc=0)
+'''
 
 #####################################################
-
-
-def psd_variability(psdlist,psdrange=None,rmsrange=None,fignum=None,units=None,
-    outname=None,figsize=(15,5)):
-
-    """given a list of 2d psd files plot spans of all of them on same plot.
-    TODO: replace input using data rather than files. Move to 2DPSD"""
-
-    units=['mm','mm','$\mu$m']
-
-    #gestione rudimentale dell'output troppo stanco per pensare allo standard.
-    if outname is not None:
-        label=os.path.basename(outname)
-        outfolder=os.path.dirname(outname)
-        os.makedirs(outfolder,exist_ok=True)
-
-    rms_v=[]
-    fig=fignumber(fignum,figsize=figsize)
-    plt.subplot(121)
-    for (p,x,f),fn in zip(psdlist,labels):
-        ps=projection(p,axis=1,span=True)
-        rms_v.append(rms_power(f,p,rmsrange))
-        c=plt.plot(f,ps[0],label=os.path.basename(fn)+' AVG')[0].get_color()
-        plt.plot(f,ps[1],'--',label='point-wise min',c=c)
-        plt.plot(f,ps[2],'--',label='point-wise max',c=c)
-        #pdb.set_trace()
-    plt.ylabel('axial PSD ('+units[2]+'$^2$ '+units[1]+')')
-    plt.xlabel('Freq. ('+units[1]+'$^{-1}$)')
-    plt.vlines(rmsrange,*plt.ylim(),label='rms range',linestyle=':')
-    plt.ylim(psdrange)
-    plt.loglog()
-    plt.grid(1)
-    plt.legend(loc=0)
-
-    print("Statistics for %s, rms range [%6.3g,%6.3g]:"%(label,*rmsrange))
-    for rms,fn in zip(rms_v,labels):
-        print(os.path.basename(fn)+": rms=%6.3g +/- %6.3g (evaluated on %i profiles)"%
-            (np.nanmean(rms),np.nanstd(rms),len(rms)))
-    print ("--------------")
-    print ("Distribution of rms: %6.3g +/- %6.3g"%(np.nanmean(rms_v,axis=1).mean(),np.nanmean(rms_v,axis=1).std()))
-    print ("AGGREGATED: rms=%6.3g +/- %6.3g (evaluated on %i profiles)"%
-            (np.nanmean(rms_v),np.nanstd(rms_v),np.size(rms_v)))
-    if len(rms_v)==2:
-        print ("Student T test t:%6.3g p:%6.3g"%ttest_ind(rms_v[0],rms_v[1]))
-
-    l=[os.path.splitext(os.path.basename(f))[0]+" rms=%3.2g +/- %3.2g (N=%i)"%
-        (np.nanmean(r),np.nanstd(r),len(r)) for f,r in zip(labels,rms_v)]
-    plt.subplot(122)
-    plt.hist([rr[np.isfinite(rr)] for rr in rms_v],density=True,bins=100,label=l)
-    plt.legend(loc=0)
-    plt.title(label+" distrib. of avg: %3.2g +/- %3.2g"%
-        (np.nanmean(rms_v,axis=1).mean(),np.nanmean(rms_v,axis=1).std()))
-    #handles = [Rectangle((0,0),1,1,color=c,ec="k") for c in [low,medium, high]]
-    #labels= ["low","medium", "high"]
-    #plt.legend(handles, labels)
-    plt.tight_layout()
-    if outname is not None:
-        plt.savefig(fn_add_subfix(outname,'_stats','.jpg'))
-
-    return rms_v
 
 ##TESTS
 
