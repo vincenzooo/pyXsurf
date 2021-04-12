@@ -15,7 +15,7 @@ from dataIO.outliers import remove_outliers
 from pySurf import data2D
 import dataIO
 
-from pySurf.psd2d import psd2d, plot_psd2d, psd2d_analysis
+from pySurf.psd2d import psd2d_analysis
 from pySurf.psd2d import plot_rms_power, rms_power
 
 from pySurf import points
@@ -120,14 +120,27 @@ def __array_finalize__(self, obj):
 
 
 class Data2D(object):  # np.ndarrays
-    """A class containing 2d data with x and y coordinates. It has a set of methods 
+    
+    """A class containing 2D data with x and y coordinates. It has a set of methods
     for analysis operations.
 
-    Function methods: return a copy with new values.
-    to use as modifier (procedure), e.g.:
-        a=a.level() """
+    Args:
+        object ([type]): [description]
+
+    Raises:
+        ValueError: [description]
+        ValueError: [description]
+        ValueError: [description]
+        ValueError: [description]
+        ValueError: [description]
+        ValueError: [description]
+
+    Returns:
+        [type]: [description]
+    """    
 
     """
+    
     def __new__(subtype, shape, dtype=float, buffer=None, offset=0,
                 strides=None, order=None, info=None):
         # Create the ndarray instance of our type, given the usual
@@ -171,17 +184,53 @@ class Data2D(object):  # np.ndarrays
         # We do not need to return anything
     """
 
-    def __init__(self, data=None, x=None, y=None, file=None, reader=None,
-                 units=None, name=None, *args, **kwargs):
-        """can be initialized with data; data,x,y; file; file, x, y.
-        if x and y are provided, they override x and y if matching number 
-            of elements, or used as range if two element."""
+    def __init__(
+        self,
+        data=None,
+        x=None,
+        y=None,
+        file=None,
+        reader=None,
+        units=None,
+        name=None,
+        *args,
+        **kwargs
+    ):
+        
+        """
+        Can be initialized with data | data, x, y | file | file, x, y.
+        if x and y are coordinates if match number of elements, 
+            or used as range if two element. 
+        If provided together with file, they override x and y 
+            read from file.
+        
+        Function methods return a copy with new values and don't alter original
+           object. Reassign to variable to use as modifier:
+           e.g. a=a.level( ... )
+
+        Args:
+            data (2D array or string): 2D data or file name (suitable reader must 
+            provided).
+            
+            x, y (array): coordinates or ranges.
+            
+            file (str): alternative way to provide a data file.
+            
+            units (str array): 3-element array with units symbols for `x`, `y`, `data`  
+            
+            reader (function): reader function (see `pySurf.readers.instrumentReader`).
+            
+            name (str): sets the name of created object.  
+
+            *args, **kwargs: optional arguments for `pySurf.data2D.register_data`. 
+        """
+
         # from pySurf.readers.instrumentReader import reader_dic
 
         # pdb.set_trace()
 
         if isinstance(data, str):
-            print('first argument is string, use it as filename')
+            print("first argument is string, use it as filename")
             file = data
             data = None
         # pdb.set_trace()
@@ -191,6 +240,7 @@ class Data2D(object):  # np.ndarrays
             # store in xrange values for x if were passed
             xrange = span(x) if x is not None else None
             yrange = span(y) if y is not None else None
+
             # pdb.set_trace()
             if reader is None:
                 reader = auto_reader(file)  # returns a reader
@@ -198,13 +248,31 @@ class Data2D(object):  # np.ndarrays
             data, x, y = read_data(file, reader, *args, **kwargs)
             # register data and pass the rest to reader
             # pdb.set_trace()
-            if np.size(xrange) == data.shape[1]:
-                self.x = xrange
-            elif np.size(xrange) == 2:
+
+            if np.size(x) == data.shape[1]:
+                self.x = x
+            elif np.size(x) == 2:
+                # y and yrange are identical
+                print("WARNING: 2 element array provided for X, uses as range.")
                 x = np.linspace(*xrange, data.shape[1])
             elif xrange is not None:
                 print(
-                    "wrong number of elements for x (must be 2 or xsize_data), it is instead", np.size(xrange))
+                    "wrong number of elements for x (must be 2 or xsize_data [%i]), it is instead %i"
+                    % (np.size(data)[1], np.size(x))
+                )
+                raise ValueError
+
+            if np.size(y) == data.shape[0]:
+                self.y = y
+            elif np.size(y) == 2:
+                # y and yrange are identical
+                print("WARNING: 2 element array provided for Y, uses as range.")
+                x = np.linspace(*yrange, data.shape[0])
+            elif yrange is not None:
+                print(
+                    "wrong number of elements for y (must be 2 or ysize_data [%i]), it is instead %i"
+                    % (np.size(data)[0], np.size(y))
+                )
                 raise ValueError
 
             # set self.header to file header if implemented in reader, otherwise set to empty string""
@@ -220,13 +288,14 @@ class Data2D(object):  # np.ndarrays
                 if len(data.shape) != 2:
                     # pdb.set_trace()
                     print(
-                        'WARNING: data are not bidimensional, results can be unpredictable!')
+                        "WARNING: data are not bidimensional, results can be unpredictable!"
+                    )
                 if x is None:
                     x = np.arange(data.shape[1])
                 if y is None:
                     y = np.arange(data.shape[0])
 
-            # if data is not None:
+                # if data is not None:
                 # se read_data calls register, this
                 data, x, y = register_data(data, x, y, *args, **kwargs)
                 # goes indented.
@@ -246,7 +315,11 @@ class Data2D(object):  # np.ndarrays
         return self.data, self.x, self.y
 
     def __add__(self, other, *args, **kwargs):
-        return Data2D(*sum_data(self(), other(), *args, **kwargs), units=self.units, name=self.name + " + " + other.name)
+        return Data2D(
+            *sum_data(self(), other(), *args, **kwargs),
+            units=self.units,
+            name=self.name + " + " + other.name
+        )
 
     def __mul__(self, scale, *args, **kwargs):
         res = self.copy()
@@ -258,19 +331,18 @@ class Data2D(object):  # np.ndarrays
             elif np.size(scale) == 1:
                 res.data = res.data * scale
             else:
-                raise ValueError(
-                    "wrong number of elements in Data2D multiplication")
+                raise ValueError("wrong number of elements in Data2D multiplication")
         elif len(np.shape(scale)) == 2:  # multiply by matrix
             # completely untested
             print("warning, multiplication between arrays was never tested")
             assert scale.shape == self.data.shape
-            self.data = self.data*scale
+            self.data = self.data * scale
         elif isinstance(scale, Data2D):
             tmp = scale.resample(self)
             res = self.copy()
-            res.data = self.data*tmp.data
+            res.data = self.data * tmp.data
         else:
-            raise ValueError('Multiply Data2D by wrong format!')
+            raise ValueError("Multiply Data2D by wrong format!")
         return res
 
     def __rmul__(self, scale, *args, **kwargs):
@@ -281,17 +353,16 @@ class Data2D(object):  # np.ndarrays
 
     def __sub__(self, other, *args, **kwargs):
         assert self.units == other.units
-        res = Data2D(*subtract_data(self(), other(), *
-                     args, **kwargs), units=self.units)
+        res = Data2D(*subtract_data(self(), other(), *args, **kwargs), units=self.units)
         res.name = self.name + " - " + other.name
         return res
 
     def __truediv__(self, other):
-        return self*(1./other)
+        return self * (1.0 / other)
 
     def merge(self, other, topoints=False):
-        """ Return the merged data between a and b.
-        If `topoints` is True points cloud data are returned.  
+        """Return the merged data between a and b.
+        If `topoints` is True points cloud data are returned.
         Gaps are brutally interpolated (unless `topoints` is set)."""
 
         if self.units != other.units:
@@ -308,37 +379,49 @@ class Data2D(object):  # np.ndarrays
 
     def plot(self, title=None, *args, **kwargs):
         """plot using data2d.plot_data and setting automatically labels and colorscales.
-           by default data are filtered at 3 sigma with 2 iterations for visualization.
-           Additional arguments are passed to plot."""
+        by default data are filtered at 3 sigma with 2 iterations for visualization.
+        Additional arguments are passed to plot."""
 
         nsigma0 = 1  # default number of stddev for color scale
-        #import pdb
+        # import pdb
         # to change the default behavior
-        stats = kwargs.pop('stats', [1, 2, 3, 4])
+        stats = kwargs.pop("stats", [1, 2, 3, 4])
         # to change the default behavior
-        nsigma = kwargs.pop('nsigma', nsigma0)
+        nsigma = kwargs.pop("nsigma", nsigma0)
         m = self.data
         # pdb.set_trace()
-        res = plot_data(self.data, self.x, self.y, units=self.units,
-                        stats=stats, nsigma=nsigma, *args, **kwargs)
+        res = plot_data(
+            self.data,
+            self.x,
+            self.y,
+            units=self.units,
+            stats=stats,
+            nsigma=nsigma,
+            *args,
+            **kwargs
+        )
         if title is None:
             if self.name is not None:
                 title = self.name
         plt.title(title)
         return res
+
     plot = update_docstring(plot, plot_data)
 
     def load(self, filename, *args, **kwargs):
         """A simple file loader using data_from_txt"""
         self.data, self.x, self.y = data_from_txt(filename, *args, **kwargs)
+
     load = update_docstring(load, data_from_txt)
 
     def save(self, filename, *args, **kwargs):
         """Save data using data2d.save_data"""
         return save_data(filename, self.data, self.x, self.y, *args, **kwargs)
+
     save.__doc__ = save_data.__doc__
 
     from functools import update_wrapper
+
     # @update_wrapper(rotate_data)  #this doesn't work as I would like
 
     def rotate(self, angle, *args, **kwargs):
@@ -346,8 +429,10 @@ class Data2D(object):  # np.ndarrays
         (from first to second axis)."""
         res = self.copy()
         res.data, res.x, res.y = rotate_data(
-            self.data, self.x, self.y, angle, *args, **kwargs)
+            self.data, self.x, self.y, angle, *args, **kwargs
+        )
         return res
+
     rotate = update_docstring(rotate, rotate_data)
 
     def rot90(self, k=1, *args, **kwargs):
@@ -357,10 +442,11 @@ class Data2D(object):  # np.ndarrays
         res.data, res.x, res.y = rotate_data(*res(), k=k, *args, **kwargs)
 
         return res
+
     rot90 = update_docstring(rot90, rotate_data)
 
     def shift(self, xoffset=None, yoffset=None, zoffset=None):
-        """Shift data of given offsets along one or more axes. 
+        """Shift data of given offsets along one or more axes.
         `offsets` can be provided either as 1 (data offset), 2 (x,y) or 3 separate values, or as a single 2 (x,y) or 3 elements vector."""
 
         # 1,2,3
@@ -380,7 +466,7 @@ class Data2D(object):  # np.ndarrays
             # [1,2,3], None, None
             # [1,2], None, None
             if xoffset is not None:
-                offsets[:np.size(xoffset)] = np.array(xoffset)
+                offsets[: np.size(xoffset)] = np.array(xoffset)
         else:
             assert np.size(xoffset) == 1
             offsets[0] = 0 if xoffset is None else xoffset
@@ -398,29 +484,34 @@ class Data2D(object):  # np.ndarrays
 
         return offsets
 
-    tv = [[1, 2, 3],
-          [None, 2, 3],
-          [None, None, 3],
-          [None, 2, None],
-          [1, None, None],
-          [1, None, 3],
-          [1, 2, None],
-          [[1, 2, 3], None, None],
-          [[1, 2, 3], 5, None],
-          [[1, 2], None, None]]
+    tv = [
+        [1, 2, 3],
+        [None, 2, 3],
+        [None, None, 3],
+        [None, 2, None],
+        [1, None, None],
+        [1, None, 3],
+        [1, 2, None],
+        [[1, 2, 3], None, None],
+        [[1, 2, 3], 5, None],
+        [[1, 2], None, None],
+    ]
 
     def transpose(self):
         res = self.copy()
         res.data, res.x, res.y = transpose_data(self.data, self.x, self.y)
         return res
+
     transpose = update_docstring(transpose, transpose_data)
 
     def apply_transform(self, *args, **kwargs):
         res = self.copy()
         # pdb.set_trace()
         res.data, res.x, res.y = apply_transform_data(
-            self.data, self.x, self.y, *args, **kwargs)
+            self.data, self.x, self.y, *args, **kwargs
+        )
         return res
+
     apply_transform = update_docstring(apply_transform, apply_transform_data)
 
     def apply_to_data(self, func, *args, **kwargs):
@@ -432,16 +523,16 @@ class Data2D(object):  # np.ndarrays
     def crop(self, *args, **kwargs):
         """crop data making use of function data2D.crop_data, where data,x,y are taken from a"""
         res = self.copy()
-        res.data, res.x, res.y = crop_data(
-            self.data, self.x, self.y, *args, **kwargs)
+        res.data, res.x, res.y = crop_data(self.data, self.x, self.y, *args, **kwargs)
         return res
+
     crop = update_docstring(crop, crop_data)
 
     def level(self, *args, **kwargs):
         res = self.copy()
-        res.data, res.x, res.y = level_data(
-            self.data, self.x, self.y, *args, **kwargs)
+        res.data, res.x, res.y = level_data(self.data, self.x, self.y, *args, **kwargs)
         return res
+
     level = update_docstring(level, level_data)
 
     def resample(self, other, *args, **kwargs):
@@ -450,10 +541,12 @@ class Data2D(object):  # np.ndarrays
         if self.units is not None and other.units is not None:
             if self.units != other.units:
                 raise ValueError(
-                    'If units are defined they must match in Data2D resample.')
+                    "If units are defined they must match in Data2D resample."
+                )
         res.data, res.x, res.y = resam
         ple_data(res(), other(), *args, **kwargs)
         return res
+
     resample = update_docstring(resample, resample_data)
 
     def add_markers(self, *args, **kwargs):
@@ -464,39 +557,67 @@ class Data2D(object):  # np.ndarrays
         plt.close(f)
         return markers
 
-    def psd(self, wfun=None, rmsnorm=True, norm=1, analysis=False, subfix='', name=None, *args, **kwargs):
+    def psd(
+        self,
+        wfun=None,
+        rmsnorm=True,
+        norm=1,
+        analysis=False,
+        subfix="",
+        name=None,
+        *args,
+        **kwargs
+    ):
         """return a PSD2D object with 2D psd of self.
         If analysis is set True, psd2d_analysis plots are generated and related parameters
           are passed as args. You need to pass also title, it generates output,
           this is subject to change, at the moment, pass empty string to generate plots
           or string to create output graphics.
         subfix and name are used to control the name of returned object.
-        units are set in units of self because of the ambiguity mentioned in 
+        units are set in units of self because of the ambiguity mentioned in
         pySurf.psd2d.psd_units, and consistently with functions in `pySurf.psd2d`.
         """
 
         if analysis:
-            title = kwargs.pop('title', (name if name is not None else ''))
-            f, p = psd2d_analysis(self.data, self.x, self.y, wfun=wfun,
-                                  norm=norm, rmsnorm=rmsnorm, title=title,
-                                  units=self.units, *args, **kwargs)
+            title = kwargs.pop("title", (name if name is not None else ""))
+            f, p = psd2d_analysis(
+                self.data,
+                self.x,
+                self.y,
+                wfun=wfun,
+                norm=norm,
+                rmsnorm=rmsnorm,
+                title=title,
+                units=self.units,
+                *args,
+                **kwargs
+            )
         else:
-            f, p = psd2d(self.data, self.x, self.y, wfun=wfun,
-                         norm=norm, rmsnorm=rmsnorm, *args, **kwargs)
+            f, p = psd2d(
+                self.data,
+                self.x,
+                self.y,
+                wfun=wfun,
+                norm=norm,
+                rmsnorm=rmsnorm,
+                *args,
+                **kwargs
+            )
 
-        newname = name if name is not None else fn_add_subfix(
-            self.name, subfix)
+        newname = name if name is not None else fn_add_subfix(self.name, subfix)
 
         return PSD2D(p, self.x, f, units=self.units, name=newname)
+
     psd = update_docstring(psd, psd2d)
 
     def remove_nan_frame(self, *args, **kwargs):
         res = self.copy()
         res.data, res.x, res.y = data2D.remove_nan_frame(
-            self.data, self.x, self.y, *args, **kwargs)
+            self.data, self.x, self.y, *args, **kwargs
+        )
         return res
-    remove_nan_frame = update_docstring(
-        remove_nan_frame, data2D.remove_nan_frame)
+
+    remove_nan_frame = update_docstring(remove_nan_frame, data2D.remove_nan_frame)
 
     def topoints(self):
         """convenience function to get points using matrix_to_points2."""
@@ -510,11 +631,14 @@ class Data2D(object):  # np.ndarrays
         """copy.deepcopy should work well."""
         return deepcopy(self)
 
-    def printstats(self, label=None, fmt='%3.2g'):
+    def printstats(self, label=None, fmt="%3.2g"):
         if label is not None:
             print(label)
-        s = ("%s PV: "+fmt+", rms: "+fmt) % (self.name, span(self.data, size=True),
-                                             np.nanstd(self.data))
+        s = ("%s PV: " + fmt + ", rms: " + fmt) % (
+            self.name,
+            span(self.data, size=True),
+            np.nanstd(self.data),
+        )
         print(s)
         return s
 
@@ -525,6 +649,7 @@ class Data2D(object):  # np.ndarrays
         Return aligned Data2D object.
         There is an experimental version for dlist in scripts."""
         from pySurf.scripts.dlist import add_markers
+
         m1, m2 = add_markers([self, other])
         trans = find_transform(m1, m2)
         return self.apply_transform(trans)
@@ -539,44 +664,52 @@ class Data2D(object):  # np.ndarrays
         res.data[~m] = fill_value
         return res
 
-    remove_outliers = update_docstring(
-        remove_outliers, dataIO.outliers.remove_outliers)
+    remove_outliers = update_docstring(remove_outliers, dataIO.outliers.remove_outliers)
 
     def extract_profile(self, *args, **kwargs):
         p = self.topoints()
         prof = points.extract_profile(p, *args, **kwargs)
         return prof
+
     extract_profile = update_docstring(extract_profile, points.extract_profile)
 
     def histostats(self, *args, **kwargs):
-        res = data_histostats(self.data, self.x, self.y,
-                              units=self.units, *args, **kwargs)
+        res = data_histostats(
+            self.data, self.x, self.y, units=self.units, *args, **kwargs
+        )
         plt.title(self.name)
         return res
-    histostats = update_docstring(
-        histostats, data_histostats, '\n-------------\n')
+
+    histostats = update_docstring(histostats, data_histostats, "\n-------------\n")
 
     def slope(self, *args, **kwargs):
-        #import pdb
+        # import pdb
         # pdb.set_trace()
-        scale = kwargs.pop('scale', None)
+        scale = kwargs.pop("scale", None)
         if self.units is not None:
             if scale is None:
                 # check if x and y in mm and z in um.
                 if self.units[0] == self.units[1]:
-                    if self.units[0] == 'mm':
-                        if self.units[0] == 'mm' and self.units[2] == 'um':
-                            scale = (1., 1., 1000.)
+                    if self.units[0] == "mm":
+                        if self.units[0] == "mm" and self.units[2] == "um":
+                            scale = (1.0, 1.0, 1000.0)
                 else:
-                    raise ValueError(
-                        "x and y different units in slope calculation")
+                    raise ValueError("x and y different units in slope calculation")
         else:
-            scale = (1., 1., 1.)
+            scale = (1.0, 1.0, 1.0)
 
-        say, sax = slope_2D(self.data, self.x, self.y,
-                            scale=scale, *args, **kwargs)
+        say, sax = slope_2D(self.data, self.x, self.y, scale=scale, *args, **kwargs)
 
-        return Data2D(*sax, units=[self.units[0], self.units[1], 'arcsec'], name=self.name + ' xslope'), Data2D(*say, units=[self.units[0], self.units[1], 'arcsec'], name=self.name + ' yslope')
+        return Data2D(
+            *sax,
+            units=[self.units[0], self.units[1], "arcsec"],
+            name=self.name + " xslope"
+        ), Data2D(
+            *say,
+            units=[self.units[0], self.units[1], "arcsec"],
+            name=self.name + " yslope"
+        )
+
     slope = update_docstring(slope, slope_2D)
 
 
@@ -586,7 +719,7 @@ class PSD2D(Data2D):
     """
 
     def __init__(self, *args, **kwargs):
-        ''' super is called implicitly (?non vero)
+        '''super is called implicitly (?non vero)
         """needs to be initialized same way as Data2D"""
         #if a surface or a wdata,x,y are passed, these are interpreted as
         super().__init__(*args,**kwargs)
@@ -594,7 +727,7 @@ class PSD2D(Data2D):
         super().__init__(*args, **kwargs)
 
     def plot(self, *args, **kwargs):
-        u = kwargs.pop('units', self.units)
+        u = kwargs.pop("units", self.units)
         # pdb.set_trace()
         return plot_psd2d(self.y, self.data, self.x, units=u, *args, **kwargs)
 
@@ -604,11 +737,19 @@ class PSD2D(Data2D):
 
     def rms_power(self, plot=False, rmsrange=None, *args, **kwargs):
         """Calculate rms slice power by integrating .
-            If plot is set also plot the whole thing."""
+        If plot is set also plot the whole thing."""
 
         # pdb.set_trace()
         if plot:
-            return plot_rms_power(self.y, self.data, self.x, units=self.units, rmsrange=rmsrange, *args, **kwargs)
+            return plot_rms_power(
+                self.y,
+                self.data,
+                self.x,
+                units=self.units,
+                rmsrange=rmsrange,
+                *args,
+                **kwargs
+            )
         else:
             """this is obtained originally by calling rms_power, however the function deals with only scalar input for rms range.
             Part dealing with multiple ranges is in plot_rms_power, but should be moved to rms_power."""
@@ -624,27 +765,27 @@ def test_rot90():
     a[6:7, 6:9] = 3
     d = Data2D(a)
 
-    plt.close('all')
+    plt.close("all")
     d.plot()
-    plt.title('original')
+    plt.title("original")
 
     plt.figure()
     # return a,d
     c = d.rot90()
     c.plot()
-    plt.title('rotated')
+    plt.title("rotated")
 
     plt.figure()
     # return a,d
     c = d.rot90(k=2)
     c.plot()
-    plt.title('rotated k=2')
+    plt.title("rotated k=2")
 
     plt.figure()
     # return a,d
     c = d.rot90(k=2, center=(10, 5))
     c.plot()
-    plt.title('rotated k=2 about (10,5)')
+    plt.title("rotated k=2 about (10,5)")
 
 
 def test_class_init(wfile=None):
@@ -658,31 +799,35 @@ def test_class_init(wfile=None):
     plt.figure(1)
     plt.clf()
     plt.suptitle(relpath)
-    plt.title('use plot_data function')
-    plot_data(d1, x1, y1, aspect='equal')
+    plt.title("use plot_data function")
+    plot_data(d1, x1, y1, aspect="equal")
 
     a = Data2D(d1, x1, y1)
     plt.figure(2)
     plt.clf()
-    plt.title('From data')
-    a.plot(aspect='equal')
+    plt.title("From data")
+    a.plot(aspect="equal")
 
-    b = Data2D(file=wfile, ytox=220/1000., center=(0, 0))
+    b = Data2D(file=wfile, ytox=220 / 1000.0, center=(0, 0))
     plt.figure(3)
     plt.clf()
-    plt.title('from filename')
-    b.plot(aspect='equal')
+    plt.title("from filename")
+    b.plot(aspect="equal")
 
-    b.save(os.path.join(outpath, os.path.basename(
-        fn_add_subfix(relpath.as_posix(), "", ".txt"))), makedirs=True)
+    b.save(
+        os.path.join(
+            outpath, os.path.basename(fn_add_subfix(relpath.as_posix(), "", ".txt"))
+        ),
+        makedirs=True,
+    )
     b.remove_nan_frame()
 
     plt.figure()
-    plt.title('removed nans')
-    b.plot(aspect='equal')
+    plt.title("removed nans")
+    b.plot(aspect="equal")
 
 
-if __name__ == '__main__':
-    plt.close('all')
+if __name__ == "__main__":
+    plt.close("all")
     test_class_init()
     test_rot90()
