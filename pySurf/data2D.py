@@ -11,6 +11,7 @@ In python I need to look at code or docstring to understand if a value is modifi
 self.data=newdata makes a method a procedure, self.copy().data=newdata; return res is a function
 """
 
+from site import ENABLE_USER_SITE
 import matplotlib.pyplot as plt
 import numpy as np
 import warnings
@@ -45,6 +46,7 @@ from dataIO.functions import update_docstring
 from dataIO.arrays import stats
 
 from pyProfile.profile import PSF_spizzichino,line
+from dataIO.functions import update_docstring
 
 test_folder = r'C:\Users\kovor\Documents\python\pyXTel\pySurf\test'
 
@@ -1031,8 +1033,12 @@ def get_stats(wdata,x=None,y=None,units=None,vars=None,string=False):
     """ Return selected statistics for each of data,x,y as numeric array or string, wrapping `dataIO.stats`.  
     
     `vars `, `units` and `string` have same meaning and usage as in wrapped function `stats`. `vars` can be passed as 3-element list to individually set which stats to print (`None` for complete stats, `[]` to exclude all).
+    If `vars` is passed as a single-level list, this is interpreted as the list of varibles to plot for the data values only (empty lists are returned for x and y).
     
-    Note that span doesn't exclude nan data, put flag to tune this option.
+    TODO: span doesn't exclude nan data, put flag to tune this option.
+    TODO: there is some confusion in creating labels for `plot_data` because it can be unclear which one is X, Y, Z. A label should be added externally or in a routine. Also, statistics cannot be sorted (a list is returned, so it is possible to sort the list).
+    TODO: make a default extended stats, with  span and pts nr. for x and y and mean, span, rms for z. 
+    
     """
     
     if units is None or not string:
@@ -1049,13 +1055,19 @@ def get_stats(wdata,x=None,y=None,units=None,vars=None,string=False):
         raise ValueError ("Unrecognized units.")
     
     #pdb.set_trace()
+    # voglio avere:
+    
     try:
         if len(vars[0]) == 0: #[], TypeError if None
-            vars=[vars]
-    except TypeError:  #
-        vars=[vars,vars,vars]
+            # e' lista nulla
+            pass
+    except TypeError:  # if it is not at least two levels (i.e. [[],[],..]) gets here
+        # replicava per ogni variabile
+        ## vars=[vars,vars,vars]
+        # ora applica solo ai dati
+        vars = [[],[],vars]
+        
     
-    #
     st=[stats(wdata,units=u[2],string=string,vars=vars[0])]
     if x is not None: 
         st.append(stats(x,units=u[0],vars=vars[1],string=string))
@@ -1063,6 +1075,62 @@ def get_stats(wdata,x=None,y=None,units=None,vars=None,string=False):
         st.append(stats(y,units=u[1],vars=vars[2],string=string))
     
     return st
+get_stats = update_docstring(get_stats, stats)
+
+def test_get_stats(value=None):
+    import pprint as pprint
+    
+    if value is None:
+        data,x,y = load_test_data()
+    
+    print (get_stats.__doc__)
+    
+    print("no options:\n",get_stats(data,x,y),"\n-------------\n")
+    #print(get_stats(data,x,y,string=True))
+    print("no options, string:\n",get_stats(data,x,y,string=True),"\n-------------\n")
+    
+    print("vars=[1,2,3], string:\n",get_stats(data,x,y,string=True,vars=[1,2,3]),"\n-------------\n")
+    #[['StdDev: 3.1 ', 'PV: 35.2 ', 'min: -32.6 '],
+    #['StdDev: 28.2 ', 'PV: 97.4 ', 'min: -48.7 '],
+    #['StdDev: 29.4 ', 'PV: 102 ', 'min: -50.8 ']]
+    
+    #this works
+    print("vars=[3], string:\n",
+          get_stats(data,x,y,string=True,vars=[3]),"\n-------------\n")
+    #[['min: -32.6 '], ['min: -48.7 '], ['min: -50.8 ']] 
+    #this fails:
+    #print(get_stats(data,x,y,string=True,vars=3),"\n-------------\n")
+
+    print("vars=[[],[2],[3]], string:\n",
+          get_stats(data,x,y,string=True,vars=[[],[2],[3]]),"\n-------------\n")
+    #[['StdDev: 3.1 '], ['PV: 97.4 '], ['min: -50.8 ']]
+       
+    print("vars=[[1],[2],[3]]:\n",
+          get_stats(data,x,y,string=True,vars=[[1],[2],[3]]),"\n-------------\n")
+    #[['StdDev: 3.1 '], ['PV: 97.4 '], ['min: -50.8 ']]
+
+
+    # units have effect only if provided as 3-el string
+    print("units='mm':\n",
+          get_stats(data,x,y,string=True,vars=[[1],[2],[3]],units='mm'),"\n-------------\n")
+    #[['StdDev: 3.1 mm'], ['PV: 97.4 '], ['min: -50.8 ']]
+
+    print("units='[mm]':\n",
+          get_stats(data,x,y,string=True,vars=[[1],[2],[3]],units=['mm']),"\n-------------\n")
+    #[['StdDev: 3.1 mm'], ['PV: 97.4 '], ['min: -50.8 ']]
+    
+    print("units=['mm','mm','mm']:\n",
+          get_stats(data,x,y,string=True,vars=[[1],[2],[3]],units=['mm','mm','mm']),"\n-------------\n")
+    #[['StdDev: 3.1 mm'], ['PV: 97.4 mm'], ['min: -50.8 mm']]
+
+    print("vars=[[1],[2,3],[3]]:\n",
+          get_stats(data,x,y,string=True,vars=[[1],[2,3],[3]],units=['mm','mm','mm']),"\n-------------\n")
+    #[['StdDev: 3.1 mm'], ['PV: 97.4 mm', 'min: -48.7 mm'], ['min: -50.8 mm']]
+    
+    print("vars=[[2,3],[],[3]]:\n",
+          get_stats(data,x,y,string=True,vars=[[2,3],[],[3]],units=['mm','mm','mm']),"\n-------------\n")
+    #[['StdDev: 3.1 mm'], ['PV: 97.4 mm', 'min: -48.7 mm'], ['min: -50.8 mm']]
+
 '''
 ## Differenza tra data_histostats e plot_stats ?? 
 ## Rimosso 2020/11/05
@@ -1258,7 +1326,36 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     plt.colorbar(axim,cax=ax1)  # fondamentale qui usare cax
     """
     
-    ## LEGEND BOX    
+    ## LEGEND BOX   
+    # print('STATS:\n',stats) 
+    if stats:
+        if hasattr(stats, '__iter__'):
+            # is iterable(stats): #stats is used as list of variables to get statistics.     
+            #legend = get_stats(data,x,y,vars=stats,units=units,string=True)
+            vars = stats
+
+        elif stats==1: #backwards compatibility
+            #print("option stats==1 is obsolete. Please replace it with a dictionary including options for `get_stats`. c to continue, q to quit.")
+            vars = [[],[],[0,1,2]]
+   
+        elif stats==2: #backwards compatibility
+            #print("option stats==2 is obsolete. Please replace it with a dictionary including options for `get_stats`. c to continue, q to quit.")
+            #pdb.set_trace()
+            
+            vars = [[2],[2],[0,2,5]]
+            
+        s = get_stats(data,x,y,vars=vars,units=units,string=True)
+        legend = list(itertools.chain.from_iterable(s))
+        legend = [l for l in legend if len(l)>0] 
+        
+        l=legendbox(legend,loc=loc,framealpha=framealpha)
+        #pdb.debug()
+        #for k,v in largs.items():
+            #for text in l.get_texts():
+                #text.set_color("red")
+        #plt.setp(l.get_texts(), color='r')
+    
+    ''' 
     if stats:
         if hasattr(stats, '__iter__'):
             # is iterable(stats): #stats is used as list of variables to get statistics.          
@@ -1292,6 +1389,8 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
             #for text in l.get_texts():
                 #text.set_color("red")
         #plt.setp(l.get_texts(), color='r')
+    '''
+    
     if title is not None:
         plt.title(title)
         
@@ -1362,6 +1461,56 @@ def compare_2images(data,ldata,x=None,y=None,fignum=None,titles=None,vmin=None,v
     return ax1,ax2
 '''
 
+def test_plot_stats(value=None):
+    """Test plotting of legendbox in plot_data"""
+    
+    import pprint as pprint
+    
+    if value is None:
+        data,x,y = load_test_data()
+    
+    #print (get_stats.__doc__)
+    plt.figure()
+    plot_data(data,x,y, aspect = 'auto',title = 'no options')
+
+    plt.figure()
+    plot_data(data,x,y, aspect = 'auto', stats = 1 ,title = 'backwards comp., stats = 1')   
+    
+    plt.figure()
+    plot_data(data,x,y, aspect = 'auto', stats = 2 ,title = 'backwards comp., stats = 2')
+    
+    plt.figure()
+    plot_data(data,x,y, aspect = 'auto',stats=[1,2,3], title = 'stats = [1,2,3]')
+    
+    plt.figure()
+    plot_data(data,x,y, aspect = 'auto',stats=[[1],[2],[3]], title = 'stats = [[1],[2],[3]]')    
+    
+    plt.figure()
+    plot_data(data,x,y, aspect = 'auto',stats=[[1],[0,2],[3]], title = 'stats = [[1],[0,2],[3]]')  
+    
+    '''
+
+       
+    print(get_stats(data,x,y,string=True,vars=[[1],[2],[3]]),"\n-------------\n")
+    #[['StdDev: 3.1 '], ['PV: 97.4 '], ['min: -50.8 ']]
+
+    # units have effect only if provided as 3-el string
+    print(get_stats(data,x,y,string=True,vars=[[1],[2],[3]],units='mm'),"\n-------------\n")
+    #[['StdDev: 3.1 mm'], ['PV: 97.4 '], ['min: -50.8 ']]
+
+    print(get_stats(data,x,y,string=True,vars=[[1],[2],[3]],units=['mm']),"\n-------------\n")
+    #[['StdDev: 3.1 mm'], ['PV: 97.4 '], ['min: -50.8 ']]
+    
+    print(get_stats(data,x,y,string=True,vars=[[1],[2],[3]],units=['mm','mm','mm']),"\n-------------\n")
+    #[['StdDev: 3.1 mm'], ['PV: 97.4 mm'], ['min: -50.8 mm']]
+
+    print(get_stats(data,x,y,string=True,vars=[[1],[2,3],[3]],units=['mm','mm','mm']),"\n-------------\n")
+    #[['StdDev: 3.1 mm'], ['PV: 97.4 mm', 'min: -48.7 mm'], ['min: -50.8 mm']]
+    
+    print(get_stats(data,x,y,string=True,vars=[[],[2,3],[3]],units=['mm','mm','mm']),"\n-------------\n")
+    #[['StdDev: 3.1 mm'], ['PV: 97.4 mm', 'min: -48.7 mm'], ['min: -50.8 mm']]
+    '''
+    
 def psf2d(y,wdata,alpha,xout,nskip=1):
     """return a 2d psf for axial profiles on wdata with coordinate y.
     """

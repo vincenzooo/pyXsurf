@@ -7,3 +7,4 @@
 workspace.ini
 /notebooks
 pySurf/readers/PyMDT
+docs/build
