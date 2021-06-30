@@ -6,6 +6,7 @@ from configparser import ConfigParser
 import io
 import struct
 import numpy as np
+import logging
 
 """ dataset info     
 Version=2
@@ -33,6 +34,7 @@ SaveOrder=Intel
 
 def read_raw_nid (file_name):
     """return header and raw data (all data blocks together) from file_name"""
+   
     with open(file_name, 'rb') as binfile:
         lines = binfile.readlines()
 
@@ -78,6 +80,8 @@ def read_nid(file_name):
     ngroups = config.get('DataSet','GroupCount') #number of groups 
     imgdic={}
     i=0
+    logging.info('reading '+file_name)
+    #print('reading '+file_name)
     for g in range(int(ngroups)):    
         grcount = config.get('DataSet','Gr%i-Count'%g )
         # all raws of the actual column 
@@ -85,7 +89,7 @@ def read_nid(file_name):
             cgtag = 'Gr%i-Ch%i'%(g,c)
             try:
                 datatag = config.get('DataSet',cgtag)
-                # then read the header, specially “Points” and “Lines” 
+                # then read the header, specially �Points� and �Lines� 
                 #ReadDataSetInfo(datatag)    
                 npoints = int(config.get(datatag,'Points'))
                 nlines = int(config.get(datatag,'Lines' ))
@@ -118,8 +122,33 @@ def read_nid(file_name):
 
                 #print(points)
                 #ReadBinData()
+                logging.info(cgtag+' read')
+                #print (cgtag+' read')
             except NoOptionError:
+                logging.info('option '+cgtag+' not found')
                 #print('option '+cgtag+' not found')
                 pass
             
     return imgdic
+
+
+if __name__ == "__main__":
+    
+    import os 
+    from pySurf.data2D_class import Data2D
+    
+    
+    datafolder = r'G:\My Drive\progetti\c_overcoating\esperimenti\20210129_dopamine\20210224_dopamine_clean'
+    fn = 'Image00053.nid'
+    file_name =  os.path.join(datafolder,fn)
+
+    #file_name=r'C:\Users\kovor\Documents\python\pyXTel\pySurf\test\input_data\AFM\02_test.nid'
+
+    datadic = read_nid(file_name)
+    data,x,y = datadic['Gr0-Ch1']
+    print("read data of shape",data.shape)
+    
+    d = Data2D(data,x,y,units=['mm','mm','um'],scale=[1000.,1000.,1000000.]) 
+
+    d.plot()
+    plt.show()

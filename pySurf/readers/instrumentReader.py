@@ -1,4 +1,6 @@
 """
+2021/06/15 header is now implemented in data2D.read_data, it calls the function in format_reader with header flag, however there is not exception handling, so I am not sure what happens when the flag is not supported.
+
 2020/07/14 see notes on 02/29. raw readers in format_reader should
    return data with the minimal amount of manipulation and the most general interface. All format/instrument specific aspects
    should be handled there.
@@ -60,8 +62,11 @@ from pySurf.points import points_find_grid
 from pySurf.points import resample_grid
 from .read_sur_files import readsur
 from pySurf.data2D import read_data
+
 #from utilities.imaging.man import stripnans
 from dataIO.read_pars_from_namelist import read_pars_from_namelist
+
+from pySurf.points import matrix_to_points2
 import pdb
 
 #from pySurf.readers._instrument_reader import *
@@ -309,7 +314,7 @@ def fitsAFM_reader(fitsfile,sizeum=None):
     x=np.linspace(1,sizeum[0],data.shape[0])/1000. #convert in mm
     y=np.linspace(1,sizeum[1],data.shape[1])/1000.
     data=data*1e6  #convert from m to um
-    return matrix_to_points(data,x,y)
+    return matrix_to_points2(data,x,y)
 
 def fitsCCI_reader(fitsfile,center=None,header=False):
     """return x,y (vectors) and data (matrix) from fits CCI file.
@@ -368,6 +373,7 @@ def test_datzygo_reader (wfile=None):
     import os
     import matplotlib.pyplot as plt
     from  pySurf.data2D import plot_data
+    from pySurf.data2D_class import Data2D
     from pySurf.readers.format_reader import datzygo_reader
 
     if wfile is  None:
