@@ -897,7 +897,7 @@ def extract_profile(points,xy0,xy1=None,npoints=None,along=True,plot=False):
     """extract a profile from xy0=(x0, y0) to xy1=(x1,y1).
     Return a couple of vectors x, y, z. The number of points can be set, otherwise is set
     accordingly to the longest profile dimension.
-    If along is set (default), a two-dim x-z profile is returned with x distancce
+    If `along` is set (default), a two-dim x-z profile is returned with x distance
     along the profile from xy0.
     If called without second argument, extract point.
     #TODO, can be made faster by cropping data around profile.
@@ -931,8 +931,8 @@ def extract_profile(points,xy0,xy1=None,npoints=None,along=True,plot=False):
             return profiles
             
     #span of extreme points
-    xs = [xy0[0],xy1[0]]  
-    ys = [xy0[1],xy1[1]]  
+    xs = np.sort([xy0[0],xy1[0]])  
+    ys = np.sort([xy0[1],xy1[1]])
     
     #  range for crop of useful data,
     ix = np.where((xg>=xs[0]) & (xg<=xs[1]))[0]
@@ -960,7 +960,7 @@ def extract_profile(points,xy0,xy1=None,npoints=None,along=True,plot=False):
     pp = crop_points(points,xr,yr)
     #points = crop_points(points,[xy0[0],xy1[0]],[xy0[1],xy1[1]])
     
-    if xy0 == xy1:
+    if np.all(xy0 == xy1):
         return ip.griddata(pp[:,0:2],pp[:,-1],xy0,method=method)
     
     xx=np.linspace(xy0[0],xy1[0],npoints)
@@ -968,6 +968,7 @@ def extract_profile(points,xy0,xy1=None,npoints=None,along=True,plot=False):
     r=np.sqrt((xx-xy0[0])**2+(yy-xy0[1])**2)
 
     z=ip.griddata(pp[:,0:2],pp[:,-1],np.vstack([xx,yy]).T,method=method)
+    #pdb.set_trace()
     if along:
         #pp=np.vstack([r,z]).T
         pp=[r,z]

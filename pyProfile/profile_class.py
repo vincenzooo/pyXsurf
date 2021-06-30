@@ -541,11 +541,14 @@ class Profile(object):  #np.ndarrays
     def resample(self,other,*args,**kwargs):
         """TODO, add option to pass x and y instead of other as an object."""
         res=self.copy()
-        if self.units is not None and other.units is not None:
-            if self.units != other.units:
-                raise ValueError('If units are defined they must match in Profile.resample.')
-        res.x,res.y=resample_profile(*res(),*other(),*args,**kwargs)
-        return res
+        try:
+            if self.units is not None and other.units is not None:
+                if self.units != other.units:
+                    raise ValueError('If units are defined they must match in Profile.resample.')
+            res.x,res.y=resample_profile(*res(),*other(),*args,**kwargs)   
+        except AttributeError: #assume other is an array
+            res.x,res.y=resample_profile(*res(),None,other,*args,**kwargs)
+        return res        
     resample=update_docstring(resample,resample_profile)
 
 
