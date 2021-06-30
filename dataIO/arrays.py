@@ -1,6 +1,7 @@
 import numpy as np
 from dataIO.span import span
 import pdb
+import logging
 
 
 def stats (data,units=None,string=False,fmt=None,vars=None):
@@ -29,21 +30,6 @@ def stats (data,units=None,string=False,fmt=None,vars=None):
     """
     # pdb.set_trace()
     st = [np.nanmean(data),np.nanstd(data),span(data,size=True),*span(data),np.size(data)]
-    
-    if string:
-        if units is None: 
-            units = ""
-        else:
-            units = " " + units
-        if fmt is None:
-            fmt = ['mean: %.3g'+units,
-                   'StdDev: %.3g'+units,
-                   'PV: %.3g'+units,
-                   'min: %.3g'+units,
-                   'max: %.3g'+units,
-                   'n:  %i']
-        
-        st = [f%val for f,val in zip (fmt,st)]
         
     if vars is None: vars = [0,1,2,3,4,5]
     #pdb.set_trace()
@@ -56,16 +42,41 @@ def stats (data,units=None,string=False,fmt=None,vars=None):
     '''
     
     #try:
-    if isinstance(vars,str):  #?
-        vars=[vars]        
+    #if isinstance(vars,str):  #?
+    #    vars=[vars]        
     #except:
     #    print('cane')
-    # pdb.set_trace()
+    #pdb.set_trace()
     if len(vars) > 0:
         st = [s for i,s in enumerate(st) if i in vars]
     else:
         st = []
         
+    # convert to string
+    if string:
+        # units defaults to empty string, or adjust spacing
+        if units is None: 
+            units = ""
+        else:
+            units = " " + units
+        # default format uses the units    
+        if fmt is None:
+            fmt = ['mean: %.3g'+units,
+                'StdDev: %.3g'+units,
+                'PV: %.3g'+units,
+                'min: %.3g'+units,
+                'max: %.3g'+units,
+                'n:  %i']
+        elif np.size(fmt) == 1:
+            #if single string replicates to all variables (no units)
+            fmt = np.repeat(fmt,len(st))
+        
+        # 2021/06/30 here st and fmt are of same length. 
+        # before today it was expecting complete format
+        # st = [s for i,s in enumerate(st) if i in vars]  # filter st
+        st = [f%val for f,val in zip (fmt,st)]
+    
+    
     return st
 
 
