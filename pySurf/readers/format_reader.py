@@ -26,9 +26,12 @@ from pySurf.points import resample_grid
 from pySurf.readers.read_sur_files import readsur
 from pySurf.readers.read_metropro_files import readMetroProData
 #from utilities.imaging.man import stripnans
+from pySurf.data2D import data_from_txt
 
 from dataIO.read_pars_from_namelist import read_pars_from_namelist
+from dataIO.fn_add_subfix import fn_add_subfix
 from .test_readers import testfolder
+from IPython.display import display
 
 import pdb
 
@@ -44,8 +47,15 @@ def points_reader(wfile,header=False,*args,**kwargs):
 
 def datzygo_reader(wfile,header=False,*args,**kwargs):
     """read .dat binary files (MetroPro/Zygo)."""
+    
+    '''from manual: Complete maps of the header formats can be obtained by running the dat_test.exe 
+program that is included with MetroPro in folder C:\MetroPro\Bin. Type the following at 
+a command prompt: 
+dat_test  –maps  >  maps.txt 
+File maps.txt will contain the output. '''
     d1,head,d3,d4=readMetroProData(wfile,*args,**kwargs)
-    if header: return head
+    #pdb.set_trace()
+    if header or kwargs.get('header',False): return head
     try:
         x0=head['X0']
     except KeyError:
@@ -58,8 +68,10 @@ def datzygo_reader(wfile,header=False,*args,**kwargs):
         xyscale=head['cameraRes']
     except KeyError:
         xyscale=1.
-    
-    #data,x,y=d1,x0+np.arange(np.shape(d1)[1]),y0+np.arange(np.shape(d1)[0])    
+    # pdb.set_trace()
+    #data,x,y=d1,x0+np.arange(np.shape(d1)[1]),y0+np.arange(np.shape(d1)[0])  
+    # data, x, y are already in the appropriate units, but xy offsets were not included.
+    # units are meters.
     data,x,y=d1,x0*xyscale+d3,y0*xyscale+d4
 
     return data,x,y
@@ -343,8 +355,8 @@ reader_dic={#'.asc':csvZygo_reader,
             '.csv':csv4D_reader,
             #'.fits':fitsWFS_reader,
             #'.txt':points_reader,
-            '.sur':sur_reader} #,
-            #'.dat':datzygo_reader}
+            '.sur':sur_reader,
+            '.dat':datzygo_reader}
 
 def auto_reader(wfile):
     """guess a reader for wfile. Return reader routine."""
@@ -354,7 +366,8 @@ def auto_reader(wfile):
     except KeyError:
         print ('fileformat ``%s``not recognized for file %s'%(ext,wfile))
         print ('Use generic text reader')
-        reader=points_reader  #generic test reader, replace with asciitables
+        reader=data_from_txt
+        #points_reader  #generic test reader, replace with asciitables
 
     return reader
 
@@ -368,7 +381,7 @@ if __name__=='__main__':
         Zygo cannot be called directly with intensity keyword set to True without making a specific case from the other readers,
         while this can be done using read_data. """
 
-    from test_readers import testfolder
+    from .test_readers import testfolder
     from pySurf.data2D import plot_data, read_data
     
     files = [r'input_data\profilometer\04_test_directions\05_xysurf_pp_Height.sur',
