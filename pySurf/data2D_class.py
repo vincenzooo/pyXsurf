@@ -375,16 +375,22 @@ class Data2D(object):  # np.ndarrays
         nsigma0 = 1  # default number of stddev for color scale
         # import pdb
         # to change the default behavior
-        stats = kwargs.pop("stats", [1, 2, 3, 4])
+        stats = kwargs.pop("stats", [[1,2],[5],[5]])
+        fmt = kwargs.pop("fmt", ['mean: %.3g'+self.units[0],
+                   'rms: %.3g'+self.units[0],
+                   'PV: %.3g'+self.units[0],
+                   '%ix%i'])
+        
         # to change the default behavior
         nsigma = kwargs.pop("nsigma", nsigma0)
         m = self.data
-        # pdb.set_trace()
+        #pdb.set_trace()
         res = plot_data(
             self.data,
             self.x,
             self.y,
             units=self.units,
+            #fmt=fmt,
             stats=stats,
             nsigma=nsigma,
             *args,
@@ -449,7 +455,7 @@ class Data2D(object):  # np.ndarrays
         # [1,2,3], None, None
         # [1,2,3], ... fallisce se non none
         # [1,2], None, None
-        pdb.set_trace()
+        # pdb.set_trace()
         offsets = [0, 0, 0]
         if yoffset is None and zoffset is None:
             # 1, None, None
@@ -539,11 +545,11 @@ class Data2D(object):  # np.ndarrays
     resample = update_docstring(resample, resample_data)
 
     def add_markers(self, *args, **kwargs):
-        f = plt.figure()
+        #f = plt.figure()
         self.plot()
         ax = add_clickable_markers2(*args, **kwargs)
         markers = ax.markers
-        plt.close(f)
+        #plt.close(f)
         return markers
 
     def psd(
@@ -594,7 +600,6 @@ class Data2D(object):  # np.ndarrays
             )
 
         newname = name if name is not None else fn_add_subfix(self.name, subfix)
-
         return PSD2D(p, self.x, f, units=self.units, name=newname)
 
     psd = update_docstring(psd, psd2d)

@@ -236,8 +236,9 @@ def register_profile(x,y,scale=(1,1),
     
     if x[-1]<x[0]:
         x=x[::-1]
-        data=np.fliplr(data)
-        x=x-min(x)
+        y=y[::-1]  #added 2021/06/15 it was never tested?
+        #data=np.fliplr(data)  #removed, no data here, from data2D
+        x=x-min(x)    # why?
 
     #adjust crop and scales
     if strip:  #messes up x and y

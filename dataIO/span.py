@@ -108,18 +108,44 @@ def span(array:np.array,
         # it was before 2019/04/01
         # return np.stack([min,max]).squeeze()  #?
 
-def span_from_pixels(p,n=None):
-    """From positions of pixel centers p returns a range from side to side. Useful to adjust plot extent in imshow.
+def span_from_pixels(p,n=None,delta = 0):
+    """From an array with positions of pixel centers `p`, returns the entire range for pixels from side to side. Useful to adjust plot extent in imshow.
+    
+    `n` is the number of pixels to consider in the output range.
+    
+    `p` (defaults to n) is uniquely used to extract the range, 
+    which makes it possible, as alternative, to pass `p` as range.
 
-    In alternative, p can be provided as range and number of pixels.
+    `delta` is used only if p has a single value (this is tested in the simplest way by checking `len(p) == 1`, doesn't account for any complex case, e.g. repeated values).
+    
+    In this case, the pixel width cannot be evaluated from the single `p` value, and `delta` is assumend as half width of the pixel to use. Can be set to 0 returns two identical values, as default in `dataIO.span()`).
+    Not the most elegant, but if a negative value is passed, this is used as fraction of value. 
+    
+    Usage example:
+        
+        s = span_from_pixels([100],n,delta=0.1)
+        xs = np.linspace(s[0],s[1],n+1) # return the n+1 interval extremes 
+    
+    More examples in `test_span_from_pixels`.
 
     note that np.linspace has flag retsteps to return step size."""
 
+    p = np.array(p)
+    
     if n is None:
         n=len(p)
 
-    dx=span(p,size=True)/(n-1)
-
+    # dx half-width of pixel
+    if len(p) == 1:
+        #use as fraction if negative
+        if delta < 0:
+            delta = np.abs(delta)*np.array(p)
+        p =  (p-delta,p+delta)
+        dx = 0
+            
+    if n > 1:
+        dx = span(p,size=True)/(n-1)
+    
     return (span(p)[0]-dx/2,span(p)[1]+dx/2)
 
 def test_span_from_pixels():
@@ -127,7 +153,13 @@ def test_span_from_pixels():
     print (span_from_pixels([0,2],3)) #[-0.5,2.5]
     print (span_from_pixels([0,1,2])) #[-0.5,2.5]
     print (span_from_pixels([0,0.5,1,1.5,2])) #[-0.25,2.25]
-
+    #new
+    print (span_from_pixels([3],4)) #[3,3]
+    print (span_from_pixels([100],1,delta=0.1))  #[99.9, 100.1]
+    print (span_from_pixels([100],3,delta=-0.1))  #[85., 115.] 
+    print (span_from_pixels([100],2,delta=1))  #(98.0, 102.0)
+    print (span_from_pixels([100],3,delta=1))  #(98.5, 101.5)
+    
 def filtered_span(*args,**kwargs):
     from dataIO.outliers import remove_outliers
     warnings.warn('This routine was replaced by outliers.remove_outliers please update calling code, will be removed.',RuntimeWarning)

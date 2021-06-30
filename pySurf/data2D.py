@@ -524,6 +524,11 @@ def read_data(file,rreader,**kwargs):
     ##    except TypeError:  #unexpected keyword if header is not implemented
     ##        return None
 
+    # return header if available, maybe temporary.
+    head=kwargs.get('header',False)
+    if head:
+        return rreader(file,**kwargs)
+    
     #filters register_data parameters cleaning args
     # done manually, can use `dataIO.dicts.pop_kw`.
     scale=kwargs.pop('scale',(1,1,1))
@@ -1029,11 +1034,22 @@ def slope_2D(wdata,x,y,scale=(1.,1.,1.)):
     return (slopeax,x,yax),(slopeaz,xaz,y)
 
 
-def get_stats(wdata,x=None,y=None,units=None,vars=None,string=False):
+def get_stats(data,x=None,y=None,units=None,vars=None,string=False,fmt=None):
     """ Return selected statistics for each of data,x,y as numeric array or string, wrapping `dataIO.stats`.  
     
-    `vars `, `units` and `string` have same meaning and usage as in wrapped function `stats`. `vars` can be passed as 3-element list to individually set which stats to print (`None` for complete stats, `[]` to exclude all).
+    `vars `, `units` and `string` have same meaning and usage as in wrapped function `stats`. 
+    Here `vars` and `units` (scalar in `stats`) can be passed as 3-element list to individually set which stats to print (`None` for complete stats, `[]` to exclude all).
     If `vars` is passed as a single-level list, this is interpreted as the list of varibles to plot for the data values only (empty lists are returned for x and y).
+    
+    Here `fmt` has a different role as in `stats`. The function with string set to True
+     return a flattened array of strings,
+     so an array of equal lenght can be passed, or a scalar, used for all axis and stats.
+    
+    Run `test_get_stats` for examples.
+    If a single scalar value is passed as `vars`, this is intended as a preset,
+      (1,2 for backward compatibility) whose value is set in `plot_data`. 
+    Apart from presets, test output legends can be generated calling
+       `get_stats(data,x,y,vars=vars,units=units,string=True)`
     
     TODO: span doesn't exclude nan data, put flag to tune this option.
     TODO: there is some confusion in creating labels for `plot_data` because it can be unclear which one is X, Y, Z. A label should be added externally or in a routine. Also, statistics cannot be sorted (a list is returned, so it is possible to sort the list).
@@ -1054,37 +1070,72 @@ def get_stats(wdata,x=None,y=None,units=None,vars=None,string=False):
     else:  # if 3 units are already ok
         raise ValueError ("Unrecognized units.")
     
-    #pdb.set_trace()
+    # pdb.set_trace()
     # voglio avere:
-    
     try:
         if len(vars[0]) == 0: #[], TypeError if None
             # e' lista nulla
             pass
-    except TypeError:  # if it is not at least two levels (i.e. [[],[],..]) gets here
+    except TypeError:  
+        # if it is not at least two levels (i.e. [[],[],..]) gets here
         # replicava per ogni variabile
         ## vars=[vars,vars,vars]
         # ora applica solo ai dati
-        vars = [[],[],vars]
+        #pdb.set_trace()
+        if len(np.shape(vars))==0:
+            if vars is not None:
+                # presets
+                if vars==1: #backwards compatibility
+                    logging.getLogger().info('stats = 1, backward compatibility')
+                    #print("option stats==1 is obsolete. Please replace it with a dictionary including options for `get_stats`. c to continue, q to quit.")
+                    vars = [[0,1,2],[],[]]
         
+                elif vars==2: #backwards compatibility
+                    logging.getLogger().info('stats = 2, backward compatibility')
+                    #print("option stats==2 is obsolete. Please replace it with a dictionary including options for `get_stats`. c to continue, q to quit.")
+                    #pdb.set_trace()
+                    vars = [[0,2,5],[2],[2]]   # mean,PV, nx, ny
+            else:
+                vars=[None,[],[]]
+        
+        elif len(np.shape(vars))==1:        
+            logging.getLogger().info('stats as single level array')
+            #pdb.set_trace()
+            vars = [vars,[],[]]
+        
+    #if string:
+    """`fmt` must be applied to data,x,y, so it must be a 3 el vector.
+    If format is provided as flattend array, flatten it. """
     
-    st=[stats(wdata,units=u[2],string=string,vars=vars[0])]
+    if np.ndim(fmt)==0:  # single fmt string
+        fmt = [fmt,fmt,fmt]
+    elif np.ndim(fmt)==1:
+        l = np.insert(np.cumsum([len(v) for v in vars]),0,0)  # cumsum of lengths of choices for each axis
+        fmt = [fmt[start:end] for start, end in zip(l, l[1:])]  # split lists
+    #pdb.set_trace()
+    st=[stats(data,units=u[2],string=string,vars=vars[0],fmt=fmt[0])]  # fmt is used only if string is True
+    
     if x is not None: 
-        st.append(stats(x,units=u[0],vars=vars[1],string=string))
+        st.append(stats(x,units=u[0],vars=vars[1],string=string,fmt=fmt[1]))
     if y is not None:    
-        st.append(stats(y,units=u[1],vars=vars[2],string=string))
+        st.append(stats(y,units=u[1],vars=vars[2],string=string,fmt=fmt[2]))
     
+    if string:
+        legend = list(itertools.chain.from_iterable(st)) # flatten list 
+        legend = [l for l in legend if len(l)>0] # remove empty lines
+        st = legend
     return st
+
 get_stats = update_docstring(get_stats, stats)
 
-def test_get_stats(value=None):
+def test_get_stats(*value):
     import pprint as pprint
     
-    if value is None:
-        data,x,y = load_test_data()
+    data,x,y = value if value else load_test_data()
     
     print (get_stats.__doc__)
     
+    print("load test surface, shape: ",data.shape)
     print("no options:\n",get_stats(data,x,y),"\n-------------\n")
     #print(get_stats(data,x,y,string=True))
     print("no options, string:\n",get_stats(data,x,y,string=True),"\n-------------\n")
@@ -1263,22 +1314,36 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     #plotting is here to resolve conflict with clim
     if x is None: x = np.arange(data.shape[1])
     if y is None: y = np.arange(data.shape[0])
-    assert x[-1]>x[0] and y[-1]>y[0]
-
-    sx=span_from_pixels(x)
-    sy=span_from_pixels(y)
+    assert x[-1]>=x[0] and y[-1]>=y[0]
     
+    #if one of the two is a single value, plot fails. To handle this special case,
+    # single values are duplicated.
+    #if np.size(x) == 1: x = x[None, :]
+    
+    delta = 0.1 # used if one of the axis has a single value.
+    # this is a workaround of setting a fake duplicated coordinate
+    # and adjust ticks accordingly.
+    sx=span_from_pixels(x,delta=delta)  #determines the extent of the plot from 
+    sy=span_from_pixels(y,delta=delta)  #  coordinates of pixel centers.
+    #pdb.set_trace()
     vmin=kwargs.pop('vmin',clim[0])
     vmax=kwargs.pop('vmax',clim[1])
     
+    fmt = kwargs.pop('fmt',None)
+    # to use with `stats` (passed as parameter)
+    
     ## PLOT
-    #pdb.set_trace()
+    # this fails if unknown kwargs is passed:
     axim=plt.imshow(data,extent=(sx[0],sx[1],sy[0],sy[1]),
             aspect=aspect,origin=origin,interpolation='none',
-            vmin=vmin, vmax=vmax,**kwargs) #this fails if unknown kwargs is passed.
-        
+            vmin=vmin, vmax=vmax,**kwargs) 
     
-    if contour: plt.contour(x,y,data,colors=colors,**kwargs)
+    # adjust for the specific case of a single value on x or y axis
+    #pdb.set_trace()
+    if span(x,size=True) == 0:
+        plt.gca().set_xticks(x)
+    if span(y,size=True) == 0:
+        plt.gca().set_yticks(y)
     #axim=plt.imshow(data,extent=(span(x)[0]-dx,span(x)[1]+dx,span(y)[0]-dy,span(y)[1]+dy),
     #    **pop_kw(kwargs,{'aspect':'equal',
     #                'origin':"lower",
@@ -1326,29 +1391,40 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     plt.colorbar(axim,cax=ax1)  # fondamentale qui usare cax
     """
     
+    # goes after colorbar
+    if contour: plt.contour(x,y,data,colors=colors,**kwargs)
+    
     ## LEGEND BOX   
-    # print('STATS:\n',stats) 
+    #print('STATS:\n',stats) 
+    
+    # handle presets, to be moved to get_stats.
     if stats:
+        ''' 
+        logger = logging.getLogger()
         if hasattr(stats, '__iter__'):
             # is iterable(stats): #stats is used as list of variables to get statistics.     
             #legend = get_stats(data,x,y,vars=stats,units=units,string=True)
             vars = stats
 
         elif stats==1: #backwards compatibility
+            logger.info('stats = 1, backward compatibility')
             #print("option stats==1 is obsolete. Please replace it with a dictionary including options for `get_stats`. c to continue, q to quit.")
-            vars = [[],[],[0,1,2]]
+            vars = [[0,1,2],[],[]]
    
         elif stats==2: #backwards compatibility
+            logger.info('stats = 2, backward compatibility')
             #print("option stats==2 is obsolete. Please replace it with a dictionary including options for `get_stats`. c to continue, q to quit.")
             #pdb.set_trace()
             
-            vars = [[2],[2],[0,2,5]]
-            
-        s = get_stats(data,x,y,vars=vars,units=units,string=True)
-        legend = list(itertools.chain.from_iterable(s))
-        legend = [l for l in legend if len(l)>0] 
+            vars = [[0,2,5],[2],[2]]   # mean,PV
         
-        l=legendbox(legend,loc=loc,framealpha=framealpha)
+        s = get_stats(data,x,y,vars=vars,units=units,string=True)
+        '''
+          
+        s = get_stats(data,x,y,vars=stats,units=units,string=True,fmt=fmt)
+
+        l=legendbox(s,loc=loc,framealpha=framealpha)
+        
         #pdb.debug()
         #for k,v in largs.items():
             #for text in l.get_texts():
