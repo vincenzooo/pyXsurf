@@ -33,20 +33,7 @@ def stats (data,units=None,string=False,fmt=None,vars=None):
         
     if vars is None: vars = [0,1,2,3,4,5]
     #pdb.set_trace()
-    
-    '''
-    try:   #not clear what this condition is for
-        _ = len(vars[0]) == 0 #[], TypeError if None
-    except TypeError:  #
-        pass #vars=[vars]  # ok, vars is a list  
-    '''
-    
-    #try:
-    #if isinstance(vars,str):  #?
-    #    vars=[vars]        
-    #except:
-    #    print('cane')
-    #pdb.set_trace()
+
     if len(vars) > 0:
         st = [s for i,s in enumerate(st) if i in vars]
     else:
