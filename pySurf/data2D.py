@@ -1293,14 +1293,6 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
         else:
             clim=span(np.where(remove_outliers(data,nsigma=nsigma),data,np.nan))
 
-        #pdb.set_trace()
-        """
-        if len(w)>0: #w[0]:
-            #pdb.set_trace()
-            if isinstance(w,outliers.EmptyRangeWarning):
-                warnings.warn('Range after filtering was empty, plotting full set of data.',EmptyPlotRangeWarning)
-            clim=span(data)
-        """
         if len(clim)==0: 
             print('Range after filtering was empty, plotting full set of data.')
             clim=span(data)
@@ -1397,75 +1389,11 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     ## LEGEND BOX   
     #print('STATS:\n',stats) 
     
-    # handle presets, to be moved to get_stats.
-    if stats:
-        ''' 
-        logger = logging.getLogger()
-        if hasattr(stats, '__iter__'):
-            # is iterable(stats): #stats is used as list of variables to get statistics.     
-            #legend = get_stats(data,x,y,vars=stats,units=units,string=True)
-            vars = stats
-
-        elif stats==1: #backwards compatibility
-            logger.info('stats = 1, backward compatibility')
-            #print("option stats==1 is obsolete. Please replace it with a dictionary including options for `get_stats`. c to continue, q to quit.")
-            vars = [[0,1,2],[],[]]
-   
-        elif stats==2: #backwards compatibility
-            logger.info('stats = 2, backward compatibility')
-            #print("option stats==2 is obsolete. Please replace it with a dictionary including options for `get_stats`. c to continue, q to quit.")
-            #pdb.set_trace()
-            
-            vars = [[0,2,5],[2],[2]]   # mean,PV
-        
-        s = get_stats(data,x,y,vars=vars,units=units,string=True)
-        '''
-          
+    # if vars is single scalar, use preset
+    if stats:          
         s = get_stats(data,x,y,vars=stats,units=units,string=True,fmt=fmt)
 
         l=legendbox(s,loc=loc,framealpha=framealpha)
-        
-        #pdb.debug()
-        #for k,v in largs.items():
-            #for text in l.get_texts():
-                #text.set_color("red")
-        #plt.setp(l.get_texts(), color='r')
-    
-    ''' 
-    if stats:
-        if hasattr(stats, '__iter__'):
-            # is iterable(stats): #stats is used as list of variables to get statistics.          
-            # stats = 1 vars = None  -->  [None,"",""]
-            # stats = True          -->   [None,"",""]
-            # stats = [None,"",""]  -->   [None,"",""]
-            # stats = None          -->   [None,"",""]
-            # stats = False         -->   no stats
-            stats = [None,"",""]
-            if vars is None:
-                vars = [None,"",""]
-            s = get_stats(data,x,y,units=units,string=True,vars=stats)
-            legend=["\n".join(ss) for ss in s]
-        elif stats==1: #backwards compatibility
-            legend=[]
-            print("option stats==1 is obsolete. Please replace it with a dictionary including options for `get_stats`. c to continue, q to quit.")
-            legend.extend(["avg: %.3g %s"%(np.nanmean(data),(units[2] if units[2] else "")),
-                           "PV: %.3g %s"%(span(data,size=True),(units[2] if units[2] else ""))])            
-        elif stats==2: #backwards compatibility
-            legend=[]
-            print("option stats==2 is obsolete. Please replace it with a dictionary including options for `get_stats`. c to continue, q to quit.")
-            #pdb.set_trace()
-            legend.extend(["avg: %.3g %s"%(np.nanmean(data),(units[2] if units[2] else "")),
-                           "PV: %.3g %s"%(span(data,size=True),(units[2] if units[2] else "")),
-                           "x_span: %.3g %s"%(span(x,size=1),(units[0] if units[0] else "")),
-                           "y_span: %.3g %s"%(span(y,size=1),(units[1] if units[1] else "")),
-                           "size: %i"%np.size(data)])          
-        l=legendbox(legend,loc=loc,framealpha=framealpha)
-        #pdb.debug()
-        #for k,v in largs.items():
-            #for text in l.get_texts():
-                #text.set_color("red")
-        #plt.setp(l.get_texts(), color='r')
-    '''
     
     if title is not None:
         plt.title(title)
@@ -1485,6 +1413,7 @@ def xplot_data(data,x,y,title=None,outfile=None,*args,**kwargs):
     if outfile is not None:
         plt.savefig(outfile)
     return axim
+
 """
 this fails in giving plots with better scaled axis.
 fig=plt.figure()
