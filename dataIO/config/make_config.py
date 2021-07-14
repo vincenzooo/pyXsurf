@@ -1,5 +1,6 @@
 from ast import literal_eval
 import os
+import io
 
 try:
     from configparser import ConfigParser
@@ -52,3 +53,10 @@ def make_config(settingsFile):
     else:
         includelist=config.sections()
     return config,includelist
+
+def string_to_config(header):
+    """ convert a string to a config object. """
+    config = ConfigParser()
+    buf = io.StringIO("\n".join(header))
+    config.read_file(buf)
+    return config
