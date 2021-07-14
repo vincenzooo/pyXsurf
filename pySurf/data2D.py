@@ -1088,7 +1088,9 @@ def get_stats(data,x=None,y=None,units=None,vars=None,string=False,fmt=None):
                 if vars==1: #backwards compatibility
                     logging.getLogger().info('stats = 1, backward compatibility')
                     #print("option stats==1 is obsolete. Please replace it with a dictionary including options for `get_stats`. c to continue, q to quit.")
-                    vars = [[0,1,2],[],[]]
+                    vars = [[1,3],[6],[6]]  # N.B.: it is stddev even if named rms
+                    fmt = ['rms: %.3g '+units[2],'PV: %.3g '+units[2],
+                           'nx:%i', 'ny: %i']
         
                 elif vars==2: #backwards compatibility
                     logging.getLogger().info('stats = 2, backward compatibility')
@@ -1110,8 +1112,10 @@ def get_stats(data,x=None,y=None,units=None,vars=None,string=False,fmt=None):
     if np.ndim(fmt)==0:  # single fmt string
         fmt = [fmt,fmt,fmt]
     elif np.ndim(fmt)==1:
+        # list of format strings
         l = np.insert(np.cumsum([len(v) for v in vars]),0,0)  # cumsum of lengths of choices for each axis
         fmt = [fmt[start:end] for start, end in zip(l, l[1:])]  # split lists
+        
     #pdb.set_trace()
     st=[stats(data,units=u[2],string=string,vars=vars[0],fmt=fmt[0])]  # fmt is used only if string is True
     
@@ -1392,7 +1396,6 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     # if vars is single scalar, use preset
     if stats:          
         s = get_stats(data,x,y,vars=stats,units=units,string=True,fmt=fmt)
-
         l=legendbox(s,loc=loc,framealpha=framealpha)
     
     if title is not None:
