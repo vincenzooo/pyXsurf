@@ -320,8 +320,8 @@ def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,
     # -critical renaming of plot_psd2d(wdata,x,y..) -> psd2d_analysis
     # and _plot_psd2d(f,p,x) -> plot_psd2d consistently with other routines.
     # -added title to determine if generating plot, with the intent of replacing outname.
-
-
+    plt.pause(1)
+    #print('cane',fignum) 
     if outname is not None:  #handle backcompatibility
         print ('psd2d_analysis WARNING: `title` replaced `outname` and output figure will be no more generated.'+
             'OUTNAME will be removed in next version, use title and save the plot after returning from routine.')
@@ -345,9 +345,9 @@ def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,
             print("psd2d(data,x,y)")
             x,y,wdata=wdata,x,y
 
-    f, p = psd2d(wdata, x, y, wfun=wfun, norm=norm, rmsnorm=rmsnorm)
-
-    #generate output
+    f, p = psd2d(wdata, x, y, wfun=wfun, norm=norm, rmsnorm=rmsnorm)  # calculate PSD 2D
+       
+    # GENERATE OUTPUT
     if title is not None:
 
         if np.size(units)==1:
@@ -363,9 +363,10 @@ def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,
         if vrange is None:
             vrange=span(wdata)
 
-        #plot surface map, who knows why on figure 5
+        #plot surface map, who knows why on figure 5       
         fig=fignumber(fignum)
-
+        #pdb.set_trace()
+        #
         plt.clf()
         maximize()
         plt.draw()

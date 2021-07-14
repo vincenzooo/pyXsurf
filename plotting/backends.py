@@ -39,15 +39,15 @@ def maximize(backend=None,fullscreen=False,verbose=False):
     Fullscreen sets fullscreen mode, that is same as maximized, but it doesn't have title bar (press key F to toggle full screen mode)."""
     
     #see https://stackoverflow.com/questions/12439588/how-to-maximize-a-plt-show-window-using-python
+
     if backend is None:
         backend=matplotlib.get_backend()
     mng = plt.get_current_fig_manager()
     if verbose:
         print ("function maximize:\nbackend: %s\nmanager:%s"%(backend,mng))
-    
     if fullscreen:
         mng.full_screen_toggle()
-    else:
+    else:   
         if backend == 'wxAgg':
             mng.frame.Maximize(True)
         elif backend == 'Qt4Agg' or backend == 'Qt5Agg':
@@ -58,7 +58,6 @@ def maximize(backend=None,fullscreen=False,verbose=False):
             #it was mng.resize(xsi,ysi) 
             #added 2020/05/26
             #works fine on Windows
-            
             dpi = matplotlib.rcParams['figure.dpi']
             xs,ys = get_max_size()
             
@@ -81,14 +80,11 @@ def maximize(backend=None,fullscreen=False,verbose=False):
             except:
                 print ("Unrecognized backend: ",backend) #not tested on different backends (only Qt)
                 raise NotImplementedError
-            
-            
-
-                
+                  
     #plt.show() #2020/05/26 removed to avoid showing empty grid in notebook inline.
     
     plt.pause(0.1) #this is needed to make sure following processing gets applied (e.g. tight_layout)
-
+    #plt.draw()  #I am sure I had used the other version because this was not working in the past. I try again to try to prevent creation of blank screen in jupyter inline terminal.   
     
 def list_backends():        
     """list all the available backends."""
