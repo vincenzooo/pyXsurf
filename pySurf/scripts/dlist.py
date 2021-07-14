@@ -28,40 +28,22 @@ from pySurf.affine2D import find_rototrans,find_affine
 from pySurf.readers.instrumentReader import fitsWFS_reader
 
 from IPython.display import display
+from dataIO.superlist import Superlist
 
-class Dlist(list):
-    """A list of pySurf.Data2D objects on which unknown operations are performed serially."""
+## FUNCTIONS ##
 
-    #automatically vectorize all unknown properties
-#    def __getattr__(self, name):
-#        return [getattr(i,name) for i in self]
-    
-    def __getattr__(self,name):  #originariamente usava __getattribute__, che riceve attributo
-        # prima di chiamarlo (quindi anche se gia' esistente).
-        #attr = object.__getattr__(self, name) #questo non funziona
-        attr = [object.__getattribute__(name) for object in self]
-        #pdb.set_trace()
-        if hasattr(attr[0], '__call__'):
-            def newfunc(*args, **kwargs):
-                #pdb.set_trace()
-                #print('before calling %s' %attr.__name__)
-                result = attr(*args, **kwargs)
-                #print('done calling %s' %attr.__name__)
-                return result
-            return newfunc
-        else:
-            return Dlist(attr) #attr
-        
-    def topoints(self):
-        """convert a dlist to single set of points containing all data."""
-        plist = [d.level((2,2)).topoints() for d in self]    
-        return np.vstack(plist)   
+# Functions operating on a dlist as Python list of Data2D objects.
+# Can be used equally on a Dlist object.
+
+# TODO:
+# Move from other scripts:
+from pySurf.scripts.repeatability import dcouples_plot
     
 def topoints(data,level=None):
     """convert a dlist to single set of points containing all data.
     if level is passed, points are leveled and the value is passed as argument (e.g. level=(2,2) levels sag along two axis)."""
     if level is not None:
-        plist = [d.level((2,2)) for d in data] 
+        plist = [d.level(level) for d in data] 
     plist = [d.topoints() for d in data]    
     return np.vstack(plist)
 
@@ -283,3 +265,50 @@ def extract_psd(dlist,rmsthr=0.07,rmsrange=None,prange=None,ax2f=None,dis=False)
     if dis:
         display(plt.gcf())
     return m_tot
+
+def psd2d(dlist,ymax=None,subfix='_psd2d',*args,**kwargs):
+    """2d psd analysis of a dlist. 
+    Doesn't do any additional processing or plotting (must be done externally)
+    [`outfolder` is being removed].
+    Any parameter for `Data2D.psd` are accepted,
+    however, parameters are not vectorized (must be the same for all data).
+    [see example of vectorization e.g. in `load_dlist`] 
+    Return a list of psd2d.
+    
+    from `psd2an`
+    ymax sets top of scale for rms right axis.
+    if outfolder is provided, save psd2d_analysis plot with dlist names+subfix"""
+    
+    m_psd=[]
+    title = kwargs.pop('title','')
+    #pdb.set_trace()
+    for dd in dlist:
+        m_psd.append(dd.psd(analysis=True,
+            title=title,wfun=wfun,*args,**kwargs))
+        #psd2d_analysis(*dd.level(2,byline=True)(),
+        #                 title=os.path.basename(outfolder),wfun=wfun,*args,**kwargs)
+        #m_psd.append((fs,ps))
+        ax=plt.gcf().axes[-1]
+        ax.set_ylim([0,ymax])
+        plt.grid(0)
+        ax.grid()
+        plt.suptitle(dd.name+' - hanning window - sag removed by line')
+        if outfolder is not None:
+            plt.savefig(os.path.join(outfolder,dd.name+subfix+'.png'))
+        #pr=projection(pl[0].data,axis=1,span=1)
+        #plot_psd(pl[0].y,pr[0],label='avg')
+        #plot_psd(pl[0].y,pr[1],label='min')
+        #plot_psd(pl[0].y,pr[2],label='max')
+    return m_psd
+
+## CLASS ##
+
+# Minimal implementation, should broadcast properties
+
+class Dlist(Superlist):
+    """A list of pySurf.Data2D objects on which unknown operations are performed serially."""           
+    
+    def topoints(self,level=True):
+        """convert a dlist to single set of points containing all data."""
+        plist = topoints(self.data,level = None)
+        return plist  

@@ -339,7 +339,10 @@ def compare_images(datalist, x=None, y=None, fignum=None, titles=None,
         yield ax
 
 def multimarkers(datalist):
-
+    """add clickable markers to a list of data using `add_clickable_markers2`. 
+    Not sure it is updated, see also Dlist."""
+    
+    
     plt.figure()
     
     #difficile condividere gli assi visto che non possono essere passati
