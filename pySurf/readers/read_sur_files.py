@@ -174,7 +174,7 @@ def readsur(filepath,raw=False):
 if __name__=="__main__":
     
     from pySurf.data2D import plot_data
-    from test_readers import testfolder
+    from pySurf.readers.test_readers import testfolder
     df=os.path.join(testfolder,r'input_data\profilometer\04_test_directions\05_xysurf_pp_Height.sur')
     res=readsur(df)
     plt.figure()

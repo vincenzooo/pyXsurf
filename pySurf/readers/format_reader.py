@@ -33,6 +33,8 @@ from dataIO.fn_add_subfix import fn_add_subfix
 from .test_readers import testfolder
 from IPython.display import display
 
+from .nid_reader import read_nid, make_channel_tags, read_datablock
+
 import pdb
 
 
@@ -313,7 +315,124 @@ def sur_reader(wfile,header=False,*args,**kwargs):
     data,x,y=head.points,head.xAxis,head.yAxis
     del(head.points,head.xAxis,head.yAxis) #remove data after they are extracted from header to save memory.
     return data,x.flatten(),y.flatten()   #are returned as column vector
+
+def nid_reader(file,index=0,header=False,*args,**kwargs):
+    """read .sur binary files."""
     
+    from pySurf.readers.nid_reader import read_raw_nid,read_nid
+    meta = read_raw_nid(file)[0]
+    if header: return meta
+
+    config = string_to_config(meta)
+            
+    # now itag is a (ordered) list of image keys
+    ddic = read_nid(file,*args,**kwargs) # head['Gr0-Ch1']
+    #data,x,y = 
+    return data,x,y
+
+
+def read_nid(file_name,index=0,header=False):
+    """read a file nid. Return a list of `data,x,y` for the scans of index in `index`.
+    
+    `data,x,y` are extracted from files and adjusted by using 
+     info from header. A file nid can contains several "scans" 
+     (typically different AFM data: phase, amplitude, etc., having different
+     units). This function extracts a single scan.
+     
+    Metadata have a hyerarchical structure, with first level general settings,
+    then subfields for singl scans
+    if `header` is set, the full file metadata are returned "raw" as list of string,
+    it is left to user to extract the subset of metadata corresponding to the 
+    extracted data.
+    A convenient way to explore the metadata is to convert them to a 
+    configparser object. This is already implemented in this routine, where
+    values should already include settings and convertions from metadata.
+    TODO: consider extracting only relevant metadata (if possible/convenient). 
+    
+    Of the old primitive routine `nid_reader.read_nid` and 
+    `nid_reader.read_raw_nid`:
+    `read_raw_nid` reads `header` as list of strings and `data` as
+    single binary block. `read_datablock` is used to extract an image
+    from the datablock. `dataIO.config.string_to_config` can be used by converting it to `config`
+    object and reading fields."""
+    
+    from pySurf.readers.nid_reader import read_raw_nid,read_nid
+    from dataIO.config.make_config import string_to_config
+    import logging
+    meta, data = read_raw_nid(file_name) 
+    
+    if header: return meta
+    
+    # build a config object `config` by merging the string.
+    config = string_to_config(meta)
+    
+    # create itag, a (ordered) list of frame keys
+    itag = make_channel_tags(meta)
+    
+    # all columns of the matrix 
+    #ngroups = config.get('DataSet','GroupCount') #number of groups 
+    imgdic=[]
+    logging.info('reading '+file_name)
+    #print('reading '+file_name)
+    if np.ndim(index) == 0:
+        scalar = True # flag, will return scalar
+        index=[index]
+    for i in index:
+        cgtag = itag [i]   
+        # all raws of the actual column   
+        #pdb.set_trace() 
+        print(cgtag)
+        try:
+            datatag = config.get('DataSet',cgtag)
+            # then read the header, specially �Points� and �Lines� 
+            #ReadDataSetInfo(datatag)    
+            npoints = int(config.get(datatag,'Points'))
+            nlines = int(config.get(datatag,'Lines' ))
+            nbits = int(config.get(datatag,'SaveBits'))
+            sign = config.get(datatag,'SaveSign')
+            if (int(nbits) != 32) or sign !='Signed':
+                raise ValueError
+            else:
+                fmt = '<l'    
+            img = read_datablock(data, npoints, nlines, nbits)
+            
+            #npoints nlines might be inverted
+            Dim0Range = float(config.get(datatag,'Dim0Range'))
+            Dim0Min = float(config.get(datatag,'Dim0Min'))
+            x = np.arange(npoints) / (npoints-1)  * Dim0Range + Dim0Min
+            
+            Dim1Range = float(config.get(datatag,'Dim1Range'))
+            Dim1Min = float(config.get(datatag,'Dim1Min'))
+            y = np.arange(nlines) / (nlines-1) * Dim1Range + Dim1Min
+            
+            Dim2Range = float(config.get(datatag,'Dim2Range'))
+            Dim2Min = float(config.get(datatag,'Dim2Min'))
+            img = (img + 2**(nbits-1)) / (2**nbits-1) * Dim2Range + Dim2Min
+            # z_value = (z_data + 2^(SaveBits-1)) / (2^SaveBits-1)  * Dim2Range + Dim2Min
+            imgdic.append([img,x,y])
+            units = [config.get(datatag,'Dim0Unit'),
+                        config.get(datatag,'Dim1Unit'),
+                        config.get(datatag,'Dim2Unit')]
+            
+            #if units != ['m','m','m']: 
+                #raise NotImplementedError('unknown units in read_nid: ',units)
+            print(units)
+            
+            #print(points)
+            #ReadBinData()
+            logging.info(cgtag+' read')
+            #print (cgtag+' read')
+        except NoOptionError:
+            logging.info('option '+cgtag+' not found')
+            #print('option '+cgtag+' not found')
+            pass
+
+    if scalar:
+        imgdic = imgdic[0]
+    return imgdic
+
+
+
 def read_sur(file,header=False):
     """Convert `res` object returned by `readsur` reader to data,x,y"""
     res = readsur(file,raw = False)

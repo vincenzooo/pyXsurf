@@ -1,4 +1,7 @@
-"""A partire da test_read_sur, trasformato in test_readers 2020/03/18"""
+"""A partire da test_read_sur, trasformato in test_readers.
+
+2020/03/18
+"""
 
 
 '''
@@ -37,6 +40,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from pySurf.data2D import plot_data
+from pySurf.readers.read_sur_files import readsur
 
 #ported to/from notebook
 
@@ -71,7 +75,7 @@ def csv_zygo_reader(wfile,*args,**kwargs):
     pdata=resample_grid(w,matrix=True)
     return pdata,x,y
 '''
-
+# %%
 if __name__=='__main__':
 
     # da _instrument_reader: li' va rimossa la registrazione.
@@ -86,23 +90,31 @@ if __name__=='__main__':
 
     #from test_readers import testfolder
     from pySurf.data2D import plot_data, read_data
+    from pySurf.readers.format_reader import points_reader, csvZygo_reader
+    from pySurf.readers.format_reader import sur_reader
+    import os
+    import sys
+    
+    print("Running in path:",os.path.realpath(os.path.curdir) )
+    print("File path:", os.path.realpath(sys.argv[0]))
+    pwd = os.path.dirname(os.path.realpath(sys.argv[0]))
     
     tests=[[sur_reader,
-    os.path.join(testfolder,r'input_data\profilometer\04_test_directions\05_xysurf_pp_Intensity.sur')
+    os.path.join(pwd,testfolder,r'input_data\profilometer\04_test_directions\05_xysurf_pp_Intensity.sur')
     ,{'center':(10,15)}],[points_reader,
-    os.path.join(testfolder,r'input_data\profilometer\04_test_directions\05_xysurf_pp_Intensity.txt')
+    os.path.join(pwd,testfolder,r'input_data\profilometer\04_test_directions\05_xysurf_pp_Intensity.txt')
     # questo fallisce, perche' delimiter e' " "  e non e' possibile passare l'argomento al reader
     #os.path.join(testfolder,r'input_data\exemplar_data\scratch\110x110_50x250_100Hz_xyscan_Height_transformed_4in_deltaR.dat')
     ,{'center':(10,15)}],
     [csvZygo_reader,
-    os.path.join(testfolder,r'input_data\zygo_data\171212_PCO2_Zygo_data.asc')
+    os.path.join(pwd,testfolder,r'input_data\zygo_data\171212_PCO2_Zygo_data.asc')
     ,{'strip':True,'center':(10,15)}],
     [csvZygo_reader,
-    os.path.join(testfolder,r'input_data\zygo_data\171212_PCO2_Zygo_data.asc')
+    os.path.join(pwd,testfolder,r'input_data\zygo_data\171212_PCO2_Zygo_data.asc')
     ,{'strip':True,'center':(10,15),'intensity':True}]]
 
     plt.ion()
-    plt.close('all')
+    #plt.close('all')
     for r,f,o in tests:  #reader,file,options
         print ('reading data %s'%os.path.basename(f))
         plt.figure()
@@ -116,3 +128,6 @@ if __name__=='__main__':
         plt.suptitle(os.path.basename(f)+' '+' '.join(["%s=%s"%(k,v) for k,v in o.items()]))
         plt.tight_layout()
         plt.show()
+
+
+
