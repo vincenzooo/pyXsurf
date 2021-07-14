@@ -76,6 +76,20 @@ def make_surf_legendre(x,y,coeff,inanp=[],inanl=[]):
     data[:,inanl]=np.nan
 
     return data
+
+def make_surf_plane(x,y,coeff):
+    """Create a test surface from plane coefficients `coeff` as returned from `pySurf.plane_fit`.
+    based on
+        # Ax + By + C = z    
+    """
+    
+    A,B,C = coeff
+    xx,yy = np.meshgrid(x,y)
+    z = A * xx + B * yy + C
+    data = z.reshape(len(y),len(x))
+
+    return data
+    
     
 def test_profile_legendre(nanpoints=0):
     """test my routines with profile
