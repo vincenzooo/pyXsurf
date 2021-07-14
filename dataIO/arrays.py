@@ -10,28 +10,33 @@ def stats (data,units=None,string=False,fmt=None,vars=None):
     vars is a list of indices that select the variables to be included, wrt a list:
     0 - mean
     1 - stddev
-    2 - PV
-    3 - min
-    4 - max
-    5 - number of elements
+    2 - rms
+    3 - PV
+    4 - min
+    5 - max
+    6 - number of elements
     
     Note that span doesn't exclude nan data, put flag to tune this option.
     
     string if set to True return stats as strings. In this case a string `units` can be used to add a postfix to statistics. A finer control can be obtained by passing in `fmt` a list of format strings for each var.
     e.g.: the default is obtained with:
     
-            fmt = ['mean: %.3g'+units,
-                   'StdDev: %.3g'+units,
-                   'PV: %.3g'+units,
-                   'min: %.3g'+units,
-                   'max: %.3g'+units,
+            fmt = ['mean: %.5g'+units,
+                   'StdDev: %.5g'+units,
+                   'rms: %.5g'+units,
+                   'PV: %.5g'+units,
+                   'min: %.5g'+units,
+                   'max: %.5g'+units,
                    'n:  %i']
     
+    2021/06/30 added rms (different from standard dev, which is centered about mean).
     """
-    # pdb.set_trace()
-    st = [np.nanmean(data),np.nanstd(data),span(data,size=True),*span(data),np.size(data)]
+    #pdb.set_trace()
+    st = [np.nanmean(data),np.nanstd(data),
+          np.sqrt(np.nansum(data**2)/np.size(np.where(~np.isnan(data))[0])),
+          span(data,size=True),*span(data),np.size(data)]
         
-    if vars is None: vars = [0,1,2,3,4,5]
+    if vars is None: vars = [0,1,2,3,4,5,6]
     #pdb.set_trace()
 
     if len(vars) > 0:
@@ -48,13 +53,15 @@ def stats (data,units=None,string=False,fmt=None,vars=None):
             units = " " + units
         # default format uses the units    
         if fmt is None:
-            fmt = ['mean: %.3g'+units,
-                'StdDev: %.3g'+units,
-                'PV: %.3g'+units,
-                'min: %.3g'+units,
-                'max: %.3g'+units,
+            fmt = ['mean: %.5g'+units,
+                'StdDev: %.5g'+units,
+                'rms: %.5g'+units,
+                'PV: %.5g'+units,
+                'min: %.5g'+units,
+                'max: %.5g'+units,
                 'n:  %i']
-        elif np.size(fmt) == 1:
+            fmt = [f for i,f in enumerate(fmt) if i in vars]
+        elif np.size(fmt) == 1:  #??
             #if single string replicates to all variables (no units)
             fmt = np.repeat(fmt,len(st))
         
@@ -62,7 +69,6 @@ def stats (data,units=None,string=False,fmt=None,vars=None):
         # before today it was expecting complete format
         # st = [s for i,s in enumerate(st) if i in vars]  # filter st
         st = [f%val for f,val in zip (fmt,st)]
-    
     
     return st
 
