@@ -53,8 +53,7 @@ A basic description of the different modules is:
 
 * **plotting** Plotting functions for pySurf data. 
 
-* **pyGeo3D** Functions for geometry in space (lines and
-planes). 
+* **pyGeo3D** Functions for geometry in space (lines and planes). 
 
 * **pyProfile** Equivalent of pySurf acting on Profiles. 
 
