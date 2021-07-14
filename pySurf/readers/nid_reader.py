@@ -7,6 +7,9 @@ import io
 import struct
 import numpy as np
 import logging
+from configparser import NoOptionError
+from dataIO.config.make_config import string_to_config
+
 
 """ dataset info     
 Version=2
@@ -55,6 +58,7 @@ def read_raw_nid (file_name):
 
 def read_datablock(data, npoints, nlines, nbits, nim=0, fmt = '<l'):
     """read image of index nim from binary data.
+    
     nbits is redundant, can be obtained from fmt.
     fmt is c-style format string,
     see https://docs.python.org/3.5/library/struct.html#struct-format-strings for other formats
@@ -67,15 +71,46 @@ def read_datablock(data, npoints, nlines, nbits, nim=0, fmt = '<l'):
     img = np.array(a).reshape((nlines,npoints))
     return img
 
+def make_channel_tags(meta):
+    """ builds list of fixed format string with channel identifiers.
+    results can be used to extract single channel data and metadata, e.g. with:
+       
+    """
+    config = string_to_config(meta)
+    # create itag, a (ordered) list of frame keys
+    itag=[]
+    ngroups = config.get('DataSet','GroupCount')
+    for g in range(int(ngroups)):    
+        grcount = config.get('DataSet','Gr%i-Count'%g )   
+        for c in range(1,int(grcount)+1):     
+            cgtag = 'Gr%i-Ch%i'%(g,c)    
+            itag.append(cgtag)
+    return itag
+        
+
 def read_nid(file_name):
-
+    """ 2021/07/02 OBSOLETE: This is function used in ICSO2020.
+    It is replaced with standardize version in `format_reader`.
+    To convert the old calls to the new:
+     
+    
+    read a file nid. Return a dictionary with keys `'Gr%i-Ch%i'%(g,c)`
+    and `data,x,y` as values, one for each image included in nid file.
+    Info from header are used to adjust scales of data.
+    
+    `read_raw_nid` reads `header` as list of strings and `data` as
+    single binary block. `read_datablock` is used to extract an image
+    from the datablock. `header` can be used by converting it to `config`
+    object and reading fields."""
+    
+    print ("Obsolete, replace read_nid with version in format_reader")
     header, data = read_raw_nid(file_name) 
+    
+    # build a config object `config` by merging the string.
     from configparser import NoOptionError
-    config = ConfigParser()
-    buf = io.StringIO("\n".join(header))
-    config.read_file(buf)
-    ng = config.get('DataSet','GroupCount')
-
+    from dataIO.config.make_config import string_to_config
+    config = string_to_config(header)
+    
     # all columns of the matrix 
     ngroups = config.get('DataSet','GroupCount') #number of groups 
     imgdic={}
@@ -119,7 +154,11 @@ def read_nid(file_name):
                 units = [config.get(datatag,'Dim0Unit'),
                          config.get(datatag,'Dim1Unit'),
                          config.get(datatag,'Dim2Unit')]
-
+                
+                #if units != ['m','m','m']: 
+                    #raise NotImplementedError('unknown units in read_nid: ',units)
+                print(units)
+                
                 #print(points)
                 #ReadBinData()
                 logging.info(cgtag+' read')
@@ -130,7 +169,6 @@ def read_nid(file_name):
                 pass
             
     return imgdic
-
 
 if __name__ == "__main__":
     
