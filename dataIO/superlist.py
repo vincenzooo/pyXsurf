@@ -24,24 +24,13 @@ class Superlist(list):
     """A list of pySurf.Data2D objects on which unknown operations are performed serially."""    
     
     def __getattr__(self,name,*args,**kwargs): 
-        #print("GETATTR!")
-        attr = [object.__getattribute__(name) for object in self]
-        print("ATTR:",attr,*args,**kwargs)
-        print("SELF,name",self,name)
-        
-        if hasattr(attr[0], '__call__'):
-            print("call methods of items")
             # devo costruire una nuova funzione che preso un oggetto
             # lista ritorna un oggetto lista ottenuto dal valore restituito dalla funzione su ogni elemento.
             def newfunc(*args, **kwargs):
                 attr = [object.__getattribute__(name) for object in self]
-                result = [a(*args, **kwargs) for a in attr]
+                result = [a(*args, **kwargs) if hasattr(attr, '__call__') else a for a in attr]
                 return result
             return newfunc
-        else:
-            # return list of attributes
-            print("return atribute of items")
-            return attr
             
 
 ## DEVELOPMENT VERSIONS
