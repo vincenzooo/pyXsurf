@@ -1,16 +1,18 @@
 from setuptools import setup
 
+"""with this install works only if numpy is already installed, otherwise fails on wheel."""
+
 setup(
   name='pyXsurf',
-  version='0.1.13',
+  version='0.1.22',
   description="Python library for X-Ray Optics, Metrology Data Analysis and Telescopes Design.",
-  packages=['pyxsurf','pyxsurf.pySurf'],
+  packages=['pyxsurf','pyxsurf.pySurf','pyxsurf.test'],
   url='https://github.com/vincenzooo/pyXSurf',
   author='Vincenzo Cotroneo',
   author_email='vincenzo.cotroneo@inaf.it',
   install_requires=[
-  'numpy'
-  ]  
+  'numpy'],
+  package_dir = {'': 'pyxsurf'}
 )
 
 '''

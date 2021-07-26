@@ -5,13 +5,15 @@ test/test*.py is included in manifest."""
 import pyxsurf
 # pyxsurf.pySurf    #fails
 from pyxsurf import pySurf
-# >>> pySurf.hello    #fails
-from pyxsurf.pySurf import hello
-##  hello cane
-# hello()    #fails
+# >>> pySurf.data2D_class    #fails
+from pyxsurf.pySurf.data2D_class import Data2D
+ 
 
-hello
+
+print(Data2D)
 ## <module 'pyxsurf.pySurf.hello' from 'C:\\Users\\User\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.7_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python37\\site-packages\\pyxsurf\\pySurf\\hello.py'>
 # hello.hello()    #fails
 
-hello.hello_cane()
+a = Data2D()
+print("---")
+print(a)
