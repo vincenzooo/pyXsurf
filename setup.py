@@ -2,12 +2,20 @@ from setuptools import setup
 
 setup(
   name='pyXsurf',
-  version='0.1.0',
-  packages=['pyxsurf'],
+  version='0.1.13',
+  description="Python library for X-Ray Optics, Metrology Data Analysis and Telescopes Design.",
+  packages=['pyxsurf','pyxsurf.pySurf'],
+  url='https://github.com/vincenzooo/pyXSurf',
+  author='Vincenzo Cotroneo',
+  author_email='vincenzo.cotroneo@inaf.it',
+  install_requires=[
+  'numpy'
+  ]  
 )
 
 '''
-#from https://docs.python.org/3/distutils/setupscript.html
+#from https://docs.pytho
+n.org/3/distutils/setupscript.html
 
 from distutils.core import setup
 
