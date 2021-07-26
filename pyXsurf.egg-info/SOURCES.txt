@@ -1,0 +1,8 @@
+.gitignore
+README.rst
+README_developers.rst
+setup.py
+pyXsurf.egg-info/PKG-INFO
+pyXsurf.egg-info/SOURCES.txt
+pyXsurf.egg-info/dependency_links.txt
+pyXsurf.egg-info/top_level.txt
