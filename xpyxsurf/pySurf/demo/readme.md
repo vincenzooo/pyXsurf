@@ -1,1 +1,0 @@
-Here are samples of demonstrative work extracted from real analysis. Can be the not most updated version of the software. It is intended as self-learning material or base for tutorials.
