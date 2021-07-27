@@ -2,7 +2,6 @@ import os
 import pdb
 from copy import deepcopy
 
-import dataIO
 import matplotlib.pyplot as plt
 import numpy as np
 from dataIO.fn_add_subfix import fn_add_subfix
@@ -660,7 +659,7 @@ class Data2D(object):  # np.ndarrays
         res.data[~m] = fill_value
         return res
 
-    remove_outliers = update_docstring(remove_outliers, dataIO.outliers.remove_outliers)
+    remove_outliers = update_docstring(remove_outliers, outliers.remove_outliers)
 
     def extract_profile(self, *args, **kwargs):
         p = self.topoints()
