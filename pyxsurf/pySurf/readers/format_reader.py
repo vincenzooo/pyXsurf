@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """  This module contains functions able to read raw data from different formats. With default arguments returns data,x,y; return header if `header` is set to True. 
     Provides common interface to several instrument reader
     routines. Functions are made to be imported in intrumentReader (from which functions were originally copied) and not to be
@@ -146,7 +148,7 @@ def csvZygo_reader(wfile,intensity=False,header=False,xyz=False,*args,**kwargs):
     The data in this section is organized by phase origin. Each line contains three pieces of
     data. The first two columns contain the column (y) and row (x) location of the data,
     beginning at the phase origin. The third number on the line can be either the character
-    string “No Data” or a floating-point number corresponding to the measurement in
+    string "No Data" or a floating-point number corresponding to the measurement in
     microns. To convert these measurements to ‘zygos’, use the following formula. (The
     names in parenthesis refer to the Binary Data Format field names)
     The data in the file is in microns. To convert to meters:
@@ -171,13 +173,13 @@ def csvZygo_reader(wfile,intensity=False,header=False,xyz=False,*args,**kwargs):
     ASCII Data File Intensity Data
     Each data point is an integer. The data is written 10 data points per line in row-major
     order. Acceptable values are from 0 to the value specified in IntensRange. An invalid
-    point is indicated by a value ≥ 65535. A line containing only a sharp character (#) is
+    point is indicated by a value >= 65535. A line containing only a sharp character (#) is
     output after the data. The number of intensity data points is:
     IntensWidth * IntensHeight * NBuckets
     ASCII Data File Connected Phase Data
     Each data point is an integer. The data is written 10 data points per line in row-major
     order. Acceptable values are in the range from -2097152 to +2097151. An invalid point
-    is indicated by a value ≥ 2147483640. A line containing only a sharp character (#) is
+    is indicated by a value >= 2147483640. A line containing only a sharp character (#) is
     output after the data. The number of connected phase data points is:
     PhaseWidth * PhaseHeight
     The phase data points are in internal units representing a scaled number of fringes. To

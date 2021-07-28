@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from dataIO.fn_add_subfix import fn_add_subfix
 from dataIO.functions import update_docstring
-from dataIO.outliers import remove_outliers
+from dataIO import outliers  #necessary to avoid conflict 
 from dataIO.span import span
 from plotting.add_clickable_markers import add_clickable_markers2
 
