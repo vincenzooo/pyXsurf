@@ -10,6 +10,7 @@ workspace.ini
 /notebooks
 pySurf/readers/PyMDT
 docs/build
+<<<<<<< HEAD
 xpyxsurf
 dist
 *.egg-info*
