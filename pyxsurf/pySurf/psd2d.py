@@ -1,6 +1,3 @@
-
-
-
 from pyProfile.psd import plot_sig_psd, normPSD
 import matplotlib.pyplot as plt
 import numpy as np

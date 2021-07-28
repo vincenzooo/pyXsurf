@@ -2,17 +2,26 @@ from setuptools import find_packages, setup
 
 """with this install works only if numpy is already installed, otherwise fails on wheel."""
 
+#p = find_packages('.')
+#p = find_packages("src", exclude=["test"]),
+
 setup(
   name='pyXsurf',
-  version='0.1.25',
+  version='0.1.40',
   description="Python library for X-Ray Optics, Metrology Data Analysis and Telescopes Design.",
-  packages=find_packages(),
   url='https://github.com/vincenzooo/pyXSurf',
   author='Vincenzo Cotroneo',
   author_email='vincenzo.cotroneo@inaf.it',
-  install_requires=['numpy'],
-  package_dir={'dataIO': 'pyxsurf/dataIO'}
+  install_requires=['wheel','numpy','matplotlib','scipy','IPython','astropy'],
+  #package_dir={'': 'pyxsurf'} #this makes me import as old style e.g. from pySurf import data2D, but can create overlapping, e.g. `test` or `plotting` may be used for other things.
+  #package_dir={'pySurf': 'pyxsurf/pySurf',
+  #             'dataIO': 'pyxsurf/dataIO'}
+  package_dir={'': 'pyxsurf'},
+  #packages=p,
+  packages = ['pySurf','dataIO','utilities'],
+  setup_requires=['numpy','astropy']
 )
+
 
 from setuptools import find_packages
 
