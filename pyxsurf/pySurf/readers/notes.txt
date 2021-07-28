@@ -1,0 +1,18 @@
+2020/03/18 ricordato di vecchia branch readers_dev e copiata in python folder. removed duplicate e copiati files con tests. Andrebbe creata una cartella 
+
+`readers`:
+	cmmconvert
+	matlab_read_surf.m
+	read_datx
+	read_metropro_files
+	read_sur_files
+	tomartagiorgia
+raw_readers (format_reader)
+instrumentReader
+
+eliminate:
+_instrument_reader
+
+2020/03/17 nuovo tentativo di fare lo sviluppo dei reader in maniera ordinata
+sulla branch principale.
+I tentativi precedenti sono messi in `old`.
