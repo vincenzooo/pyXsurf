@@ -171,10 +171,25 @@ def read_mx_profiles(filename,*args,**kwargs):
     
     return profiles
 
+
+def get_header_field(db, tag, header='<<PMCA SPECTRUM>>'):
+    """Extract a single field named `tag` as a list.
+    tag must should match a field (column) name as inferred from header 
+    (otherwise empty list is returned).
+    Temporarily here for use with `read_mca`, can be moved to a more general
+    use in dataIO.
+    """
+    
+    from dataIO.read_pars_from_namelist import namelist_from_string
+    headers = [d.header[header] for d in db['data']]
+    return [namelist_from_string(t,separator='-')[tag] for t in headers]
+    
 def read_mca(filename,*args,**kwargs):
-    """temptative routine to read mca files from amptek energy sensitive detector. Return a profile with metadata information in a `.header` property (temporarily a dictionary obtained from string blocks) of all profiles.
+    """ Given a .mca file, return a `Profile` object.
+    
+    temptative routine to read mca files from amptek energy sensitive detector. Return a profile with metadata information in a `.header` property (temporarily a dictionary obtained from string blocks) of all profiles.
     Like all other readers will be incorporated in some form of reader in a 
-    more mature version"""
+    more mature version."""
 
     import re
     from scipy import interpolate
@@ -379,16 +394,17 @@ class Profile(object):  #np.ndarrays
         
     def __mul__(self,scale,*args,**kwargs):
         res = self.copy()
-        if np.size(scale)==1:
+        if np.size(scale)==1:  # scalar
             if isinstance(scale,Profile):
                 """if it is Profile, do pointwise multiplication rescaling on firts."""
-                raise NotImplementedError ('can be ambigous (return point to point multipl. or surface? Fix in code, at the momeb accept only x and (y) scalars.')
+                # resample and multiply. For surface result, use matrix multiplication.
+                #raise NotImplementedError ('can be ambigous (return point to point multipl. or surface? Fix in code, at the momeb accept only x and (y) scalars.')
                 tmp=scale.resample(self)
                 res=self.copy()
-                res.y=self.y*tmp.y
+                res.y = self.y * tmp.y
             else:     
                 res.y = scale * res.y 
-        elif np.size(scale)==2:      
+        elif np.size(scale)==2:      # x and y scales      
             res.x = scale[0] * res.x
             res.y = scale[1] * res.y
         else:
@@ -397,10 +413,31 @@ class Profile(object):  #np.ndarrays
 
     def __rmul__(self,scale,*args,**kwargs):
         return self.__mul__(scale,*args,**kwargs)
-
+        
+    def __matmul__(self,scale,*args,**kwargs):
+        raise NotImplementedError ('Return a 2D surface (Data2D).')
+        
     def __neg__(self):
         return self.__mul__(-1)
 
+    def __rtruediv__(self,other):
+    
+        #self is Profile, other can be integer or profile. 
+        # it is result = other/self
+        #print(self)
+        #print(other)
+        
+        res = self.copy()
+        if isinstance(other,Profile):
+            return other.__truediv__(self)
+        elif np.size(other) == 1:  # scalar
+            sel = (self.y != 0) 
+            res = self.copy()
+            res.y[sel] = other*(1./self.y[sel])
+            res.y[~sel] = np.nan
+        else:
+            raise ValueError('__rtruediv__ Data2D by wrong format!')
+        return res
 
     def __truediv__(self,other):
         return self*(1./other)
@@ -664,7 +701,20 @@ class PSD(Profile):
     def save(self,filename,*args,**kwargs):
         """Save psd."""
         self.save(filename,header='# f[%s] PSD[%s]'%self.units)
-    
+
+from dataIO.superlist import Superlist
+class Plist(Superlist):
+    """A list of Profile objects on which unknown operations are performed serially."""           
+      
+    def plot(self,*args,**kwargs):
+        """plot over same plot each profile in the list."""
+        
+        for p in self:
+            p.plot()
+        
+        return plt.gca()   
+
+  
 def test_class_init(wfile=None):
     """test init and plot"""
     from dataIO.fn_add_subfix import fn_add_subfix
