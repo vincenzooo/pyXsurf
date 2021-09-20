@@ -18,7 +18,7 @@ setup(
   #             'dataIO': 'pyxsurf/dataIO'}
   package_dir={'': 'pyxsurf'},
   #packages=p,
-  packages = ['pySurf','dataIO','utilities'],
+  packages = ['pySurf','dataIO','utilities','plotting','pyProfile'],
   setup_requires=['numpy','astropy']
 )
 
