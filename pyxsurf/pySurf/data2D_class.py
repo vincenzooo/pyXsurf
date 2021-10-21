@@ -368,19 +368,22 @@ class Data2D(object):  # np.ndarrays
 
     def plot(self, title=None, *args, **kwargs):
         """plot using data2d.plot_data and setting automatically labels and colorscales.
-        by default data are filtered at 3 sigma with 2 iterations for visualization.
-        Additional arguments are passed to plot."""
+        by default data are filtered at 3 sigma with 2 iterations for visualization, pass nsigma = None to include all data.
+        Additional arguments are passed to plot. """
 
         units = self.units if self.units is not None else ["","",""]
         nsigma0 = 1  # default number of stddev for color scale
         # import pdb
         # to change the default behavior
-        stats = kwargs.pop("stats", [[0,1,3],[6],[6]])
-        # format for legend labels (replace "stdev" with "rms")
-        fmt = kwargs.pop("fmt", ['mean: %.3g'+units[0],
-                   'rms: %.3g'+units[0],
-                   'PV: %.3g'+units[0],
-                   '%i X','%i'])
+        if "stats" in kwargs:
+            stats = kwargs.pop("stats")
+        else: 
+            stats = [[0,1,3],[6],[6]]
+            # format for legend labels (replace "stdev" with "rms")
+            fmt = kwargs.pop("fmt", ['mean: %.3g '+units[2],
+                       'rms: %.3g '+units[2],
+                       'PV: %.3g '+units[2],
+                       '%i X','%i'])
         
         # to change the default behavior
         nsigma = kwargs.pop("nsigma", nsigma0)
