@@ -381,9 +381,9 @@ class Data2D(object):  # np.ndarrays
             stats = [[0,1,3],[6],[6]]
             # format for legend labels (replace "stdev" with "rms")
             fmt = kwargs.pop("fmt", ['mean: %.3g '+units[2],
-                       'rms: %.3g '+units[2],
-                       'PV: %.3g '+units[2],
-                       '%i X','%i'])
+               'rms: %.3g '+units[2],
+               'PV: %.3g '+units[2],
+               'size: %i X %i'])
         
         # to change the default behavior
         nsigma = kwargs.pop("nsigma", nsigma0)
