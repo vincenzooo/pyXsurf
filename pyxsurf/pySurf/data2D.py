@@ -1034,21 +1034,36 @@ def slope_2D(wdata,x,y,scale=(1.,1.,1.)):
 
 
 def get_stats(data,x=None,y=None,units=None,vars=None,string=False,fmt=None):
-    """ Return selected statistics for each of data,x,y as numeric array or string, wrapping `dataIO.stats`.  
+    """ Return selected statistics for each of data,x,y as numeric array or string, wrapping `dataIO.stats`. 
     
-    `vars `, `units` and `string` have same meaning and usage as in wrapped function `stats`. 
-    Here `vars` and `units` (scalar in `stats`) can be passed as 3-element list to individually set which stats to print (`None` for complete stats, `[]` to exclude all).
-    If `vars` is passed as a single-level list, this is interpreted as the list of varibles to plot for the data values only (empty lists are returned for x and y).
+    `vars` determines which statistical indicators are included in stats, while `string`, `fmt` and `units` are used to generate and control a string output in a similar way as in wrapped function `dataIO.arrays.stats`. `get_stats` implements a more versatile syntax handling statistics on  three coordinates axis.
+    See the test function `test_get_stats` for more examples.
     
-    Here `fmt` has a different role as in `stats`. The function with string set to True
-     return a flattened array of strings,
-     so an array of equal lenght can be passed, or a scalar, used for all axis and stats.
+    `vars` is an array of indices selecting which variables must be included in the statistics. You can call `stats` with no argument to see the list of variables (and standard format).    
+    The options are:
+        scalar: use a preset (=1 basic statistics, =2 for extended statistics)
+        single level list of integer indices (e.g. =[0,1]): it is applied only to data. 
+        two-level nested list (e.g. =[[0,1]]) and the outer list has a single element, the selection is used replicated to data, x, y. 
+        3-element nested list =[[0,1],[1],[2]]: indicates different choices for data, x and y.
     
-    Run `test_get_stats` for examples.
-    If a single scalar value is passed as `vars`, this is intended as a preset,
-      (1,2 for backward compatibility) whose value is set in `plot_data`. 
-    Apart from presets, test output legends can be generated calling
-       `get_stats(data,x,y,vars=vars,units=units,string=True)`
+    In this context, special values can be used to indicate different type of defaults (N.B.: vars are in order matching `data, x, y`), these are internally converted to the proper format:
+    None: don't include element (e.g. [1,2] is equivalent to [[1,2],None,None])
+    []:  use default (e.g. [[0,2],[],None] uses default for x and doesn't report y)
+    [[]]: use full set of variables (e.g. [[0,2],[],[[]]] uses default for x and full stats for y, [[[]]] uses full for data).
+
+    Statistics are returned as array of numerical values, unless `string` flag is set. In that case, `units` and `fmt` are used to control the output format.
+        
+    `units` (scalar in `dataIO.stats`) can be passed as 3-element list of strings to individually set the units for each axis. These are appended to every value in the respective axis (a more flexible behavior can be obtained by using `fmt`).
+    
+    Here `fmt` has a different role as in `dataIO.stats`. If `string` is set to True, the function returns a flattened array of strings, so an array of equal lenght can be passed, or a scalar, used for all axis and stats. Note that strings are assembled here externally to `dataIO.arrays.stats` function, whose `fmt` argument is not used at all here.
+     
+    `units` are used and appended to `fmt` if not None or set to empty string.
+    The length of the two must match, and are converted to the correct format inside this function.
+    Conversion is made in this case in dependance on the format of `vars`. For example, `vars = [[1,2,3],None,None]` requires to convert ['mm','mm','um'] to ['um','um','um']
+    
+    If default, units are built from vars.
+    
+    
     
     TODO: span doesn't exclude nan data, put flag to tune this option.
     TODO: there is some confusion in creating labels for `plot_data` because it can be unclear which one is X, Y, Z. A label should be added externally or in a routine. Also, statistics cannot be sorted (a list is returned, so it is possible to sort the list).
@@ -1056,6 +1071,13 @@ def get_stats(data,x=None,y=None,units=None,vars=None,string=False,fmt=None):
     
     """
     
+    """
+    If a single scalar value is passed as `vars`, this is intended as a preset (1,2 for backward compatibility, where 1 is basic data statistics, and 2 more extended, including x and y size). These presets are defined in `data2D.get_stats`, which can also be called directly to test generation of legend for `data2D.plot_data`, like e.g.:
+
+        from pySurf.data2D import get_stats get_stats(data,x,y,vars=[1,2,3],units=['mm','mm','mm'],string=True,fmt=None)
+        
+    """
+    # put value of `units` in u, converted to standard 3-el string array 
     if units is None or not string:
         u = ["","",""]
     elif isinstance(units,str): #assumes z
@@ -1069,68 +1091,161 @@ def get_stats(data,x=None,y=None,units=None,vars=None,string=False,fmt=None):
     else:  # if 3 units are already ok
         raise ValueError ("Unrecognized units.")
     
-    # pdb.set_trace()
-    # voglio avere:
+    #pdb.set_trace()
+    # this handles all special cases and converts vars to a three-el list of lists.
+    #   with elements (possibly empty) lists of indices.
     try:
         if len(vars[0]) == 0: #[], TypeError if None
-            # e' lista nulla
+            # e' lista nulla apply defaults.
             pass
     except TypeError:  
-        # if it is not at least two levels (i.e. [[],[],..]) gets here
-        # replicava per ogni variabile
+        # None
+        # if it is not at least two levels (i.e. [[],[],..]) gets here.
+        #    apply to data (previous version was replicating for all axis).
         ## vars=[vars,vars,vars]
-        # ora applica solo ai dati
-        #pdb.set_trace()
-        if len(np.shape(vars))==0:
+
+        if len(np.shape(vars))==0:  # scalar 
             if vars is not None:
                 # presets
                 if vars==1: #backwards compatibility
                     logging.getLogger().info('stats = 1, backward compatibility')
                     #print("option stats==1 is obsolete. Please replace it with a dictionary including options for `get_stats`. c to continue, q to quit.")
-                    vars = [[1,3],[6],[6]]  # N.B.: it is stddev even if named rms
-                    fmt = ['rms: %.3g '+units[2],'PV: %.3g '+units[2],
-                           'nx:%i', 'ny: %i']
+                    vars = [[1,3],[],[]]  # N.B.: it is stddev even if named rms
+                    fmt = ['rms: %.3g '+u[2],'PV: %.3g '+u[2]]
         
                 elif vars==2: #backwards compatibility
                     logging.getLogger().info('stats = 2, backward compatibility')
                     #print("option stats==2 is obsolete. Please replace it with a dictionary including options for `get_stats`. c to continue, q to quit.")
                     #pdb.set_trace()
-                    vars = [[0,2,5],[2],[2]]   # mean,PV, nx, ny
+                    vars = [[0,1,3],[6],[6]]   # mean,PV, nx, ny
+                    fmt = ['mean: %.3g '+u[2],'PV: %.3g '+u[2],'rms: %.3g '+u[2],                          'nx:%i', 'ny: %i']
             else:
                 vars=[None,[],[]]
         
         elif len(np.shape(vars))==1:        
-            logging.getLogger().info('stats as single level array')
+            logging.getLogger().info('stats as single level array, use for data only')
             #pdb.set_trace()
             vars = [vars,[],[]]
-        
-    #if string:
-    """`fmt` must be applied to data,x,y, so it must be a 3 el vector.
-    If format is provided as flattend array, flatten it. """
-    
-    if np.ndim(fmt)==0:  # single fmt string
-        fmt = [fmt,fmt,fmt]
-    elif np.ndim(fmt)==1:
-        # list of format strings
-        l = np.insert(np.cumsum([len(v) for v in vars]),0,0)  # cumsum of lengths of choices for each axis
-        fmt = [fmt[start:end] for start, end in zip(l, l[1:])]  # split lists
-        
-    #pdb.set_trace()
-    st=[stats(data,units=u[2],string=string,vars=vars[0],fmt=fmt[0])]  # fmt is used only if string is True
-    
-    if x is not None: 
-        st.append(stats(x,units=u[0],vars=vars[1],string=string,fmt=fmt[1]))
-    if y is not None:    
-        st.append(stats(y,units=u[1],vars=vars[2],string=string,fmt=fmt[2]))
+    # vars here is in shape [[],[],[]]
     
     if string:
-        legend = list(itertools.chain.from_iterable(st)) # flatten list 
-        legend = [l for l in legend if len(l)>0] # remove empty lines
-        st = legend
-    return st
+        # old version:
+        """`fmt` must be applied to data,x,y, so it must be a 3 el vector.
+        If format is provided as flattend array, flatten it. """
+        """
+        if np.ndim(fmt)==0:  # single fmt string or None
+            fmt = [fmt,fmt,fmt]
+        elif np.ndim(fmt)==1:
+            # list of format strings
+            l = np.insert(np.cumsum([len(v) for v in vars]),0,0)  # cumsum of lengths of choices for each axis
+            fmt = [fmt[start:end] for start, end in zip(l, l[1:])]  # split lists
+        """
+        # new version 2021/10/22
+        """`fmt` is now provided as single level array,
+        one element for each line. Multiple format codes in same line are allowed and are applied sequentially to flattened stats. 
+        return \n characters inside strings are also used as line separators."""
+        #fmt = []
+    
+        
+        if np.ndim(fmt)==0:  # single fmt string or None
+            
+            fmt = [fmt,fmt,fmt]
+        elif np.ndim(fmt)==1:
+            # list of format strings
+            l = np.insert(np.cumsum([len(v) for v in vars]),0,0)  # cumsum of lengths of choices for each axis
+            fmt = [fmt[start:end] for start, end in zip(l, l[1:])]  # split lists
 
+        #pdb.set_trace()
+        
+    st=stats(data,vars=vars[0])     
+    if x is not None: 
+       st.extend(stats(x,vars=vars[1])) #st.append(stats(x,units=u[0],vars=vars[1],string=string,fmt=fmt[1]))
+    if y is not None:    
+        st.extend(stats(y,vars=vars[2]))
+    
+    if string:
+        for f in fmt:
+            if fmt is None:
+                fmt = ['%.2f']*len(st)
+        #legend = list(itertools.chain.from_iterable(st)) # flatten list 
+        st = ("\n".join(fmt))%tuple(st) #.split('\n')
+        
+    return st
 get_stats = update_docstring(get_stats, stats)
 
+def test_get_stats(*value,help=True):
+    
+    data,x,y = value if value else load_test_data()
+    
+    
+    # TODO: wrap the following in decorator, to log
+    #    and pring placeholder for ERROR writing details
+    #    at the end of test.
+    
+    if help: print (get_stats.__doc__)
+    
+    try:
+        print("load test surface, shape: ",data.shape)
+        print("no options:\n",get_stats(data,x,y),"\n-------------\n")
+        # [-0.6937998887775654, 0.3722780252351366, 0.7873685374338596,1.8219939575195314,-1.2262238037109376, 0.5957701538085938,76800]
+        
+        print("no options, string:\n",get_stats(data,x,y,string=True),"\n-------------\n")
+        
+        print("presets")
+        print("vars=1, /string:\n",get_stats(data,x,y,string=True,vars=1),"\n-------------\n")
+        print("vars=2, /string:\n",get_stats(data,x,y,string=True,vars=2),"\n-------------\n")
+        print("vars=1, string:False\n",get_stats(data,x,y,string=False,vars=1),"\n-------------\n")
+        
+        print("vars=[1,2,3], string:\n",get_stats(data,x,y,string=True,vars=[1,2,3]),"\n-------------\n")
+        #['StdDev: 3.1 ', 'PV: 35.2 ', 'min: -32.6 ']
+        
+        #fails
+        #print("vars=[[1,2,3]], string:\n",get_stats(data,x,y,string=True,vars=[[1,2,3]]),"\n-------------\n")
+        #[['StdDev: 3.1 ', 'PV: 35.2 ', 'min: -32.6 '],
+        #['StdDev: 28.2 ', 'PV: 97.4 ', 'min: -48.7 '],
+        #['StdDev: 29.4 ', 'PV: 102 ', 'min: -50.8 ']]
+        
+        #this works
+        print("vars=[3], string:\n",
+              get_stats(data,x,y,string=True,vars=[3]),"\n-------------\n")
+        #[['min: -32.6 '], ['min: -48.7 '], ['min: -50.8 ']] 
+        #this fails:
+        #print(get_stats(data,x,y,string=True,vars=3),"\n-------------\n")
+
+        print("vars=[[],[2],[3]], string:\n",
+              get_stats(data,x,y,string=True,vars=[[],[2],[3]]),"\n-------------\n")
+        #[['StdDev: 3.1 '], ['PV: 97.4 '], ['min: -50.8 ']]
+           
+        print("vars=[[1],[2],[3]]:\n",
+              get_stats(data,x,y,string=True,vars=[[1],[2],[3]]),"\n-------------\n")
+        #[['StdDev: 3.1 '], ['PV: 97.4 '], ['min: -50.8 ']]
+
+
+        # units have effect only if provided as 3-el string
+        print("units='mm':\n",
+              get_stats(data,x,y,string=True,vars=[[1],[2],[3]],units='mm'),"\n-------------\n")
+        #[['StdDev: 3.1 mm'], ['PV: 97.4 '], ['min: -50.8 ']]
+
+        print("units='[mm]':\n",
+              get_stats(data,x,y,string=True,vars=[[1],[2],[3]],units=['mm']),"\n-------------\n")
+        #[['StdDev: 3.1 mm'], ['PV: 97.4 '], ['min: -50.8 ']]
+        
+        print("units=['mm','mm','mm']:\n",
+              get_stats(data,x,y,string=True,vars=[[1],[2],[3]],units=['mm','mm','mm']),"\n-------------\n")
+        #[['StdDev: 3.1 mm'], ['PV: 97.4 mm'], ['min: -50.8 mm']]
+
+        print("vars=[[1],[2,3],[3]]:\n",
+              get_stats(data,x,y,string=True,vars=[[1],[2,3],[3]],units=['mm','mm','mm']),"\n-------------\n")
+        #[['StdDev: 3.1 mm'], ['PV: 97.4 mm', 'min: -48.7 mm'], ['min: -50.8 mm']]
+        
+        print("vars=[[2,3],[],[3]]:\n",
+              get_stats(data,x,y,string=True,vars=[[2,3],[],[3]],units=['mm','mm','mm']),"\n-------------\n")
+        #[['StdDev: 3.1 mm'], ['PV: 97.4 mm', 'min: -48.7 mm'], ['min: -50.8 mm']]
+
+    except:
+        raise
+
+'''
 def test_get_stats(*value):
     import pprint as pprint
     
@@ -1184,6 +1299,7 @@ def test_get_stats(*value):
     print("vars=[[2,3],[],[3]]:\n",
           get_stats(data,x,y,string=True,vars=[[2,3],[],[3]],units=['mm','mm','mm']),"\n-------------\n")
     #[['StdDev: 3.1 mm'], ['PV: 97.4 mm', 'min: -48.7 mm'], ['min: -50.8 mm']]
+'''
 
 '''
 ## Differenza tra data_histostats e plot_stats ?? 

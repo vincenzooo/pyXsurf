@@ -15,7 +15,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
 import pdb
-
+from dataIO.functions import update_docstring
 
 ## profile creation
 
@@ -346,10 +346,13 @@ def movingaverage(values,window):
     return smas # as a numpy array
 
 def rebin_profile(x,y,*args,**kwargs):
+    """ Flexible rebin of a profile. Reduces number of points without losing information.
+    Uses `stats.binned_statistics` of which keeps the interface. """
     ss=stats.binned_statistic(x,y,statistic='mean',*args,**kwargs)
     x2=np.array([(x+y)/2. for x,y in zip(ss[1][:-1],ss[1][1:])])  #centra su punto centrale
     y2=ss[0]
     return x2,y2  
+    rebin_profile = update_docstring(rebin_profile, stats.binned_statistics)
 
 def crop_profile(x,y=None,xrange=None,yrange=None,*args,**kwargs):
     """Crop a profile to range (can be set to None) in x and y.
