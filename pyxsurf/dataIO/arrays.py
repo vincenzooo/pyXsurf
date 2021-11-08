@@ -4,7 +4,7 @@ import pdb
 import logging
 import warnings
 
-warnings.simplefilter("always")
+warnings.simplefilter("once")
 
 def stats (data=None,units=None,string=False,fmt=None,vars=None):
     """ Return selected statistics on data as numerical array or list of strings (one for each stats).  
@@ -116,16 +116,41 @@ def is_nested_list(l):
     """Return true if it is a nested list (at least one element is a list), False otherwise (all elements are scalar).
     Uses isinstance, so arrays are not considered lists. 
     from https://stackoverflow.com/questions/24180879/python-check-if-a-list-is-nested-or-not."""
-    
+    #breakpoint()
     try:
           next(x for x in l if isinstance(x,list))
     
     except StopIteration:
         return False
+    except TypeError: #l is scalar or None
+        return False
     
     return True
 
-    
+def test_is_nested_list():
+    """
+    testvalues=[None,[None],[None,[],[]],[[1,2,3]],[3],[[3]],[[],[2],[3]],[[1],[2],[3]],[[1],[2],[3]],[[1],[2,3],[3]],[[2,3],[],[3]]]
+    '''
+    None | False
+    [None] | False
+    [None, [], []] | True
+    [[1, 2, 3]] | True
+    [3] | False
+    [[3]] | True
+    [[], [2], [3]] | True
+    [[1], [2], [3]] | True
+    [[1], [2], [3]] | True
+    [[1], [2, 3], [3]] | True
+    [[2, 3], [], [3]] | True
+    '''
+    """
+    testvalues=[None,[None],3,[None,[],[]],[[1,2,3]],[3],[[3]],
+        [[],[2],[3]],[[1],[2],[3]],[[1],[2],[3]],
+        [[1],[2,3],[3]],[[2,3],[],[3]]]
+    for tv in testvalues:
+        #print('test string output:')
+        print (tv,"|",is_nested_list(tv))
+        
     
 if __name__ == "__main__":
     test_stats()
