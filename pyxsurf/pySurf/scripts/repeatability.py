@@ -33,8 +33,11 @@ import itertools
 from IPython.display import display
 
 #from pySurf.data2D_class import align_interactive
-from plotting.multiplots import commonscale
+
 #from config.interface import conf_from_json
+
+from pySurf.scripts.dlist import plot_data_repeat 
+from pySurf.scripts.dlist import dcouples_plot   
 
 """2019/04/08 from messy script/repeatability, here sorted function that have been used. When a function is needed by e.g. a notebook, move it here from repeatability_dev.
 
@@ -51,34 +54,6 @@ def removemis(D2D,func):
     res.data=res.data-func(res.data)[0]
     return res
 
-def plot_data_repeat(dlist,name="",num=None,*args,**kwargs):
-    """"given a list of Data2D objects dlist, plots them as subplots in maximized window. 
-    returns stats.
-    """
-
-    res=[]
-    #fig,axes=plt.subplots(1,len(dlist),num=1)
-    xs,ys=find_grid_size(len(dlist),3,square=False)
-    fig,axes=plt.subplots(xs,ys,num=num,clear=True)
-    plt.close() #prevent from showing inline in notebook with %matplotlib inline
-    axes=axes.flatten()
-    maximize()
-    
-    for i,(ll,ax) in enumerate(zip(dlist,axes)):
-        plt.subplot(xs,ys,i+1,sharex=axes[0],sharey=axes[0])
-        ll.plot(stats=True,*args,**kwargs)
-        res.append(ll.std())
-        #plt.clim([-3,3])
-        plt.clim(*(np.nanmean(ll.data)+np.nanstd(ll.data)*np.array([-1,1])))
-    plt.suptitle(name+' RAW (plane level)')
-    for ax in axes[:len(dlist)-1:-1]:
-        fig.delaxes(ax)
-        #plt.pause(0.1)
-        
-    commonscale(plt.gcf())
-        
-    return res           
-    
     
 def plot_data_repeat_leveling(dlist,outfile=None,dis=True,name = ""):
     """Create a multiplot on a grid with plots of all data with
@@ -193,7 +168,6 @@ def plot_repeat(rfiles,outfile=None,dis=True,name = "",plot_func=plot_data_repea
     dlist=[Data2D(file=wf1,**ro).level() for i,wf1 in enumerate(rfiles)]
     res = plot_func(dlist,outfile=outfile,dis=dis,name = name)
     
-    
     return dlist
 
 
@@ -201,38 +175,7 @@ def plot_repeat(rfiles,outfile=None,dis=True,name = "",plot_func=plot_data_repea
 from pySurf.readers.format_reader import auto_reader
 
     
-def dcouples_plot(dlist,level=True,dis=False):
-    """calculate rotating differences, data are supposed to be already aligned.
-    Note, differences are not leveled.
-    if dis is set to True, call display after plots (not found a better way of doing this)."""
-    
-    dcouples=[c[1]-c[0] for c in list(itertools.combinations(dlist, 2))]
-    if level:
-        dcouples=[d.level() for d in dcouples]
 
-    plt.clf()
-    maximize()
-    
-    xs,ys=find_grid_size(len(dcouples),square=True)[::-1]
-    fig,axes=plt.subplots(xs,ys)
-    plt.close() #prevent from showing inline in notebook with %matplotlib inline
-    if len(np.shape(axes))>1:
-        axes=axes.flatten()
-    elif len(np.shape(axes))==0:
-        axes=[axes]
-    maximize()
-    for i,(ll,ax) in enumerate(zip(dcouples,axes)):
-        plt.subplot(xs,ys,i+1,sharex=axes[0],sharey=axes[0])
-        ll.plot()
-        plt.clim(*(ll.std()*np.array([-1,1])))
-    for ax in axes[:len(dcouples)-1:-1]:
-        fig.delaxes(ax)
-        #plt.pause(0.1)
-    #plt.tight_layout()
-    
-
-    #return [d.std() for d in [diff21,diff31,diff32]]
-    return dcouples
     
     
 def plot_rep_diff(dlist,outfile=None,dis=True):

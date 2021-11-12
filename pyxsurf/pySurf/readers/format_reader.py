@@ -35,7 +35,7 @@ from dataIO.fn_add_subfix import fn_add_subfix
 from .test_readers import testfolder
 from IPython.display import display
 
-from .nid_reader import read_nid, make_channel_tags, read_datablock
+from .nid_reader import make_channel_tags, read_datablock
 
 import pdb
 
@@ -289,24 +289,6 @@ def csvZygo_reader(wfile,intensity=False,header=False,xyz=False,*args,**kwargs):
 
     return  (d1,x,y) if intensity else (d2,x,y)
 
-
-def fits_reader(fitsfile,header=False):
-    """ Generic fits reader, returns data,x,y.
-
-    header is ignored. If `header` is set to True is returned as dictionary."""
-
-    a=fits.open(fitsfile)
-    head=a[0].header
-    if header: return head
-
-    data=a[0].data
-    a.close()
-
-    x=np.arange(data.shape[1])
-    y=np.arange(data.shape[0])
-
-    return data,x,y
-
 from .read_sur_files import readsur
 
 def sur_reader(wfile,header=False,*args,**kwargs):
@@ -316,24 +298,9 @@ def sur_reader(wfile,header=False,*args,**kwargs):
 
     data,x,y=head.points,head.xAxis,head.yAxis
     del(head.points,head.xAxis,head.yAxis) #remove data after they are extracted from header to save memory.
-    return data,x.flatten(),y.flatten()   #are returned as column vector
-
-def nid_reader(file,index=0,header=False,*args,**kwargs):
-    """read .sur binary files."""
-    
-    from pySurf.readers.nid_reader import read_raw_nid,read_nid
-    meta = read_raw_nid(file)[0]
-    if header: return meta
-
-    config = string_to_config(meta)
-            
-    # now itag is a (ordered) list of image keys
-    ddic = read_nid(file,*args,**kwargs) # head['Gr0-Ch1']
-    #data,x,y = 
-    return data,x,y
-
-
-def read_nid(file_name,index=0,header=False):
+    return data,x.flatten(),y.flatten()   #are returned as column vector  
+        
+def read_nid(file_name,index=0,header=False,read_tags=False):
     """read a file nid. Return a list of `data,x,y` for the scans of index in `index`.
     
     `data,x,y` are extracted from files and adjusted by using 
@@ -351,6 +318,8 @@ def read_nid(file_name,index=0,header=False):
     values should already include settings and convertions from metadata.
     TODO: consider extracting only relevant metadata (if possible/convenient). 
     
+    `read_tags` if set, keys for channels with data are returned (to return also the empty ones call `make_channel_tags`)
+    
     Of the old primitive routine `nid_reader.read_nid` and 
     `nid_reader.read_raw_nid`:
     `read_raw_nid` reads `header` as list of strings and `data` as
@@ -358,32 +327,42 @@ def read_nid(file_name,index=0,header=False):
     from the datablock. `dataIO.config.string_to_config` can be used by converting it to `config`
     object and reading fields."""
     
-    from pySurf.readers.nid_reader import read_raw_nid,read_nid
+    from pySurf.readers.nid_reader import read_raw_nid  #,read_nid
     from dataIO.config.make_config import string_to_config
     import logging
-    meta, data = read_raw_nid(file_name) 
-    
-    if header: return meta
-    
-    # build a config object `config` by merging the string.
-    config = string_to_config(meta)
-    
-    # create itag, a (ordered) list of frame keys
-    itag = make_channel_tags(meta)
+     
     
     # all columns of the matrix 
     #ngroups = config.get('DataSet','GroupCount') #number of groups 
     imgdic=[]
+
     logging.info('reading '+file_name)
     #print('reading '+file_name)
+    meta, data = read_raw_nid(file_name)
+    if header: return meta
+    
+    # build a config object `config` by merging the string.
+    config = string_to_config(meta)        
+    # create itag, a (ordered) list of frame keys, only for frames with data
+    itag = make_channel_tags(meta)
+    hasdata = [config.get('DataSet',t,fallback=None) is not None for t in itag]
+    itag = [i for (i, hd) in zip(itag, hasdata) if hd]
+    
     if np.ndim(index) == 0:
-        scalar = True # flag, will return scalar
-        index=[index]
+        if read_tags:  #return tags of subscans with data.
+            if index == 0:
+                return itag
+        else:
+            index=[index]
+    if read_tags: return [itag[i] for i in index]
+                    
     for i in index:
+        #breakpoint()
         cgtag = itag [i]   
         # all raws of the actual column   
         #pdb.set_trace() 
-        print(cgtag)
+        #print(cgtag)
+        logging.info('tag '+cgtag)
         try:
             datatag = config.get('DataSet',cgtag)
             # then read the header, specially �Points� and �Lines� 
@@ -418,22 +397,46 @@ def read_nid(file_name,index=0,header=False):
             
             #if units != ['m','m','m']: 
                 #raise NotImplementedError('unknown units in read_nid: ',units)
-            print(units)
-            
+            #print(units)
+            logging.info('units '+units)
             #print(points)
             #ReadBinData()
             logging.info(cgtag+' read')
             #print (cgtag+' read')
-        except NoOptionError:
+        except:
+            
+            #breakpoint()
             logging.info('option '+cgtag+' not found')
             #print('option '+cgtag+' not found')
             pass
-
-    if scalar:
-        imgdic = imgdic[0]
+        #breakpoint()
+    if len (imgdic)==1: imgdic=imgdic[0] 
+        
     return imgdic
 
+def nid_reader(file,index=0,header=False,*args,**kwargs):
+    """read .sur binary files."""
+    
+    from pySurf.readers.nid_reader import read_raw_nid  #,read_nid
+    from dataIO.config.make_config import string_to_config
+    meta = read_raw_nid(file)[0]
+    if header: return meta
 
+    config = string_to_config(meta)
+            
+    ddic = read_nid(file,*args,**kwargs) # head['Gr0-Ch1']
+    #data,x,y = 
+    
+    return data,x,y
+
+   
+def nid_reader2(wfile,header=False):
+    """read .nid binary files."""
+    head=read_nid(wfile)
+    if header: return head
+
+    data,x,y=head['Gr0-Ch1']
+    return data,x,y
 
 def read_sur(file,header=False):
     """Convert `res` object returned by `readsur` reader to data,x,y"""
@@ -443,6 +446,40 @@ def read_sur(file,header=False):
     del res.xAxis
     del res.yAxis
     return None if header else (data,x.flatten(),y.flatten())
+
+def fits_reader(fitsfile,header=False):
+    """ Generic fits reader, returns data,x,y.
+
+    header is ignored. If `header` is set to True is returned as dictionary."""
+
+    a=fits.open(fitsfile)
+    head=a[0].header
+    if header: return head
+
+    data=a[0].data
+    a.close()
+
+    x=np.arange(data.shape[1])
+    y=np.arange(data.shape[0])
+
+    return data,x,y
+    
+    
+def test_read_nid(file_name=None):
+    from pySurf.data2D_class import Data2D
+    from matplotlib import pyplot as plt
+    if file_name is None:
+        file_name=r'..\test\input_data\AFM\02_test.nid'
+    
+    datadic = read_nid(file_name)
+    data,x,y = datadic['Gr0-Ch1']
+    print("read data of shape",data.shape)
+    
+    d = Data2D(data,x,y,units=['mm','mm','um'],scale=[1000.,1000.,1000000.]) 
+
+    d.plot()
+    plt.show()
+    return d
 
 def test_reader(file,reader,outfolder=None,infolder=None,**kwargs):
     """called without `raw` flag, return data,x,y. Infolder is taken from file or can be passed (e.g. to point to local test data)."""
@@ -477,7 +514,8 @@ reader_dic={#'.asc':csvZygo_reader,
             #'.fits':fitsWFS_reader,
             #'.txt':points_reader,
             '.sur':sur_reader,
-            '.dat':datzygo_reader}
+            '.dat':datzygo_reader,
+            '.nid':read_nid}
 
 def auto_reader(wfile):
     """guess a reader for wfile. Return reader routine."""
@@ -502,28 +540,8 @@ if __name__=='__main__':
         Zygo cannot be called directly with intensity keyword set to True without making a specific case from the other readers,
         while this can be done using read_data. """
 
-    from .test_readers import testfolder
+    from .test_readers import testfolder, testfiles
     from pySurf.data2D import plot_data, read_data
-    
-    files = [r'input_data\profilometer\04_test_directions\05_xysurf_pp_Height.sur',
-    r'input_data\profilometer\04_test_directions\05_xysurf_pp_Height.txt',
-    r'input_data\4D\180215_C1S01_RefSub.csv',
-    r'input_data\4D\180215_C1S01_RefSub.h5',
-    r'input_data\CCI\01_PCO2S03_00009.sur',
-    r'input_data\exemplar_data\scratch\110x110_50x250_100Hz_xyscan_Height_transformed_4in_deltaR_matrix.dat',
-    r'input_data\exemplar_data\scratch\110x110_50x250_100Hz_xyscan_Height_transformed_4in_deltaR_matrix.fits',
-    r'input_data\exemplar_data\scratch\110x110_50x250_100Hz_xyscan_Height_transformed_4in_deltaR.dat',
-    r'input_data\fits\reproducibility\181016_01_PCO2S06_1009_08.fits',
-    r'input_data\fits\reproducibility\181016_01_PCO2S06_1009_08.fits',
-    
-    r'input_data\newview\105_C1S01.asc',
-    r'input_data\newview\105_C1S01.dat',
-    r'input_data\newview\105_C1S01.xyz',
-    
-    r'input_data\zygo_data\171212_PCO2_Zygo_data.asc',
-    r'input_data\zygo_data\171212_PCO2_Zygo_data.txt'
-    ]
-    files=[os.path.join(testfolder,f) for f in files]
     
     tests=[[sur_reader,
     os.path.join(testfolder,r'input_data\profilometer\04_test_directions\05_xysurf_pp_Intensity.sur')

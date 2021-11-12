@@ -12,7 +12,7 @@ import pdb
 from pySurf.readers.format_reader import auto_reader
 from pySurf.data2D import plot_data,get_data, level_data, save_data, rotate_data, remove_nan_frame, resample_data
 from pySurf.data2D import read_data,sum_data, subtract_data, projection, crop_data, transpose_data, apply_transform, register_data
-from plotting.multiplots import find_grid_size, compare_images, subplot_grid
+from plotting.multiplots import find_grid_size, subplot_grid
 from pySurf.psd2d import psd2d,plot_psd2d,psd2d_analysis,plot_rms_power,rms_power
 from plotting.backends import maximize
 from plotting.add_clickable_markers import add_clickable_markers2
@@ -29,15 +29,14 @@ from pySurf.readers.instrumentReader import fitsWFS_reader
 
 from IPython.display import display
 from dataIO.superlist import Superlist
+import itertools
+from plotting.multiplots import commonscale
 
 ## FUNCTIONS ##
 
 # Functions operating on a dlist as Python list of Data2D objects.
 # Can be used equally on a Dlist object.
 
-# TODO:
-# Move from other scripts:
-from pySurf.scripts.repeatability import dcouples_plot
     
 def topoints(data,level=None):
     """convert a dlist to single set of points containing all data.
@@ -107,17 +106,19 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
     
     # 2020/07/10 args overwrite kwargs (try to avoid duplicates anyway).
     # args were ignored before.
-    if not args:  #assume is correct number of elements
-        args = []*len(rfiles)
     
+    if not args:  #assume is correct number of elements
+        args = [[]]*len(rfiles)
     
     #pdb.set_trace()
+    
     #transform vectorized kwargs in list of kwargs
     kwargs=[{k:v[i] for k,v in kwargs.items()} for i in np.arange(len(rfiles))]
     
     #kwargs here is a list of dictionaries {option:value}, matching the readers
-    dlist=[Data2D(file=wf1,reader=r,**{**k, **a}) for wf1,r,k,a in zip(rfiles,reader,args,kwargs)]
-
+    #dlist=[Data2D(file=wf1,reader=r,**{**k, **a}) for wf1,r,k,a in zip(rfiles,reader,args,kwargs)]
+    dlist=[Data2D(file=wf1,reader=r,*a,**k) for wf1,r,a,k in zip(rfiles,reader,args,kwargs)]
+    
     return dlist
 
 def test_load_dlist(rfiles):
@@ -131,6 +132,150 @@ def test_load_dlist(rfiles):
             'units':['mm','mm','$\mu$m']}])
     return dlist,dlist2
 
+def plot_data_repeat(dlist,name="",num=None,*args,**kwargs):
+    """"given a list of Data2D objects dlist, plots them as subplots on a grid with shared x and y scales in maximized window. colorscale is independent for each subplot.
+    returns stats.
+    num is the figure number to plot on a specofic figure, other arguments are passed to plot.
+    """
+
+    res=[]
+    #fig,axes=plt.subplots(1,len(dlist),num=1)
+    xs,ys=find_grid_size(len(dlist),3,square=False)
+    fig,axes=plt.subplots(xs,ys,num=num,clear=True)
+    plt.close() #prevent from showing inline in notebook with %matplotlib inline
+    axes=axes.flatten()
+    maximize()
+    
+    for i,(ll,ax) in enumerate(zip(dlist,axes)):
+        plt.subplot(xs,ys,i+1,sharex=axes[0],sharey=axes[0])
+        ll.plot(stats=True,*args,**kwargs)
+        res.append(ll.std())
+        #plt.clim([-3,3])
+        plt.clim(*(np.nanmean(ll.data)+np.nanstd(ll.data)*np.array([-1,1])))
+    plt.suptitle(name+' RAW (plane level)')
+    for ax in axes[:len(dlist)-1:-1]:
+        fig.delaxes(ax)
+        #plt.pause(0.1)
+        
+    commonscale(plt.gcf())
+        
+    return res       
+
+def dcouples_plot(dlist,level=True):
+    """calculate and plots rotating differences, data are supposed to be already aligned. 
+    plots are generated on a grid, x and y axes are shared, color scale is automatic for each subplot.
+    Note, data are leveled by default (level=True).
+    
+    """
+    
+    dcouples=[c[1]-c[0] for c in list(itertools.combinations(dlist, 2))]
+    if level:
+        dcouples=[d.level() for d in dcouples]
+
+    plt.clf()
+    maximize()
+    
+    xs,ys=find_grid_size(len(dcouples),square=True)[::-1]
+    fig,axes=plt.subplots(xs,ys)
+    plt.close() #prevent from showing inline in notebook with %matplotlib inline
+    if len(np.shape(axes))>1:
+        axes=axes.flatten()
+    elif len(np.shape(axes))==0:
+        axes=[axes]
+    maximize()
+    for i,(ll,ax) in enumerate(zip(dcouples,axes)):
+        plt.subplot(xs,ys,i+1,sharex=axes[0],sharey=axes[0])
+        ll.plot()
+        plt.clim(*(ll.std()*np.array([-1,1])))
+    for ax in axes[:len(dcouples)-1:-1]:
+        fig.delaxes(ax)
+        #plt.pause(0.1)
+    #plt.tight_layout()
+    
+
+    #return [d.std() for d in [diff21,diff31,diff32]]
+    return dcouples
+
+
+def compare_images(datalist, x=None, y=None, fignum=None, titles=None,
+                   vmin=None, vmax=None, commonscale=False, axis=0, axmax=0,
+                   *args, **kwargs):
+    """return a generator that plots n images in a list in subplots with shared
+    zoom and axes. datalist is a list of data in format (data, x, y).
+    x and y provide plot range (temporarily, ideally want to be able to 
+    plot same scale).
+    fignum window where to plot, if fignnum is 0 current figure is cleared,
+    if None new figure is created.
+    axis defines the axis with larger number of plots (default ncols >= nrows)
+    axmax maximum nr of plots along shorter dim.
+    """
+    #modified again 2018/06/05 to accept list of data,x,y triplets. x and y are 
+    # accepted as range.
+    # old docstring was:
+    # return a generator that plots n images in a list in subplots with shared
+    # zoom and axes. datalist is a list of 2d data on same x and y.
+    # fignum window where to plot, if fignnum is 0 current figure is cleared,
+    # if None new figure is created.
+    
+    
+    # this was changed a couple of times in interface, for example in passing
+    # ((data,x,y),...) rather than (data1,data2),x,y
+    # it can be tricky in a general way if data don't have all same size,
+    # at the moment it is assumed they have.
+    # in any case x and y are used only to generate the extent,
+    # that is then adapted to the size of data.
+
+    gridsize = find_grid_size(len(datalist),axmax)
+    if axis == 1: gridsize=gridsize[::-1]
+
+    fig = fignumber(fignum)
+
+    plt.clf()
+    ax = None
+
+    # this is to set scale if not fixed
+    d1std = [np.nanstd(data[0]) for data in datalist]
+    std = min(d1std)
+
+    for i, d in enumerate(datalist):
+        """adjust to possible input formats"""
+        data, x, y = d
+        if x is None:
+            x = np.arange(data.shape[1])
+        if y is None:
+            y = np.arange(data.shape[0])
+        ax = plt.subplot(gridsize[0], gridsize[1], i+1, sharex=ax, sharey=ax)
+        if titles is not None:
+            print("titles is not none, it is ", titles)
+            plt.title(titles[i])
+        # plt.xlabel('X (mm)')
+        # plt.ylabel('Y (mm)')
+        s = (std if commonscale else d1std[i])
+        d1mean = np.nanmean(data)
+        aspect=kwargs.pop('aspect',None)
+        axim = plt.imshow(data, extent=np.hstack([span(x),span(y)]),
+                          interpolation='none', aspect=aspect,
+                          vmin=kwargs.get('vmin', d1mean-s),
+                          vmax=kwargs.get('vmax', d1mean+s),
+                          *args, **kwargs)
+        plt.colorbar()
+        yield ax
+
+def multimarkers(datalist):
+    """add clickable markers to a list of data using `add_clickable_markers2`. 
+    Not sure it is updated, see also Dlist."""
+    
+    
+    plt.figure()
+    
+    #difficile condividere gli assi visto che non possono essere passati
+    s=subplot_grid(len(datalist))
+    a=[add_clickable_markers2(s[0])]
+    for ss in s[1:-1]:
+        plot_data(datalist)
+        a.append(add_clickable_markers2(ss))
+    a.append(add_clickable_markers2(s[-1],hold=True))
+    return a
 
 def mark_data(datalist,outfile=None,deg=1,levelfunc=None,propertyname='markers',direction=0):
     """plot all data in a set of subplots. Allows to interactively put markers

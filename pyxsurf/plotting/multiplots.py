@@ -273,7 +273,7 @@ def subplot_grid(number,size=0,smax=0,*args,**kwargs):
     
     return fig,axes
 
-
+''' #moved to dlist
 def compare_images(datalist, x=None, y=None, fignum=None, titles=None,
                    vmin=None, vmax=None, commonscale=False, axis=0, axmax=0,
                    *args, **kwargs):
@@ -337,22 +337,7 @@ def compare_images(datalist, x=None, y=None, fignum=None, titles=None,
                           *args, **kwargs)
         plt.colorbar()
         yield ax
-
-def multimarkers(datalist):
-    """add clickable markers to a list of data using `add_clickable_markers2`. 
-    Not sure it is updated, see also Dlist."""
-    
-    
-    plt.figure()
-    
-    #difficile condividere gli assi visto che non possono essere passati
-    s=subplot_grid(len(datalist))
-    a=[add_clickable_markers2(s[0])]
-    for ss in s[1:-1]:
-        plot_data(datalist)
-        a.append(add_clickable_markers2(ss))
-    a.append(add_clickable_markers2(s[-1],hold=True))
-    return a
+'''
 
 def diff_images(data1,data2,x=None,y=None,fignum=None,titles=None,vmin=None,vmax=None,
     commonscale=False, direction=0, *args, **kwargs):
