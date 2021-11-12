@@ -207,12 +207,12 @@ def matrixdat_reader(wfile,*args,**kwargs):
     from pySurf.readers.format_reader import datzygo_reader
     return read_data(wfile,datzygo_reader,*args,**kwargs)
 
-def fits_reader(wfile,*args,**kwargs):
-    """temporary wrapper for new readers, replace call to fits_reader
+def nid_reader(wfile,*args,**kwargs):
+    """temporary wrapper for new readers,
     with calls to read_data(wfile,reader=fits_reader)"""
-    from pySurf.readers.format_reader import fits_reader
-    return read_data(wfile,fits_reader,*args,**kwargs)
-
+    from pySurf.readers.format_reader import read_nid
+    return read_data(wfile,read_nid,*args,**kwargs)
+    
 def points_reader(wfile,*args,**kwargs):
     """temporary wrapper for points readers, read and register
     points and convert to 2D data"""
@@ -236,10 +236,8 @@ def FEAreader(FEAfile):
 def getdata(fitsfile):
     """return x,y (vectors) and data (matrix) from fits file."""
     #works with fits from CCI sur files
-    a=fits.open(fitsfile)
-    header=a[0].header
-    data=a[0].data
-    a.close()
+    data,x,y=fits_reader(fitsfile)
+    header=fits_reader(fitsfile,header=True)
 
     #from pySurf.points import level_points
     #data=level_points(data)
@@ -251,18 +249,24 @@ def getdata(fitsfile):
 
     return x,y,data
 
+
+def fits_reader(wfile,*args,**kwargs):
+    """temporary wrapper for new readers, replace call to fits_reader
+    with calls to read_data(wfile,reader=fits_reader)"""
+    from pySurf.readers.format_reader import fits_reader
+    return read_data(wfile,fits_reader,*args,**kwargs)
+    
 def fitsWFS_reader(wfile,ypix=1.,ytox=1.,zscale=1.,crop=[None,None,None],
     center=None,strip=False,scale=(1,1,1.)):
-    """return data (matrix) and x,y (vectors) from fits WFS file.
+    """return data (matrix) and x,y (vectors) from fits WFS file. Here all lateral sizes must be speficied or default (no header info).
     I don't  understand very well order of data, inverting data
     works for S22 for bump positive, but sample seems rotated and
     horizontally flipped.
     If strip is set, nan are removed. strip is done after centering and scaling, so center is calculated on full data."""
-
-    aa=fits.open(wfile)
-    header=aa[0].header
-    data=-aa[0].data
-    aa.close()
+    
+    from pySurf.readers.format_reader import fits_reader
+    
+    data,x,y=fits_reader(fitsfile)
 
     #adjust crop and scales
     ny,nx=data.shape
@@ -301,11 +305,10 @@ def fitsWFS_reader(wfile,ypix=1.,ytox=1.,zscale=1.,crop=[None,None,None],
     return data,x,y
 
 def fitsAFM_reader(fitsfile,sizeum=None):
-    """return x,y (vectors) and data (matrix) from fits file. AFM file"""
-    a=fits.open(fitsfile)
-    header=a[0].header
-    data=a[0].data
-    a.close()
+    """return data, x,y from fits file. accept size um to calculate x and y.AFM file"""
+    
+    from pySurf.readers.format_reader import fits_reader
+    data,x,y=fits_reader(fitsfile)
     #z in m
     from pySurf.points import level_points
     data=level_points(data)
@@ -317,13 +320,14 @@ def fitsAFM_reader(fitsfile,sizeum=None):
     return matrix_to_points2(data,x,y)
 
 def fitsCCI_reader(fitsfile,center=None,header=False):
-    """return x,y (vectors) and data (matrix) from fits CCI file.
+    """return x,y (vectors) and data (matrix) from fits CCI file. `x` and `y` are obtained from 'DX' and 'DY' keys in header. 
     center can be none, in which case data are not centered.
     To extract center position from header, use center=(None,None)."""
-    aa=fits.open(fitsfile)
-    HH=aa[0].header   # HH to avoid naming `header` too many things.
-    data=aa[0].data
-    aa.close()
+    
+    from pySurf.readers.format_reader import fits_reader
+    
+    data,x,y=fits_reader(fitsfile)
+    HH=fits_reader(fitsfile,header=True)
 
     dx=HH['DX']
     dy=HH['DY']

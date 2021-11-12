@@ -122,6 +122,7 @@ from pyProfile.profile import level_profile
 from pyProfile.profile import resample_profile
 from pyProfile.profile import sum_profiles, subtract_profiles
 from pyProfile.psd import psd as profpsd
+from pyProfile.profile import movingaverage
 
 #from pySurf.data2D_class import update_docstring,doc_from
 
@@ -189,7 +190,8 @@ def read_mca(filename,*args,**kwargs):
     
     temptative routine to read mca files from amptek energy sensitive detector. Return a profile with metadata information in a `.header` property (temporarily a dictionary obtained from string blocks) of all profiles.
     Like all other readers will be incorporated in some form of reader in a 
-    more mature version."""
+    more mature version.
+    """
 
     import re
     from scipy import interpolate
@@ -211,9 +213,11 @@ def read_mca(filename,*args,**kwargs):
     #print(blocks['<<CALIBRATION>>'])
     data = [float(d) for d in blocks['<<DATA>>']  ]
     cal = np.array([[float(dd) for dd in d.split()] for d in blocks['<<CALIBRATION>>'][1:]])
-
-    x = interpolate.interp1d(cal[:,0],cal[:,1],fill_value='extrapolate')(np.arange(len(data))) #np.interp doesn't extrapolate
+    #print(len(data),cal)
+    x = interpolate.interp1d(cal[:,0],cal[:,1],fill_value='extrapolate')(np.arange(len(data))) #use interp1d because np.interp doesn't extrapolate
+    #print(span(x),len(x))
     
+    #print(cal)
     profiles = Profile(x,data,name=filename)
     profiles.header = blocks
     
@@ -391,10 +395,37 @@ class Profile(object):  #np.ndarrays
             except ValueError:
                 raise ValueError("Unrecognized type in subtraction")
         return res
+    
+    def __repr__(self):
+    
+        return '<.Profile "%s" at %s>'%(self.name,hex( id(self)))
         
+        ''' N.B.: you cannot retrieve and modify existing __repr__,
+        the following gives infinite recursion, the only way is to recreate a new repr: 
+       
+            class me():
+                def __repr__(self):
+                    return self.__repr__()
+                    
+            a = me()
+            a'''
+    
+    
     def __mul__(self,scale,*args,**kwargs):
+        """mutiplocation: accept Profile, scalars or 2-vector [x,y]. """
+        
+        # this is called directly if self is a Profile object.
+        # mul gets called if self and scale are same type,
+        # or if self can handle self.__mul__(scale)
+        # when this doesn't work, it calls scale.__rmul__(self)
+        # so for example:
+        # p1*p2 calls p1.mul(p2) -> ok
+        # p2*5 calls p2.mul(5) -> ok
+        # 5*p2 calls p2.__rmul__(5) <-- fallback from 5.__mul__(p2)  
+        
         res = self.copy()
-        if np.size(scale)==1:  # scalar
+        #breakpoint()
+        if np.size(scale)==1:  # scalar object or value
             if isinstance(scale,Profile):
                 """if it is Profile, do pointwise multiplication rescaling on firts."""
                 # resample and multiply. For surface result, use matrix multiplication.
@@ -402,8 +433,22 @@ class Profile(object):  #np.ndarrays
                 tmp=scale.resample(self)
                 res=self.copy()
                 res.y = self.y * tmp.y
-            else:     
+                    
+                if scale.units[1] == self.units[1]:
+                    res.units[1] = scale.units[1]+'^2'
+                else:
+                    res.units[1]='%s %s'%(self.units[1], scale.units[1])
+                if self.name and scale.name:
+                    res.name = self.name + ' x ' + scale.name
+                else: 
+                    res.name = (self.name if self.name else scale.name) + ' product'
+            else:     # value
+                #breakpoint()
                 res.y = scale * res.y 
+                if self.name:
+                    res.name = '%s x %s'%(self.name,scale)
+                else:
+                    res.name = 'x %s'%scale
         elif np.size(scale)==2:      # x and y scales      
             res.x = scale[0] * res.x
             res.y = scale[1] * res.y
@@ -412,7 +457,14 @@ class Profile(object):  #np.ndarrays
         return res
 
     def __rmul__(self,scale,*args,**kwargs):
-        return self.__mul__(scale,*args,**kwargs)
+        # this is called on the second term (self) if mul of the first (scale) failed in scale * self.
+        
+        #print('__rmul__ (%s,%s) calling %s__mul__ (%s)'%(2*(self,scale)))
+        
+        res = self.__mul__(scale,*args,**kwargs)
+        #breakpoint()
+        res.name = '%s x '%(scale)+(self.name if self.name else '') 
+        return res
         
     def __matmul__(self,scale,*args,**kwargs):
         raise NotImplementedError ('Return a 2D surface (Data2D).')
@@ -421,26 +473,72 @@ class Profile(object):  #np.ndarrays
         return self.__mul__(-1)
 
     def __rtruediv__(self,other):
-    
-        #self is Profile, other can be integer or profile. 
+        """division: accept Profile, scalars or 2-vector [x,y]. """
+        # we are here because other/self didn't succeed with other.__truediv__
+        # self is Profile, other can be integer or profile. 
         # it is result = other/self
-        #print(self)
-        #print(other)
+        # print(self)
+        # print(other)
         
         res = self.copy()
-        if isinstance(other,Profile):
-            return other.__truediv__(self)
-        elif np.size(other) == 1:  # scalar
-            sel = (self.y != 0) 
-            res = self.copy()
-            res.y[sel] = other*(1./self.y[sel])
-            res.y[~sel] = np.nan
+        if np.size(other) == 1:
+            if isinstance(other,Profile):  # scalar
+                sel = (self.y != 0) 
+                res = self.copy()
+                res.y[sel] = other*(1./self.y[sel])
+                res.y[~sel] = np.nan
+                #breakpoint()
+                if other.units[1] == self.units[1]:
+                    res.units[1] = ''
+                else:
+                    res.units[1]='%s / %s'%(other.units[1], self.units[1])
+                res.name = '%s ratio'%(other.name if other.name is not None else '' ) + (' / %s'%(self.name) if self.name is not None else '') 
+            else:     # value
+                #breakpoint()
+                res.y = other / res.y 
+                if self.units[1]:
+                    res.units[1] = '/'+self.units[1] 
+                if self.name:
+                    res.name = '%s / %s'%(other,self.name)
+                else:
+                    res.name = '%s / ratio'%(other)
+
+        elif np.size(other)==2:      # x and y others    
+            #return other.__truediv__(self)
+            res.x = other[0] / res.x
+            res.y = other[1] / res.y
         else:
-            raise ValueError('__rtruediv__ Data2D by wrong format!')
+            raise ValueError('__rtruediv__ Profile by wrong format!')
         return res
 
     def __truediv__(self,other):
-        return self*(1./other)
+    
+        # __truediv__ is normally called, 
+        # gets here for p2/p1 # p2/p1 = __truediv__(self=p2,other=p1)
+        # gets here for p2/5 # p2/5 = __truediv__(self=p2,other=5)
+        # 5/p2 will not call this, but will try to call 5.__truediv__, if it fails,
+        #     p2.__rtruediv__ will be called instead
+
+        '''https://stackoverflow.com/questions/37310077/python-rtruediv-does-not-work-as-i-expect
+        
+        __rtruediv__ only has priority over __truediv__ if the right-hand operand is an instance of a subclass of the left-hand operand's class.
+
+        When you do 343 / x, NewInt is a subclass of int, so x's __rtruediv__ gets priority. When you do 343.3 / x, NewInt is not a subclass of float, so 343.3's __truediv__ gets priority.
+
+        343.3.__truediv__(x) doesn't return NotImplemented, since float knows how to divide a float by an int. Thus, x.__rtruediv__ doesn't get called.
+        '''
+        # __rtruediv__ is implemented in Profile, so 1/other makes sense for Profile and numbers. 
+        #breakpoint()
+        res = self*(1./other)
+        u = getattr(other,'units',['',''])[1]  # assegna units y or ''
+        if self.units[1] == u:
+            res.units[1] = ''
+        else:
+            res.units[1] = self.units[1]+('/'+u if u else '')
+        if self.name is not None:
+            #res.name = '__truediv__'
+            res.name = '%s%s'%(self.name if self.name else "ratio",((' / %s'%getattr(other,'name',other)) if getattr(other,'name','') else ''))
+        return res
         
     def min (self):
         return np.nanmin(self.y)
@@ -449,68 +547,36 @@ class Profile(object):  #np.ndarrays
         return np.nanmax(self.y)    
     
     def plot(self,title=None,*args,**kwargs):
-        """plot using data2d.plot_data and setting automatically labels and colorscales.
-           by default data are filtered at 3 sigma with 2 iterations for visualization.
-           Additional arguments are passed to plot.
+        """plot profile using and setting automatically labels.
+           Additional arguments are passed to `plt.plot`.
         
         Quite useless for profile, can be plot with `plt.plot(*P(),*args,**kwargs)"""
-        
+        #modeled over data2D.plot, non c'e' plot_profile
         from plotting.captions import legendbox
         from pyProfile.profile import get_stats
         
-        nsigma0=None  #default takes all range.
-        #import pdb
-        #pdb.set_trace()
         stats=kwargs.pop('stats',0) #to change the default behavior
         loc=kwargs.pop('loc',0) #location for stats legend
         framealpha=kwargs.pop('framealpha',0.5) #transparency for stats legend
-        nsigma=kwargs.pop('nsigma',nsigma0) #to change the default behavior
+        l = None if self.name is None else self.name 
+        res=plt.plot(self.x,self.y,label=l,*args,**kwargs)
         
-        if nsigma is not None:
-            raise NotImplementedError("nsigma was passed, but outlyers filtering\n"+
-                'is not active yet.')
-        res=plt.plot(self.x,self.y,
-            *args,**kwargs)
         if stats: #add stats to plot
             legend=get_stats(self.x,self.y,units=self.units)
-            """
-            if stats==2:
-                legend.extend(["x_span: %.3g %s"%(span(x,size=1),(units[0] if units[0] else "")),"y_span: %.3g %s"%(span(y,size=1),(units[1] if units[1] else "")),"size: %i"%np.size(data)])
-            """
             l=legendbox(legend,loc=loc,framealpha=framealpha)
             
-        plt.xlabel('X'+(" ("+self.units[0]+")" if self.units[0] is not None else ""))
-        plt.ylabel('Y'+(" ("+self.units[1]+")" if self.units[1] is not None else ""))
+        plt.xlabel('X'+(" ("+self.units[0]+")" if self.units[0] else ""))
+        plt.ylabel('Y'+(" ("+self.units[1]+")" if self.units[1] else ""))
   
         if title is None:
             if self.name is not None:
                 title = self.name
         plt.title(title)
+        
         return res
+        
     plot=update_docstring(plot,plt.plot)
-    '''
-    Useless for profile, can be plot with `plt.plot(*P(),*args,**kwargs)`
-    
-    def plot(self,title=None,*args,**kwargs):
-        """plot using data2d.plot_data and setting automatically labels and colorscales.
-           by default data are filtered at 3 sigma with 2 iterations for visualization.
-           Additional arguments are passed to plot."""
 
-        nsigma0=1  #default number of stddev for color scale
-        #import pdb
-        #pdb.set_trace()
-        stats=kwargs.pop('stats',2) #to change the default behavior
-        nsigma=kwargs.pop('nsigma',nsigma0) #to change the default behavior
-        m=self.data
-        res=plot_data(self.data,self.x,self.y,units=self.units,
-            stats=stats,nsigma=nsigma,*args,**kwargs)
-        if title is None:
-            if self.name is not None:
-                title = self.name
-        plt.title(title)
-        return res
-    plot=update_docstring(plot,plot_data)
-    '''
 
     def load(self,filename,*args,**kwargs):
         """A simple file loader using np.genfromtxt.
@@ -560,6 +626,14 @@ class Profile(object):  #np.ndarrays
         return res #
     crop=update_docstring(crop,crop_profile)
     
+    def movingaverage(self,*args,**kwargs):
+        """moving average using function profile.movingaverage, where x,y are taken from self."""
+        
+        res=self.copy()
+        res.y=movingaverage(self.y,*args,**kwargs)
+        return res #
+        #crop=update_docstring(crop,movingaverage)
+    
     def level(self,degree=1,zero='mean',*args,**kwargs):
         """return a leveled profile calling profile.level_profile.
 `zero option can be 'top', 'bottom' or 'mean', and is a facility to shift curves so that their min or max value is aligned to zero."""
@@ -580,7 +654,7 @@ class Profile(object):  #np.ndarrays
         res=self.copy()
         try:
             if self.units is not None and other.units is not None:
-                if self.units != other.units:
+                if self.units[0] != other.units[0]:
                     raise ValueError('If units are defined they must match in Profile.resample.')
             res.x,res.y=resample_profile(*res(),*other(),*args,**kwargs)   
         except AttributeError: #assume other is an array
@@ -746,6 +820,115 @@ def test_class_init(wfile=None):
     plt.figure()
     plt.title('removed nans')
     b.plot(aspect='equal')
+    
+    
+def test_profile_mul(p1,p2):
+    #test mul
+    print(p1)
+    print(p1*p2) #calls p1.mul(p2) -> ok
+    print(5*p1) #calls 5.mul(p2) -> falls back on p2.__rmul__
+    print(p1*5) #calls p1.mul(5) -> ok
+    
+    #test mul
+    print(span(p1.y))
+    print('---------------')
+    print(span((p1*p2).y)) #calls p1.mul(p2) -> ok
+    print(span((5*p1).y)) #calls 5.mul(p2) -> falls back on p2.__rmul__
+    print(span((p1*5).y)) #calls p1.mul(5) -> ok
+    
+
+def test_profile_mul2(p1,res):    
+
+    test_plot(p1*res) #calls p1.mul(p2) -> ok
+    test_plot(res*p1)
+    test_plot(p1*p1)
+    test_plot(p1*5) #calls p1.mul(p2) -> ok
+    test_plot(5*p1)
+    test_plot(5*res)
+    test_plot(res*5) #calls p1.mul(5) -> ok
+
+def test_profile_class():
+
+    #test hardcore labels
+    from pyProfile.profile_class import test_profile_mul2
+
+    res=p1*2
+    res.name = ''
+    res.units = ['keV','']
+
+    test_profile_mul2(p1,p2)
+    test_profile_mul2(p1,res)
+    test_profile_mul2(res,res)
+
+    #test hardcore labels
+    from pyProfile.profile_class import test_profile_div2
+
+    res=p1*2
+    res.name = ''
+    res.units = ['keV','']
+
+    test_profile_div2(p1,p2)
+    test_profile_div2(p2,res)
+    test_profile_div2(res,res)
+
+def test_plot(p1):
+    plt.figure()
+    (p1).plot()
+    plt.legend()
+    print(p1)
+    return p1
+
+
+    
+def test_profile_div(p1,p2):    
+    
+    test_profile_division(p1,p2)
+    
+    #test div
+    print(span(p1.y))
+    print('---------------')
+    print(span((p1/p2).y)) #calls p1.div(p2) -> ok
+    print(span((5/p1).y)) #calls 5.div(p2) -> falls back on p2.__rdiv__
+    print(span((p1/5).y)) #calls p1.div(5) -> ok
+    
+    test_plot(p1)
+    test_plot(p1/p2) #calls p1.mul(p2) -> ok
+    test_plot(5/p1)
+    test_plot(p1/5) #calls p1.mul(5) -> ok
+ 
+def test_profile_div2(p1,res):    
+
+    test_plot(p1/res) #calls p1.mul(p2) -> ok
+    test_plot(res/p1)
+    test_plot(p1/p1)
+    test_plot(p1/5) #calls p1.mul(p2) -> ok
+    test_plot(5/p1)
+    test_plot(5/res)
+    test_plot(res/5) #calls p1.mul(5) -> ok 
+    
+
+# test profile division
+def test_profile_division(p1,p2):
+    """ plot division of profile 2 by 1 and inverse of the inverse ratio based on np only and compare with division between objects, interpolate over 1st. Plot comparison with what is calculated by np only."""
+    
+    def divide (x1,y1,x2,y2):
+        """division based only on np."""
+        yy2=np.interp(x1,x2,y2)
+        yr= y1/yy2
+        return yr
+    
+    x1,y1 = p1()
+    x2,y2 = p2()
+
+    r = p2/p1
+    plt.figure()
+    
+    r.plot()
+    plt.plot(x2,divide(x2,y2,x1,y1),label='ratio p2/p1')
+    plt.plot(x1,1/divide(x1,y1,x2,y2),label='1/ratio p1/p2')
+    plt.legend()
+    plt.xlim([0.1,14])
+    plt.ylim([0.5,1.65])
 
 if __name__=='__main__':
     plt.close('all')

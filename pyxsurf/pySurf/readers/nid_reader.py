@@ -1,5 +1,6 @@
 """Set of functions to read .nid AFM data.
 This is a first prototype, format is not standard."""
+## read_nid is OBSOLETE -> use format_reader.read_nid
 
 import numpy as npoints
 from configparser import ConfigParser
@@ -9,6 +10,7 @@ import numpy as np
 import logging
 from configparser import NoOptionError
 from dataIO.config.make_config import string_to_config
+import os 
 
 
 """ dataset info     
@@ -57,9 +59,9 @@ def read_raw_nid (file_name):
     return header,data
 
 def read_datablock(data, npoints, nlines, nbits, nim=0, fmt = '<l'):
-    """read image of index nim from binary data.
+    """read image of index `nim` from binary data.
     
-    nbits is redundant, can be obtained from fmt.
+    `nbits` is redundant, can be obtained from fmt.
     fmt is c-style format string,
     see https://docs.python.org/3.5/library/struct.html#struct-format-strings for other formats
     """
@@ -170,18 +172,12 @@ def read_nid(file_name):
             
     return imgdic
 
-if __name__ == "__main__":
-    
-    import os 
+def test_read_nid(file_name=None):
     from pySurf.data2D_class import Data2D
+    from matplotlib import pyplot as plt
+    if file_name is None:
+        file_name=r'..\test\input_data\AFM\02_test.nid'
     
-    
-    datafolder = r'G:\My Drive\progetti\c_overcoating\esperimenti\20210129_dopamine\20210224_dopamine_clean'
-    fn = 'Image00053.nid'
-    file_name =  os.path.join(datafolder,fn)
-
-    #file_name=r'C:\Users\kovor\Documents\python\pyXTel\pySurf\test\input_data\AFM\02_test.nid'
-
     datadic = read_nid(file_name)
     data,x,y = datadic['Gr0-Ch1']
     print("read data of shape",data.shape)
@@ -190,3 +186,12 @@ if __name__ == "__main__":
 
     d.plot()
     plt.show()
+    return d
+
+if __name__ == "__main__":
+    
+    datafolder = r'G:\My Drive\progetti\c_overcoating\esperimenti\20210129_dopamine\20210224_dopamine_clean'
+    fn = 'Image00053.nid'
+    file_name =  os.path.join(datafolder,fn)
+
+    d = test_read_nid(file_name)

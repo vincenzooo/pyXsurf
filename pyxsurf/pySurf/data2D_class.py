@@ -17,7 +17,7 @@ from pySurf.data2D import (crop_data, data_from_txt, data_histostats,
                            level_data, plot_data, projection, read_data,
                            register_data, resample_data, rotate_data,
                            save_data, slope_2D, subtract_data, sum_data,
-                           transpose_data)
+                           transpose_data, get_stats)
 from pySurf.points import matrix_to_points2, points_autoresample
 from pySurf.psd2d import (plot_psd2d, plot_rms_power, psd2d, psd2d_analysis,
                           rms_power)
@@ -171,6 +171,11 @@ class Data2D(object):  # np.ndarrays
         #self.info = getattr(obj, 'info', None)
         # We do not need to return anything
     """
+    #def __repr__(self):
+        #breakpoint()
+        #pass
+        #repr(self)
+        #return self
 
     def __init__(
         self,
@@ -377,6 +382,7 @@ class Data2D(object):  # np.ndarrays
         # to change the default behavior
         if "stats" in kwargs:
             stats = kwargs.pop("stats")
+            fmt = kwargs.pop("fmt",None)
         else: 
             stats = [[0,1,3],[6],[6]]
             # format for legend labels (replace "stdev" with "rms")
@@ -628,6 +634,12 @@ class Data2D(object):  # np.ndarrays
     def copy(self):
         """copy.deepcopy should work well."""
         return deepcopy(self)
+
+    def stats(self,*args,**kwargs):
+        
+        units = kwargs.pop('units',self.units)
+        #breakpoint()
+        return get_stats(self.data,self.x,self.y,units=units,*args,**kwargs)
 
     def printstats(self, label=None, fmt="%3.2g"):
         if label is not None:

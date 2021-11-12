@@ -1127,14 +1127,9 @@ def get_stats(data=None,x=None,y=None,units=None,vars=None,string=False,fmt=None
     #   the right number of % placeholders for `st` values.
     # u is a list of 3 units for axis.
     #breakpoint()
-    # run with string = True if `fmt` is None, using default stats and getting strings 
-    # if fmt is set () string is False (string is never used). In this case an array of floats is returned, to be later processed using `fmt`.
-    # units are ignored in this case, but they shoud have been incorporated already in fmt.
-        #if string is False and fmt is None, strings are returned.
-    #breakpoint()
-    st = [stats(d,vars=v,string=(fmt is None) and string,units=uu) for d,v,uu in zip([data,x,y],vars,[u[2],u[0],u[1]])]
+    st = [stats(d,vars=v,string=(fmt is not None),units=uu) for d,v,uu in zip([data,x,y],vars,[u[2],u[0],u[1]])]
     st = list(itertools.chain.from_iterable(st)) # flatten list   
-    if data is not None and fmt is not None and string:
+    if data is not None and fmt is not None:
         st=(("\n".join(fmt))%tuple(st)).split('\n')
     
     return st
@@ -1187,10 +1182,6 @@ def test_get_stats(*value,help=True):
         print("vars=[[1],[2],[3]]:\n",
               get_stats(data,x,y,string=True,vars=[[1],[2],[3]]),"\n-------------\n")
         #[['StdDev: 3.1 '], ['PV: 97.4 '], ['min: -50.8 ']]
-        
-        print('fmt and alls parameters are ignored if string is False')
-        print(get_stats(data,x,y,string=False,vars=[[2,6],[],[1]],units='km',fmt=''))
-        
 
         print("-- UNITS --")
         

@@ -29,7 +29,11 @@ def add_config(confdic,tag,**kwargs):
     for k,v in kwargs.items():
         confdic[tag][k]=v
 
-        
+def explore_config(config,*strings):
+    """ given a list of strings, retrieve the value of the nested config item. """
+    for k in strings:
+        config = config.get() 
+    return config   
         
 def read_json_conf(jfile):
     """Read a dictionary from a json file and return a dic. Can include or exclude first level keys.
