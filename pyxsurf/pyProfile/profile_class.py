@@ -122,7 +122,7 @@ from pyProfile.profile import level_profile
 from pyProfile.profile import resample_profile
 from pyProfile.profile import sum_profiles, subtract_profiles
 from pyProfile.psd import psd as profpsd
-from pyProfile.profile import movingaverage
+from pyProfile.profile import movingaverage, rebin_profile
 
 #from pySurf.data2D_class import update_docstring,doc_from
 
@@ -632,7 +632,16 @@ class Profile(object):  #np.ndarrays
         res=self.copy()
         res.y=movingaverage(self.y,*args,**kwargs)
         return res #
-        #crop=update_docstring(crop,movingaverage)
+    movingaverage=update_docstring(movingaverage,movingaverage)
+        
+    def rebin(self,*args,**kwargs):
+        """rebin using function profile.rebin_profile, where x,y are taken from self."""
+        
+        res=self.copy()
+        res.x,res.y=rebin_profile(self.x,self.y,*args,**kwargs)
+        return res #
+    
+    rebin=update_docstring(rebin,rebin_profile)
     
     def level(self,degree=1,zero='mean',*args,**kwargs):
         """return a leveled profile calling profile.level_profile.

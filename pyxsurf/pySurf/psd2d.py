@@ -15,10 +15,8 @@ from utilities.imaging import fitting as fit
 # from IPython.display import display
 from plotting.fignumber import fignumber
 from plotting.backends import maximize
-from pySurf.scripts.plot_surface_analysis import leveldata
 from pySurf.data2D import levellegendre, level_by_line
 from pySurf.data2D import get_data
-from plotting.multiplots import compare_images
 
 import pdb
 
@@ -636,6 +634,8 @@ def calculatePSD2(wdata,xg,yg,outname="",wfun=None,vrange=[None,None],rmsrange=N
     """given points w, calculate and plot surface maps with different leveling (piston, tilt, sag, 10 legendre)
     use psd2d to calculate and save x and y 2d PSDs, plots only y.
     fignum window where to plot, if fignnum is 0 current figure is cleared, if None new figure is created. Default to figure 1 ."""
+    
+    from plotting.multiplots import compare_images
     ##STILL AWFUL CODE
     # misal_deg is useless, since data are expected to be already leveled.
     # if not, still can be applied, but is quite useless.

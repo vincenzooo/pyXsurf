@@ -31,18 +31,17 @@ if __name__ == '__main__':
 '''
 
 import os
-#from format_reader import read_sur
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from pySurf.data2D import plot_data
+#from format_reader import read_sur
 from pySurf.readers.read_sur_files import readsur
 
 #from test_readers import testfolder
 from pySurf.data2D import plot_data, read_data
 from pySurf.readers.format_reader import points_reader,csvZygo_reader 
 from pySurf.readers.format_reader import sur_reader
-import os
-import sys
 
 #ported to/from notebook
 
@@ -70,8 +69,9 @@ r'input_data\newview\105_C1S01.xyz',
 r'input_data\zygo_data\171212_PCO2_Zygo_data.asc',
 r'input_data\zygo_data\171212_PCO2_Zygo_data.txt'
 ]
-files=[os.path.join(testfolder,f) for f in files]
-    
+files=[os.path.join(testfolder,f) for f in testfiles]
+
+  
 def test_read_fits(file, raw = False):
 
     """read a sur file using read_sur_files, that is expected to return a structure
@@ -127,7 +127,7 @@ def test_readers(tests):
         plt.suptitle(os.path.basename(f)+' '+' '.join(["%s=%s"%(k,v) for k,v in o.items()]))
         plt.tight_layout()
         plt.show()
-            
+
             
 # %%
 if __name__=='__main__':

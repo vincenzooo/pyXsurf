@@ -1437,8 +1437,8 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     #print(kwargs)
 
     ## AXIS LABELS
-    plt.xlabel('X'+(" ("+units[0]+")" if units[0] is not None else ""))
-    plt.ylabel('Y'+(" ("+units[1]+")" if units[1] is not None else ""))
+    plt.xlabel('X'+(" ("+units[0]+")" if units[0] else ""))
+    plt.ylabel('Y'+(" ("+units[1]+")" if units[1]  else ""))
     
     ## ADJUST COLORBAR:\
     '''

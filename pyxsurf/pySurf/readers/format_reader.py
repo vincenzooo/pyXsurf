@@ -32,7 +32,6 @@ from pySurf.data2D import data_from_txt
 
 from dataIO.read_pars_from_namelist import read_pars_from_namelist
 from dataIO.fn_add_subfix import fn_add_subfix
-from .test_readers import testfolder
 from IPython.display import display
 
 from .nid_reader import make_channel_tags, read_datablock
@@ -57,6 +56,7 @@ program that is included with MetroPro in folder C:\MetroPro\Bin. Type the follo
 a command prompt: 
 dat_test  –maps  >  maps.txt 
 File maps.txt will contain the output. '''
+
     d1,head,d3,d4=readMetroProData(wfile,*args,**kwargs)
     #pdb.set_trace()
     if header or kwargs.get('header',False): return head
@@ -415,7 +415,7 @@ def read_nid(file_name,index=0,header=False,read_tags=False):
     return imgdic
 
 def nid_reader(file,index=0,header=False,*args,**kwargs):
-    """read .sur binary files."""
+    """read .sur binary files. Incompleta."""
     
     from pySurf.readers.nid_reader import read_raw_nid  #,read_nid
     from dataIO.config.make_config import string_to_config

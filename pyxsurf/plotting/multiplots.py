@@ -445,33 +445,40 @@ def align_images(ax2,ax3):
     ax1,ax2=add_clickable_markers2(ax=ax2),add_clickable_markers2(ax=ax3,hold=True)
     return ax1.markers,ax2.markers
 
-
-
-def associate_plots(ax1,ax2,on=0):
-    """if on is None toggle, if it is 0 set off, if 1 set on. Not implemented, for now
+def associate_plots_axis(ax1,ax2,axis=None,on=0):
+    """
+    Incomplete attempt to add axis option.
+    Associate axis of two different subplots `ax1`, `ax2`. 
+    if `on` is None toggle, if it is 0 set off, if 1 set on. Not implemented, for now
     associate and keeps on until figure is closed.
+    `axis` tells which axis are associated (0 = x, 1 =y, None = both).
     """
 
+    if axis is None:
+        axis = [0,1]  #activate both x and y-axis
+    else:
+        axis = [axis] # will be checked with `in`
+        
     # Declare and register callbacks
     def on_xlims_change(axes):
-        print("updated xlims: ", axes.get_xlim())
+        #print("updated xlims: ", axes.get_xlim())
         #axes.associated.set_autoscale_on(False)
         xold=axes.xold
         xl=axes.xaxis.get_view_interval()   #range of plot in data coordinates, sorted lr
         axes.xold=xl
 
-        print("stored value (xold), from get_view_interval (xl)=",xold,xl)
+        #print("stored value (xold), from get_view_interval (xl)=",xold,xl)
         zoom=(xl[1]-xl[0]) /(xold[1]-xold[0])
-        print("zzom",zoom)
+        #print("zzom",zoom)
         olim=axes.associated.get_xlim()
-        print("other axis lim (olim):",olim)
+        #print("other axis lim (olim):",olim)
         xc=(olim[1]+olim[0])/2  #central point of other axis
         xs=(olim[1]-olim[0])/2  #half span
         #dxc=((xl[0]+xl[1])-(xold[0]+xold[1]))/2*(olim[1]-olim[0])/(xl[1]-xl[0])
         dxc=((xl[0]+xl[1])-(xold[0]+xold[1]))/2*(olim[1]-olim[0])/(xold[1]-xold[0])
-        print("offset on unzoomed data, rescaled to other axes (dxc)",dxc)
+        #print("offset on unzoomed data, rescaled to other axes (dxc)",dxc)
         nxl=(xc-xs*zoom+dxc,xc+xs*zoom+dxc)  #new limits
-        print(nxl)
+        #print(nxl)
         axes.associated.set_xlim(nxl,emit=False,auto=False)
 
     def on_ylims_change(axes):
@@ -490,6 +497,98 @@ def associate_plots(ax1,ax2,on=0):
         xs=(olim[1]-olim[0])/2  #half span
         dxc=((xl[0]+xl[1])-(xold[0]+xold[1]))/2*(olim[1]-olim[0])/(xold[1]-xold[0])
         #print "offset on unzoomed data, rescaled to other axes (dxc)",dxc
+        #nxl=(xc+dxc,xc)  #newlimits
+        nxl=(xc-xs*zoom+dxc,xc+xs*zoom+dxc)
+        axes.associated.set_ylim(nxl,emit=False,auto=False)
+
+    def ondraw(event):
+        # print 'ondraw', event
+        # these ax.limits can be stored and reused as-is for set_xlim/set_ylim later
+        #print event -> it is matplotlib.backend_bases.DrawEvent object (?)
+        ax1.xold=ax1.get_xlim()
+        ax2.xold=ax2.get_xlim()
+        ax1.yold=ax1.get_ylim()
+        ax2.yold=ax2.get_ylim()
+        #print "on draw axis: axes xlims", ax1.xold, ax2.xold
+
+
+    fig=ax1.figure
+    cid1 = fig.canvas.mpl_connect('draw_event', ondraw)
+    if ax2.figure != fig:
+        cid2 = ax2.figure.canvas.mpl_connect('draw_event', ondraw)
+    
+    setattr(ax2,'associated',ax1)
+    setattr(ax2,'associated',ax1)
+    
+    if 0 in axis:
+        setattr(ax1,'xold',ax1.get_xlim())
+        setattr(ax2,'xold',ax2.get_xlim())
+        ax1.callbacks.connect('xlim_changed', on_xlims_change)
+        ax2.callbacks.connect('xlim_changed', on_xlims_change)        
+        
+    if 1 in axis:
+        setattr(ax1,'yold',ax1.get_ylim())
+        setattr(ax2,'yold',ax2.get_ylim())
+        ax1.callbacks.connect('ylim_changed', on_ylims_change)
+        ax2.callbacks.connect('ylim_changed', on_ylims_change)
+
+
+def associate_plots(ax1,ax2,axis=None,on=0):
+    """
+    Associate axis of two different subplots `ax1`, `ax2`.
+    This is a different mechanism than shared axis, in that here zoom and pans are kept synchronized, but axis are independent. If the two plots have same scales on both axis, it works like shared axis.
+    
+    Run `test_associate`, `test_associate_zoom` for examples.
+    
+    TODO: toggle association: note that relative alignment of centers is maintained, to be able to manually align center a toggle mechanism must be implemented:
+    if `on` is None toggle, if it is 0 set off, if 1 set on. Not implemented, for now
+    associate and keeps on until figure is closed.
+    TODO: being able to associate only on x or y `axis` tells which axis are associated (0 = x, 1 =y, None = both). See attempt in `associate_plots_axis`
+    TODO: when home is clicked, plots are messed up, need to click twice.
+    
+    """
+
+    if axis is None:
+        axis = [0,1] #activate both x and y-axis
+        
+    # Declare and register callbacks
+    def on_xlims_change(axes):
+        print("updated xlims: ", axes.get_xlim())
+        #axes.associated.set_autoscale_on(False)
+        xold=axes.xold
+        xl=axes.xaxis.get_view_interval()   #range of plot in data coordinates, sorted lr
+        axes.xold=xl
+
+        print("stored value (xold), from get_view_interval (xl)=",xold,xl)
+        zoom=(xl[1]-xl[0]) /(xold[1]-xold[0])
+        print("zzom",zoom)
+        olim=axes.associated.get_xlim()
+        print("other axis lim (olim):",olim)
+        xc=(olim[1]+olim[0])/2  #central point of other axis
+        xs=(olim[1]-olim[0])/2  #half span
+        #dxc=((xl[0]+xl[1])-(xold[0]+xold[1]))/2*(olim[1]-olim[0])/(xl[1]-xl[0])
+        dxc=((xl[0]+xl[1])-(xold[0]+xold[1]))/2*(olim[1]-olim[0])/(xold[1]-xold[0])
+        print("offset on unzoomed data, rescaled to other axes (dxc)\n\n",dxc)
+        nxl=(xc-xs*zoom+dxc,xc+xs*zoom+dxc)  #new limits
+        #print(nxl)
+        axes.associated.set_xlim(nxl,emit=False,auto=False)
+
+    def on_ylims_change(axes):
+        print ("updated ylims: ", axes.get_ylim())
+        #axes.associated.set_autoscale_on(False)
+        xold=axes.yold
+        xl=axes.yaxis.get_view_interval()   #range of plot in data coordinates, sorted lr
+        axes.yold=xl
+
+        print ("stored value (yold), from get_view_interval (yl)=",xold,xl)
+        zoom=(xl[1]-xl[0]) /(xold[1]-xold[0])
+        print ("zzom",zoom)
+        olim=axes.associated.get_ylim()
+        print ("other axis lim (olim):",olim)
+        xc=(olim[1]+olim[0])/2  #central point of other axis
+        xs=(olim[1]-olim[0])/2  #half span
+        dxc=((xl[0]+xl[1])-(xold[0]+xold[1]))/2*(olim[1]-olim[0])/(xold[1]-xold[0])
+        print ("offset on unzoomed data, rescaled to other axes (dxc)\n\n",dxc)
         #nxl=(xc+dxc,xc)  #newlimits
         nxl=(xc-xs*zoom+dxc,xc+xs*zoom+dxc)
         axes.associated.set_ylim(nxl,emit=False,auto=False)
