@@ -4,7 +4,7 @@ import os
 import pdb
 
 def fread(fid, nelements, dtype):
-    if dtype is np.str:
+    if dtype is str:
         dt = np.uint8  # WARNING: assuming 8-bit ASCII for np.str!
     else:
         dt = dtype

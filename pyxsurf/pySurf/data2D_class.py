@@ -353,6 +353,12 @@ class Data2D(object):  # np.ndarrays
 
     def __truediv__(self, other):
         return self * (1.0 / other)
+        
+    def __repr__(self):
+    
+        return '<.Data2D "%s" at %s>'%(self.name,hex( id(self)))
+        
+        ''' NSee notes in profile_class'''
 
     def merge(self, other, topoints=False):
         """Return the merged data between a and b.
