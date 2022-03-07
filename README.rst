@@ -13,9 +13,15 @@ Installation
 
 Download or fork the project. You can use git clone command by:
 ``git clone https://github.com/vincenzooo/pyXSurf.git`` or the button
-``download`` at top of page. The folder containing code must be made
-accessible to python on your system (generally this means it must be in
-the system path).
+``download`` at top of page.
+At this point you have two options:
+
+1) Python installer (suggested): move to the folder with the code and call
+``python setup.py install``
+2) Manual (developer): put the folder with code in a path accessible to 
+python on your system (generally this means it must be in the system path) 
+and start using it. In this case you must install
+all dependencies.
 
 For users new to Python, the library was developed on anaconda
 distribution. Any other distribution should be equivalent, however I
@@ -30,14 +36,12 @@ Status of code and documentation
 
 The main part of the library is well defined and it works well. I am
 constantly adding functions when I find they are needed during my daily
-work. Not all modules and functions in the repository are meant to be
-included in the library, with a few of them in early stage development
-or abandoned, however I don't know how to remove them from the public
-distribution, while keeping them for backwards compatibility or future
-needs, so they are included.
+work. The selection of modules for public release is in phase of improvement,
+there are still a few modules that are in early stage or not of general interest, 
+but are included for backwards compatibility, future needs or just to stay on the safe side.
 
-Code is usually commented, and sometimes
-even in the right place for self-documentation to work, but this is quite non-uniform,
+Code is usually commented, and sometimes even in the right place for self-documentation to work, 
+but this is quite non-uniform,
 as it mixes different conventions I tried over the time, and it will remain like this
 until I find one tool that I can use to maintain the documentation.  
 In the meanwhile, you should be able to access
