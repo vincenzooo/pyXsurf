@@ -47,6 +47,8 @@ from dataIO.arrays import stats, is_nested_list
 from pyProfile.profile import PSF_spizzichino,line
 from dataIO.functions import update_docstring
 
+rad_to_sec = 180/np.pi*3600.
+
 test_folder = r'C:\Users\kovor\Documents\python\pyXTel\pySurf\test'
 
 class EmptyPlotRangeWarning(EmptyRangeWarning):
@@ -1007,29 +1009,29 @@ def calculate_slope_2D(wdata,x,y,scale=(1.,1.,1.)):
     dy=np.diff(y) [:,np.newaxis]  #original
 
     grad=np.gradient(wdata)  #0->axial(along y), 1->az (along x)
-    slopeax=grad[0][:-1,:]/scale[-1]*206265/dy  #in arcseconds from um  #original
-    slopeaz=grad[1][:,:-1]/scale[-1]*206265/dx
-    #slopeax=grad[0][:,:-1]/scale[-1]*206265/dy  #in arcseconds from um
-    #slopeaz=grad[1][:-1,:]/scale[-1]*206265/dx
+    slopeax=grad[0][:-1,:]/scale[-1]*rad_to_sec/dy  #in arcseconds from um  #original
+    slopeaz=grad[1][:,:-1]/scale[-1]*rad_to_sec/dx
+    #slopeax=grad[0][:,:-1]/scale[-1]*rad_to_sec/dy  #in arcseconds from um
+    #slopeaz=grad[1][:-1,:]/scale[-1]*rad_to_sec/dx
 
     return slopeax,slopeaz
 
 def slope_2D(wdata,x,y,scale=(1.,1.,1.)):
     """calculate slope maps in x and y.
-    return slope in x and y respectively.
+    return a couple of maps of type slope,x,y data for x and y slopes respectively.
     Set scale to (dx,dy,1000.) for z in micron, x,y in mm. (?does it mean  1,1,1000?)"""
 
     dx=np.diff(x)#[:,np.newaxis]
     dy=np.diff(y) [:,np.newaxis]  #original
 
     grad=np.gradient(wdata)  #0->axial(along y), 1->az (along x)
-    slopeax=grad[0][:-1,:]/scale[-1]*206265/dy  #in arcseconds from um  #original
+    slopeax=grad[0][:-1,:]/scale[-1]*rad_to_sec/dy  #in arcseconds from um  #original
     yax=y[:-1]+dy.ravel()/2
 
-    slopeaz=grad[1][:,:-1]/scale[-1]*206265/dx
+    slopeaz=grad[1][:,:-1]/scale[-1]*rad_to_sec/dx
     xaz=x[:-1]+dx/2
-    #slopeax=grad[0][:,:-1]/scale[-1]*206265/dy  #in arcseconds from um
-    #slopeaz=grad[1][:-1,:]/scale[-1]*206265/dx
+    #slopeax=grad[0][:,:-1]/scale[-1]*rad_to_sec/dy  #in arcseconds from um
+    #slopeaz=grad[1][:-1,:]/scale[-1]*rad_to_sec/dx
 
     return (slopeax,x,yax),(slopeaz,xaz,y)
 
@@ -1617,7 +1619,7 @@ def psf2d(y,wdata,alpha,xout,nskip=1):
         yout=PSF_spizzichino(y,col/1000.,alpha=alpha,xout=xout)[1]
         psf2d.append(yout)
     return np.array(psf2d).T
-    #return xout*206265.,np.array(yout)
+    #return xout*rad_to_sec.,np.array(yout)
 
 def compare_2images(data,ldata,x=None,y=None,fignum=None,titles=None,vmin=None,vmax=None,
     commonscale=False):

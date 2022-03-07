@@ -93,6 +93,8 @@ import os
 from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
+from .profile import merge_profiles
+
 
 '''
 #from pySurf.readers._instrument_reader import read_data, csvZygo_reader,csv4D_reader,sur_reader,auto_reader
@@ -120,6 +122,7 @@ from pyProfile import profile
 from pyProfile.profile import crop_profile
 from pyProfile.profile import level_profile
 from pyProfile.profile import resample_profile
+from pyProfile.profile import sort_profile
 from pyProfile.profile import sum_profiles, subtract_profiles
 from pyProfile.psd import psd as profpsd
 from pyProfile.profile import movingaverage, rebin_profile
@@ -249,7 +252,9 @@ class Profile(object):  #np.ndarrays
             file=y
             y=None
         else:
-            y=np.array(y) #onvert to array if not
+            if y is not None:
+                y=np.array(y) #onvert to array if not
+            
         #pdb.set_trace()
         self.file=file #initialized to None if not provided
         if file is not None:
@@ -433,7 +438,8 @@ class Profile(object):  #np.ndarrays
                 tmp=scale.resample(self)
                 res=self.copy()
                 res.y = self.y * tmp.y
-                    
+                
+                #FIXME questo non convince, ad es, se none, ad es se divisione
                 if scale.units[1] == self.units[1]:
                     res.units[1] = scale.units[1]+'^2'
                 else:
@@ -443,7 +449,7 @@ class Profile(object):  #np.ndarrays
                 else: 
                     res.name = (self.name if self.name else scale.name) + ' product'
             else:     # value
-                #breakpoint()
+                breakpoint()
                 res.y = scale * res.y 
                 if self.name:
                     res.name = '%s x %s'%(self.name,scale)
@@ -539,12 +545,28 @@ class Profile(object):  #np.ndarrays
             #res.name = '__truediv__'
             res.name = '%s%s'%(self.name if self.name else "ratio",((' / %s'%getattr(other,'name',other)) if getattr(other,'name','') else ''))
         return res
+
+    
+    def merge(self,other,*args,**kwargs):
+        
+        if isinstance(other,Profile):
+            res = merge_profiles([[self.x,self.y],[other.x,other.y]],*args,**kwargs)
+            res = Profile(*res,units=self.units,name=self.name + " + " + other.name)
+        else:
+            raise ValueError("Unrecognized type in sum")
+        return res
         
     def min (self):
         return np.nanmin(self.y)
 
     def max (self):
         return np.nanmax(self.y)    
+        
+    def sort (self,reverse=False):
+        """return sorted copy."""
+        res = self.copy()
+        res.x,res.y= sort_profile(self.x,self.y,reverse=reverse)   
+        return res
     
     def plot(self,title=None,*args,**kwargs):
         """plot profile using and setting automatically labels.
@@ -558,7 +580,9 @@ class Profile(object):  #np.ndarrays
         stats=kwargs.pop('stats',0) #to change the default behavior
         loc=kwargs.pop('loc',0) #location for stats legend
         framealpha=kwargs.pop('framealpha',0.5) #transparency for stats legend
-        l = None if self.name is None else self.name 
+        l = kwargs.pop('label',None)
+        if l is None and self.name:
+            l = self.name
         res=plt.plot(self.x,self.y,label=l,*args,**kwargs)
         
         if stats: #add stats to plot

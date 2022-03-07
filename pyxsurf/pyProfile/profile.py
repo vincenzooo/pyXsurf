@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 from scipy import stats
 import pdb
 from dataIO.functions import update_docstring
-
+from scipy.stats import binned_statistic
 ## profile creation
 
 def line(x,y=None):
@@ -300,7 +300,14 @@ def level_profile (x,y=None,degree=1):
         x=np.arange(len(y))
     
     return x,y-polyfit_profile(x,y,degree) 
-        
+
+def sort_profile (x,y,reverse=False):
+    """sort profile on the base of x. """
+
+    i = x.argsort()    
+    if reverse:
+        i=i[::-1]
+    return x[i],y[i]       
 
 def remove_profile_outliers(y,nsigma=3,includenan=True):
     """remove outliers from a profile by interpolation.
@@ -394,8 +401,12 @@ def resample_profile(x1,y1,x2,y2=None):
     y2 is not used and put for consistency (can be omitted).
     
     """
-    if np.any(np.diff(x1) <= 0): raise ValueError ('x1 must be increasing for interpolation')
-    if np.any(np.diff(x2) <= 0): raise ValueError ('x2 must be increasing for interpolation')    
+    if np.any(np.diff(x1) <= 0): 
+        if np.any(np.diff(x1) >= 0): 
+            raise ValueError ('x1 must be monotonic for interpolation')
+    if np.any(np.diff(x2) <= 0): 
+        if np.any(np.diff(x1) >= 0): 
+            raise ValueError ('x2 must be monotonic for interpolation')    
     
     y2 = np.interp(x2,x1,y1)
      
@@ -405,7 +416,109 @@ def sum_profiles(x1,y1,x2,y2,*args,**kwargs):
     return x1,y1+resample_profile(x2,y2,x1)[1]  
         
 def subtract_profiles(x1,y1,x2,y2,*args,**kwargs):
-    return x1,y1-resample_profile(x2,y2,x1)[1]  
+    return x1,y1-resample_profile(x2,y2,x1)[1] 
+
+def merge_profiles(profiles,ranges=None):
+                    
+#def merge_profiles(ranges, profiles, labels,xrange=None,yrange=None,
+#                    outname=None):
+    """ da trim_psds_group in ICSO2020_review
+    
+        Makes a single profile trimming and averaging multiple ones 
+        according to selection.
+    
+        this is lauched to trim a single set of psds related to same sample (or same context).
+        ranges, profiles, labels are lists with same number of elements,
+        describing respectively: 
+        ranges for each psd (if None, the psd is not included in the output).
+            If set to None, include all data.
+        labels to be used in plot.
+        outname: if provided generate plot of trim and txt with resulting psd.
+        
+        """
+    if ranges is None:
+        ranges = np.repeat([[None],[None]],
+                           len(profiles),axis=1).T
+    xtot,ytot,bins,xvals,yvals = [] , [], [], [], []
+    
+    #plt.figure(figsize=(12,6))
+    #for ran,pr,lab in zip(ranges,profiles,labels):
+    for ran,pr in zip(ranges,profiles):
+        if ran is not None:
+            #print(d)
+            x,y = pr
+            if x[0] == 0:
+                x=x[1:]
+                y=y[1:]
+            xx,yy = crop_profile(x,y,ran)
+            #plot_psd(xx,yy,label=lab,units=['um','um','nm'])
+            xtot.append(xx)
+            ytot.append(yy)
+        """
+        plt.legend( prop={'size': 12},loc = 1) #bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.xlim(xrange)
+        plt.ylim(yrange)
+        if outname:
+            plt.title(os.path.basename(outname))
+        plt.grid( which='minor', linestyle='--')
+        plt.tight_layout()
+    if outname:
+        plt.savefig(fn_add_subfix(outname,'_trimpsds','.png'))
+    """
+    
+    ### The following part is of interest only for rebinning,
+    ###   not included in this version's output
+    ###   because result will in general not be smooth in transitions between
+    ###   different intervals.
+    ###   if intervals are not overlapping, it is irrelevant.
+    # makes rebinning and averaging.
+    # we want to start from lower x (assuming inputs are passed not in order),
+    # keep x in non overlapping regions, while averaging on common regions.
+    # psd frequencies (x) are not equally spacing. If I do average, I get
+    #   spikes when typically lower freqs of each psd are more spaced than higher freq
+    #   of same psds. Then overlapping intervals of two psds typically have one with
+    #   broader spacing. Most of intervals have points only from psds with tighter spacing
+    #      when points from the other enter, you get spike. This is why interpolation is needed.
+    #sort groups in xtot in ascending order
+    pmin=[a.min() for a in xtot]
+    igroup =np.argsort(pmin)
+    for i in igroup:
+        x = xtot[i]
+        y = ytot[i]
+        if len(bins) == 0:
+            bins.append(x)
+            xvals.append(x)
+            yvals.append(y)
+        else:
+            sel = x>max(bins[-1])
+            xint = np.hstack([ bins[-1][bins[-1]>=min(x)] , x[sel] ])
+            #pdb.set_trace()
+            xvals.append(xint)
+            yvals.append(np.interp(xint,x,y))
+            if any(sel):
+                #pdb.set_trace()
+                #resample second vector on common range
+                bins.append(x[sel])
+    xtot=np.hstack(xtot)
+    ytot=np.hstack(ytot)
+    xvals=np.hstack(xvals)
+    yvals=np.hstack(yvals)
+    xbins = np.hstack(bins)
+    ybins = binned_statistic(xvals,yvals,bins=xbins,statistic='mean') [0]
+    ###
+    
+    """
+    plot_psd(xbins[:-1],ybins,label='binned',units=['um','um','nm'],
+             linestyle='--')
+    #plot_psd(xtot,ytot,label='total',units=['um','um','nm'])
+    if outname:
+        save_profile(fn_add_subfix(outname,'_binpsd','.dat'),xbins[:-1],ybins)
+    
+    if outname:
+        plt.savefig(fn_add_subfix(outname,'_trimpsds','.png'))
+    """
+    
+    return xtot, ytot    
 
 def calculate_barycenter(x,y):
     """return the x of barycenter using y as weight function."""
