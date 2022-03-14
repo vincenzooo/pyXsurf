@@ -93,8 +93,9 @@ import os
 from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
-from .profile import merge_profiles
-
+from pyProfile.profile import merge_profiles
+from pyProfile.profile import register_profile
+from pyProfile.profile import save_profile
 
 '''
 #from pySurf.readers._instrument_reader import read_data, csvZygo_reader,csv4D_reader,sur_reader,auto_reader
@@ -608,13 +609,13 @@ class Profile(object):  #np.ndarrays
         self.x,self.y = np.genfromtxt(filename,unpack=True,*args,**kwargs)
     load=update_docstring(load,np.genfromtxt)
 
-    from pyProfile.profile import save_profile
     def save(self,filename,*args,**kwargs):
         """Save data using `pyProfile.profile.save_profile`."""
-        return save_profile(filename,self.x,self.y,*args,**kwargs)
+        res = save_profile(filename,self.x,self.y,*args,**kwargs)
+        return res
     save.__doc__=save_profile.__doc__
+    
 
-    from pyProfile.profile import register_profile
     def register(self,filename,*args,**kwargs):
         """Use pyProfile.profile.register_profile to rescale."""
         self.x,self.y = register_profile(x,y,*args,**kwargs)

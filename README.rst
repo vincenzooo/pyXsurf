@@ -21,7 +21,7 @@ At this point you have two options:
 2) Manual (developer): put the folder with code in a path accessible to 
 python on your system (generally this means it must be in the system path) 
 and start using it. In this case you must install
-all dependencies.
+all dependencies by yourself.
 
 For users new to Python, the library was developed on anaconda
 distribution. Any other distribution should be equivalent, however I

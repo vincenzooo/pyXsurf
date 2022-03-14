@@ -11,6 +11,8 @@ In this experimental version, different ways to access object methods are tested
 
 functions operating on a list of Data2D objects
 
+Another problem is to make sure that superlists are returned on list operators like slices, how to do this? Metaclasses?
+
 2020/05/26 moved to dataIO"""
 # turned into a class derived from list 2020/01/16, no changes to interface,
 # everything should work with no changes.
