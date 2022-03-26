@@ -71,6 +71,12 @@ A basic description of the different modules is:
 Some examples and data can be found in a ``test`` subfolder of each
 module.
 
+Citation
+--------
+
+.. image:: https://zenodo.org/badge/165474659.svg
+   :target: https://zenodo.org/badge/latestdoi/165474659
+
 Author
 ------
 
