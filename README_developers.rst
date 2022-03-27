@@ -4,6 +4,7 @@ pyXSurf (formerly pyXTel)
 Python library for X-Ray Optics, Metrology Data Analysis and Telescopes
 Design. 
 
+2022/03/22 Started restructuring repository. Renamed "source" folder to source (from pyXsurf).Add installation instructions for developers to this file and readme.txt.
 2021/07/21 Upgraded installation mechanism.
 2020/11/09 Changed repository name from ``pyXTel`` to
 ``pyXSurf``.
