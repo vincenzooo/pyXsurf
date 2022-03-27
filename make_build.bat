@@ -8,5 +8,5 @@ for /f %%i in ('dir /b/a-d/od/t:c dist') do set LAST=%%i
 
 #echo Upload %LAST%
 
-twine upload --repository testpypi -u vincenzooo  --skip-existing dist/%LAST%
+twine upload --repository testpypi -u vincenzooo -p M!gn0tta --skip-existing dist/%LAST%
 rem dist/pyXsurf-0.1.25-py3-none-any.whl
