@@ -7,7 +7,7 @@ from setuptools import find_packages, setup
 
 setup(
   name='pyXsurf',
-  version='0.1.40',
+  version='0.1.50',
   description="Python library for X-Ray Optics, Metrology Data Analysis and Telescopes Design.",
   url='https://github.com/vincenzooo/pyXSurf',
   author='Vincenzo Cotroneo',
@@ -16,7 +16,7 @@ setup(
   #package_dir={'': 'pyxsurf'} #this makes me import as old style e.g. from pySurf import data2D, but can create overlapping, e.g. `test` or `plotting` may be used for other things.
   #package_dir={'pySurf': 'pyxsurf/pySurf',
   #             'dataIO': 'pyxsurf/dataIO'}
-  package_dir={'': 'pyxsurf'},
+  package_dir={'': 'source'},
   #packages=p,
   packages = ['pySurf','dataIO','utilities','plotting','pyProfile'],
   setup_requires=['numpy','astropy']

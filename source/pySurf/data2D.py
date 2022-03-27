@@ -331,7 +331,7 @@ def rotate_data(data,x=None,y=None,ang=0,k=None,center=None,
         return res
 
     if k is not None:
-        assert ang is 0
+        assert ang == 0
 
         ##alg 1: basic rotation with maximum inplace operations, messes up sign of axis, raises ambiguity on how to plot with plot_data
         #data=np.rot90(data,k,axes=(1,0))
