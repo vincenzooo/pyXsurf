@@ -9,8 +9,8 @@ Each test is run with `python test_script.py` and can call specific tests in sub
 Call these scripts after installation e.g. from (potentially OS dependant) shell script.
 An example can be (not that this works on any system, provided all tools are installed)::
 
-python test\test_dep.py
-python test\test_import.py
+python test_install\test_dep.py
+python test_install\test_import.py
 py.test --nbval profile_demo_rise.ipynb
 
 
