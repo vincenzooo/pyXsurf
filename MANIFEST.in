@@ -1,0 +1,18 @@
+include LICENSE.txt
+include INSTALL
+#from spectrapy:
+#recursive-include conf *
+#recursive-include examples *
+#recursive-include doc/build/html *
+#prune examples/__pycache__
+#prune tests/*/__pycache__
+#prune tests/htmlcov
+#prune tests/.cache
+#exclude tests/.coverage
+#exclude examples/test.py
+#from SO https://stackoverflow.com/questions/26911045/is-it-possible-to-exclude-certain-files-when-building-a-wheel-with-setup-py
+exclude .travis.yml
+exclude appveyor.yml
+exclude data/private/file.env
+#VC, non sicuro serva, forse da escludere traminte __init__.py
+exclude source/pySurf/old
