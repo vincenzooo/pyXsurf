@@ -18,17 +18,22 @@ Welcome to pyXsurf's documentation!
    deleteme_link
    deleteme_link2
    deleteme/basic_usage.ipynb
-   deleteme/basic_usage.html
    
 Prova riferimenti
 ====================
+RAW HTML:
+
 .. raw:: html
   :file: deleteme/basic_usage.html
  
-.. include:: ../deleteme2/basic_usage2.rst
+INCLUDE OUTER DIR:
+.. include::  ../deleteme2/basic_usage2.rst
 
 Alt
 ====
+
+basic_usage2.rst
+
 .. automodule:: pySurf
    :members:
   
