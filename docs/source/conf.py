@@ -43,7 +43,8 @@ extensions = ['myst_parser',
               'sphinx.ext.autodoc',
               'sphinx.ext.doctest',
               'sphinx.ext.autosummary',
-              'nbsphinx'
+              'nbsphinx',
+              'sphinx_automodapi.automodapi'
 ]
 
 autosummary_generate = True
