@@ -1,3 +1,6 @@
+# this is handmade copy of external github readme.
+# TODO make automatic
+
 pyXsurf (formerly pyXTel)
 =========================
 
@@ -81,3 +84,5 @@ Author
 ------
 
 Vincenzo Cotroneo vincenzo.cotroneo@inaf.it
+
+
