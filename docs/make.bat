@@ -7,7 +7,9 @@ REM Command file for Sphinx documentation
 if "%SPHINXBUILD%" == "" (
 	set SPHINXBUILD=sphinx-build
 )
-set SOURCEDIR=source
+
+REM VC modify to compile from different source folder
+if "%2" NEQ "" (set SOURCEDIR=%2) else (set SOURCEDIR=source)
 set BUILDDIR=build
 
 if "%1" == "" goto help
