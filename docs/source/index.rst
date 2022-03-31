@@ -33,6 +33,8 @@ See the following sections
    :maxdepth: 1
    
    Github readme <readme_link>
+   Tutorials <tutorials>
+   HowTo <howto>
    
   
 
