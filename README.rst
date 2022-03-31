@@ -11,43 +11,50 @@ Design.
 Installation
 ------------
 
-Download or fork the project. You can use git clone command by:
+Download or clone the project. You can use git clone command by:
 ``git clone https://github.com/vincenzooo/pyXSurf.git`` or the button
 ``download`` at top of page.
 At this point you have two options:
 
-1) Python installer (suggested): move to the folder with the code and call
+1. Python installer (suggested): move to the folder with the code and call
 ``python setup.py install``
-2) Manual (developer): put the folder with code in a path accessible to 
+
+2. Manual (developer): put the folder with code in a path accessible to 
 python on your system (generally this means it must be in the system path) 
 and start using it. In this case you must install
 all dependencies by yourself.
 
-For users new to Python, the library was developed on anaconda
-distribution. Any other distribution should be equivalent, however I
-never had any problem with Anaconda and find it very easy to work with,
-so I can only recommend it. Same way, I used for developement
-notepad++/IPython/jupyter on Windows; Spyder; VScode and feel to
-recommend any of these. Of course any other environment or editor works
-same way.
+Developers branches can be installed in the same way and they should work equally (just have more unfinished stuff), so the only thing you need to do differently is just to select the correct branch. See  
 
-Status of code and documentation
+Status of the library
 --------------------------------
 
 The main part of the library is well defined and it works well. I am
 constantly adding functions when I find they are needed during my daily
-work. The selection of modules for public release is in phase of improvement,
-there are still a few modules that are in early stage or not of general interest, 
-but are included for backwards compatibility, future needs or just to stay on the safe side.
+work. 
 
-Code is usually commented, and sometimes even in the right place for self-documentation to work, 
-but this is quite non-uniform,
-as it mixes different conventions I tried over the time, and it will remain like this
-until I find one tool that I can use to maintain the documentation.  
-In the meanwhile, you should be able to access
-it by usual python introspection (``?``, ``??``, autocompletion, etc.). There
-are some tutorial and examples, but they are quite scattered around in
-folders ``Demo``, ``Tutorial``, ``Test``, etc.
+I have tried the installation on a few computers and it worked smoothly by `setup.py`. You are very welcome to help signaling any problem or missing information, please see `Contributing`_ below.
+
+If everything worked well with the installation, there
+are a decent number of tutorial and examples, but they are quite scattered around in
+folders ``Demo``, ``Tutorial``, ``Test``, etc. 
+
+You should be able to access information by usual python introspection (``?``, ``??``, autocompletion, etc.).
+
+See developer notes for a detailed status of developement, how to access more recent features and last status of documentation (on developer brach), especially if you think you can help.
+Expecially installation and release mechanism, are in phase of improvement, as well as documentation.
+
+.. _contributing
+
+Contributing
+--------------------------------
+
+Please report bugs or feature requests, missing documentation, or open a issue on github.
+
+Expecially appreciated is if you can provide templates, examples or hints on how to handle, documentation (Sphinx), packaging, continuous integration (Github).
+
+Please check :ref:`README_developers` for the status of the development, or if you think you can help in any way. 
+
 
 Modules
 -------
@@ -76,6 +83,16 @@ Citation
 
 .. image:: https://zenodo.org/badge/165474659.svg
    :target: https://zenodo.org/badge/latestdoi/165474659
+
+License
+-------
+
+This project is Copyright (c) Vincenzo Cotroneo and licensed under
+the terms of the BSD 3-Clause license. Parts of this package are based upon
+the `Astropy package template <https://github.com/astropy/package-template>`_
+which is licensed under the BSD 3-clause license. See the licenses folder for
+more information.
+
 
 Author
 ------
