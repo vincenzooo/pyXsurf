@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "..\\astropy.github.com.git"
+		},
+		{
+			"path": "..\\astropy_test"
+		},
+		{
+			"path": "..\\pyXsurf"
+		},
+		{
+			"path": "..\\pyXsurf_astropy"
+		}
+	],
+	"settings": {
+		"esbonio.sphinx.confDir": ""
+	}
+}

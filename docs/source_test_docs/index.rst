@@ -11,8 +11,13 @@ Page of documentation branch
 ==============================
 
 Here there are two folders: ``source_test_doc`` containing experimentation on ``sphinx`` and ``rst`` functions and
-their usage, in which this file is located, and ``docs``, containing the developing official documentation for pyXsurf,
-The two are independent git repositories, this file can be compiled by 
+their usage, in which this file is located, and ``docs``, containing the developing official documentation for pyXsurf
+main branch.
+The makefile in the parent folder was modify to accept an optional source dir as argument. 
+This makes is possible to compile the *official* documentation, with the usual ``make file``,
+or the documentation of the *documentation* branch if the folder is passed with ``make file\source_test_docs``,
+to render this file.
+
 
 .. toctree::
    :maxdepth: 1
