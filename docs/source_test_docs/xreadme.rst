@@ -19,9 +19,9 @@ Download or fork the project. You can use git clone command by:
 ``download`` at top of page.
 At this point you have two options:
 
-1) Python installer (suggested): move to the folder with the code and call
+1. Python installer (suggested): move to the folder with the code and call
 ``python setup.py install``
-2) Manual (developer): put the folder with code in a path accessible to 
+2. Manual (developer): put the folder with code in a path accessible to 
 python on your system (generally this means it must be in the system path) 
 and start using it. In this case you must install
 all dependencies by yourself.
