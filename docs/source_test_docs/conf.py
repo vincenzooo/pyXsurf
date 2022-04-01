@@ -44,7 +44,10 @@ extensions = ['myst_parser',
               'sphinx.ext.doctest',
               'sphinx.ext.autosummary',
               'nbsphinx',
-              'sphinx_automodapi.automodapi'
+              'sphinx_automodapi.automodapi',
+              'sphinx_automodapi.automodapi',
+              'sphinx.ext.autosectionlabel',
+              'sphinx.ext.inheritance_diagram'
 ]
 
 autosummary_generate = True
@@ -67,9 +70,9 @@ exclude_patterns = []
 import guzzle_sphinx_theme
 
 html_theme_path = guzzle_sphinx_theme.html_theme_path()
-#html_theme = 'guzzle_sphinx_theme'
+html_theme = 'guzzle_sphinx_theme'
 #html_theme = 'haiku'  #viene greco
-html_theme = 'alabaster'
+#html_theme = 'traditional'
 
 # Guzzle theme options (see theme.conf for more information)
 html_theme_options = {

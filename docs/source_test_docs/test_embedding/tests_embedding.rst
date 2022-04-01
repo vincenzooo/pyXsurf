@@ -48,7 +48,7 @@ If a file ``.ipynb`` is direcly called in ipynb, each of its sections is inserte
 .. toctree::
    :maxdepth: 1
    
-   deleteme/basic_usage.ipynb
+   doc_files/basic_usage.ipynb
 
 If instead files are included in external .rst:
 
@@ -59,6 +59,13 @@ If instead files are included in external .rst:
    ipynb with include (wrong) <ipynb_include_link>
 
 
+
+Ideally one wants to visualize a single link, that, when clicked, brings you to a single jupyter page (it can have internal sections, but they don't have to "spill" in the calling table of content).
+
+If this happens might depend on the levels of titles. Controlling this behavior is the reason for making another page with **section tests*.
+
+
+
 Embedding HTML
 -----------------
 
@@ -67,7 +74,6 @@ This works an rst which calls RAW HTML:
 .. toctree::
    :maxdepth: 1
 
-   deleteme/basic_usage.html
    call external link to html <basic_html_link>
 
 
@@ -79,9 +85,10 @@ Include rst from parent toctree with headers of lower level
 .. toctree::
    :maxdepth: 2
 
+   put directly HTML file <doc_files/basic_usage.html>
    include rst with link to rst <deleteme_link>
    try include ipynb in parent folder <deleteme_link2>
-   deleteme/basic_usage
+   doc_files/basic_usage
 
 Comments
 --------

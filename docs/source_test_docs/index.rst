@@ -10,22 +10,29 @@
 Page of documentation branch
 ==============================
 
-Here there are two folders: ``source_test_doc`` containing experimentation on ``sphinx`` and ``rst`` functions and
+Here there are two folders: ``source_test_doc`` containing experimentation on *sphinx* and *rst* functions and
 their usage, in which this file is located, and ``docs``, containing the developing official documentation for pyXsurf
 main branch.
-The makefile in the parent folder was modify to accept an optional source dir as argument. 
-This makes is possible to compile the *official* documentation, with the usual ``make file``,
-or the documentation of the *documentation* branch if the folder is passed with ``make file\source_test_docs``,
-to render this file.
+
+The most complete documentation is created by compiling the source in the dev documentation folder ``source_test_doc``.
+This can be easily be dome by runnning the modified make file, with an optional source dir as argument.
+So, if you put yourself in the ``docs`` folder you can call:
+
+* ``make file``, which as usual compiles the *official* documentation, or
+* ``make file\source_test_docs`` which render the same plus the additional documentation of the *documentation* branch.
+
+The last one also renders this "cover page", which allows you to chose between the two:
 
 
 .. toctree::
    :maxdepth: 1
    
-   pySurf documentation <index_docs_link>
-   sphinx and rst usage <index_tests>
+   pySurf "official documentation" (main page) <index_docs_link>
+   Testing sphinx and rst usage <index_tests>
 
-	
+
+
+
 =======================
 Automatically generated
 =======================

@@ -33,23 +33,12 @@ See the following sections
    :maxdepth: 1
    
    Github readme <readme_link>
-   Tutorials <tutorials>
-   HowTo <howto>
+
+..
+   .. toctree::
+      :maxdepth: 1
+      Tutorials <tutorials>
+      HowTo <howto>
    
   
 
-
-pyXsurf API
------------
-
-.. toctree::
-    api
-	
-=======================
-Automatically generated
-=======================
-
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

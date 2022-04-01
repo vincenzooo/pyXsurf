@@ -26,12 +26,11 @@ Readme currently is:
 These guidelines follow Sphinx’s recommendation in the Sections chapter of its reStructuredText Primer 
 and Python’s convention in the 7.3.6. Sections part of its style guide.
 
-.. toctree::
+..
+   .. toctree::
 
-   sphinx_sections
-   astropy_sections
-
-
+      sphinx_sections
+      astropy_sections
 
 	
 =======================
@@ -40,9 +39,10 @@ After header
 
 Here the same toctree after a header.
 
-.. toctree::
-   
-   sphinx_sections
-   astropy_sections
+..
+   .. toctree::
+      
+      sphinx_sections
+      astropy_sections
 
 
