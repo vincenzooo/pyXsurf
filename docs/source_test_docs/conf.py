@@ -16,11 +16,11 @@
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here.
-import pathlib
-import sys
-sys.path.insert(0, pathlib.Path(__file__).parents[2].resolve().as_posix())
-# print(pathlib.Path(__file__).parents[2].resolve().as_posix()) #pyXTel
-sys.path.insert(0, r'..\deleteme2')
+#import pathlib
+#import sys
+#sys.path.insert(0, pathlib.Path(__file__).parents[2].resolve().as_posix())
+## print(pathlib.Path(__file__).parents[2].resolve().as_posix()) #pyXTel
+#sys.path.insert(0, r'..\deleteme2')
 
 # -- Project information -----------------------------------------------------
 
@@ -72,7 +72,8 @@ import guzzle_sphinx_theme
 html_theme_path = guzzle_sphinx_theme.html_theme_path()
 #html_theme = 'guzzle_sphinx_theme'
 #html_theme = 'haiku'  #viene greco
-html_theme = 'traditional'
+#html_theme = 'traditional'
+html_theme = 'bootstrap-astropy'
 
 # Guzzle theme options (see theme.conf for more information)
 html_theme_options = {
@@ -84,3 +85,4 @@ html_theme_options = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
