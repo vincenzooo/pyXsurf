@@ -45,8 +45,12 @@ extensions = ['myst_parser',
               'sphinx.ext.autosummary',
               'nbsphinx',
               'sphinx_automodapi.automodapi',
+<<<<<<< HEAD
               'sphinx.ext.autosectionlabel',
               'sphinx.ext.inheritance_diagram'
+=======
+              'sphinx.ext.autosectionlabel'
+>>>>>>> eae9e3063288efad9d3cb4722dc70c6b2919ea35
 ]
 
 autosummary_generate = True
