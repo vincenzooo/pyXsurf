@@ -24,7 +24,7 @@ python on your system (generally this means it must be in the system path)
 and start using it. In this case you must install
 all dependencies by yourself.
 
-Developers branches can be installed in the same way and they should work equally (just have more unfinished stuff), so the only thing you need to do differently is just to select the correct branch. See  
+Developers branches can be installed in the same way and they should work equally (just have more unfinished stuff), so the only thing you need to do differently, is to switch branch (e.g. ``git checkout documentation``, if ``documentation`` is the name of the branch) before running the setup. Please check developers notes for a list of active branches and their features.   
 
 Status of the library
 --------------------------------
@@ -33,7 +33,7 @@ The main part of the library is well defined and it works well. I am
 constantly adding functions when I find they are needed during my daily
 work. 
 
-I have tried the installation on a few computers and it worked smoothly by `setup.py`. You are very welcome to help signaling any problem or missing information, please see `Contributing`_ below.
+I have tried the installation on a few computers and it worked smoothly by `setup.py`. You are very welcome to help signaling any problem or missing information, please see :ref:`Contributing` below.
 
 If everything worked well with the installation, there
 are a decent number of tutorial and examples, but they are quite scattered around in
@@ -41,7 +41,7 @@ folders ``Demo``, ``Tutorial``, ``Test``, etc.
 
 You should be able to access information by usual python introspection (``?``, ``??``, autocompletion, etc.).
 
-See developer notes for a detailed status of developement, how to access more recent features and last status of documentation (on developer brach), especially if you think you can help.
+See developer notes :ref:`developersnotes` for a detailed status of developement, how to access more recent features and last status of documentation (on developer brach), especially if you think you can help.
 Expecially installation and release mechanism, are in phase of improvement, as well as documentation.
 
 .. _contributing
@@ -53,7 +53,7 @@ Please report bugs or feature requests, missing documentation, or open a issue o
 
 Expecially appreciated is if you can provide templates, examples or hints on how to handle, documentation (Sphinx), packaging, continuous integration (Github).
 
-Please check :ref:`README_developers` for the status of the development, or if you think you can help in any way. 
+Please check :ref:`developersnotes` for the status of the development, or if you think you can help in any way. 
 
 
 Modules
@@ -88,10 +88,12 @@ License
 -------
 
 This project is Copyright (c) Vincenzo Cotroneo and licensed under
-the terms of the BSD 3-Clause license. Parts of this package are based upon
-the `Astropy package template <https://github.com/astropy/package-template>`_
-which is licensed under the BSD 3-clause license. See the licenses folder for
-more information.
+the terms of the BSD 3-Clause license. 
+
+.. Parts of this package are based upon
+   the `Astropy package template <https://github.com/astropy/package-template>`_
+   which is licensed under the BSD 3-clause license. See the licenses folder for
+   more information.
 
 
 Author

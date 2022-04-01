@@ -6,4 +6,4 @@ Next I try to include a reference to a file rst in a folder up in the hierarchy 
 
 Any header appearing below is in the included file, note all sections in this page visualized also in tocs that list this rst.
 
-.. include:: ../deleteme2/basic_usage2.rst
+.. include:: ../../../deleteme2/basic_usage2.rst
