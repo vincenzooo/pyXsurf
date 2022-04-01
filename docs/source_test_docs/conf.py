@@ -70,15 +70,9 @@ exclude_patterns = []
 import guzzle_sphinx_theme
 
 html_theme_path = guzzle_sphinx_theme.html_theme_path()
-<<<<<<< HEAD
-html_theme = 'guzzle_sphinx_theme'
-#html_theme = 'haiku'  #viene greco
-#html_theme = 'traditional'
-=======
 #html_theme = 'guzzle_sphinx_theme'
 #html_theme = 'haiku'  #viene greco
-html_theme = 'alabaster'
->>>>>>> eae9e3063288efad9d3cb4722dc70c6b2919ea35
+html_theme = 'traditional'
 
 # Guzzle theme options (see theme.conf for more information)
 html_theme_options = {
