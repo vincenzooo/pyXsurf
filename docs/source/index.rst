@@ -41,3 +41,10 @@ See the following sections
    
   
 
+API
+=======================
+
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

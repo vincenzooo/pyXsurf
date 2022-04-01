@@ -18,9 +18,10 @@
 # add these directories to sys.path here.
 import pathlib
 import sys
-sys.path.insert(0, pathlib.Path(__file__).parents[2].resolve().as_posix())
+#sys.path.insert(0, pathlib.Path(__file__).parents[2].resolve().as_posix())
 # print(pathlib.Path(__file__).parents[2].resolve().as_posix()) #pyXTel
-sys.path.insert(0, r'..\deleteme2')
+#sys.path.insert(0, r'..\deleteme2')
+# non serviva a molto
 
 # -- Project information -----------------------------------------------------
 

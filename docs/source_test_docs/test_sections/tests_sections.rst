@@ -26,23 +26,54 @@ Readme currently is:
 These guidelines follow Sphinx’s recommendation in the Sections chapter of its reStructuredText Primer 
 and Python’s convention in the 7.3.6. Sections part of its style guide.
 
-..
-   .. toctree::
+TYPO3 uses
 
-      sphinx_sections
-      astropy_sections
+|   = with overline for parts 
+|   = for chapters 
+|   - for sections 
+|   ~ for subsections 
+|   " for subsubsections 
+|   ' for paragraphs
+|   ^, #, *, $, `
+
+
+See https://stackoverflow.com/questions/59397527/managing-sphinx-toctrees-combined-with-inline-sections
+
+https://stackoverflow.com/questions/46791625/how-to-separate-sphinx-chapters-within-a-single-part-into-different-files
+
+
+The files linked now, have 
+
+.. toctree::
+
+   part_chapter
 
 	
 =======================
-After header
+After header 1
 =======================
 
-Here the same toctree after a header.
-
-..
-   .. toctree::
-      
-      sphinx_sections
-      astropy_sections
+Here the same toctree after a section header.
 
 
+.. toctree::
+   
+   part_chapter
+
+
+.. test with include
+
+Now with include:
+
+
+.. include::   part_chapter
+
+	
+=======================
+After header 2
+=======================
+
+Here the same inclusion after a section header.
+
+
+.. include::   part_chapter
