@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "pyXTEL"
-version = "0.1.41"
+name = "pyXsurf"
+version = "1.5.2"
 description = ""
 authors = ["vincenzo"]
 packages = [
-{ include = "*", from = "pyxsurf" },
+{ include = "*", from = "source" },
 ]
 
 [tool.poetry.dependencies]

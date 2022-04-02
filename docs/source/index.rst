@@ -1,3 +1,4 @@
+
 .. pyXsurf documentation master file, created by
    sphinx-quickstart on Mon Mar 14 19:25:52 2022.
    You can adapt this file completely to your liking, but it should at least
@@ -14,13 +15,13 @@
 Welcome to pyXsurf's documentation!
 ===================================
 ..
-	.. |logo_svg| image:: _static/astropy_banner.svg
+	.. |logo_svg| image:: _static/surf-board-wave.svg
 
-	.. |logo_png| image:: _static/astropy_banner_96.png
+	.. |logo_png| image:: _static/surf-board-wave.png
 
 	.. raw:: html
 
-	   <img src="_static/astropy_banner.svg" onerror="this.src='_static/astropy_banner_96.png'; this.onerror=null;" width="485"/>
+	   <img src="_static/surf-board-wave.svg" onerror="this.src='_static/surf-board-wave.png'; this.onerror=null;" width="485"/>
 
 	.. only:: latex
 
@@ -30,21 +31,30 @@ Welcome to pyXsurf's documentation!
 See the following sections
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    
-   Github readme <readme_link>
-..
-   .. toctree::
-      :maxdepth: 1
-      Tutorials <tutorials>
+   tutorials
+   
+..      
       HowTo <howto>
-   
-  
 
-API
-=======================
 
+.. include:: readme
+
+pyXsurf API
+------------
+
+.. toctree::
+   api 
+
+Indices and Tables
+-------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+
+
+
+	
