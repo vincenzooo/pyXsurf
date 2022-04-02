@@ -1,5 +1,8 @@
 from setuptools import find_packages, setup
 
+# or
+from setuptools import find_namespace_packages
+
 """with this install works only if numpy is already installed, otherwise fails on wheel."""
 
 #p = find_packages('.')
@@ -23,12 +26,7 @@ setup(
 )
 
 
-from setuptools import find_packages
-
-# or
-from setuptools import find_namespace_packages
-
-'''
+"""
 #from https://docs.pytho
 n.org/3/distutils/setupscript.html
 
@@ -43,9 +41,9 @@ setup(    name='pyXsurf',
     author_email='vincenzo.cotroneo@inaf.it',
     #url='https://github.com/vincenzooo/pyXSurf',
     )
-'''     
+"""     
      
-'''
+""" 
 
 from setuptools import setup
 setup(
@@ -70,4 +68,4 @@ setup(
 
 # from 
 
-'''
+""" 
