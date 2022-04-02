@@ -30,13 +30,18 @@ Tests for embedding of different formats in different positions
 Embedding rst directly and indirectly
 -------------------------------------
 
-.rst files ``readme.rst``, are linked (even without extension) directly, through a file ``readme_link.rst`` which references (through directive ``.. include::``) to a parent folder (works in same way for any path) with a readme file. In both cases the extension can be omitted:
+.rst files ``readme.rst``, are linked directly or through a file ``readme_link.rst``. This references, through directive ``.. include::``, to a readme file in a parent folder (works in same way for any path, internal or external). In both cases the extension can be omitted:
+
+.. code:: rst
+
+   directly link readme.rst <readme>
+   indirect link to readme in parent dir <readme_link>
 
 .. toctree::
    :maxdepth: 1
    
-   readme from rst <readme>
-   readme from external parent dir <readme_link>
+   directly link readme.rst <readme>
+   indirect link to readme in parent dir <readme_link>
    
   
 Embedding ipynb

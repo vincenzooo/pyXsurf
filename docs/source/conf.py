@@ -16,12 +16,12 @@
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here.
-import pathlib
-import sys
-#sys.path.insert(0, pathlib.Path(__file__).parents[2].resolve().as_posix())
-# print(pathlib.Path(__file__).parents[2].resolve().as_posix()) #pyXTel
+#import pathlib
+#import sys
+#import os
+#sys.path.insert(0, os.path.join(pathlib.Path(__file__).parents[2].resolve().as_posix(),'source','pySurf'))
+#print("**"+os.path.join(pathlib.Path(__file__).parents[2].resolve().as_posix(),'source','pySurf')+"**") #pyXTel
 #sys.path.insert(0, r'..\deleteme2')
-# non serviva a molto
 
 # -- Project information -----------------------------------------------------
 
@@ -40,7 +40,7 @@ release = 'v1.5.0'
 # ones.
 extensions = ['myst_parser',
               'sphinx.ext.duration',
-              "guzzle_sphinx_theme",
+              #"guzzle_sphinx_theme",
               'sphinx.ext.autodoc',
               'sphinx.ext.doctest',
               'sphinx.ext.autosummary',
@@ -68,9 +68,6 @@ exclude_patterns = []
 #
 #html_theme = 'alabaster'
 
-# import guzzle_sphinx_theme
-#html_theme_path = guzzle_sphinx_theme.html_theme_path()
-#html_theme = 'guzzle_sphinx_theme'
 
 #html_theme = 'haiku'
 
@@ -78,11 +75,21 @@ import astropy_sphinx_theme
 html_theme_path = astropy_sphinx_theme.get_html_theme_path()
 html_theme = 'bootstrap-astropy'
 
-# Guzzle theme options (see theme.conf for more information)
-html_theme_options = {
-    # Set the name of the project to appear in the sidebar
-    "project_nav_name": "pyXsurf",
-}
+# Static files to copy after template files
+# https://docs.astropy.org/projects/package-template/en/latest/nextsteps.html
+#html_static_path = ['_static']
+#html_style = 'pyXsurf.css'
+
+
+#import guzzle_sphinx_theme
+#html_theme_path = guzzle_sphinx_theme.html_theme_path()
+#html_theme = 'guzzle_sphinx_theme'
+## Guzzle theme options (see theme.conf for more information)
+#html_theme_options = {
+#    # Set the name of the project to appear in the sidebar
+#    "project_nav_name": "pyXsurf",
+#}
+
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

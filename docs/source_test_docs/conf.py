@@ -39,7 +39,7 @@ release = 'v1.5.0'
 # ones.
 extensions = ['myst_parser',
               'sphinx.ext.duration',
-              "guzzle_sphinx_theme",
+              #"guzzle_sphinx_theme",
               'sphinx.ext.autodoc',
               'sphinx.ext.doctest',
               'sphinx.ext.autosummary',
@@ -67,19 +67,21 @@ exclude_patterns = []
 # a list of builtin themes.
 #
 #html_theme = 'alabaster'
-import guzzle_sphinx_theme
 
-html_theme_path = guzzle_sphinx_theme.html_theme_path()
-#html_theme = 'guzzle_sphinx_theme'
+
+
 #html_theme = 'haiku'  #viene greco
 #html_theme = 'traditional'
 html_theme = 'bootstrap-astropy'
 
-# Guzzle theme options (see theme.conf for more information)
-html_theme_options = {
-    # Set the name of the project to appear in the sidebar
-    "project_nav_name": "pyXsurf",
-}
+#import guzzle_sphinx_theme
+#html_theme_path = guzzle_sphinx_theme.html_theme_path()
+#html_theme = 'guzzle_sphinx_theme'
+## Guzzle theme options (see theme.conf for more information)
+#html_theme_options = {
+#    # Set the name of the project to appear in the sidebar
+#    "project_nav_name": "pyXsurf",
+#}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
