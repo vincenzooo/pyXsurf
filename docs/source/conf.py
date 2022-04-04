@@ -39,7 +39,7 @@ release = 'v1.5.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['myst_parser',
-              "myst_nb",
+              #"myst_nb",
               'sphinx.ext.duration',
               'sphinx_gallery.load_style',
               #"guzzle_sphinx_theme",
