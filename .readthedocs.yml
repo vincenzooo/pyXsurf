@@ -1,11 +1,12 @@
 version: 2
 
 build:
-  image: latest
+  image: documentation
 
 python:
   version: 3.7
   install:
+    - requirements: docs/requirements.txt
     - method: pip
       path: .
       extra_requirements:
@@ -13,3 +14,7 @@ python:
         - all
 
 formats: []
+
+sphinx:
+  builder: html
+  configuration: docs/conf.py
