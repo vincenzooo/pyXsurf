@@ -107,3 +107,5 @@ This is a good page explaining the basic usage of ``git``
 https://kbroman.org/github_tutorial/pages/routine.html
 
 
+See https://stackoverflow.com/questions/19048732/python-setup-py-develop-vs-install for comments on installation modes.
+TODO: summarize here.
