@@ -2,3 +2,4 @@ ipykernel
 nbsphinx
 sphinx_automodapi
 sphinx_astropy
+pySurf
