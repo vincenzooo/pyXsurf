@@ -97,3 +97,20 @@ html_theme = 'bootstrap-astropy'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+
+'''
+import recommonmark
+# VC http://tansignariold.opendatasicilia.it/it/latest/ricette/ReadtheDocs/come_fare_leggere_un_file_MD_a_ReadtheDocs.html
+from recommonmark.transform import AutoStructify
+
+from recommonmark.parser import CommonMarkParser
+
+source_parsers = {
+    '.md': 'recommonmark.parser.CommonMarkParser',
+}
+
+source_suffix = ['.rst', '.md']
+
+extensions = ['sphinx.ext.ifconfig','sphinx_markdown_tables']
+'''
