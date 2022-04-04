@@ -38,8 +38,10 @@ release = 'v1.5.0'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = [#'myst_parser',
+extensions = ['myst_parser',
+              "myst_nb",
               'sphinx.ext.duration',
+              'sphinx_gallery.load_style',
               #"guzzle_sphinx_theme",
               'sphinx.ext.autodoc',
               'sphinx.ext.doctest',
