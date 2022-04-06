@@ -1,4 +1,4 @@
-__all__ = ['pySurf','dataIO','pyProfile','thermal']
+__all__ = ['pySurf','dataIO','pyProfile','thermal','utilities']
 
 '''
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
