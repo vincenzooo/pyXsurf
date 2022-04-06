@@ -1,4 +1,4 @@
-pyXsurf (formerly pyXTel)
+pyXsurf
 =========================
 
 Python library for X-Ray Optics, Metrology Data Analysis and Telescopes
