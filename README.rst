@@ -24,7 +24,11 @@ python on your system (generally this means it must be in the system path)
 and start using it. In this case you must install
 all dependencies by yourself.
 
+<<<<<<< HEAD
 Developers branches can be installed in the same way and they should work equally (just have more unfinished stuff), so the only thing you need to do differently, is to switch branch (e.g. ``git checkout documentation``, if ``documentation`` is the name of the branch) before running the setup. Please check developers notes for a list of active branches and their features.   
+=======
+Developers branches can be installed in the same way and they should work equally (just have more unfinished stuff), so the only thing you need to do differently is just to select the correct branch. See  
+>>>>>>> f904d4ef677c952536fde4857ee83c780eaba091
 
 Status of the library
 --------------------------------
@@ -53,7 +57,7 @@ Please report bugs or feature requests, missing documentation, or open a issue o
 
 Expecially appreciated is if you can provide templates, examples or hints on how to handle, documentation (Sphinx), packaging, continuous integration (Github).
 
-Please check :ref:`developersnotes` for the status of the development, or if you think you can help in any way. 
+Please check :ref:`README_developers` for the status of the development, or if you think you can help in any way. 
 
 
 Modules
@@ -88,12 +92,10 @@ License
 -------
 
 This project is Copyright (c) Vincenzo Cotroneo and licensed under
-the terms of the BSD 3-Clause license. 
-
-.. Parts of this package are based upon
-   the `Astropy package template <https://github.com/astropy/package-template>`_
-   which is licensed under the BSD 3-clause license. See the licenses folder for
-   more information.
+the terms of the BSD 3-Clause license. Parts of this package are based upon
+the `Astropy package template <https://github.com/astropy/package-template>`_
+which is licensed under the BSD 3-clause license. See the licenses folder for
+more information.
 
 
 Author
