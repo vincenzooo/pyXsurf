@@ -17,18 +17,14 @@ Download or clone the project. You can use git clone command by:
 At this point you have two options:
 
 1. Python installer (suggested): move to the folder with the code and call
-``python setup.py install``
+``python setup.py install``.
 
 2. Manual (developer): put the folder with code in a path accessible to 
 python on your system (generally this means it must be in the system path) 
 and start using it. In this case you must install
 all dependencies by yourself.
 
-<<<<<<< HEAD
-Developers branches can be installed in the same way and they should work equally (just have more unfinished stuff), so the only thing you need to do differently, is to switch branch (e.g. ``git checkout documentation``, if ``documentation`` is the name of the branch) before running the setup. Please check developers notes for a list of active branches and their features.   
-=======
-Developers branches can be installed in the same way and they should work equally (just have more unfinished stuff), so the only thing you need to do differently is just to select the correct branch. See  
->>>>>>> f904d4ef677c952536fde4857ee83c780eaba091
+Developers branches can be installed in the same way and they should work equally (just have more unfinished stuff), so the only thing you need to do differently, is to switch branch, e.g. ``git checkout documentation`` (where ``documentation`` is the name of the branch) before running the setup. Also, if you plan to make changes to the code and want to avoid reinstalling every time for them to became effective, you can install the code in "developer mode" (as at point 1, but using command ``python setup.py develop`` instead of ``install``). Please check developers notes for a list of active branches and their features and for more details.
 
 Status of the library
 --------------------------------
