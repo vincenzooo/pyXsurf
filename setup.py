@@ -10,7 +10,7 @@ from setuptools import find_namespace_packages
 
 setup(
   name='pyXsurf',
-  version='1.5.1',
+  version='1.5.5',
   description="Python library for X-Ray Optics, Metrology Data Analysis and Telescopes Design.",
   url='https://github.com/vincenzooo/pyXSurf',
   author='Vincenzo Cotroneo',

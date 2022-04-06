@@ -41,7 +41,6 @@ from plotting.multiplots import compare_images
 from dataIO.fn_add_subfix import fn_add_subfix
 from dataIO.span import span
 import os
-from utilities.imaging import fitting as fit
 from plotting.add_clickable_markers import add_clickable_markers
 
 

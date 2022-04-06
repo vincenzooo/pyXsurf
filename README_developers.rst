@@ -91,7 +91,6 @@ Mostly following https://medium.com/free-code-camp/from-a-python-project-to-an-o
 
 References
 ------------
-
 For users new to Python, the library was developed on anaconda
 distribution. Any other distribution should be equivalent, however I
 never had any problem with Anaconda and find it very easy to work with,
@@ -99,7 +98,6 @@ so I can only recommend it. Same way, I used for developement
 notepad++/IPython/jupyter on Windows; Spyder; VScode and feel to
 recommend any of these. Of course any other environment or editor works
 same way.
-
 
 if you are not sure of what you are doing (as I am most of the time), feel free to keep it locally and use only ``git`` or to use any expertise you have (and I don't necessarily do have).
 
