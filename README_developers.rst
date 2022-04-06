@@ -1,4 +1,4 @@
-.. _developers notes:
+.. _developersnotes:
 
 Developers Notes
 =================
@@ -21,7 +21,15 @@ If you modify any file, and you suspect it could be an improvement, please send 
 
 .. note::
     Themes are defined in the ``conf.py`` file of each folder, so there might be a difference in the aspect of the "official" documentation, according to which compilation command is run. TODO: make this point uniform, by making the configuration for tests to recall the configuration for the "official page".
-    
+
+
+Active Branches
+-------------------------------------------------
+There a couple of branches active at the moment:
+
+* **documentation** The most recent branching, it is mostly devoted at developing better sphinx documentation
+* **readers_dev** Development to Reader routines for I/O of file formats 
+
 
 Roadmap
 ---------------
@@ -97,3 +105,5 @@ This is a good page explaining the basic usage of ``git``
 https://kbroman.org/github_tutorial/pages/routine.html
 
 
+See https://stackoverflow.com/questions/19048732/python-setup-py-develop-vs-install for comments on installation modes.
+TODO: summarize here.
