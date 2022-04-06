@@ -5,9 +5,10 @@ from setuptools import find_packages, setup
 #p = find_packages('.')
 #p = find_packages("src", exclude=["test"]),
 
+# see https://docs.python.org/2/distutils/examples.html#pure-python-distribution-by-package
 setup(
   name='pyXsurf',
-  version='0.1.50',
+  version='1.5.6',
   description="Python library for X-Ray Optics, Metrology Data Analysis and Telescopes Design.",
   url='https://github.com/vincenzooo/pyXSurf',
   author='Vincenzo Cotroneo',
@@ -18,7 +19,7 @@ setup(
   #             'dataIO': 'pyxsurf/dataIO'}
   package_dir={'': 'source'},
   #packages=p,
-  packages = ['pySurf','dataIO','utilities','plotting','pyProfile','utilities\\imaging','pySurf\\readers','dataIO\\config'],
+  packages = ['pySurf','dataIO','utilities','plotting','pyProfile','utilities.imaging','pySurf.readers','dataIO.config'],
   setup_requires=['numpy','astropy'],
   include_package_data=True
 )
