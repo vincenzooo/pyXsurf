@@ -81,6 +81,7 @@ html_theme_options = {
     'logotext2': 'X',  # orange, light
     'logotext3': 'surf'   # white,  light,
 }
+html_logo = 'resources/surf-board-wave_small.png'
 
 # Static files to copy after template files
 # https://docs.astropy.org/projects/package-template/en/latest/nextsteps.html
