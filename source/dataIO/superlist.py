@@ -14,6 +14,7 @@ functions operating on a list of Data2D objects
 Another problem is to make sure that superlists are returned on list operators like slices, how to do this? Metaclasses?
 
 2020/05/26 moved to dataIO"""
+
 # turned into a class derived from list 2020/01/16, no changes to interface,
 # everything should work with no changes.
 
@@ -22,8 +23,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pdb
 
-class Superlist(list):
+class xSuperlist(list):
     """A list of pySurf.Data2D objects on which unknown operations are performed serially."""    
+    # property returns a function, which if called returns a list with the property of each item
+    # method returns a list with the methods of each item as function. 
     
     def __getattr__(self,name,*args,**kwargs): 
             # devo costruire una nuova funzione che preso un oggetto
@@ -33,6 +36,38 @@ class Superlist(list):
                 result = [a(*args, **kwargs) if hasattr(attr, '__call__') else a for a in attr]
                 return result
             return newfunc
+            
+class Superlist(list):
+    """Working version from Superlist6. """   
+    # A problem is that a list is returned, not a superlist, so for example calling
+    #   s.crop([2,10]) returns a list of objects, but I cannot apply a second time about
+    #   method. 
+    
+    
+    def __getattr__(self,name,*args,**kwargs): 
+        attr = [object.__getattribute__(name) for object in self]
+        
+        if hasattr(attr[0], '__call__'):
+            # builds a function that, taken a list object oggetto
+            # return a list of the results obtained applying function to each item.
+            def newfunc(*args, **kwargs):
+                attr = [object.__getattribute__(name) for object in self]
+                result = [a(*args, **kwargs) for a in attr]
+                return result
+            return newfunc
+        else:
+            # return list of attributes
+            return attr
+    
+    def __getattribute__(self,name):
+        attr = object.__getattribute__(self, name)
+        if hasattr(attr, '__call__'):
+            def newfunc(*args, **kwargs):
+                result = attr(*args, **kwargs)
+                return result
+            return newfunc
+        else:
+            return attr
             
 
 ## DEVELOPMENT VERSIONS
@@ -47,7 +82,7 @@ class superlist1(list):
         attr = [object.__getattribute__(name) for object in self]
         
         result = []
-        if hasattr(attr, '__call__'):
+        if hasattr(attr, '__call__'):   #try to identify a method as a callable attr
             def newfunc(*args, **kwargs):
                 #pdb.set_trace()
                 print('before calling %s' %a.__name__)
@@ -56,7 +91,7 @@ class superlist1(list):
                 return result
             return newfunc
         else:
-            return a
+            return attr
 
         return result  #it works as a property. As method, this returns a list of methods, but since the method is called as sl.method(),
         #gives an error as it tries to call the list.
@@ -205,7 +240,8 @@ class superlist5(list):
         else:
             # return list of attributes
             print("return atribute of items")
-            return Dlist(attr) #attr
+            return superlist5(attr) #attr  #this can also be list. using superlist anyway makes it possible to call item methods also on results.
+            # example, I can call shape of shapes from nested arrays. [[1,2],[1,2,3],[4,5]].shape.shape -> [2,2,2] (not working)
             
 class Superlist6(list):
     """Working version for debug of getattr/getattribute.
@@ -243,8 +279,39 @@ class Superlist6(list):
             return newfunc
         else:
             return attr
-    """"""
 
+class Superlist(list):
+    """Working version from Superlist6. Returns a superlist."""   
+    # A problem was that if a list is returned, not a superlist, for example calling
+    #   s.crop([2,10]) returns a list of objects, but I cannot apply a second time about
+    #   method. 
+    
+    
+    def __getattr__(self,name,*args,**kwargs): 
+        attr = [object.__getattribute__(name) for object in self]
+        
+        if hasattr(attr[0], '__call__'):
+            # builds a function that, taken a list object oggetto
+            # return a list of the results obtained applying function to each item.
+            def newfunc(*args, **kwargs):
+                attr = [object.__getattribute__(name) for object in self]
+                result = Superlist()
+                result.extend([a(*args, **kwargs) for a in attr])
+                return result
+            return newfunc
+        else:
+            # return list of attributes
+            return attr
+    
+    def __getattribute__(self,name):
+        attr = object.__getattribute__(self, name)
+        if hasattr(attr, '__call__'):
+            def newfunc(*args, **kwargs):
+                result = attr(*args, **kwargs)
+                return result
+            return newfunc
+        else:
+            return attr
 
 
 def test_superlist_dlist(D):
@@ -256,7 +323,7 @@ def test_superlist_dlist(D):
     print(D.name)
     print('\ntest method (D.plot):')
     print(D.plot())
-
+    
     # existing method
     D.plot
 
@@ -282,10 +349,11 @@ def test_superlist(cls,obj=None):
     print(s.shape)
     print('\ntest method (np.flatten):')
     print(s.flatten())
+    return s
     
     
 if __name__ == "__main__":
-    test_superlist(superlist1)
+    s = test_superlist(Superlist)
         #test_superlist(superlist)
     """
     except: # catch *all* exceptions
