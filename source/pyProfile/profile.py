@@ -267,10 +267,6 @@ def load_profile(file,*args,**kwargs):
         
     return np.genfromtxt(file,unpack=True,*args,**kwargs)
 
-def merge_profile(x1,y1,x2,y2):
-    """stitch profiles"""
-    raise NotImplementedError("see example of psd merging in G:\My Drive\progetti\read_nid.ipynb")
-
 def save_profile(filename,x,y,**kwargs):
     """Use np.savetxt to save x and y to file """
     np.savetxt(filename,np.vstack([x,y]).T,**kwargs)
@@ -350,17 +346,19 @@ def movingaverage(values,window,method='same',*args,**kwargs):
     try:
         if len(window) == 1:
             window = window[0]
-            weigths = np.repeat(1.0, window)/window
+            assert int(window/2.)*2==(window-1)
+            weights = np.repeat(1.0, window)/window
         else:
             pass
     except TypeError:
         assert int(window/2.)*2==(window-1)
-        weigths = np.repeat(1.0, window)/window
+        weights = np.repeat(1.0, window)/window
     
+    print(values,weights)
     #including valid will REQUIRE there be enough datapoints.
     #for example, if you take out valid, it will start @ point one,
     #not having any prior points, so itll be 1+0+0 = 1 /3 = .3333
-    smas = np.convolve(values, weigths, method=method,*args,**kwargs)
+    smas = np.convolve(values, weights, method,*args,**kwargs)
     for i in np.arange(int(window/2.)+1):
         smas[i]=np.mean(values[:2*i+1])
         smas[-i]=np.mean(values[-2*i-1:])
@@ -432,6 +430,11 @@ def sum_profiles(x1,y1,x2,y2,*args,**kwargs):
 def subtract_profiles(x1,y1,x2,y2,*args,**kwargs):
     return x1,y1-resample_profile(x2,y2,x1)[1] 
 
+def merge_profile(x1,y1,x2,y2):
+    """stitch profiles"""
+    raise NotImplementedError("see example of psd merging in G:\My Drive\progetti\read_nid.ipynb")
+    
+    
 def merge_profiles(profiles,ranges=None):
                     
 #def merge_profiles(ranges, profiles, labels,xrange=None,yrange=None,

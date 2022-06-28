@@ -816,17 +816,6 @@ class PSD(Profile):
 
 from dataIO.superlist import Superlist
 
-class Plist(Superlist):
-    """A list of Profile objects on which unknown operations are performed serially."""
-      
-    def plot(self,*args,**kwargs):
-        """plot over same plot each profile in the list."""
-        
-        for p in self:
-            p.plot()
-        
-        return plt.gca()   
-
 def load_plist(rfiles,reader=None,*args,**kwargs):
     """Read a set of profile files to a plist.
     readers and additional arguments can be passed as scalars or lists.
@@ -887,21 +876,43 @@ def load_plist(rfiles,reader=None,*args,**kwargs):
     #transform vectorized kwargs in list of kwargs
     kwargs=[{k:v[i] for k,v in kwargs.items()} for i in np.arange(len(rfiles))]
     
-    self = Plist()
+    self = Superlist()
     for wf1,r,a,k in zip(rfiles,reader,args,kwargs):
         self.append(Profile(file=wf1,reader=r,*a,**k))
         
     return self
 
-def test_load_plist(rfiles):
+class Plist(Superlist):
+    """A list of Profile objects on which unknown operations are performed serially.
+    Useless, it is just a Superlist of profiles."""
     
-    fl =[r'C:\Users\kovor\Documents\python\pyXTel\source\pyProfile\test\input_data\01_mandrel3_xscan_20140706.txt',
-     r'C:\Users\kovor\Documents\python\pyXTel\source\pyProfile\test\input_data\01_mandrel3_xscan_20140706_sm11.txt',
-     r'C:\Users\kovor\Documents\python\pyXTel\source\pyProfile\test\input_data\01_mandrel3_xscan_20140706_sm31.txt']
+    '''
+    def plot(self,*args,**kwargs):
+        """plot over same plot each profile in the list."""
+        
+        for p in self:
+            p.plot()
+        
+        return plt.gca()  
+    '''
+        
 
-    a = load_plist(fl,reader=None,scale=(-1,-1,1),
-                units=['mm','um'],delimiter=',')
-    a.plot()
+def test_load_plist(rfiles = None):
+
+    if rfiles is None:
+        rfiles =[r'C:\Users\kovor\Documents\python\pyXTel\source\pyProfile\test\input_data\01_mandrel3_xscan_20140706.txt',
+         r'C:\Users\kovor\Documents\python\pyXTel\source\pyProfile\test\input_data\01_mandrel3_xscan_20140706_sm11.txt',
+         r'C:\Users\kovor\Documents\python\pyXTel\source\pyProfile\test\input_data\01_mandrel3_xscan_20140706_sm31.txt']
+
+    pl = load_plist(rfiles,reader=None,units=['mm','um'],delimiter=',')
+    #a.plot()
+    
+    print('\ntest method which perform actions (plot):')
+    print(pl.plot())
+    print('\ntest method which returns values (profile.min):')
+    print(pl.min())
+    print('\ntest chained method which returns Superlist (profile.crop):')
+    pl.crop([2,3]).plot()
     
     """
     plist2=load_plist([],None,[{'scale':(-1,-1,1),
@@ -911,7 +922,7 @@ def test_load_plist(rfiles):
     return plist,plist2
     """
     
-    return plist
+    return pl
 
   
 def test_class_init(wfile=None):
