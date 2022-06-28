@@ -169,6 +169,7 @@ def print_tree(tree, depth = 0):
                 print_tree(val, depth+1)    
             else:  #file:
                 print ("\t" * depth+'|', key,':',val[:6])  #print ("\t" * depth, key,':',val[:6])
+                # non so perche' qui sopra si limita a 6, forse per array grandi, ma fallisce se altri dati.
                
  
 def test_filterByKey():
