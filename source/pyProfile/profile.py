@@ -339,14 +339,28 @@ def movingaverage(values,window,mode='full'):
     return smas # as a numpy array
 """   
 
-def movingaverage(values,window):
-    """for now, only odd windows. Full returns"""
-    assert int(window/2.)*2==(window-1)
-    weigths = np.repeat(1.0, window)/window
-    #including valid will REQUIRE there to be enough datapoints.
+def movingaverage(values,window,method='same',*args,**kwargs):
+    """ Convolve vector ``values`` with a ``window`` using ``np.convolve``.
+    
+    Window can be provided as vector or as integer (number of points, must be odd,
+    or it is rounded to lower odd number. (see np.convolve and np.scipy.convolve).
+    
+    2022///06/28 added option to use smoothing window."""
+    
+    try:
+        if len(window) == 1:
+            window = window[0]
+            weigths = np.repeat(1.0, window)/window
+        else:
+            pass
+    except TypeError:
+        assert int(window/2.)*2==(window-1)
+        weigths = np.repeat(1.0, window)/window
+    
+    #including valid will REQUIRE there be enough datapoints.
     #for example, if you take out valid, it will start @ point one,
     #not having any prior points, so itll be 1+0+0 = 1 /3 = .3333
-    smas = np.convolve(values, weigths, 'same')
+    smas = np.convolve(values, weigths, method=method,*args,**kwargs)
     for i in np.arange(int(window/2.)+1):
         smas[i]=np.mean(values[:2*i+1])
         smas[-i]=np.mean(values[-2*i-1:])

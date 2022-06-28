@@ -87,6 +87,65 @@ def stats (data=None,units=None,string=False,fmt=None,vars=None):
     
     return st
 
+def split_on_indices(vector,indices):
+    """Split an array on a list of indices ``ind``(indices represent the number of items in each block). 
+    Return a list of splitted sub-arrays. """
+    
+    if np.sum(indices) != len(vector):
+        Warning('len of indices for splitting is not matching vector length!')
+    ind = np.cumsum(indices).tolist()
+    result = [vector[i1:i2] for i1,i2 in zip([0]+ind,ind)]
+
+    return result
+
+
+def split_blocks (vector, sep = None, direction = None, split = False):
+
+    """ Given a vector return the lenght of blocks (or blocks if split is True).
+    
+    A block is a monotonic sequence.
+    
+    The direction of monotony can be explicitly set with ``direction`` argument 
+    (positive if increasing, negative if decreasing, 0 consider blocks as formed by equal elements).
+    If direction is not provided, it is inferred from the first two elements.
+    
+    Return a list: if ``split`` is False (default), a list of the lengths of blocks is returned, otherwise a list of blocks is returned. 
+    
+    (e.g. [1,2,3,1,2,3] -> return [3,3])
+    (e.g. [1,1,1,2,2,2,3,3,3,4,4,4], equal = True -> return [3,3,3,3]) """
+    
+    if direction is None: direction = np.sign(vector[1]-vector[0])
+    diff = np.diff(vector)
+    
+    if direction == 0:
+        diff = np.insert(diff,0,0)
+        ind = np.where(diff != 0)[0].tolist()
+    else:
+        direction = np.sign(direction)
+        ind = list(np.where(np.sign(diff) != np.sign(direction))[0]+1)
+    ind.append (len(vector))
+    
+    #if not cumulative or split: # cumulative can be obtained with np.cumsum()
+    ind = [i1-i2 for i1,i2 in zip(ind,[0]+ind[:-1])]
+    
+    return split_on_indices(vector, ind) if split else ind
+
+
+def test_len_blocks():
+
+    print(split_blocks([1,2,3,1,2,3]))   #[3,3]
+    print(split_blocks([1,2,3,1,2]))   #[3,2]
+    print(split_blocks([1,2,3,1,2],direction = -1))   #[1,1,2,1]
+    print(split_blocks([1,2,3,1,2],direction = 0))   #[1,1,1,1,1]
+    print(split_blocks([1,1,1,2,2,3,3,3],direction = 0))   #[3,2,3]
+    
+    print(split_blocks([1,2,3,1,2,3],split = True))   #[[1,2,3],[1,2,3]]
+    print(split_blocks([1,2,3,1,2],split = True))   # [[1, 2, 3], [1, 2]]
+    print(split_blocks([1,2,3,1,2],direction = -1,split = True))   # [[1], [2], [3, 1], [2]]
+    print(split_blocks([1,2,3,1,2],direction = 0,split = True))   # [[1], [2], [3], [1], [2]]
+    print(split_blocks([1,1,1,2,2,3,3,3],direction = 0,split = True))   # [[1, 1, 1], [2, 2], [3, 3, 3]]
+
+
 
 def test_stats(*args,**kwargs):
     # generate random distribution

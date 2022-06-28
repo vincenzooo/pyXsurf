@@ -107,8 +107,8 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
     # 2020/07/10 args overwrite kwargs (try to avoid duplicates anyway).
     # args were ignored before.
     
-    if not args:  #assume is correct number of elements
-        args = [[]]*len(rfiles)
+    #if not args:  #assume is correct number of elements
+    #    args = [[]]*len(rfiles)   ## Non va fatto cosi'!! senno' duplica "by ref"
     
     #pdb.set_trace()
     
