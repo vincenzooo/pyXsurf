@@ -238,7 +238,8 @@ class Profile(object):  #np.ndarrays
     usando __new__ e __array_finalize__."""
 
 
-    def __init__(self,x=None,y=None,file=None,reader=None,units=None,name=None,*args,**kwargs):
+    def __init__(self,x=None,y=None,file=None,reader=None,
+        scale = (1.,1.), units=None,name=None,*args,**kwargs):
         """can be initialized with data; x,y; file; file, x
         if x is provided, they override x from data if matching number of elements, 
            or used as range if two element (error is raised in case of ambiguity)."""
@@ -248,10 +249,10 @@ class Profile(object):  #np.ndarrays
         
         #pdb.set_trace()
 
-        if isinstance (y,str):
+        if isinstance (x,str):
             print ('first argument is string, use it as filename')
-            file=y
-            y=None
+            file=x
+            x=None
         else:
             if y is not None:
                 y=np.array(y) #onvert to array if not
@@ -268,6 +269,7 @@ class Profile(object):  #np.ndarrays
             if reader is not None: raise NotImplementedError("readers are not implemented yet for profiles,"+
                 "\tPass data or read from two column text file in compatible format.")
             
+            #pdb.set_trace()
             self.load(file,*args,**kwargs)
             """
             if reader is None:
@@ -606,6 +608,7 @@ class Profile(object):  #np.ndarrays
     def load(self,filename,*args,**kwargs):
         """A simple file loader using np.genfromtxt.
         Load columns from file in self.x and self.y."""
+        #pdb.set_trace()
         self.x,self.y = np.genfromtxt(filename,unpack=True,*args,**kwargs)
     load=update_docstring(load,np.genfromtxt)
 
@@ -618,8 +621,9 @@ class Profile(object):  #np.ndarrays
 
     def register(self,filename,*args,**kwargs):
         """Use pyProfile.profile.register_profile to rescale."""
+        #pdb.set_trace()
         self.x,self.y = register_profile(x,y,*args,**kwargs)
-    load=update_docstring(register,register_profile)
+    register=update_docstring(register,register_profile)
 
 
 
@@ -654,10 +658,10 @@ class Profile(object):  #np.ndarrays
     def movingaverage(self,*args,**kwargs):
         """moving average using function profile.movingaverage, where x,y are taken from self."""
         
-        res=self.copy()
-        res.y=movingaverage(self.y,*args,**kwargs)
+        res = self.copy()
+        res.y = movingaverage(self.y,*args,**kwargs)
         return res #
-    movingaverage=update_docstring(movingaverage,movingaverage)
+    movingaverage = update_docstring(movingaverage,movingaverage)
         
     def rebin(self,*args,**kwargs):
         """rebin using function profile.rebin_profile, where x,y are taken from self."""
@@ -811,8 +815,9 @@ class PSD(Profile):
         self.save(filename,header='# f[%s] PSD[%s]'%self.units)
 
 from dataIO.superlist import Superlist
+
 class Plist(Superlist):
-    """A list of Profile objects on which unknown operations are performed serially."""           
+    """A list of Profile objects on which unknown operations are performed serially."""
       
     def plot(self,*args,**kwargs):
         """plot over same plot each profile in the list."""
@@ -821,6 +826,92 @@ class Plist(Superlist):
             p.plot()
         
         return plt.gca()   
+
+def load_plist(rfiles,reader=None,*args,**kwargs):
+    """Read a set of profile files to a plist.
+    readers and additional arguments can be passed as scalars or lists.
+    2022/06/28 first implementation, copying from scripts/dlist.py, docstring not yet updated
+    Mechanism for args and kwargs is quite basic and error-prone.
+
+    You can pass additional arguments to the reader in different ways:
+     - pass them individually, they will be used for all readers
+         load_dlist(.. ,option1='a',option2=1000)
+     - to have individual reader parameters pass them as dictionaries (a same number as rfiles),
+         load_dlist(.. ,{option1='a',option2=1000},{option1='b',option3='c'},..)
+         in this case reader must be explicitly passed (None is acceptable value for auto).
+
+    Example:
+        plist=load_plist(rfiles,reader=fitsWFS_reader,scale=(-1,-1,1),
+                units=['mm','mm','um'])
+
+        dlist2=load_dlist(rfiles,fitsWFS_reader,[{'scale':(-1,-1,1),
+                'units':['mm','mm','um']},{'scale':(1,1,-1),
+                'units':['mm','mm','um']},{'scale':(-1,-1,1),
+                'units':['mm','mm','$\mu$m']}])
+    """
+
+    if reader is None:
+        #reader=auto_reader(rfiles[0])
+        #reader = [auto_reader(r) for r in rfiles]
+        reader = [None for r in rfiles]  # placeholder
+        
+    if np.size(reader) ==1:
+        reader=[reader]*len(rfiles)
+        
+    ''' additional options see Dlist '''
+    
+    if kwargs : #passed explicit parameters for each reader
+        # Note, there is ambiguity when rfiles and a kwargs value have same
+        # number of elements()
+        #pdb.set_trace()
+        #vectorize all values
+        for k,v in kwargs.items():
+            if (np.size(v) == 1):
+                kwargs[k]=[v]*len(rfiles)    
+            elif (len(v) != len(rfiles)):
+                kwargs[k]=[v]*len(rfiles)
+            #else:  #non funziona perche' ovviamente anche chiamando esplicitamente, sara'
+            #  sempre di lunghezza identica a rfiles.
+            #    print ('WARNING: ambiguity detected, it is not possible to determine'+
+            #    'if `%s` values are intended as n-element value or n values for each data.\n'+
+            #    'To solve, call the function explicitly repeating the value.'%k)
+    
+    # 2020/07/10 args overwrite kwargs (try to avoid duplicates anyway).
+    # args were ignored before.
+    print(kwargs)
+    if not args:  #assume is correct number of elements
+        args = [[]]*len(rfiles)
+    
+    #pdb.set_trace()
+    
+    #transform vectorized kwargs in list of kwargs
+    kwargs=[{k:v[i] for k,v in kwargs.items()} for i in np.arange(len(rfiles))]
+    
+    self = Plist()
+    for wf1,r,a,k in zip(rfiles,reader,args,kwargs):
+        self.append(Profile(file=wf1,reader=r,*a,**k))
+        
+    return self
+
+def test_load_plist(rfiles):
+    
+    fl =[r'C:\Users\kovor\Documents\python\pyXTel\source\pyProfile\test\input_data\01_mandrel3_xscan_20140706.txt',
+     r'C:\Users\kovor\Documents\python\pyXTel\source\pyProfile\test\input_data\01_mandrel3_xscan_20140706_sm11.txt',
+     r'C:\Users\kovor\Documents\python\pyXTel\source\pyProfile\test\input_data\01_mandrel3_xscan_20140706_sm31.txt']
+
+    a = load_plist(fl,reader=None,scale=(-1,-1,1),
+                units=['mm','um'],delimiter=',')
+    a.plot()
+    
+    """
+    plist2=load_plist([],None,[{'scale':(-1,-1,1),
+            'units':['mm','um']},{'scale':(1,1,-1),
+            'units':['mm','um']},{'scale':(-1,-1,1),
+            'units':['mm','$\\mu$m']}])
+    return plist,plist2
+    """
+    
+    return plist
 
   
 def test_class_init(wfile=None):
