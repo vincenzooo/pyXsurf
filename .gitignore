@@ -81,3 +81,4 @@ pip-wheel-metadata/
 
 # Mac OSX
 .DS_Store
+*.lnk
