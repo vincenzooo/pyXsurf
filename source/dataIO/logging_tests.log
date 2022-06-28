@@ -1,0 +1,15 @@
+2022-05-23 22:10:52,455 - __main__ - DEBUG - debug message
+2022-05-23 22:10:52,456 - __main__ - INFO - info message
+2022-05-23 22:10:52,458 - __main__ - [1;31mWARNING[1;0m - warn message
+2022-05-23 22:10:52,459 - __main__ - [1;41mERROR[1;0m - error message
+2022-05-23 22:10:52,461 - __main__ - CRITICAL - critical message
+2022-05-23 22:11:25,568 - root - DEBUG - debug message
+2022-05-23 22:11:25,570 - root - INFO - info message
+2022-05-23 22:11:25,572 - root - [1;31mWARNING[1;0m - warn message
+2022-05-23 22:11:25,573 - root - [1;41mERROR[1;0m - error message
+2022-05-23 22:11:25,574 - root - CRITICAL - critical message
+2022-05-23 22:11:31,532 - root - DEBUG - debug message
+2022-05-23 22:11:31,534 - root - INFO - info message
+2022-05-23 22:11:31,534 - root - [1;31mWARNING[1;0m - warn message
+2022-05-23 22:11:31,535 - root - [1;41mERROR[1;0m - error message
+2022-05-23 22:11:31,536 - root - CRITICAL - critical message
