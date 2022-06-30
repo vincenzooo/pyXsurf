@@ -1,30 +1,68 @@
 #from pprint import pprint
 import numpy as np
 
-def read_blocks(filename):
-    """Read a file containing blocks of numerical data separated by a white line.
-    A dictionary is returned in which the first line of each block is used as a key and the following lines
-    are assumed to be matrices of data with data on the same line separated by comma.
-    e.g.:
+import warnings
+warnings.filterwarnings("error", category=np.VisibleDeprecationWarning) 
 
-    <Block name on this line (data in following lines)>
-    351.08931,-165.07514,-691.24115
-    352.28775,-125.48324,-691.24096
-    353.64744,-78.56968,-691.37016
-    355.13786,-30.21684,-691.3701
+def read_blocks(filename,delimiter = '\n\n', comment = None,*args,**kwargs):
+    """Read a file containing blocks of numerical data separated by a white line.
+    
+    Return a list, each element of which is a list of the lines in the block.  
+    2022/06/29 converted result from dictionary to list.    
     """
     
     f = open(filename, 'r')
     content = f.read()
     f.close()
-    pDic={}
-    for block in content.split('\n\n'):
+    pList=[]
+    for block in content.split(delimiter):
         if (block.strip() != ''):
             """build a dic with a set of points, first line is used as key"""
             lines=block.split('\n')
-            pDic[lines[0]]=np.array([l.split(',') for l in lines[1:]],dtype=float)
-    f.close()
-    return pDic
+            goodlines = [dd for dd in lines if (comment is None) or not(dd.startswith(comment))] 
+            goodlines = [gl for gl in goodlines if len(gl.strip())!=0] #il caso di commento e' gia' escluso
+            try:
+                l = np.array([dd.split() for dd in goodlines],*args,**kwargs)
+                l = np.array([dd.split() for dd in goodlines],*args,**kwargs)
+            except np.VisibleDeprecationWarning:
+                print ('Triying to convert splitted strings with unknown dtype results'+
+                       ' in non corresponding lengths. Return array of strings.')
+                l = goodlines
+            except ValueError:
+                print('Data type not corresponding to user-provided dtype. Return array of strings.')
+                l = goodlines
+                
+            pList.append(np.array(l))
+
+    return pList
+    
+def test_read_blocks(filename=None):
+
+    def print_results(a, title):
+        '''pass result and descriptive title for a test.'''
+        
+        print('\n======',title)
+        print('%i blocks read'%len(a))
+        print('block shapes: ',[aa.shape for aa in a])
+        print('block contents: ')
+        for i,aa in enumerate(a):
+            print('%i)\n'%(i+1),'[%s\n..\n..\n%s]'%(','.join(map(str,aa[:3])),','.join(map(str,aa[-2:]))))
+        return a
+    
+    filename = r'C:\Users\kovor\Documents\python\pyXTel\source\pyProfile\test\input_data\data_blocks_spaced.dat'
+    
+    print('read %s, contains three white-line-separated blocks with initial 3-line # comment followed by 94 couples of data. First block has 6-line comment.'%os.path.join(os.path.dirname(filename),os.path.(basename))
+    
+    a = print_results(read_blocks(filename, comment = '#'),"comment = '#', ignore commented lines, lines are splitted. Return 2xN string array.") #array of strings 2 x N
+    
+    a = print_results(read_blocks(filename, comment = '#', dtype = float),"comment = '#' with float dtype, Return 2xN float array.") #array of floats 2 x N
+    
+    a = print_results(read_blocks(filename),"no comment or dtype, lines are splitted but they are inconsistent length. Return string vector with lines.")  # da warning in quanto lo split funziona creando liste. Se queste sono di lunghezze diversa,
+                         # la conversione in array restituiscce un array monodimensionale (vettore) di oggetti (lista)
+
+    a = print_results(read_blocks(filename, dtype = float),"dtype, but no comment character, comment lines break consistency. Return string vector with lines.") #lista di array
+    
+    
     
     
 def head(fn,N=10):
@@ -88,6 +126,8 @@ def test_program_path():
     p = program_path0()  
     print("caller's path: ", p )
     return  p
+    
+    
         
 if __name__ == "__main__":
     a = test_program_path()
