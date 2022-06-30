@@ -815,7 +815,18 @@ class PSD(Profile):
         self.save(filename,header='# f[%s] PSD[%s]'%self.units)
 
 from dataIO.superlist import Superlist
+from dataIO.arrays import split_blocks, split_on_indices
 
+def load_from_blocks(file, *args, **kwargs):
+    """read a list of profiles from a single file, extracting them using ``split_blocks``."""
+    
+    x,y = np.genfromtxt(file, *args, **kwargs)
+    i = split_blocks(x)
+    xx = split_on_indices(x,i)
+    yy = split_on_indices(y,i)
+    profiles = [Profile(x, y, name = '%03i'%i) for i,(x,y) in enumerate(zip(xx,yy))]
+    return profiles
+    
 def load_plist(rfiles,reader=None,*args,**kwargs):
     """Read a set of profile files to a plist.
     readers and additional arguments can be passed as scalars or lists.
@@ -838,55 +849,61 @@ def load_plist(rfiles,reader=None,*args,**kwargs):
                 'units':['mm','mm','um']},{'scale':(-1,-1,1),
                 'units':['mm','mm','$\mu$m']}])
     """
-
-    if reader is None:
-        #reader=auto_reader(rfiles[0])
-        #reader = [auto_reader(r) for r in rfiles]
-        reader = [None for r in rfiles]  # placeholder
-        
-    if np.size(reader) ==1:
-        reader=[reader]*len(rfiles)
-        
-    ''' additional options see Dlist '''
     
-    if kwargs : #passed explicit parameters for each reader
-        # Note, there is ambiguity when rfiles and a kwargs value have same
-        # number of elements()
+    if isinstance(rfiles, str):
+        profiles = load_from_blocks(rfiles, unpack = True, *args, **kwargs)
+    else:
+        if reader is None:
+            #reader=auto_reader(rfiles[0])
+            #reader = [auto_reader(r) for r in rfiles]
+            reader = [None for r in rfiles]  # placeholder
+            
+        if np.size(reader) ==1:
+            reader=[reader]*len(rfiles)
+            
+        ''' additional options see Dlist '''
+        
+        if kwargs : #passed explicit parameters for each reader
+            # Note, there is ambiguity when rfiles and a kwargs value have same
+            # number of elements()
+            #pdb.set_trace()
+            #vectorize all values
+            for k,v in kwargs.items():
+                if (np.size(v) == 1):
+                    kwargs[k]=[v]*len(rfiles)    
+                elif (len(v) != len(rfiles)):
+                    kwargs[k]=[v]*len(rfiles)
+                #else:  #non funziona perche' ovviamente anche chiamando esplicitamente, sara'
+                #  sempre di lunghezza identica a rfiles.
+                #    print ('WARNING: ambiguity detected, it is not possible to determine'+
+                #    'if `%s` values are intended as n-element value or n values for each data.\n'+
+                #    'To solve, call the function explicitly repeating the value.'%k)
+        
+        # 2020/07/10 args overwrite kwargs (try to avoid duplicates anyway).
+        # args were ignored before.
+        print(kwargs)
+        if not args:  #assume is correct number of elements
+            args = [[]]*len(rfiles)
+        
         #pdb.set_trace()
-        #vectorize all values
-        for k,v in kwargs.items():
-            if (np.size(v) == 1):
-                kwargs[k]=[v]*len(rfiles)    
-            elif (len(v) != len(rfiles)):
-                kwargs[k]=[v]*len(rfiles)
-            #else:  #non funziona perche' ovviamente anche chiamando esplicitamente, sara'
-            #  sempre di lunghezza identica a rfiles.
-            #    print ('WARNING: ambiguity detected, it is not possible to determine'+
-            #    'if `%s` values are intended as n-element value or n values for each data.\n'+
-            #    'To solve, call the function explicitly repeating the value.'%k)
-    
-    # 2020/07/10 args overwrite kwargs (try to avoid duplicates anyway).
-    # args were ignored before.
-    print(kwargs)
-    if not args:  #assume is correct number of elements
-        args = [[]]*len(rfiles)
-    
-    #pdb.set_trace()
-    
-    #transform vectorized kwargs in list of kwargs
-    kwargs=[{k:v[i] for k,v in kwargs.items()} for i in np.arange(len(rfiles))]
-    
+
+        #transform vectorized kwargs in list of kwargs
+        kwargs=[{k:v[i] for k,v in kwargs.items()} for i in np.arange(len(rfiles))]
+        profiles = [Profile(file=wf1,reader=r,*a,**k) for 
+            wf1,r,a,k in zip(rfiles,reader,args,kwargs)]
+        
     self = Superlist()
-    for wf1,r,a,k in zip(rfiles,reader,args,kwargs):
-        self.append(Profile(file=wf1,reader=r,*a,**k))
+    for p in profiles:    
+        self.append(p)
         
     return self
 
+'''
 class Plist(Superlist):
     """A list of Profile objects on which unknown operations are performed serially.
     Useless, it is just a Superlist of profiles."""
     
-    '''
+    """
     def plot(self,*args,**kwargs):
         """plot over same plot each profile in the list."""
         
@@ -894,8 +911,28 @@ class Plist(Superlist):
             p.plot()
         
         return plt.gca()  
-    '''
+    """
+    
+    def __init__(self, files = None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         
+        if files is not None:
+            self = load_plist(files, *args, **kwargs)
+'''
+        
+from dataIO.superlist import Superlist
+
+
+class Plist(Superlist):
+
+    def __init__(self, *args, **kwargs):
+        
+        if 'files' in kwargs:
+            files = kwargs.pop('files')
+            s = load_plist(files, *args, **kwargs)   # return a list
+            super().__init__(s, *args, **kwargs)
+        else:
+            super().__init__(*args, **kwargs)        
 
 def test_load_plist(rfiles = None):
 
@@ -924,6 +961,25 @@ def test_load_plist(rfiles = None):
     
     return pl
 
+def test_plist():
+
+    rfiles =[r'C:\Users\kovor\Documents\python\pyXTel\source\pyProfile\test\input_data\01_mandrel3_xscan_20140706.txt', r'C:\Users\kovor\Documents\python\pyXTel\source\pyProfile\test\input_data\01_mandrel3_xscan_20140706_sm11.txt', r'C:\Users\kovor\Documents\python\pyXTel\source\pyProfile\test\input_data\01_mandrel3_xscan_20140706_sm31.txt']
+    
+    p = Plist(files = rfiles, delimiter = ',')
+    p.plot()
+    plt.title('Plist initialized with files')
+    
+    plt.figure()
+    profiles  = [ Profile(file = f, delimiter = ',') for f in rfiles]
+    p = Plist(profiles)
+    p.plot()
+    plt.title('Initialized with Profiles read at init')
+
+    plt.figure()
+    profiles = load_plist(rfiles, delimiter = ',')
+    p = Plist(profiles)
+    p.plot()
+    plt.title('Initialized with profiles loaded with function')
   
 def test_class_init(wfile=None):
     """test init and plot"""
