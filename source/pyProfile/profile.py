@@ -386,9 +386,9 @@ def crop_profile(x,y=None,xrange=None,yrange=None,*args,**kwargs):
     if xrange is None: 
         xrange=[None,None]
     if xrange[0] is None:
-        xrange[0]=np.min(x)
+        xrange[0]=np.nanmin(x)
     if xrange[1] is None:
-        xrange[1]=np.max(x)
+        xrange[1]=np.nanmax(x)
 
     sel=(x>=xrange[0])&(x<=xrange[1])
     x=x[sel]
