@@ -238,7 +238,7 @@ def register_profile(x,y,scale=(1,1),
         x=x[::-1]
         y=y[::-1]  #added 2021/06/15 it was never tested?
         #data=np.fliplr(data)  #removed, no data here, from data2D
-        x=x-min(x)    # why?
+        #x=x-min(x)    # why?
 
     #adjust crop and scales
     if strip:  #messes up x and y
@@ -386,9 +386,9 @@ def crop_profile(x,y=None,xrange=None,yrange=None,*args,**kwargs):
     if xrange is None: 
         xrange=[None,None]
     if xrange[0] is None:
-        xrange[0]=np.min(x)
+        xrange[0]=np.nanmin(x)
     if xrange[1] is None:
-        xrange[1]=np.max(x)
+        xrange[1]=np.nanmax(x)
 
     sel=(x>=xrange[0])&(x<=xrange[1])
     x=x[sel]

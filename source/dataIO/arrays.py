@@ -88,7 +88,7 @@ def stats (data=None,units=None,string=False,fmt=None,vars=None):
     return st
 
 def split_on_indices(vector,indices):
-    """Split an array on a list of indices ``ind``(indices represent the number of items in each block). 
+    """Split an array on a list of lengths (indices represent the number of items in each block). 
     Return a list of splitted sub-arrays. """
     
     if np.sum(indices) != len(vector):
@@ -114,7 +114,9 @@ def split_blocks (vector, sep = None, direction = None, split = False):
     (e.g. [1,2,3,1,2,3] -> return [3,3])
     (e.g. [1,1,1,2,2,2,3,3,3,4,4,4], equal = True -> return [3,3,3,3]) """
     
-    if direction is None: direction = np.sign(vector[1]-vector[0])
+    if direction is None:  # exclude invalid points
+        x = [vector[i] for i in np.where(np.isfinite(vector))[0]]
+        direction = np.sign(x[1]-x[0])
     diff = np.diff(vector)
     
     if direction == 0:
@@ -125,8 +127,16 @@ def split_blocks (vector, sep = None, direction = None, split = False):
         ind = list(np.where(np.sign(diff) != np.sign(direction))[0]+1)
     ind.append (len(vector))
     
+    # correct for nan or invalid data, which artificially create two artificial changes of direction.
+    # keep only the first, invalid data will be included in output in second block.
+    ind = [i for i in ind if i in np.where(np.isfinite(vector))[0]+1]  # +1 to include nan in following block and keep into account first element if invalid. I suspect it will give problems if last element is invalid,
+    #must be kept specifically into account.
+    #if not np.isfinite(vector[0]): ind.remove(1)  # 1 is legitimate only if first two elements are finite
+    
     #if not cumulative or split: # cumulative can be obtained with np.cumsum()
     ind = [i1-i2 for i1,i2 in zip(ind,[0]+ind[:-1])]
+    
+    
     
     return split_on_indices(vector, ind) if split else ind
 

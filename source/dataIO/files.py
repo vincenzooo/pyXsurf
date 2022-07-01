@@ -1,5 +1,6 @@
 #from pprint import pprint
 import numpy as np
+import os
 
 import warnings
 warnings.filterwarnings("error", category=np.VisibleDeprecationWarning) 
@@ -51,7 +52,7 @@ def test_read_blocks(filename=None):
     
     filename = r'C:\Users\kovor\Documents\python\pyXTel\source\pyProfile\test\input_data\data_blocks_spaced.dat'
     
-    print('read %s, contains three white-line-separated blocks with initial 3-line # comment followed by 94 couples of data. First block has 6-line comment.'%os.path.join(os.path.dirname(filename),os.path.(basename))
+    print('read "%s", contains three white-line-separated blocks with initial 3-line # comment followed by 94 couples of data. First block has 6-line comment.'%os.path.join(os.path.basename(os.path.dirname(filename)),os.path.basename(filename)))
     
     a = print_results(read_blocks(filename, comment = '#'),"comment = '#', ignore commented lines, lines are splitted. Return 2xN string array.") #array of strings 2 x N
     
