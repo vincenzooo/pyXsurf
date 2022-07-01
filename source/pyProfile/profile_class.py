@@ -93,31 +93,16 @@ import os
 from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
-from pyProfile.profile import merge_profiles
-from pyProfile.profile import register_profile
-from pyProfile.profile import save_profile
-
-'''
-#from pySurf.readers._instrument_reader import read_data, csvZygo_reader,csv4D_reader,sur_reader,auto_reader
-#from pySurf.readers.format_reader import auto_reader
-from pySurf.data2D import plot_data,get_data, level_data, save_data, rotate_data, resample_data
-from pySurf.data2D import read_data,sum_data, subtract_data, projection, crop_data, transpose_data
-from pySurf.data2D import slope_2D, register_data, data_from_txt, data_histostats
-from dataIO.outliers import remove_outliers
-
-from pySurf import data2D
-import dataIO
-'''
-
-#from pySurf.psd2d import psd2d,plot_psd2d,psd2d_analysis,psd_analysis,plot_rms_power,rms_power
-
-
 from copy import deepcopy
-from dataIO.span import span
-from dataIO.fn_add_subfix import fn_add_subfix
-
 import pdb
 import inspect  # to use with importing docstring
+
+from dataIO.span import span
+from dataIO.fn_add_subfix import fn_add_subfix
+from dataIO.superlist import Superlist
+from dataIO.arrays import split_blocks, split_on_indices
+from dataIO.functions import update_docstring
+
 from pySurf.affine2D import find_affine
 from pyProfile import profile
 from pyProfile.profile import crop_profile
@@ -127,10 +112,11 @@ from pyProfile.profile import sort_profile
 from pyProfile.profile import sum_profiles, subtract_profiles
 from pyProfile.psd import psd as profpsd
 from pyProfile.profile import movingaverage, rebin_profile
+from pyProfile.profile import merge_profiles
+from pyProfile.profile import register_profile
+from pyProfile.profile import save_profile
 
-#from pySurf.data2D_class import update_docstring,doc_from
 
-from dataIO.functions import update_docstring
 '''
 def update_docstring(func,source):
     """given a current function and a source function, update current function docstring
@@ -310,9 +296,10 @@ class Profile(object):  #np.ndarrays
                 if x is None:
                     x=np.arange(np.size(y))
 
-            #if data is not None:
-                x,y=register_profile(x,y,*args,**kwargs)# se load_profile calls register, this
-                #goes indented.
+    #if data is not None:
+        
+        x,y=register_profile(x,y,scale=scale,*args,**kwargs)# se load_profile calls register, this
+        #goes indented.
 
         self.x,self.y=x,y
 
@@ -814,13 +801,10 @@ class PSD(Profile):
         """Save psd."""
         self.save(filename,header='# f[%s] PSD[%s]'%self.units)
 
-from dataIO.superlist import Superlist
-from dataIO.arrays import split_blocks, split_on_indices
-
 def load_from_blocks(file, *args, **kwargs):
     """read a list of profiles from a single file, extracting them using ``split_blocks``."""
     
-    x,y = np.genfromtxt(file, *args, **kwargs)
+    x,y = np.genfromtxt(file, unpack = True, *args, **kwargs)
     i = split_blocks(x)
     xx = split_on_indices(x,i)
     yy = split_on_indices(y,i)
@@ -828,8 +812,12 @@ def load_from_blocks(file, *args, **kwargs):
     return profiles
     
 def load_plist(rfiles,reader=None,*args,**kwargs):
-    """Read a set of profile files to a plist.
-    readers and additional arguments can be passed as scalars or lists.
+    """Read a set of profile file(s) to a plist. By default, files are split on blocks with spaces or changes in monotony.
+    
+    readers and additional arguments can be passed as scalars or lists,
+    including arguments for ``load_from_blocks``.
+    Return a Plist.
+    
     2022/06/28 first implementation, copying from scripts/dlist.py, docstring not yet updated
     Mechanism for args and kwargs is quite basic and error-prone.
 
@@ -851,7 +839,7 @@ def load_plist(rfiles,reader=None,*args,**kwargs):
     """
     
     if isinstance(rfiles, str):
-        profiles = load_from_blocks(rfiles, unpack = True, *args, **kwargs)
+        profiles = load_from_blocks(rfiles, *args, **kwargs)
     else:
         if reader is None:
             #reader=auto_reader(rfiles[0])

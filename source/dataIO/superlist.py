@@ -43,7 +43,9 @@ class Superlist(list):
     #   s.crop([2,10]) returns a list of objects, but I cannot apply a second time about
     #   method. 
     
-    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
     def __getattr__(self,name,*args,**kwargs): 
         attr = [object.__getattribute__(name) for object in self]
         
