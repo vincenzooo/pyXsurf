@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.189">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>pyXsurf – stats_legend</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../../">
+<script src="../../../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../../../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../../../index.html">
+    <span class="navbar-title">pyXsurf</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/vincenzooo/pyXsurf"><i class="bi bi-github" role="img">
+</i> 
+ </a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">(Untitled)</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../index.html" class="sidebar-item-text sidebar-link">pyXsurf</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../core.html" class="sidebar-item-text sidebar-link">pyXsurf (formerly pyXTel)</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#stats-labels-in-plots" id="toc-stats-labels-in-plots" class="nav-link active" data-scroll-target="#stats-labels-in-plots">Stats labels in plots</a>
+  <ul>
+  <li><a href="#basic" id="toc-basic" class="nav-link" data-scroll-target="#basic">Basic</a></li>
+  </ul></li>
+  <li><a href="#custom-stats" id="toc-custom-stats" class="nav-link" data-scroll-target="#custom-stats">Custom stats</a>
+  <ul>
+  <li><a href="#control-of-stats-in-plot-function" id="toc-control-of-stats-in-plot-function" class="nav-link" data-scroll-target="#control-of-stats-in-plot-function">Control of stats in plot function</a></li>
+  </ul></li>
+  <li><a href="#possible-improvements" id="toc-possible-improvements" class="nav-link" data-scroll-target="#possible-improvements">Possible improvements</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/vincenzooo/pyXsurf/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataIO.arrays <span class="im">import</span> test_stats, stats</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pySurf.data2D <span class="im">import</span> test_get_stats, get_stats</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pySurf.data2D <span class="im">import</span> test_plot_stats, plot_data, load_test_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="stats-labels-in-plots" class="level2">
+<h2 class="anchored" data-anchor-id="stats-labels-in-plots">Stats labels in plots</h2>
+<section id="basic" class="level3">
+<h3 class="anchored" data-anchor-id="basic">Basic</h3>
+<p>Stats labels can be added to plots and can be customized. Here we describe functions that are involved in the creation and visualization of this label, and the ways to customize it.</p>
+<p>The most basic way to control stats properties is setting stats = 1 (basic) or 2 (extended). The default configuration also should give</p>
+</section>
+</section>
+<section id="custom-stats" class="level2">
+<h2 class="anchored" data-anchor-id="custom-stats">Custom stats</h2>
+<p>To go beyond these options, values can be passed to the plot routine to control what to include in legend. Legend is generated in plot_data using the function <code>pySurf.data2D.get_stats</code>. This last returns the legend as a list of strings that the plot routine draws on the plot.</p>
+<section id="control-of-stats-in-plot-function" class="level3">
+<h3 class="anchored" data-anchor-id="control-of-stats-in-plot-function">Control of stats in plot function</h3>
+<p>All functions have test functions that run them with different options. Here is an example of how stats info can be controlled using <code>plot_data</code> arguments:</p>
+<p><code>test_plot_stats</code> runs the data plotting function <code>plot_data</code> with different choices of the parameters <code>stats</code> and <code>fmt</code>, which completely control the behaviour of the legend:</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>test_plot_stats()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="stats_legend_files/figure-html/cell-4-output-1.svg" class="img-fluid"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="stats_legend_files/figure-html/cell-4-output-2.svg" class="img-fluid"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="stats_legend_files/figure-html/cell-4-output-3.svg" class="img-fluid"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="stats_legend_files/figure-html/cell-4-output-4.svg" class="img-fluid"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="stats_legend_files/figure-html/cell-4-output-5.svg" class="img-fluid"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="stats_legend_files/figure-html/cell-4-output-6.svg" class="img-fluid"></p>
+</div>
+</div>
+<p>To understand the options that we can pass to <code>plot_data</code> we need to consider how the legend is created. This is obtained as a list of strings (one for each line), created by <code>pySurf.data2D.get_stats(data,x,y, vars=.., fmt=.., ...)</code>.</p>
+<p><code>vars</code> allows to chose which statistical result to add to the legend for each varible (it is a 3-element list of lists), <code>fmt</code> and <code>units</code> allows to customize the output. These are derived from function <code>dataIO.arrays.stats</code> (which is indeed applied once for each variable).</p>
+<p>See documentation for both functinos in test output.</p>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>test_get_stats()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> Return selected statistics for each of data,x,y as numeric array or string, wrapping `dataIO.stats`.  
+    
+    `vars `, `units` and `string` have same meaning and usage as in wrapped function `stats`. `vars` can be passed as 3-element list to individually set which stats to print (`None` for complete stats, `[]` to exclude all).
+    If `vars` is passed as a single-level list, this is interpreted as the list of varibles to plot for the data values only (empty lists are returned for x and y).
+    
+    TODO: span doesn't exclude nan data, put flag to tune this option.
+    TODO: there is some confusion in creating labels for `plot_data` because it can be unclear which one is X, Y, Z. A label should be added externally or in a routine. Also, statistics cannot be sorted (a list is returned, so it is possible to sort the list).
+    TODO: make a default extended stats, with  span and pts nr. for x and y and mean, span, rms for z. 
+    
+    
+
+stats(data, units=None, string=False, fmt=None, vars=None)
+ Return selected statistics on data as numerical array or list of strings (one for each stats).  
+    
+    vars is a list of indices that select the variables to be included, wrt a list:
+    0 - mean
+    1 - stddev
+    2 - PV
+    3 - min
+    4 - max
+    5 - number of elements
+    
+    Note that span doesn't exclude nan data, put flag to tune this option.
+    
+    string if set to True return stats as strings. In this case a string `units` can be used to add a postfix to statistics. A finer control can be obtained by passing in `fmt` a list of format strings for each var.
+    e.g.: the default is obtained with:
+    
+            fmt = ['mean: %.3g'+units,
+                   'StdDev: %.3g'+units,
+                   'PV: %.3g'+units,
+                   'min: %.3g'+units,
+                   'max: %.3g'+units,
+                   'n:  %i']
+    
+    
+no options:
+ [[], [], [1.1102230246251566e-17, 0.04429278408975292, 0.15279672, -0.07639836, 0.07639836, 240]] 
+-------------
+
+no options, string:
+ [[], [], ['mean: 1.11e-17 ', 'StdDev: 0.0443 ', 'PV: 0.153 ', 'min: -0.0764 ', 'max: 0.0764 ', 'n:  240']] 
+-------------
+
+vars=[1,2,3], string:
+ [[], [], ['StdDev: 0.0443 ', 'PV: 0.153 ', 'min: -0.0764 ']] 
+-------------
+
+vars=[3], string:
+ [[], [], ['min: -0.0764 ']] 
+-------------
+
+vars=[[],[2],[3]], string:
+ [[], ['PV: 0.0448 '], ['min: -0.0764 ']] 
+-------------
+
+vars=[[1],[2],[3]]:
+ [['StdDev: 0.372 '], ['PV: 0.0448 '], ['min: -0.0764 ']] 
+-------------
+
+units='mm':
+ [['StdDev: 0.372 mm'], ['PV: 0.0448 '], ['min: -0.0764 ']] 
+-------------
+
+units='[mm]':
+ [['StdDev: 0.372 mm'], ['PV: 0.0448 '], ['min: -0.0764 ']] 
+-------------
+
+units=['mm','mm','mm']:
+ [['StdDev: 0.372 mm'], ['PV: 0.0448 mm'], ['min: -0.0764 mm']] 
+-------------
+
+vars=[[1],[2,3],[3]]:
+ [['StdDev: 0.372 mm'], ['PV: 0.0448 mm', 'min: -0.0224 mm'], ['min: -0.0764 mm']] 
+-------------
+
+vars=[[2,3],[],[3]]:
+ [['PV: 1.82 mm', 'min: -1.23 mm'], [], ['min: -0.0764 mm']] 
+-------------
+</code></pre>
+</div>
+</div>
+<p>A similar test shows how same logic is implemented in <code>dataIO.arrays.stats:</code></p>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>test_stats()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>no options: all stats as float: [0.5005961637052837, 0.28831761641970005, 0.9960826445285902, 0.002751698459795393, 0.9988343429883856, 1000] 
+----------
+
+
+with empty vars, return empty: [] 
+----------
+
+
+select two stats [0.5005961637052837, 0.28831761641970005] 
+----------
+
+
+return as string, include units: ['mean: 0.501 km', 'StdDev: 0.288 km'] 
+----------
+
+
+return string, with format ['media: 0.500596 A', 'scarto: 000 mm'] 
+----------
+
+</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<pre><code>[0.5005961637052837,
+ 0.28831761641970005,
+ 0.9960826445285902,
+ 0.002751698459795393,
+ 0.9988343429883856,
+ 1000]</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="possible-improvements" class="level2">
+<h2 class="anchored" data-anchor-id="possible-improvements">Possible improvements</h2>
+<p>The behavior of stats labels is not completely customizeable.</p>
+<p>To invert the order of variables, <code>get_stats</code> must be called with the correct parameters, and strings rearranged before manually generating a new legend.</p>
+<p>X, Y, Z variables can get confused. An axis label can be added only with some similar manipulation of the legend.</p>
+<p>See TODO: in code.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

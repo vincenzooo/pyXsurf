@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.189">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>pyXsurf – test_pointcloud</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<script src="../../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">pyXsurf</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/vincenzooo/pyXsurf"><i class="bi bi-github" role="img">
+</i> 
+ </a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">(Untitled)</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../index.html" class="sidebar-item-text sidebar-link">pyXsurf</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../core.html" class="sidebar-item-text sidebar-link">pyXsurf (formerly pyXTel)</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> interpolate <span class="im">as</span> ip</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> numpy <span class="im">import</span> ma</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pdb</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> copy <span class="im">import</span> deepcopy</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataIO.span <span class="im">import</span> span</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> IPython <span class="im">import</span> display</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p>Test methods for loading, resampling, plotting, and saving. I am not sure code is not duplicated of the <code>points</code> module.</p>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> load(filename,x<span class="op">=</span><span class="va">None</span>,y<span class="op">=</span><span class="va">None</span>,<span class="bu">xrange</span><span class="op">=</span><span class="va">None</span>,yrange<span class="op">=</span><span class="va">None</span>,matrix<span class="op">=</span><span class="va">False</span>,scale<span class="op">=</span>(<span class="fl">1.</span>,<span class="fl">1.</span>,<span class="fl">1.</span>),center<span class="op">=</span><span class="va">None</span>,skip_header<span class="op">=</span><span class="va">None</span>,delimiter<span class="op">=</span><span class="st">','</span>):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""return a set of xyz points (Npoints,Ndim) from nanovea saved txt (matrix=False)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">    or gwyddion saved matrix (matrix=True, xrange, yrange must be defined).</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Scale is used to scale the coordinates (equivalent to points=points*scale)</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">    Center is the position of the center of the image (before any scaling or rotation) in absolute coordinates.</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">        Set to (0,0) to center the coordinate system to the data."""</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">#2014/04/29 added x and y as preferred arguments to xrange and yrange (to be removed).</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> skip_header<span class="op">==</span><span class="va">None</span>: </span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        skip<span class="op">=</span><span class="dv">0</span> </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>: </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        skip<span class="op">=</span>skip_header</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (matrix):</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> ((<span class="bu">xrange</span><span class="op">==</span><span class="va">None</span> <span class="kw">or</span> yrange<span class="op">==</span><span class="va">None</span>) <span class="kw">and</span> (x<span class="op">==</span><span class="va">None</span> <span class="kw">or</span> y<span class="op">==</span><span class="va">None</span>)): <span class="cf">raise</span> <span class="pp">Exception</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        mdata<span class="op">=</span>np.genfromtxt(filename,skip_header<span class="op">=</span>skip)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        nx,ny<span class="op">=</span> mdata.shape</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> x<span class="op">==</span><span class="va">None</span> <span class="kw">and</span> y<span class="op">==</span><span class="va">None</span>:</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>            x<span class="op">=</span>np.linspace(<span class="op">*</span><span class="bu">xrange</span>,num<span class="op">=</span>nx)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>            y<span class="op">=</span>np.linspace(<span class="op">*</span>yrange,num<span class="op">=</span>ny)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">#plt.imshow(mdata, extent=(mxrange.min(), myrange.max(), mxrange.max(), myrange.min()))</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        xpoints,ypoints<span class="op">=</span>[xy.flatten() <span class="cf">for</span> xy <span class="kw">in</span> np.array(np.meshgrid(x,y))]</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        zpoints<span class="op">=</span>mdata.flatten()</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        points<span class="op">=</span>np.vstack([xpoints,ypoints,zpoints]).T</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        points<span class="op">=</span> np.genfromtxt(filename,delimiter<span class="op">=</span>delimiter,skip_header<span class="op">=</span>skip)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> center <span class="op">!=</span> <span class="va">None</span>:</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>        offset<span class="op">=</span>np.hstack([((np.nanmax(points,axis<span class="op">=</span><span class="dv">0</span>)<span class="op">-</span>np.nanmin(points,axis<span class="op">=</span><span class="dv">0</span>))<span class="op">/</span><span class="dv">2</span>)[<span class="dv">0</span>:<span class="dv">2</span>],<span class="dv">0</span>])<span class="op">-</span>np.array([center[<span class="dv">0</span>],center[<span class="dv">1</span>],<span class="dv">0</span>])</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>        points<span class="op">=</span>points<span class="op">-</span>offset  <span class="co">#center on 0  </span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> scale <span class="op">!=</span> <span class="va">None</span>:</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>        points<span class="op">=</span>points<span class="op">*</span>scale</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> points</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Points(np.ndarray):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Represent a set of points in a N-dimensional point cloud, defined as array in format (Npoints,Ndim)."""</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    method<span class="op">=</span><span class="st">'linear'</span> <span class="co">#default method for interpolation. It can be redefined with Points.method.</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">#if set differently in function calls, it is overridden.    </span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__new__</span>(cls, filename, <span class="op">*</span>args,<span class="op">**</span>kwargs):</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        points<span class="op">=</span>load(filename,<span class="op">*</span>args,<span class="op">**</span>kwargs)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        obj <span class="op">=</span> np.asarray(points).view(cls)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">#obj.info = info</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> obj</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> __array_finalize__(<span class="va">self</span>, obj):</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="co">#print 'In __array_finalize__:'</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">#print '   self is %s' % repr(self)</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">#print '   obj is %s' % repr(obj)</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> obj <span class="kw">is</span> <span class="va">None</span>: <span class="cf">return</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.info <span class="op">=</span> <span class="bu">getattr</span>(obj, <span class="st">'info'</span>, <span class="va">None</span>)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> __array_wrap__(<span class="va">self</span>, out_arr, context<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">#print 'In __array_wrap__:'</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">#print '   self is %s' % repr(self)</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">#print '   arr is %s' % repr(out_arr)</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        <span class="co"># then just call the parent</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> np.ndarray.__array_wrap__(<span class="va">self</span>, out_arr, context)   </span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> translate(<span class="va">self</span>,offset<span class="op">=</span><span class="dv">0</span>):</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""returns translated coordinates of 2D point(s) x ([Npoints x 2]) by an offset.</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">        It works also on 3-D points, in that case the z is returned unchanged.</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co">        ND."""</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>        <span class="co">#2014/11/26 in class. Replaced old translate with a simple sum of arrays.</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">#   The sum is broadcasted whenever it makes sense.</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>        <span class="co">#It is interesting to notice that calculating the new vector and assigning it to self</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>        <span class="co">#    with self[:]=translated and returning self</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>        <span class="co">#    doesn't work, in the sense that the original array is modified and all returned</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>        <span class="co">#    values point to the same array.</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>        <span class="co">#2014/08/11 </span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>        <span class="co">#- return a 3d array if a 3d array was passed as argument.</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>        <span class="co">#- convert the result to array before return.</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>        <span class="co">#   The result was initially of type np.matrix to simplify operations on extracted columns,</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>        <span class="co">#   but it didn't really work. The problem is that the result is a matrix and if the</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>        <span class="co">#   user is unaware of that, all following slicing (column extractions) will be messed up</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>        <span class="co">#   (vectors will be column vectors as opposite to row vectors returned by np arrays.</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span><span class="op">+</span>offset</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> rotate(<span class="va">self</span>,theta<span class="op">=</span><span class="dv">0</span>,center<span class="op">=</span>(<span class="dv">0</span>,<span class="dv">0</span>)):</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""returns rotated coordinates of 2D point(s) x ([Npoints x 2]) about a center with anticlockwise angle theta in rad. </span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="co">        If 3D points are passed, z coordinate is maintained.</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a><span class="co">        3D. ugly wrapper around a 2d function (of x and y)."""</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> np.size(theta)<span class="op">!=</span><span class="dv">1</span>:</span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="va">NotImplemented</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>        tx,ty<span class="op">=</span>center</span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (<span class="va">self</span>.shape[<span class="op">-</span><span class="dv">1</span>]<span class="op">==</span><span class="dv">3</span>):</span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> np.hstack([<span class="va">self</span>[:,<span class="dv">0</span>:<span class="dv">2</span>].rotate(theta,center),<span class="va">self</span>[:,<span class="dv">2</span>:]])</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span>(<span class="va">self</span>.shape[<span class="op">-</span><span class="dv">1</span>]<span class="op">!=</span><span class="dv">2</span>):</span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>                <span class="cf">raise</span> <span class="va">NotImplemented</span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>        x,y<span class="op">=</span>np.array(<span class="va">self</span>[:,<span class="dv">0</span>]),np.array(<span class="va">self</span>[:,<span class="dv">1</span>])</span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>        cost<span class="op">=</span>math.cos(theta)</span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>        sint<span class="op">=</span>math.sin(theta)</span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>        x1<span class="op">=</span>x<span class="op">*</span>cost<span class="op">-</span>y<span class="op">*</span>sint <span class="op">+</span> ty<span class="op">*</span>sint <span class="op">-</span> tx<span class="op">*</span>(cost<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>        y1<span class="op">=</span>x<span class="op">*</span>sint<span class="op">+</span>y<span class="op">*</span>cost <span class="op">-</span> tx<span class="op">*</span>sint <span class="op">-</span> ty <span class="op">*</span>(cost<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> np.vstack((x1,y1)).T</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#filename=r'C:\Users\Vincenzo\Google Drive\libraries\python\userKov\pySurf\test\pointCloud\01_initialization\input\01_OP2S06_CMMsurface.dat'</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>os.path.curdir</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>filename<span class="op">=</span><span class="vs">r'pointCloud\01_initialization\input\01_OP2S06_CMMsurface.dat'</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>p<span class="op">=</span>Points(filename,delimiter<span class="op">=</span><span class="st">'</span><span class="ch">\t</span><span class="st">'</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> (p.rotate())</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> (p.rotate(<span class="dv">5</span>))</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>r<span class="op">=</span>p.rotate(np.pi<span class="op">/</span><span class="dv">2</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> (r)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> (p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[ -66.862   67.004 -208.344]
+ [ -59.662   67.028 -210.662]
+ [ -52.306   67.041 -212.756]
+ ...
+ [  61.03   -72.874 -210.496]
+ [  68.302  -72.874 -208.137]
+ [  75.485  -72.871 -205.546]]
+[[  45.28554106   83.12209593 -208.344     ]
+ [  47.35092297   76.22464904 -210.662     ]
+ [  49.45000802   69.17448969 -212.756     ]
+ ...
+ [ -52.56874441  -79.19474659 -210.496     ]
+ [ -50.505953    -86.16804391 -208.137     ]
+ [ -48.46553075  -93.05514599 -205.546     ]]
+[[ -67.004  -66.862 -208.344]
+ [ -67.028  -59.662 -210.662]
+ [ -67.041  -52.306 -212.756]
+ ...
+ [  72.874   61.03  -210.496]
+ [  72.874   68.302 -208.137]
+ [  72.871   75.485 -205.546]]
+[[ -66.862   67.004 -208.344]
+ [ -59.662   67.028 -210.662]
+ [ -52.306   67.041 -212.756]
+ ...
+ [  61.03   -72.874 -210.496]
+ [  68.302  -72.874 -208.137]
+ [  75.485  -72.871 -205.546]]</code></pre>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> (p)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> (r)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[ -66.862   67.004 -208.344]
+ [ -59.662   67.028 -210.662]
+ [ -52.306   67.041 -212.756]
+ ...
+ [  61.03   -72.874 -210.496]
+ [  68.302  -72.874 -208.137]
+ [  75.485  -72.871 -205.546]]
+[[ -67.004  -66.862 -208.344]
+ [ -67.028  -59.662 -210.662]
+ [ -67.041  -52.306 -212.756]
+ ...
+ [  72.874   61.03  -210.496]
+ [  72.874   68.302 -208.137]
+ [  72.871   75.485 -205.546]]</code></pre>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>filename<span class="op">=</span><span class="vs">r'pointCloud\01_initialization\input\01_OP2S06_CMMsurface.dat'</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>p<span class="op">=</span>Points(filename,delimiter<span class="op">=</span><span class="st">'</span><span class="ch">\t</span><span class="st">'</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> (p.translate())</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> (p.translate(<span class="dv">5</span>))</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>r<span class="op">=</span>p.translate((<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">6</span>))</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> (<span class="bu">id</span>(p),<span class="st">'</span><span class="ch">\n</span><span class="st">'</span>,p)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> (<span class="bu">id</span>(r),<span class="st">'</span><span class="ch">\n</span><span class="st">'</span>,r)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[ -66.862   67.004 -208.344]
+ [ -59.662   67.028 -210.662]
+ [ -52.306   67.041 -212.756]
+ ...
+ [  61.03   -72.874 -210.496]
+ [  68.302  -72.874 -208.137]
+ [  75.485  -72.871 -205.546]]
+[[ -61.862   72.004 -203.344]
+ [ -54.662   72.028 -205.662]
+ [ -47.306   72.041 -207.756]
+ ...
+ [  66.03   -67.874 -205.496]
+ [  73.302  -67.874 -203.137]
+ [  80.485  -67.871 -200.546]]
+1814454546216 
+ [[ -66.862   67.004 -208.344]
+ [ -59.662   67.028 -210.662]
+ [ -52.306   67.041 -212.756]
+ ...
+ [  61.03   -72.874 -210.496]
+ [  68.302  -72.874 -208.137]
+ [  75.485  -72.871 -205.546]]
+1814454545768 
+ [[ -67.862   68.004 -202.344]
+ [ -60.662   68.028 -204.662]
+ [ -53.306   68.041 -206.756]
+ ...
+ [  60.03   -71.874 -204.496]
+ [  67.302  -71.874 -202.137]
+ [  74.485  -71.871 -199.546]]</code></pre>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="29">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pySurf.points <span class="im">import</span> resample_grid</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>method<span class="op">=</span><span class="st">'linear'</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _resample_on_mesh(<span class="va">self</span>,xgrid,ygrid):</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> matplotlib.mlab <span class="im">import</span> griddata</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""resample points [Npoints x 3] on the grid defined by two vectors xgrid [Nx] and ygrid [Ny].</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">    Return a [Nx * Ny , 3] vector of points, sorted in standard python order</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">    (x changes faster). To get a (plottable) matrix of data use:</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co">    plt.imshow(rpoints[:,2].reshape(ygrid.size,xgrid.size))."""</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="va">self</span>.shape[<span class="dv">1</span>]<span class="op">==</span><span class="dv">3</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    x,y<span class="op">=</span>np.meshgrid(xgrid,ygrid) <span class="co">#this always return</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    z<span class="op">=</span>ip.griddata(<span class="va">self</span>[:,<span class="dv">0</span>:<span class="dv">2</span>],<span class="va">self</span>[:,<span class="dv">2</span>],(x,y),method<span class="op">=</span>method) </span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    rpoints<span class="op">=</span>np.vstack([x.flatten(),y.flatten(),z.flatten()]).T   </span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">#2014/11/24 rpoints=np.vstack([x.T.flatten(),y.T.flatten(),z.T.flatten()]).T</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> rpoints</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _resample_on_points(<span class="va">self</span>,positions):</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Resample points [Npoints x ndim] on the points defined in positions.</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="co">        </span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="co">    Positions is [Mpoints x ndim-1] or [Mpoints x ndim-1] (in this case, the last column is ignored).</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="co">    Return a [Nx x Ny , ndim] vector of points. </span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a><span class="co">    To get a (plottable) matrix of data use:</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="co">    plt.imshow(rpoints[:,ndim-1].reshape(xgrid.size,ygrid.size))."""</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    points<span class="op">=</span><span class="va">self</span>.points</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(points.shape)<span class="op">==</span><span class="dv">1</span>:</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>        ndim<span class="op">=</span><span class="dv">1</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> <span class="bu">len</span>(points.shape)<span class="op">==</span><span class="dv">2</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>        ndim<span class="op">=</span>(points.shape)[<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="bu">len</span>(positions.shape)<span class="op">==</span><span class="dv">2</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (positions.shape)[<span class="op">-</span><span class="dv">1</span>]<span class="op">!=</span>ndim<span class="op">-</span><span class="dv">1</span> <span class="kw">and</span> (positions.shape)[<span class="op">-</span><span class="dv">1</span>]<span class="op">!=</span>ndim:</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>        warn(<span class="st">'Positions provided for data interpolation have mismatching dimensions.'</span>)</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>    z<span class="op">=</span>ip.griddata(<span class="va">self</span>[:,<span class="dv">0</span>:<span class="op">-</span><span class="dv">1</span>],<span class="va">self</span>[:,<span class="op">-</span><span class="dv">1</span>],positions[:,<span class="dv">0</span>:ndim],method<span class="op">=</span><span class="va">self</span>.method)</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>    rpoints<span class="op">=</span>np.hstack([positions[:,<span class="dv">0</span>:ndim],z[:,np.newaxis]])</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> rpoints</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a><span class="co">def resample(self,positions):</span></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a><span class="co">    """resample points [Npoints x 3] on the points defined in positions [Mpoints x 2], or [Mpoints x 3]</span></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a><span class="co">    (in this case 3rd column is ignored).</span></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a><span class="co">    Return a [Nx x Ny , 3] vector of points. To get a (plottable) matrix of data use:</span></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a><span class="co">    plt.imshow(rpoints[:,2].reshape(xgrid.size,ygrid.size))."""</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a><span class="co">    assert self.shape[1]==3</span></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a><span class="co">    z=ip.griddata(self[:,0:2],self[:,-1],positions[:,0:2],method=method)</span></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a><span class="co">    rpoints=np.hstack([positions[:,0:2],z[:,np.newaxis]])</span></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a><span class="co">    return rpoints</span></span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span>        </span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> to_matrix(points,xgrid<span class="op">=</span><span class="va">None</span>,ygrid<span class="op">=</span><span class="va">None</span>,shape<span class="op">=</span><span class="va">None</span>,matrix<span class="op">=</span><span class="va">False</span>,fill_value<span class="op">=</span>np.nan,<span class="op">**</span>kwargs):</span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Resample points on a grid based on different possible settings.</span></span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> shape<span class="op">==</span><span class="va">None</span>:</span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> <span class="bu">len</span>(xgrid.shape)<span class="op">==</span><span class="bu">len</span>(ygrid.shape)<span class="op">==</span><span class="dv">1</span></span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> xgrid<span class="op">==</span>ygrid<span class="op">==</span><span class="va">None</span></span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>        x,y,z<span class="op">=</span>np.hsplit(<span class="va">self</span>,<span class="dv">3</span>)</span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>        xgrid<span class="op">=</span>np.linspace(x.<span class="bu">min</span>(),x.<span class="bu">max</span>(),shape[<span class="dv">0</span>])</span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>        ygrid<span class="op">=</span>np.linspace(y.<span class="bu">min</span>(),y.<span class="bu">max</span>(),shape[<span class="dv">1</span>])</span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> xgrid<span class="op">!=</span><span class="va">None</span></span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> ygrid<span class="op">!=</span><span class="va">None</span></span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>    grid<span class="op">=</span>np.vstack([g.flatten() <span class="cf">for</span> g <span class="kw">in</span>  np.meshgrid(xgrid,ygrid)]).T</span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>    points<span class="op">=</span>ip.griddata(<span class="va">self</span>[:,<span class="dv">0</span>:<span class="dv">2</span>],<span class="va">self</span>[:,<span class="dv">2</span>],grid,fill_value<span class="op">=</span>fill_value,method<span class="op">=</span>method)</span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a>    points<span class="op">=</span><span class="va">self</span>.reshape(ygrid.size,xgrid.size)</span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a><span class="co">""" save and plot use the same interface"""</span></span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> save(<span class="va">self</span>,filename,xgrid<span class="op">=</span><span class="va">None</span>,ygrid<span class="op">=</span><span class="va">None</span>,shape<span class="op">=</span><span class="va">None</span>,matrix<span class="op">=</span><span class="va">False</span>,fill_value<span class="op">=</span>np.nan,<span class="op">**</span>kwargs):</span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""save points on a file. If matrix is true write in matrix form (in this case you have to </span></span>
+<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a><span class="co">    provide the values for axis). Otherwise write as points in columns."""</span></span>
+<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a>    <span class="co">#2014/08/08 default fill_value modified to nan.</span></span>
+<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a>    <span class="co">#20140420 moved filename to second argument for consistency.</span></span>
+<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> matrix:</span>
+<span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> shape<span class="op">==</span><span class="va">None</span>:</span>
+<span id="cb10-79"><a href="#cb10-79" aria-hidden="true" tabindex="-1"></a>            <span class="cf">assert</span> <span class="bu">len</span>(xgrid.shape)<span class="op">==</span><span class="bu">len</span>(ygrid.shape)<span class="op">==</span><span class="dv">1</span></span>
+<span id="cb10-80"><a href="#cb10-80" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb10-81"><a href="#cb10-81" aria-hidden="true" tabindex="-1"></a>            <span class="cf">assert</span> xgrid<span class="op">==</span>ygrid<span class="op">==</span><span class="va">None</span></span>
+<span id="cb10-82"><a href="#cb10-82" aria-hidden="true" tabindex="-1"></a>            x,y,z<span class="op">=</span>np.hsplit(<span class="va">self</span>,<span class="dv">3</span>)</span>
+<span id="cb10-83"><a href="#cb10-83" aria-hidden="true" tabindex="-1"></a>            xgrid<span class="op">=</span>np.linspace(x.<span class="bu">min</span>(),x.<span class="bu">max</span>(),shape[<span class="dv">0</span>])</span>
+<span id="cb10-84"><a href="#cb10-84" aria-hidden="true" tabindex="-1"></a>            ygrid<span class="op">=</span>np.linspace(y.<span class="bu">min</span>(),y.<span class="bu">max</span>(),shape[<span class="dv">1</span>])</span>
+<span id="cb10-85"><a href="#cb10-85" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> xgrid<span class="op">!=</span><span class="va">None</span></span>
+<span id="cb10-86"><a href="#cb10-86" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> ygrid<span class="op">!=</span><span class="va">None</span></span>
+<span id="cb10-87"><a href="#cb10-87" aria-hidden="true" tabindex="-1"></a>        grid<span class="op">=</span>np.vstack([g.flatten() <span class="cf">for</span> g <span class="kw">in</span>  np.meshgrid(xgrid,ygrid)]).T</span>
+<span id="cb10-88"><a href="#cb10-88" aria-hidden="true" tabindex="-1"></a>        points<span class="op">=</span>ip.griddata(<span class="va">self</span>[:,<span class="dv">0</span>:<span class="dv">2</span>],<span class="va">self</span>[:,<span class="dv">2</span>],grid,fill_value<span class="op">=</span>fill_value,method<span class="op">=</span>method)</span>
+<span id="cb10-89"><a href="#cb10-89" aria-hidden="true" tabindex="-1"></a>        points<span class="op">=</span><span class="va">self</span>.reshape(ygrid.size,xgrid.size)</span>
+<span id="cb10-90"><a href="#cb10-90" aria-hidden="true" tabindex="-1"></a>        <span class="co">#points=np.hstack([grid,self[:,np.newaxis]])</span></span>
+<span id="cb10-91"><a href="#cb10-91" aria-hidden="true" tabindex="-1"></a>    <span class="co">#if not, they are already in the correct format</span></span>
+<span id="cb10-92"><a href="#cb10-92" aria-hidden="true" tabindex="-1"></a>    np.savetxt(<span class="va">self</span>,filename,<span class="op">**</span>kwargs)</span>
+<span id="cb10-93"><a href="#cb10-93" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-94"><a href="#cb10-94" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot(<span class="va">self</span>,xgrid<span class="op">=</span><span class="va">None</span>,ygrid<span class="op">=</span><span class="va">None</span>,shape<span class="op">=</span><span class="va">None</span>,resample<span class="op">=</span><span class="va">True</span>,scatter<span class="op">=</span><span class="va">False</span>,<span class="op">**</span>kwargs):</span>
+<span id="cb10-95"><a href="#cb10-95" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""resample xyz points [Nx3] to a grid whose axis xgrid and ygrid are given</span></span>
+<span id="cb10-96"><a href="#cb10-96" aria-hidden="true" tabindex="-1"></a><span class="co">    and plot it. If resample is set to False x and y positions are considered only for range, </span></span>
+<span id="cb10-97"><a href="#cb10-97" aria-hidden="true" tabindex="-1"></a><span class="co">    but they are not used to position the z values (it works if x and y are on an exact unrotated grid,</span></span>
+<span id="cb10-98"><a href="#cb10-98" aria-hidden="true" tabindex="-1"></a><span class="co">    resampling is slower, but exact)."""</span></span>
+<span id="cb10-99"><a href="#cb10-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-100"><a href="#cb10-100" aria-hidden="true" tabindex="-1"></a>    <span class="co">#plot</span></span>
+<span id="cb10-101"><a href="#cb10-101" aria-hidden="true" tabindex="-1"></a>    <span class="co">#plt.clf()</span></span>
+<span id="cb10-102"><a href="#cb10-102" aria-hidden="true" tabindex="-1"></a>    x,y,z<span class="op">=</span>np.hsplit(<span class="va">self</span>,<span class="dv">3</span>)</span>
+<span id="cb10-103"><a href="#cb10-103" aria-hidden="true" tabindex="-1"></a>    cmap<span class="op">=</span>kwargs.pop(<span class="st">'cmap'</span>,<span class="st">'jet'</span>)</span>
+<span id="cb10-104"><a href="#cb10-104" aria-hidden="true" tabindex="-1"></a>    aspect<span class="op">=</span>kwargs.pop(<span class="st">'aspect'</span>,<span class="st">'equal'</span>)</span>
+<span id="cb10-105"><a href="#cb10-105" aria-hidden="true" tabindex="-1"></a>    <span class="co">#pdb.set_trace()</span></span>
+<span id="cb10-106"><a href="#cb10-106" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> scatter: <span class="co">#do scatterplot</span></span>
+<span id="cb10-107"><a href="#cb10-107" aria-hidden="true" tabindex="-1"></a>        beamsize<span class="op">=</span><span class="dv">20</span> <span class="co">#I may use this to represent beamsize (round symbol) or lateral resolution (square)</span></span>
+<span id="cb10-108"><a href="#cb10-108" aria-hidden="true" tabindex="-1"></a>        plt.gca().set_aspect(aspect)</span>
+<span id="cb10-109"><a href="#cb10-109" aria-hidden="true" tabindex="-1"></a>        plt.scatter(x, y, c<span class="op">=</span>z, s<span class="op">=</span>beamsize, cmap<span class="op">=</span>cmap, edgecolors<span class="op">=</span><span class="st">'None'</span>, <span class="op">**</span>kwargs)</span>
+<span id="cb10-110"><a href="#cb10-110" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb10-111"><a href="#cb10-111" aria-hidden="true" tabindex="-1"></a>        <span class="co">#if not scatter plot, grid must be provided as shape or as xgrid and ygrid axis.</span></span>
+<span id="cb10-112"><a href="#cb10-112" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> shape<span class="op">==</span><span class="va">None</span>:</span>
+<span id="cb10-113"><a href="#cb10-113" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> <span class="bu">len</span>(xgrid.shape)<span class="op">==</span><span class="bu">len</span>(ygrid.shape)<span class="op">==</span><span class="dv">1</span>:</span>
+<span id="cb10-114"><a href="#cb10-114" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> z    <span class="co">#skip plot</span></span>
+<span id="cb10-115"><a href="#cb10-115" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb10-116"><a href="#cb10-116" aria-hidden="true" tabindex="-1"></a>            <span class="cf">assert</span> xgrid<span class="op">==</span>ygrid<span class="op">==</span><span class="va">None</span></span>
+<span id="cb10-117"><a href="#cb10-117" aria-hidden="true" tabindex="-1"></a>            xgrid<span class="op">=</span>np.linspace(x.<span class="bu">min</span>(),x.<span class="bu">max</span>(),shape[<span class="dv">0</span>])</span>
+<span id="cb10-118"><a href="#cb10-118" aria-hidden="true" tabindex="-1"></a>            ygrid<span class="op">=</span>np.linspace(y.<span class="bu">min</span>(),y.<span class="bu">max</span>(),shape[<span class="dv">1</span>])</span>
+<span id="cb10-119"><a href="#cb10-119" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> resample:</span>
+<span id="cb10-120"><a href="#cb10-120" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span> (<span class="st">"resampling..."</span>)</span>
+<span id="cb10-121"><a href="#cb10-121" aria-hidden="true" tabindex="-1"></a>            z<span class="op">=</span>resample_grid(<span class="va">self</span>,xgrid,ygrid)[:,<span class="dv">2</span>]</span>
+<span id="cb10-122"><a href="#cb10-122" aria-hidden="true" tabindex="-1"></a>        nx,ny<span class="op">=</span>[xx.size <span class="cf">for</span> xx <span class="kw">in</span> (xgrid,ygrid)]</span>
+<span id="cb10-123"><a href="#cb10-123" aria-hidden="true" tabindex="-1"></a>        xr,yr<span class="op">=</span>[span(xx) <span class="cf">for</span> xx <span class="kw">in</span> (xgrid,ygrid)]</span>
+<span id="cb10-124"><a href="#cb10-124" aria-hidden="true" tabindex="-1"></a>        xxg,sx<span class="op">=</span>np.linspace(xr[<span class="dv">0</span>],xr[<span class="dv">1</span>],nx,retstep<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb10-125"><a href="#cb10-125" aria-hidden="true" tabindex="-1"></a>        yyg,sy<span class="op">=</span>np.linspace(yr[<span class="dv">0</span>],yr[<span class="dv">1</span>],ny,retstep<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb10-126"><a href="#cb10-126" aria-hidden="true" tabindex="-1"></a>        <span class="co">#ranges for plot (intervals centered on xxg, yyg)</span></span>
+<span id="cb10-127"><a href="#cb10-127" aria-hidden="true" tabindex="-1"></a>        xr<span class="op">=</span>xr<span class="op">+</span>np.array((<span class="op">-</span>sx<span class="op">/</span><span class="dv">2</span>,sx<span class="op">/</span><span class="dv">2</span>))</span>
+<span id="cb10-128"><a href="#cb10-128" aria-hidden="true" tabindex="-1"></a>        yr<span class="op">=</span>yr<span class="op">+</span>np.array((<span class="op">-</span>sy<span class="op">/</span><span class="dv">2</span>,sy<span class="op">/</span><span class="dv">2</span>))</span>
+<span id="cb10-129"><a href="#cb10-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-130"><a href="#cb10-130" aria-hidden="true" tabindex="-1"></a>        z<span class="op">=</span>z.reshape(ny,nx)</span>
+<span id="cb10-131"><a href="#cb10-131" aria-hidden="true" tabindex="-1"></a>        plt.imshow(z,extent<span class="op">=</span>[xr[<span class="dv">0</span>],xr[<span class="dv">1</span>],yr[<span class="dv">0</span>],yr[<span class="dv">1</span>]],interpolation<span class="op">=</span><span class="st">'none'</span>,aspect<span class="op">=</span>aspect,</span>
+<span id="cb10-132"><a href="#cb10-132" aria-hidden="true" tabindex="-1"></a>            origin<span class="op">=</span><span class="st">'lower'</span>)</span>
+<span id="cb10-133"><a href="#cb10-133" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(<span class="st">'X (mm)'</span>)</span>
+<span id="cb10-134"><a href="#cb10-134" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="st">'Y (mm)'</span>)</span>
+<span id="cb10-135"><a href="#cb10-135" aria-hidden="true" tabindex="-1"></a>    plt.colorbar()</span>
+<span id="cb10-136"><a href="#cb10-136" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="cb10-137"><a href="#cb10-137" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> z</span>
+<span id="cb10-138"><a href="#cb10-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-139"><a href="#cb10-139" aria-hidden="true" tabindex="-1"></a>Points.save<span class="op">=</span>save</span>
+<span id="cb10-140"><a href="#cb10-140" aria-hidden="true" tabindex="-1"></a>Points.plot<span class="op">=</span>plot</span>
+<span id="cb10-141"><a href="#cb10-141" aria-hidden="true" tabindex="-1"></a>filename<span class="op">=</span><span class="vs">r'pointCloud\01_initialization\input\01_OP2S06_CMMsurface.dat'</span></span>
+<span id="cb10-142"><a href="#cb10-142" aria-hidden="true" tabindex="-1"></a>p<span class="op">=</span>Points(filename,delimiter<span class="op">=</span><span class="st">'</span><span class="ch">\t</span><span class="st">'</span>)</span>
+<span id="cb10-143"><a href="#cb10-143" aria-hidden="true" tabindex="-1"></a>a<span class="op">=</span>p.plot(shape<span class="op">=</span>(<span class="dv">29</span>,<span class="dv">20</span>))</span>
+<span id="cb10-144"><a href="#cb10-144" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"p.plot().shape:"</span>,a.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>resampling...</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="test_pointCloud_files/figure-html/cell-8-output-2.png" class="img-fluid"></p>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>p.plot().shape: (20, 29)</code></pre>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>gfile<span class="op">=</span>filename</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>outfolder<span class="op">=</span><span class="st">'OP2S06cmm'</span> </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>imsize<span class="op">=</span>(<span class="dv">29</span>,<span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
