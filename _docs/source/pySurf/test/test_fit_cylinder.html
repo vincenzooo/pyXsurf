@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.189">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>pyXsurf – test_fit_cylinder</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<script src="../../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">pyXsurf</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/vincenzooo/pyXsurf"><i class="bi bi-github" role="img">
+</i> 
+ </a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">(Untitled)</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../index.html" class="sidebar-item-text sidebar-link">pyXsurf</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../core.html" class="sidebar-item-text sidebar-link">pyXsurf (formerly pyXTel)</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#settings" id="toc-settings" class="nav-link active" data-scroll-target="#settings">Settings</a></li>
+  <li><a href="#cylinder-fit" id="toc-cylinder-fit" class="nav-link" data-scroll-target="#cylinder-fit">Cylinder fit</a></li>
+  <li><a href="#test-alignment-correction" id="toc-test-alignment-correction" class="nav-link" data-scroll-target="#test-alignment-correction">test alignment correction</a></li>
+  <li><a href="#cylinder-vs-cone" id="toc-cylinder-vs-cone" class="nav-link" data-scroll-target="#cylinder-vs-cone">cylinder vs cone</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/vincenzooo/pyXsurf/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+
+<p>2015/01/15<br>
+The two calibration files are nearly equivalent and are compared in another notebook.<br>
+Outliers are corrected in this version, giving for residuals 2.35 um rms on central region.</p>
+<p>(*)There are only two reference points for this sample, so it is hard to quantify errors. #gwyddion finds 0.11-0.15 degrees for same data, this program from reference points finds -1.63, that is considerably different. It is visible how the axis is not aligned after the rotation and I am not even sure it is improved wrt raw data. Align and data simmetry are corrected in this version and a basic treatment for outliers is introduced, considerably lowering the error (40 um in previous version).</p>
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pySurf.fit_cylinder <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pySurf.points <span class="im">import</span> <span class="op">*</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Using matplotlib backend: TkAgg
+Populating the interactive namespace from numpy and matplotlib</code></pre>
+</div>
+</div>
+<section id="settings" class="level2">
+<h2 class="anchored" data-anchor-id="settings">Settings</h2>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#always run this</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>gfile<span class="op">=</span><span class="vs">r'test_fitCylinder\bonding_data\150529BottomLeft_Center.txt'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>p<span class="op">=</span>get_points(gfile,matrix<span class="op">=</span><span class="dv">1</span>, <span class="bu">xrange</span><span class="op">=</span>[<span class="dv">0</span>,<span class="dv">100</span>],yrange<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">100</span>],delimiter<span class="op">=</span><span class="st">" "</span>)<span class="op">*</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>pts1<span class="op">=</span>crop_points(p,[<span class="dv">23</span>,<span class="dv">80</span>],[<span class="dv">15</span>,<span class="dv">93</span>])</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>plot_points(p,shape<span class="op">=</span>[<span class="dv">57</span>,<span class="dv">78</span>])</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'original'</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>display(plt.gcf())</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'crop'</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>plot_points(pts1,shape<span class="op">=</span>[<span class="dv">57</span>,<span class="dv">78</span>])</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>display(plt.gcf())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>WARNING: xrange and yrange options to get_points are obsolete, use x and y with twoelements to obtain same effect. Will be removed. I will correct for now</code></pre>
+</div>
+<div class="cell-output cell-output-error">
+<pre><code>ValueError: Y is not correct size (or 2-el array)</code></pre>
+</div>
+</div>
+</section>
+<section id="cylinder-fit" class="level2">
+<h2 class="anchored" data-anchor-id="cylinder-fit">Cylinder fit</h2>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:true}" data-execution_count="154">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>plt.close(<span class="st">'all'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:true}" data-execution_count="203">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>gfile<span class="op">=</span><span class="vs">r'test_fitCylinder\PCO1S17_cylinder\110x60_100x500_xyscan_100Hz_Height.txt'</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>pts1<span class="op">=</span>get_points(gfile)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="204">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>odr0<span class="op">=</span>(<span class="dv">0</span>,<span class="fl">220.</span>,<span class="dv">0</span>,<span class="fl">0.</span>) <span class="co">#use nominal value for guess direction</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="205">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#create points to be fit from a subset of points.</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>pts<span class="op">=</span>pts1[:]</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">#level plane</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>pts<span class="op">=</span>level_points(pts)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>pts[:,<span class="dv">2</span>]<span class="op">=</span>pts[:,<span class="dv">2</span>]<span class="op">-</span>pts[np.argsort(pts[:,<span class="dv">2</span>])[<span class="dv">0</span>],<span class="dv">2</span>]</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>deltaR,odr<span class="op">=</span>fit_cylinder(pts,odr0,zscale<span class="op">=</span><span class="fl">1000.</span>,options<span class="op">=</span>{<span class="st">'maxiter'</span>:<span class="dv">500</span>},method<span class="op">=</span><span class="st">'Nelder-Mead'</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>radius<span class="op">=</span>cylinder_error3(odr,pts<span class="op">*</span>[<span class="dv">1</span>,<span class="dv">1</span>,<span class="fl">1.</span><span class="op">/</span><span class="dv">1000</span>],extra<span class="op">=</span><span class="dv">1</span>)[<span class="op">-</span><span class="dv">1</span>] <span class="co">#this is a workaround to retrieve radius</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>plot_points(deltaR)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>-----------------------------------
+Results of fit on region (function: &lt;function cylinder_error3 at 0x000000002F02D048&gt;):
+X: [ 0.000,110.000]
+Y: [ 0.000,60.000]
+data range: [ 0.000, 2.192]
+---
+  status: 1
+    nfev: 802
+ success: False
+     fun: 0.62521596822262959
+       x: array([  3.67190126e+09,   1.51996449e+06,  -9.48793919e+09,
+        -3.91829640e+06])
+ message: 'Maximum number of function evaluations has been exceeded.'
+     nit: 460
+Angle of cyl axis with y axis (deg):
+90.0
+Radius:
+3554.82247987
+Axis Parameters:
+[  3.67190126e+09   1.51996449e+06  -9.48793919e+09  -3.91829640e+06]
+---
+rms residuals=625.215968223 um
+resampling...</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="205">
+<pre><code>array([[ -539.34213789,  -539.38565016,  -539.42916243, ...,
+         -587.11858716,  -587.16209943,  -587.2056119 ],
+       [ -539.36311991,  -539.40663218,  -539.45014445, ...,
+         -587.13956945,  -587.18308172,  -587.22659418],
+       [ -539.45441826,  -539.49793054,  -539.5414428 , ...,
+         -587.23086712,  -587.27437939,  -587.31789185],
+       ..., 
+       [-1027.17818708, -1027.22169344, -1027.2651998 , ...,
+        -1074.94814588, -1074.99165223, -1075.03515856],
+       [-1035.49534532, -1035.53885158, -1035.58235784, ...,
+        -1083.26519293, -1083.30869919, -1083.35220541],
+       [-1043.88279047, -1043.92629662, -1043.96980278, ...,
+        -1091.65252594, -1091.69603209, -1091.73953821]])</code></pre>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="206">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>plot_points(deltaR)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>display(plt.gcf())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>resampling...</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="test_fit_cylinder_files/figure-html/cell-12-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="test-alignment-correction" class="level2">
+<h2 class="anchored" data-anchor-id="test-alignment-correction">test alignment correction</h2>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:true}" data-execution_count="189">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>plt.close(<span class="st">'all'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="190">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#repeat last calculation points.</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>pts<span class="op">=</span>pts1[:]</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>plot_points(pts)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">#level plane ot make radius guess easier</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>pts<span class="op">=</span>level_points(pts)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>pts[:,<span class="dv">2</span>]<span class="op">=</span>pts[:,<span class="dv">2</span>]<span class="op">-</span>pts[np.argsort(pts[:,<span class="dv">2</span>])[<span class="dv">0</span>],<span class="dv">2</span>]</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>deltaR,odr<span class="op">=</span>fit_cylinder(pts,odr0,zscale<span class="op">=</span><span class="fl">1000.</span>,options<span class="op">=</span>{<span class="st">'maxiter'</span>:<span class="dv">500</span>},method<span class="op">=</span><span class="st">'Nelder-Mead'</span>)</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>radius<span class="op">=</span>cylinder_error3(odr,pts<span class="op">*</span>[<span class="dv">1</span>,<span class="dv">1</span>,<span class="fl">1.</span><span class="op">/</span><span class="dv">1000</span>],extra<span class="op">=</span><span class="dv">1</span>)[<span class="op">-</span><span class="dv">1</span>] <span class="co">#this is a workaround to retrieve radius</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>display(plt.gcf())</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>plot_points(deltaR)</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>display(plt.gcf())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>resampling...
+-----------------------------------
+Results of fit on region (function: &lt;function cylinder_error3 at 0x000000002F02D048&gt;):
+X: [23.000,80.000]
+Y: [15.000,93.000]
+data range: [ 0.000, 0.051]
+---
+  status: 0
+    nfev: 531
+ success: True
+     fun: 0.014440213494010248
+       x: array([  2.07486572e+02,   5.38997399e+07,  -5.52097053e+02,
+        -2.01075039e-06])
+ message: 'Optimization terminated successfully.'
+     nit: 259
+Angle of cyl axis with y axis (deg):
+89.8962216578
+Radius:
+53899739.8653
+Axis Parameters:
+[  2.07486572e+02   5.38997399e+07  -5.52097053e+02  -2.01075039e-06]
+---
+rms residuals=14.440213494 um</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="test_fit_cylinder_files/figure-html/cell-14-output-2.png" class="img-fluid"></p>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>resampling...</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="test_fit_cylinder_files/figure-html/cell-14-output-4.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="193">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>deltaR,odr<span class="op">=</span>fit_cylinder(pts,np.array([  <span class="fl">2.07486572e+02</span>,   <span class="fl">5.38997399e+07</span>,  <span class="op">-</span><span class="fl">5.52097053e+02</span>,</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>        <span class="op">-</span><span class="fl">2.01075039e-06</span>]),zscale<span class="op">=</span><span class="fl">1000.</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>plt.clf()</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>plot_points(deltaR)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>display(plt.gcf())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>-----------------------------------
+Results of fit on region (function: &lt;function cylinder_error3 at 0x000000002F02D048&gt;):
+X: [23.000,80.000]
+Y: [15.000,93.000]
+data range: [ 0.000, 0.051]
+---
+Angle of cyl axis with y axis (deg):
+89.8962216579
+Radius:
+53899739.8837
+Axis Parameters:
+[  2.07486572e+02   5.38997399e+07  -5.52097053e+02  -2.01075039e-06]
+---
+rms residuals=14.4402136478 um
+resampling...</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="test_fit_cylinder_files/figure-html/cell-15-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="194">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>odr0</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="194">
+<pre><code>(0, 220.0, 0, 0.0)</code></pre>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="195">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>pp2<span class="op">=</span>rotate_points(pp,<span class="fl">0.5</span><span class="op">/</span><span class="dv">180</span><span class="op">*</span>np.pi)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co">#plt.clf()</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co">#plot_points(pp2)</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co">#display(plt.gcf())</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>pp2<span class="op">=</span>level_points(pp2)</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>pp2[:,<span class="dv">2</span>]<span class="op">=</span>pp2[:,<span class="dv">2</span>]<span class="op">-</span>pp2[np.argsort(pp2[:,<span class="dv">2</span>])[<span class="dv">20</span>],<span class="dv">2</span>]</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="co">#plt.clf()</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="co">#plot_points(pp2)</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="co">#display(plt.gcf())</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>deltaR,odr<span class="op">=</span>fit_cylinder(pp2,odr0,zscale<span class="op">=</span><span class="fl">1000.</span>,options<span class="op">=</span>{<span class="st">'maxiter'</span>:<span class="dv">500</span>},method<span class="op">=</span><span class="st">'Nelder-Mead'</span>)</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>radius<span class="op">=</span>cylinder_error3(odr,pp2<span class="op">*</span>[<span class="dv">1</span>,<span class="dv">1</span>,<span class="fl">1.</span><span class="op">/</span><span class="dv">1000</span>],extra<span class="op">=</span><span class="dv">1</span>)[<span class="op">-</span><span class="dv">1</span>] <span class="co">#this is a workaround to retrieve radius</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>plt.clf()</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>plot_points(deltaR)</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>display(plt.gcf())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>-----------------------------------
+Results of fit on region (function: &lt;function cylinder_error3 at 0x000000002F02D048&gt;):
+X: [22.838,79.974]
+Y: [15.040,93.139]
+data range: [-0.000, 0.051]
+---
+  status: 0
+    nfev: 532
+ success: True
+     fun: 0.014440214167367084
+       x: array([  2.21405897e+02,   5.75154376e+07,  -5.89133297e+02,
+        -8.85181741e-06])
+ message: 'Optimization terminated successfully.'
+     nit: 255
+Angle of cyl axis with y axis (deg):
+89.9027457372
+Radius:
+57515437.6197
+Axis Parameters:
+[  2.21405897e+02   5.75154376e+07  -5.89133297e+02  -8.85181741e-06]
+---
+rms residuals=14.4402141674 um
+resampling...</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="test_fit_cylinder_files/figure-html/cell-17-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="196">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>deltaR,odr<span class="op">=</span>fit_cylinder(pp2,odr0,zscale<span class="op">=</span><span class="fl">1000.</span>,options<span class="op">=</span>{<span class="st">'maxiter'</span>:<span class="dv">500</span>},method<span class="op">=</span><span class="st">'Nelder-Mead'</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>pp2<span class="op">=</span>level_points(pp2)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>pp2[:,<span class="dv">2</span>]<span class="op">=</span>pp2[:,<span class="dv">2</span>]<span class="op">-</span>pp2[np.argsort(pp2[:,<span class="dv">2</span>])[<span class="dv">20</span>],<span class="dv">2</span>]</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>deltaR,odr<span class="op">=</span>fit_cylinder(pp2,odr0,zscale<span class="op">=</span><span class="fl">1000.</span>,options<span class="op">=</span>{<span class="st">'maxiter'</span>:<span class="dv">500</span>},method<span class="op">=</span><span class="st">'Nelder-Mead'</span>)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>radius<span class="op">=</span>cylinder_error3(odr,pp2<span class="op">*</span>[<span class="dv">1</span>,<span class="dv">1</span>,<span class="fl">1.</span><span class="op">/</span><span class="dv">1000</span>],extra<span class="op">=</span><span class="dv">1</span>)[<span class="op">-</span><span class="dv">1</span>] <span class="co">#this is a workaround to retrieve radius</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>-----------------------------------
+Results of fit on region (function: &lt;function cylinder_error3 at 0x000000002F02D048&gt;):
+X: [22.838,79.974]
+Y: [15.040,93.139]
+data range: [-0.000, 0.051]
+---
+  status: 0
+    nfev: 532
+ success: True
+     fun: 0.014440214167367084
+       x: array([  2.21405897e+02,   5.75154376e+07,  -5.89133297e+02,
+        -8.85181741e-06])
+ message: 'Optimization terminated successfully.'
+     nit: 255
+Angle of cyl axis with y axis (deg):
+89.9027457372
+Radius:
+57515437.6197
+Axis Parameters:
+[  2.21405897e+02   5.75154376e+07  -5.89133297e+02  -8.85181741e-06]
+---
+rms residuals=14.4402141674 um
+-----------------------------------
+Results of fit on region (function: &lt;function cylinder_error3 at 0x000000002F02D048&gt;):
+X: [22.838,79.974]
+Y: [15.040,93.139]
+data range: [-0.000, 0.051]
+---
+  status: 0
+    nfev: 532
+ success: True
+     fun: 0.014440214167367084
+       x: array([  2.21405897e+02,   5.75154376e+07,  -5.89133297e+02,
+        -8.85181741e-06])
+ message: 'Optimization terminated successfully.'
+     nit: 255
+Angle of cyl axis with y axis (deg):
+89.9027457372
+Radius:
+57515437.6197
+Axis Parameters:
+[  2.21405897e+02   5.75154376e+07  -5.89133297e+02  -8.85181741e-06]
+---
+rms residuals=14.4402141674 um</code></pre>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="197">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>plot_points(level_points(deltaR))</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>display(plt.gcf())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>resampling...</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="test_fit_cylinder_files/figure-html/cell-20-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="198">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>plt.clf()</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>plot_points(deltaR)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>display(plt.gcf())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>resampling...</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="test_fit_cylinder_files/figure-html/cell-21-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="199">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>deltaR</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="199">
+<pre><code>array([[ 22.97378504,  15.04011971,  29.86333519],
+       [ 23.97378352,  15.04186503,  26.56684816],
+       [ 24.973782  ,  15.04361036,  23.41785282],
+       ..., 
+       [ 77.83756566,  93.13599397,  21.69687301],
+       [ 78.83756414,  93.13773929,  24.92494881],
+       [ 79.83756262,  93.13948462,  28.30912918]])</code></pre>
+</div>
+</div>
+</section>
+<section id="cylinder-vs-cone" class="level2">
+<h2 class="anchored" data-anchor-id="cylinder-vs-cone">cylinder vs cone</h2>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="60">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co">#cone is correct for OP2, </span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>fit_func<span class="op">=</span>cone_error    <span class="co">#this is the function giving the FOM to be minimized</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> p(x): <span class="bu">print</span> x <span class="co">#,cylinder_error(x,points)</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>outSubfix<span class="op">=</span><span class="st">'_cone'</span> <span class="co">#the name of output file is the datafile with this subfix added</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>datafile<span class="op">=</span><span class="vs">r'test_fitCylinder\OP2S04b_cone\04_OP2S04_xyscan_Height_transformed.dat'</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a><span class="co">#datafile='OP2S03c/22_OP2S03_yxsurf_Height_transformed.dat'</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="co">#datafile='OP2S04/04_OP2S04_xyscan_Height_transformed.dat'</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a><span class="co">#datafile='OP2S05/05_OP2S05_xysurf_Height_transformed.dat'</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a><span class="co">#create points to be fit from a subset of points.</span></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>pts<span class="op">=</span>get_points(datafile,delimiter<span class="op">=</span><span class="st">' '</span>)</span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a><span class="co">#pts=rotate_points(pts,-np.pi/2)</span></span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>pts<span class="op">=</span>crop_points(pts,(<span class="op">-</span><span class="dv">28</span>,<span class="dv">33</span>),(<span class="op">-</span><span class="dv">75</span>,<span class="dv">65</span>))</span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a><span class="co">#pts[:,2]=pts[:,2]/1000.</span></span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a>c<span class="op">=</span>crop_points(pts,(<span class="op">-</span><span class="dv">28</span>,<span class="dv">33</span>),(<span class="op">-</span><span class="dv">50</span>,<span class="dv">50</span>))    <span class="co">#[0:-1:1000,:]</span></span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a>odr2<span class="op">=</span>(<span class="dv">33</span>,<span class="fl">220.</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">220</span>)</span>
+<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-22"><a href="#cb33-22" aria-hidden="true" tabindex="-1"></a>result<span class="op">=</span>minimize(fit_func,x0<span class="op">=</span>(odr2[<span class="dv">0</span>:<span class="op">-</span><span class="dv">1</span>],),args<span class="op">=</span>(c,),options<span class="op">=</span>{<span class="st">'maxiter'</span>:<span class="dv">1000</span>},callback<span class="op">=</span>p,method<span class="op">=</span><span class="st">'Nelder-Mead'</span>)</span>
+<span id="cb33-23"><a href="#cb33-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'-----------------------------------'</span></span>
+<span id="cb33-24"><a href="#cb33-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'Results of fit on subset of points:'</span></span>
+<span id="cb33-25"><a href="#cb33-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> result    </span>
+<span id="cb33-26"><a href="#cb33-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-27"><a href="#cb33-27" aria-hidden="true" tabindex="-1"></a><span class="co">#create output results applying the value from fit to all points</span></span>
+<span id="cb33-28"><a href="#cb33-28" aria-hidden="true" tabindex="-1"></a>odr<span class="op">=</span>result.x</span>
+<span id="cb33-29"><a href="#cb33-29" aria-hidden="true" tabindex="-1"></a>fom,deltaR,coeff<span class="op">=</span>fit_func(odr,pts,extra<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb33-30"><a href="#cb33-30" aria-hidden="true" tabindex="-1"></a>origin<span class="op">=</span>(odr[<span class="dv">0</span>],<span class="dv">0</span>,odr[<span class="dv">1</span>])</span>
+<span id="cb33-31"><a href="#cb33-31" aria-hidden="true" tabindex="-1"></a>direction<span class="op">=</span>(odr[<span class="dv">2</span>],<span class="fl">1.</span>,odr[<span class="dv">3</span>])</span>
+<span id="cb33-32"><a href="#cb33-32" aria-hidden="true" tabindex="-1"></a>deltaR[:,<span class="dv">2</span>]<span class="op">=</span>deltaR[:,<span class="dv">2</span>]<span class="op">*</span><span class="dv">1000</span></span>
+<span id="cb33-33"><a href="#cb33-33" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'-----------------------------------'</span></span>
+<span id="cb33-34"><a href="#cb33-34" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'Results of fit applied to complete set of points:'</span></span>
+<span id="cb33-35"><a href="#cb33-35" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'F.O.M.=</span><span class="sc">%s</span><span class="st">'</span><span class="op">%</span>(fom)</span>
+<span id="cb33-36"><a href="#cb33-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-37"><a href="#cb33-37" aria-hidden="true" tabindex="-1"></a>plot_points(deltaR,vmin<span class="op">=-</span><span class="dv">5</span>,vmax<span class="op">=</span><span class="dv">10</span>,scatter<span class="op">=</span><span class="dv">1</span>,aspect<span class="op">=</span><span class="st">'equal'</span>)</span>
+<span id="cb33-38"><a href="#cb33-38" aria-hidden="true" tabindex="-1"></a>save_points(deltaR,filename<span class="op">=</span>fn_add_subfix(datafile,outSubfix))</span>
+<span id="cb33-39"><a href="#cb33-39" aria-hidden="true" tabindex="-1"></a>plt.savefig(fn_add_subfix(datafile,outSubfix,<span class="st">'.png'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>C:\Users\Vincenzo\Google Drive\libraries\python\userKov\pySurf\fit_cylinder.py:97: RuntimeWarning: invalid value encountered in divide
+  vd=direction/((np.array(direction)**2).sum())  #normalize vector, not sure it is necessary.
+C:\Users\Vincenzo\Google Drive\libraries\python\userKov\pySurf\fit_cylinder.py:10: RuntimeWarning: invalid value encountered in divide
+  vd=lVersor/np.sqrt(np.sum(np.array(lVersor)**2))  #normalize vector, not sure it is necessary.</code></pre>
+</div>
+<div class="cell-output cell-output-error">
+<pre><code>ValueError: shapes (488003,3) and (1,) not aligned: 3 (dim 1) != 1 (dim 0)</code></pre>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="60">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co">#fit cylinder with new interface</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>fit_func<span class="op">=</span>cone_error    <span class="co">#this is the function giving the FOM to be minimized</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> p(x): <span class="bu">print</span> x <span class="co">#,cylinder_error(x,points)</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>outSubfix<span class="op">=</span><span class="st">'_cone'</span> <span class="co">#the name of output file is the datafile with this subfix added</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>datafile<span class="op">=</span><span class="vs">r'test_fitCylinder\OP2S04b_cone\04_OP2S04_xyscan_Height_transformed.dat'</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="co">#datafile='OP2S03c/22_OP2S03_yxsurf_Height_transformed.dat'</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a><span class="co">#datafile='OP2S04/04_OP2S04_xyscan_Height_transformed.dat'</span></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a><span class="co">#datafile='OP2S05/05_OP2S05_xysurf_Height_transformed.dat'</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a><span class="co">#create points to be fit from a subset of points.</span></span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>pts<span class="op">=</span>get_points(datafile,delimiter<span class="op">=</span><span class="st">' '</span>)</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a><span class="co">#pts=rotate_points(pts,-np.pi/2)</span></span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>pts<span class="op">=</span>crop_points(pts,(<span class="op">-</span><span class="dv">28</span>,<span class="dv">33</span>),(<span class="op">-</span><span class="dv">75</span>,<span class="dv">65</span>))</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a><span class="co">#pts[:,2]=pts[:,2]/1000.</span></span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>c<span class="op">=</span>crop_points(pts,(<span class="op">-</span><span class="dv">28</span>,<span class="dv">33</span>),(<span class="op">-</span><span class="dv">50</span>,<span class="dv">50</span>))    <span class="co">#[0:-1:1000,:]</span></span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>odr2<span class="op">=</span>(<span class="dv">33</span>,<span class="fl">220.</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">220</span>)</span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>deltaR,odr<span class="op">=</span>fit_cylinder(pp2,(<span class="dv">0</span>,<span class="fl">50.</span>,np.cos(<span class="fl">0.1</span>)<span class="op">-</span><span class="fl">0.1</span>,<span class="fl">0.</span>),zscale<span class="op">=</span><span class="fl">1000.</span>,options<span class="op">=</span>{<span class="st">'maxiter'</span>:<span class="dv">500</span>},method<span class="op">=</span><span class="st">'Nelder-Mead'</span>)</span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>radius<span class="op">=</span>cylinder_error3(odr,pp2<span class="op">*</span>[<span class="dv">1</span>,<span class="dv">1</span>,<span class="fl">1.</span><span class="op">/</span><span class="dv">1000</span>],extra<span class="op">=</span><span class="dv">1</span>)[<span class="op">-</span><span class="dv">1</span>] <span class="co">#this is a workaround to retrieve radius</span></span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>result<span class="op">=</span>minimize(fit_func,x0<span class="op">=</span>(odr2[<span class="dv">0</span>:<span class="op">-</span><span class="dv">1</span>],),args<span class="op">=</span>(c,),options<span class="op">=</span>{<span class="st">'maxiter'</span>:<span class="dv">1000</span>},callback<span class="op">=</span>p,method<span class="op">=</span><span class="st">'Nelder-Mead'</span>)</span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'-----------------------------------'</span></span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'Results of fit on subset of points:'</span></span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> result    </span>
+<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a><span class="co">#create output results applying the value from fit to all points</span></span>
+<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a>odr<span class="op">=</span>result.x</span>
+<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a>fom,deltaR,coeff<span class="op">=</span>fit_func(odr,pts,extra<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a>origin<span class="op">=</span>(odr[<span class="dv">0</span>],<span class="dv">0</span>,odr[<span class="dv">1</span>])</span>
+<span id="cb36-32"><a href="#cb36-32" aria-hidden="true" tabindex="-1"></a>direction<span class="op">=</span>(odr[<span class="dv">2</span>],<span class="fl">1.</span>,odr[<span class="dv">3</span>])</span>
+<span id="cb36-33"><a href="#cb36-33" aria-hidden="true" tabindex="-1"></a>deltaR[:,<span class="dv">2</span>]<span class="op">=</span>deltaR[:,<span class="dv">2</span>]<span class="op">*</span><span class="dv">1000</span></span>
+<span id="cb36-34"><a href="#cb36-34" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'-----------------------------------'</span></span>
+<span id="cb36-35"><a href="#cb36-35" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'Results of fit applied to complete set of points:'</span></span>
+<span id="cb36-36"><a href="#cb36-36" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'F.O.M.=</span><span class="sc">%s</span><span class="st">'</span><span class="op">%</span>(fom)</span>
+<span id="cb36-37"><a href="#cb36-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-38"><a href="#cb36-38" aria-hidden="true" tabindex="-1"></a>plot_points(deltaR,vmin<span class="op">=-</span><span class="dv">5</span>,vmax<span class="op">=</span><span class="dv">10</span>,scatter<span class="op">=</span><span class="dv">1</span>,aspect<span class="op">=</span><span class="st">'equal'</span>)</span>
+<span id="cb36-39"><a href="#cb36-39" aria-hidden="true" tabindex="-1"></a>save_points(deltaR,filename<span class="op">=</span>fn_add_subfix(datafile,outSubfix))</span>
+<span id="cb36-40"><a href="#cb36-40" aria-hidden="true" tabindex="-1"></a>plt.savefig(fn_add_subfix(datafile,outSubfix,<span class="st">'.png'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>C:\Users\Vincenzo\Google Drive\libraries\python\userKov\pySurf\fit_cylinder.py:97: RuntimeWarning: invalid value encountered in divide
+  vd=direction/((np.array(direction)**2).sum())  #normalize vector, not sure it is necessary.
+C:\Users\Vincenzo\Google Drive\libraries\python\userKov\pySurf\fit_cylinder.py:10: RuntimeWarning: invalid value encountered in divide
+  vd=lVersor/np.sqrt(np.sum(np.array(lVersor)**2))  #normalize vector, not sure it is necessary.</code></pre>
+</div>
+<div class="cell-output cell-output-error">
+<pre><code>ValueError: shapes (488003,3) and (1,) not aligned: 3 (dim 1) != 1 (dim 0)</code></pre>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:true}">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co">#test level points</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pySurf.points <span class="im">import</span> _get_plane</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>d<span class="op">=</span>data[<span class="op">~</span>np.isnan(data[:,<span class="dv">2</span>]),:] <span class="co">#irrelevant, plane_fit excludes nans</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>plane<span class="op">=</span>_get_plane(d)</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>points<span class="op">=</span>d[:]</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>points<span class="op">=</span>subtract_points(points,plane,resample<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> points</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> d</span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> plane</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>plt.figure(<span class="dv">1</span>)</span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>plt.clf()</span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>plot_points(plane)</span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a>plt.figure(<span class="dv">2</span>)</span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a>plt.clf()</span>
+<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a>plot_points(points)</span>
+<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a>plt.figure(<span class="dv">3</span>)</span>
+<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a>plt.clf()</span>
+<span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a>plot_points(d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

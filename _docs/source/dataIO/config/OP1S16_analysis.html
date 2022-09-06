@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.189">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>pyXsurf – op1s16_analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<script src="../../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">pyXsurf</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/vincenzooo/pyXsurf"><i class="bi bi-github" role="img">
+</i> 
+ </a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">(Untitled)</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../index.html" class="sidebar-item-text sidebar-link">pyXsurf</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../core.html" class="sidebar-item-text sidebar-link">pyXsurf (formerly pyXTel)</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#settings" id="toc-settings" class="nav-link active" data-scroll-target="#settings">Settings</a></li>
+  <li><a href="#alignment" id="toc-alignment" class="nav-link" data-scroll-target="#alignment">Alignment</a></li>
+  <li><a href="#calibration" id="toc-calibration" class="nav-link" data-scroll-target="#calibration">Calibration</a></li>
+  <li><a href="#cone-fit" id="toc-cone-fit" class="nav-link" data-scroll-target="#cone-fit">Cone fit</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/vincenzooo/pyXsurf/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+
+<div class="cell" data-tags="[]" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#2015/01/23 added leveling in transformation (transformed data are saved after leveling).</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#2015/01/13 from OP1S10_analysis</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fit_cylinder <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pySurf.points <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> calibrate_align <span class="im">import</span> <span class="op">*</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Once deleted, variables cannot be recovered. Proceed (y/[n])? y
+Using matplotlib backend: Qt4Agg
+Populating the interactive namespace from numpy and matplotlib</code></pre>
+</div>
+</div>
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<section id="settings" class="level2">
+<h2 class="anchored" data-anchor-id="settings">Settings</h2>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:true}" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 20150115 correct from 20140111 </span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#Markers are coordinate values read on positioning (x inverted wrt operator coordinates).</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Saved data have both x and y inverted wrt operator coordinates).</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># We want to refer to sample cordinates on the glass=operator (for mandrel invert x),</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># then:</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#    - reference points on mandrel from CMM must be inverted only in x for 180 rotation aroun oa</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#    - reference points on glass are inverted in x for machine-&gt;operator</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#    - surface data must be inverted in x and y, same scaling for calibration.</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#original multiplier before Op1S16 was (-1.,1.) for both markers. </span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Changed to get a better result, but I don't really understand the reason.</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>markers1<span class="op">=</span>np.array([[<span class="fl">62.52</span>,<span class="op">-</span><span class="fl">9.16</span>],[<span class="fl">55.03</span>,<span class="op">-</span><span class="fl">13.50</span>],[<span class="fl">7.91</span>,<span class="fl">32.89</span>],[<span class="op">-</span><span class="fl">11.13</span>,<span class="op">-</span><span class="fl">47.28</span>],[<span class="op">-</span><span class="fl">67.56</span>,<span class="op">-</span><span class="fl">7.94</span>]])</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>markers1<span class="op">=</span>markers1<span class="op">*</span>np.array((<span class="fl">1.</span>,<span class="fl">1.</span>))</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>markers2<span class="op">=</span>np.array([[<span class="op">-</span><span class="fl">0.935</span>,<span class="fl">64.404</span>],[<span class="fl">3.348</span>,<span class="fl">57.679</span>],[<span class="op">-</span><span class="fl">42.893</span>,<span class="fl">9.760</span>],[<span class="fl">38.710</span>,<span class="op">-</span><span class="fl">7.826</span>],[<span class="op">-</span><span class="fl">0.110</span>,<span class="op">-</span><span class="fl">64.799</span>]])</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>markers2<span class="op">=</span>markers2<span class="op">*</span>np.array((<span class="fl">1.</span>,<span class="fl">1.</span>))</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>gscale<span class="op">=</span>(<span class="op">-</span><span class="dv">1</span>,<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>mscale<span class="op">=</span>(<span class="op">-</span><span class="dv">1</span>,<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:true}" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#always run this</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>gfile<span class="op">=</span><span class="vs">r'measure_data\2015_07_27\01_op1S16_xysurf_Height.txt'</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>cfile<span class="op">=</span><span class="vs">r'measure_data\2015_05_20\04_mandrel09_xysurf_Height.txt'</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>outfolder<span class="op">=</span><span class="st">'OP1S16'</span> </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>imsize<span class="op">=</span>(<span class="dv">281</span>,<span class="dv">3001</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="alignment" class="level2">
+<h2 class="anchored" data-anchor-id="alignment">Alignment</h2>
+<div class="cell" data-tags="[]" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create logger</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>logger <span class="op">=</span> logging.getLogger()</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>logger.setLevel(logging.DEBUG)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>logfile<span class="op">=</span>os.path.join(outfolder,<span class="st">'aligncal_log.txt'</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span>(os.path.exists(os.path.dirname(logfile))):</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    os.makedirs(os.path.dirname(logfile))</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co"># create console handler and set level to debug</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>ch <span class="op">=</span> logging.StreamHandler()</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>ch.setLevel(logging.DEBUG)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>fh <span class="op">=</span> logging.FileHandler(logfile)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>fh.setLevel(logging.DEBUG)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co"># create formatter</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>formatter <span class="op">=</span> logging.Formatter(<span class="st">'</span><span class="sc">%(asctime)s</span><span class="st"> - </span><span class="sc">%(name)s</span><span class="st"> - </span><span class="sc">%(levelname)s</span><span class="st"> - </span><span class="sc">%(message)s</span><span class="st">'</span>)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co"># add formatter to ch</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>ch.setFormatter(formatter)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>fh.setFormatter(formatter)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="co"># add ch to logger</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>logger.addHandler(ch)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>logger.addHandler(fh)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-tags="[]" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>trans<span class="op">=</span>find_transform(markers1,markers2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>C:\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:2499: VisibleDeprecationWarning: `rank` is deprecated; use the `ndim` attribute or function instead. To find the rank of a matrix see `numpy.linalg.matrix_rank`.
+  VisibleDeprecationWarning)
+INFO:root:stdv of markers distance errors from barycenter: 0.443716589048
+2015-08-27 13:53:28,977 - root - INFO - stdv of markers distance errors from barycenter: 0.443716589048
+INFO:root:rotation angle (degrees): -91.0046780985 +-0.230883604265
+2015-08-27 13:53:28,999 - root - INFO - rotation angle (degrees): -91.0046780985 +-0.230883604265
+INFO:root:errors in markers position after rotations: 
+[[ 0.21123979 -0.60026714]
+ [ 0.02357702  0.08748366]
+ [-0.66075873  0.09464397]
+ [ 0.45071789  0.14001273]
+ [-0.02477597  0.27812679]]
+2015-08-27 13:53:29,007 - root - INFO - errors in markers position after rotations: 
+[[ 0.21123979 -0.60026714]
+ [ 0.02357702  0.08748366]
+ [-0.66075873  0.09464397]
+ [ 0.45071789  0.14001273]
+ [-0.02477597  0.27812679]]</code></pre>
+</div>
+</div>
+<div class="cell" data-tags="[]" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>plt.clf()</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="dv">1</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>plt.gca().set_aspect(<span class="st">'equal'</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>plt.plot(markers1[:,<span class="dv">0</span>],markers1[:,<span class="dv">1</span>],<span class="st">'o'</span>,label<span class="op">=</span><span class="st">'markers1'</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>plt.plot(markers2[:,<span class="dv">0</span>],markers2[:,<span class="dv">1</span>],<span class="st">'x'</span>,label<span class="op">=</span><span class="st">'markers2'</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#m=find_transform(markers2,markers1)(markers2) #inverse transform</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>m<span class="op">=</span>trans(markers1)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>plt.plot(m[:,<span class="dv">0</span>],m[:,<span class="dv">1</span>],<span class="st">'+'</span>,label<span class="op">=</span><span class="st">'transformed'</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>display(plt.gcf())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="OP1S16_analysis_files/figure-html/cell-8-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="calibration" class="level2">
+<h2 class="anchored" data-anchor-id="calibration">Calibration</h2>
+<p>Sample data are calibrate for stage bending by subtracting data fome scan on flat mandrel. Can process more than one file in sequence. All settings are defined by settings file.</p>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>plt.close(<span class="st">'all'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#verify the reference points position on intensity data</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>df<span class="op">=</span>gfile.replace(<span class="st">'Height'</span>,<span class="st">'Intensity'</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>ip<span class="op">=</span>calibrate_align(df, cfile<span class="op">=</span><span class="va">None</span>,trans<span class="op">=</span>trans,pshape<span class="op">=</span>imsize, </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                   gscale<span class="op">=</span>gscale,outfolder<span class="op">=</span>outfolder,nolevel<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>plt.figure(<span class="st">'Original data'</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>plt.plot(markers1[:,<span class="dv">0</span>],markers1[:,<span class="dv">1</span>],<span class="st">'o'</span>,markerfacecolor<span class="op">=</span><span class="st">'none'</span>, c<span class="op">=</span><span class="st">'w'</span>,lw<span class="op">=</span><span class="dv">20</span>,markersize<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>plt.figure(<span class="st">'Transformed data'</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>plt.plot(markers2[:,<span class="dv">0</span>],markers2[:,<span class="dv">1</span>],<span class="st">'o'</span>,markerfacecolor<span class="op">=</span><span class="st">'none'</span>, c<span class="op">=</span><span class="st">'w'</span>,lw<span class="op">=</span><span class="dv">20</span>,markersize<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>plt.savefig(os.path.join(outfolder,fn_add_subfix(os.path.basename(df),<span class="st">''</span>,<span class="st">'.png'</span>)))</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co">#f=os.path.join(outfolder,fn_add_subfix(os.path.basename(df),'_transformed_matrix','.dat'))</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co">#save_points(ip,f,shape=(281,2961),matrix=1,fill_value=-100.)</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>display(plt.figure(<span class="st">'Original data'</span>))</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>display(plt.figure(<span class="st">'Transformed data'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>INFO:root:Glass data read from measure_data\2015_07_27\01_op1S16_xysurf_Intensity.txt
+2015-08-05 14:38:15,216 - root - INFO - Glass data read from measure_data\2015_07_27\01_op1S16_xysurf_Intensity.txt
+INFO:root:as (963321L, 3L) array.
+2015-08-05 14:38:15,217 - root - INFO - as (963321L, 3L) array.
+WARNING:root:calibration file not provided, skip calibration.
+2015-08-05 14:38:15,220 - root - WARNING - calibration file not provided, skip calibration.
+WARNING:root:Apply transformation to data points.
+2015-08-05 14:38:15,437 - root - WARNING - Apply transformation to data points.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>resampling...
+resampling...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>INFO:root:Plotting and saving data in OP1S16
+2015-08-05 14:39:22,240 - root - INFO - Plotting and saving data in OP1S16</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code></code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="OP1S16_analysis_files/figure-html/cell-10-output-5.png" class="img-fluid"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="OP1S16_analysis_files/figure-html/cell-10-output-6.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:true}" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#here signs are put arbitrarily to aligh transformed cylinder. gscale and mscale must be the</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co">#same</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>rpoints<span class="op">=</span>calibrate_align(gfile, cfile,trans,imsize, outfolder,gscale<span class="op">=</span>gscale,mscale<span class="op">=</span>mscale)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>INFO:root:Glass data read from measure_data\2015_07_27\01_op1S16_xysurf_Height.txt
+2015-08-27 13:59:17,907 - root - INFO - Glass data read from measure_data\2015_07_27\01_op1S16_xysurf_Height.txt
+INFO:root:as (963321L, 3L) array.
+2015-08-27 13:59:17,908 - root - INFO - as (963321L, 3L) array.
+INFO:root:calibration performed with data from file measure_data\2015_05_20\04_mandrel09_xysurf_Height.txt
+2015-08-27 14:00:16,785 - root - INFO - calibration performed with data from file measure_data\2015_05_20\04_mandrel09_xysurf_Height.txt
+INFO:root:as (1803601L, 3L) array.
+2015-08-27 14:00:16,786 - root - INFO - as (1803601L, 3L) array.
+WARNING:root:Apply transformation to data points.
+2015-08-27 14:00:16,930 - root - WARNING - Apply transformation to data points.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>resampling...
+resampling...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>INFO:root:Plotting and saving data in OP1S16
+2015-08-27 14:01:27,698 - root - INFO - Plotting and saving data in OP1S16</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code></code></pre>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:true}" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>display(plt.figure(<span class="st">'Original data'</span>))</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>display(plt.figure(<span class="st">'Transformed data'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="OP1S16_analysis_files/figure-html/cell-12-output-1.png" class="img-fluid"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="OP1S16_analysis_files/figure-html/cell-12-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="cone-fit" class="level2">
+<h2 class="anchored" data-anchor-id="cone-fit">Cone fit</h2>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:true}" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>fit_func<span class="op">=</span>cone_error3 <span class="co">#function to be minimized</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>outSubfix<span class="op">=</span><span class="st">'_cone'</span> <span class="co">#the name of output file is the datafile with this subfix added</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>datafile<span class="op">=</span><span class="st">'OP1S16/01_op1S16_xysurf_Height_transformed.dat'</span> <span class="co">#datafile already calibrated and aligned</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>plotTitle<span class="op">=</span><span class="st">'OP1S16'</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> p(x): <span class="bu">print</span> x <span class="co"># callback function </span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">#passed to minimization to print each step.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:true}" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">#create points to be fit from a subset of points.</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>pts<span class="op">=</span>get_points(datafile,delimiter<span class="op">=</span><span class="st">' '</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>pts[:,<span class="dv">2</span>]<span class="op">=</span>pts[:,<span class="dv">2</span>]<span class="op">/</span><span class="fl">1000.</span>   <span class="co">#data are um, convert to mm before fit</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:true}" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>pts<span class="op">=</span>crop_points(pts,(<span class="op">-</span><span class="dv">43</span>,<span class="dv">25</span>),(<span class="op">-</span><span class="dv">60</span>,<span class="dv">63</span>))</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co">#level plane</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>pts,pl<span class="op">=</span>level_points(pts,returnPars<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>pts[:,<span class="dv">2</span>]<span class="op">=</span>pts[:,<span class="dv">2</span>]<span class="op">-</span>pts[np.argsort(pts[:,<span class="dv">2</span>])[<span class="dv">20</span>],<span class="dv">2</span>]</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>c<span class="op">=</span>crop_points(pts,(<span class="op">-</span><span class="dv">43</span>,<span class="dv">25</span>),(<span class="op">-</span><span class="dv">50</span>,<span class="dv">50</span>))    <span class="co">#[0:-1:1000,:]</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>odr2<span class="op">=</span>(<span class="dv">0</span>,<span class="fl">220.5</span>,<span class="dv">0</span>,<span class="op">-</span>np.sin(np.arctan(<span class="fl">0.374</span><span class="op">/</span><span class="dv">180</span><span class="op">*</span>np.pi))) <span class="co">#use nominal value for guess direction</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>result<span class="op">=</span>minimize(fit_func,x0<span class="op">=</span>(odr2),</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>                args<span class="op">=</span>(c,),options<span class="op">=</span>{<span class="st">'maxiter'</span>:<span class="dv">500</span>},method<span class="op">=</span><span class="st">'Nelder-Mead'</span>)<span class="co">#,callback=p)</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'-----------------------------------'</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'Results of fit on region:'</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> result    </span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>odr<span class="op">=</span>result.x</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>fom,deltaR,coeff<span class="op">=</span>fit_func(odr,c,extra<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'Angle of cone axis with y axis (deg):'</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> np.arccos(np.sqrt(<span class="dv">1</span><span class="op">-</span>(odr[<span class="op">-</span><span class="dv">2</span>:]<span class="op">**</span><span class="dv">2</span>).<span class="bu">sum</span>()))<span class="op">*</span><span class="dv">180</span><span class="op">/</span>np.pi</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'Cone parameters (angle(deg), R@y=0):'</span></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> np.arctan(coeff[<span class="dv">0</span>])<span class="op">*</span><span class="dv">180</span><span class="op">/</span>np.pi,coeff[<span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>-----------------------------------
+Results of fit on region:
+  status: 0
+    nfev: 626
+ success: True
+     fun: 0.025006738531221082
+       x: array([ -9.00158140e+00,   2.19471946e+02,  -1.54681137e-03,
+        -2.30490017e-03])
+ message: 'Optimization terminated successfully.'
+     nit: 371
+Angle of cone axis with y axis (deg):
+0.159043114304
+Cone parameters (angle(deg), R@y=0):
+-0.131678342919 219.395796653</code></pre>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:true}" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co">#create output results applying the value from fit to all points</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>fom,deltaR,coeff<span class="op">=</span>fit_func(odr,pts,extra<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>deltaR[:,<span class="dv">2</span>]<span class="op">=</span>deltaR[:,<span class="dv">2</span>]<span class="op">*</span><span class="dv">1000</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'-----------------------------------'</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'Fit on subset is applied to complete set of points:'</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'F.O.M.=</span><span class="sc">%s</span><span class="st">'</span><span class="op">%</span>(fom)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>-----------------------------------
+Fit on subset is applied to complete set of points:
+F.O.M.=0.0226768245564</code></pre>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:true}" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>plt.figure(<span class="dv">1</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>plt.clf()</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>plot_points(deltaR,vmin<span class="op">=-</span><span class="dv">10</span>,vmax<span class="op">=</span><span class="dv">10</span>,scatter<span class="op">=</span><span class="dv">1</span>,aspect<span class="op">=</span><span class="st">'equal'</span>)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>plt.title(plotTitle)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>display(plt.gcf())</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>save_points(deltaR,fn_add_subfix(datafile,<span class="st">'_deltaR'</span>,<span class="st">'.dat'</span>))</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>plt.savefig(fn_add_subfix(datafile,<span class="st">'_deltaR'</span>,<span class="st">'.png'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="OP1S16_analysis_files/figure-html/cell-17-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>np.std(deltaR[:,<span class="dv">2</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<pre><code>22.676824556363083</code></pre>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co">#attempt fit on best region</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>c<span class="op">=</span>crop_points(pts,(<span class="op">-</span><span class="dv">43</span>,<span class="dv">20</span>),(<span class="op">-</span><span class="dv">39</span>,<span class="dv">61</span>))    <span class="co">#[0:-1:1000,:]</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>odr2<span class="op">=</span>(<span class="dv">0</span>,<span class="fl">220.5</span>,<span class="dv">0</span>,<span class="op">-</span>np.sin(np.arctan(<span class="fl">0.374</span><span class="op">/</span><span class="dv">180</span><span class="op">*</span>np.pi))) <span class="co">#use nominal value for guess direction</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>result<span class="op">=</span>minimize(fit_func,x0<span class="op">=</span>(odr2),</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>                args<span class="op">=</span>(c,),options<span class="op">=</span>{<span class="st">'maxiter'</span>:<span class="dv">500</span>},method<span class="op">=</span><span class="st">'Nelder-Mead'</span>)<span class="co">#,callback=p)</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'-----------------------------------'</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'Results of fit on region:'</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> result    </span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>odr<span class="op">=</span>result.x</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>fom,deltaR,coeff<span class="op">=</span>fit_func(odr,c,extra<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'Angle of cone axis with y axis (deg):'</span></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> np.arccos(np.sqrt(<span class="dv">1</span><span class="op">-</span>(odr[<span class="op">-</span><span class="dv">2</span>:]<span class="op">**</span><span class="dv">2</span>).<span class="bu">sum</span>()))<span class="op">*</span><span class="dv">180</span><span class="op">/</span>np.pi</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'Cone parameters (angle(deg), R@y=0):'</span></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> np.arctan(coeff[<span class="dv">0</span>])<span class="op">*</span><span class="dv">180</span><span class="op">/</span>np.pi,coeff[<span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>-----------------------------------
+Results of fit on region:
+  status: 0
+    nfev: 778
+ success: True
+     fun: 0.021181031759935885
+       x: array([ -9.00276091e+00,   2.19276852e+02,  -1.73463119e-03,
+        -7.16948511e-03])
+ message: 'Optimization terminated successfully.'
+     nit: 456
+Angle of cone axis with y axis (deg):
+0.422637256284
+Cone parameters (angle(deg), R@y=0):
+-0.407498324088 219.205736316</code></pre>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co">#refit subregion after removing of outliers and leveling</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>fom,deltaR,coeff<span class="op">=</span>fit_func(odr,c,extra<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>deltaR[:,<span class="dv">2</span>]<span class="op">=</span>deltaR[:,<span class="dv">2</span>]<span class="op">*</span><span class="dv">1000</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="co">#refine fit on subregion by </span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="co">#relevel on c:</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>pts,tmp<span class="op">=</span>level_points(pts,returnPars<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">"plane for all pts: "</span>,tmp</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a><span class="co">#c[:,2]=c[:,2]-c[np.argsort(c[:,2])[20],2]</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a><span class="co">#try to clip at 3 sigma, but it doesn't work, you cannot set to 0 need to set to c avg. nan gives error with polyfit:</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="co">#c[np.where(np.abs(deltaR[:,2])&gt;3*np.std(deltaR[:,2])),2]</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>a<span class="op">=</span>np.where(np.<span class="bu">abs</span>(deltaR[:,<span class="dv">2</span>]<span class="op">-</span>deltaR[:,<span class="dv">2</span>].mean())<span class="op">&gt;</span><span class="dv">3</span><span class="op">*</span>np.std(deltaR[:,<span class="dv">2</span>]))[<span class="dv">0</span>]</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> aa <span class="kw">in</span> a:</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>    tmp<span class="op">=</span>crop_points(c,c[aa,<span class="dv">0</span>]<span class="op">+</span>(<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>),c[aa,<span class="dv">1</span>]<span class="op">+</span>(<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>)) <span class="co">#cut on square of fixed size around outliers</span></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>    avg<span class="op">=</span>(tmp[:,<span class="dv">2</span>].<span class="bu">sum</span>()<span class="op">-</span>c[aa,<span class="dv">2</span>])<span class="op">/</span>(size(tmp[:,<span class="dv">2</span>])<span class="op">-</span><span class="dv">1</span>)  <span class="co">#calculate average of other points</span></span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>    c[aa,<span class="dv">2</span>]<span class="op">=</span>avg</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a><span class="co">#redo plane</span></span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>c,tmp<span class="op">=</span>level_points(c,returnPars<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">"plane for central region: "</span>,tmp</span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>c[:,<span class="dv">2</span>]<span class="op">=</span>c[:,<span class="dv">2</span>]<span class="op">-</span>np.nanmin(c[:,<span class="dv">2</span>])</span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a>result<span class="op">=</span>minimize(fit_func,x0<span class="op">=</span>(odr),</span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>                args<span class="op">=</span>(c,),options<span class="op">=</span>{<span class="st">'maxiter'</span>:<span class="dv">500</span>},method<span class="op">=</span><span class="st">'Nelder-Mead'</span>)<span class="co">#,callback=p)</span></span>
+<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'-----------------------------------'</span></span>
+<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'Results of fit on region:'</span></span>
+<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> result    </span>
+<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a>odr<span class="op">=</span>result.x</span>
+<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a>fom,deltaR,coeff<span class="op">=</span>fit_func(odr,c,extra<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb32-29"><a href="#cb32-29" aria-hidden="true" tabindex="-1"></a>deltaR[:,<span class="dv">2</span>]<span class="op">=</span>deltaR[:,<span class="dv">2</span>]<span class="op">*</span><span class="dv">1000</span></span>
+<span id="cb32-30"><a href="#cb32-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'Angle of cone axis with y axis (deg):'</span></span>
+<span id="cb32-31"><a href="#cb32-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> np.arccos(np.sqrt(<span class="dv">1</span><span class="op">-</span>(odr[<span class="op">-</span><span class="dv">2</span>:]<span class="op">**</span><span class="dv">2</span>).<span class="bu">sum</span>()))<span class="op">*</span><span class="dv">180</span><span class="op">/</span>np.pi</span>
+<span id="cb32-32"><a href="#cb32-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> <span class="st">'Cone parameters (angle(deg), R@y=0):'</span></span>
+<span id="cb32-33"><a href="#cb32-33" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span> np.arctan(coeff[<span class="dv">0</span>])<span class="op">*</span><span class="dv">180</span><span class="op">/</span>np.pi,coeff[<span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>plane for all pts:  [ -8.11882720e-16   4.64565387e-17   9.57755290e-01]
+plane for central region:  [ -1.14019967e-02  -5.82422153e-05   7.17099260e-01]
+-----------------------------------
+Results of fit on region:
+  status: 0
+    nfev: 248
+ success: True
+     fun: 0.0026158934133140486
+       x: array([ -1.14807221e+01,   2.19104958e+02,  -1.76494296e-03,
+        -5.97003411e-03])
+ message: 'Optimization terminated successfully.'
+     nit: 141
+Angle of cone axis with y axis (deg):
+0.356694789748
+Cone parameters (angle(deg), R@y=0):
+-0.340770529566 219.101605101</code></pre>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="27">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>plt.close(<span class="st">'all'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>plt.figure(<span class="dv">2</span>)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>plt.clf()</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>plot_points(deltaR,scatter<span class="op">=</span><span class="dv">1</span>,aspect<span class="op">=</span><span class="st">'equal'</span>,vmin<span class="op">=-</span><span class="dv">5</span>,vmax<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>display(plt.gcf())</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>save_points(deltaR,fn_add_subfix(datafile,<span class="st">'_deltaR_4inch'</span>,<span class="st">'.dat'</span>))</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>plt.savefig(fn_add_subfix(datafile,<span class="st">'_deltaR_4inch'</span>,<span class="st">'.png'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="OP1S16_analysis_files/figure-html/cell-23-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>save_points(deltaR,fn_add_subfix(datafile,<span class="st">'_deltaR_4inch_matrix'</span>,<span class="st">'.dat'</span>),matrix<span class="op">=</span><span class="dv">1</span>,shape<span class="op">=</span>(<span class="dv">252</span>,<span class="dv">800</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:false}" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pyProfile.psd <span class="im">import</span> psd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
