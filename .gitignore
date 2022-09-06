@@ -5,6 +5,7 @@
 .*
 .*/
 !.gitignore
+!.github/workflows
 *.pyc
 workspace.ini
 *.code-workspace
