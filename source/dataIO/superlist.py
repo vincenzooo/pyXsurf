@@ -13,6 +13,9 @@ functions operating on a list of Data2D objects
 
 Another problem is to make sure that superlists are returned on list operators like slices, how to do this? Metaclasses?
 
+2022/07/12 after last changes it seems to work quite well. 
+TODO: implement assignment, e.g. pl.x = 12.398/pl.x
+
 2020/05/26 moved to dataIO"""
 
 # turned into a class derived from list 2020/01/16, no changes to interface,
