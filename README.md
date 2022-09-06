@@ -33,7 +33,7 @@ python setup.py install
 2.  Developer:
 
 ``` sh
-pip install -e setup.py
+pip install -e '.[dev]'
 ```
 
 Developers branches can be installed in the same way and they should
