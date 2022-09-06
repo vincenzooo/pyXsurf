@@ -20,7 +20,7 @@ website:
   description: "Python Library for X-Ray Optics, Metrology and Telescopes Design."
   twitter-card: true
   open-graph: true
-  repo-branch: master
+  repo-branch: pyXsurf_nbdev
   repo-url: "https://github.com/vincenzooo/pyXsurf"
   repo-actions: [issue]
   navbar:
