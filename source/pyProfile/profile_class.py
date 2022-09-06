@@ -922,6 +922,9 @@ class Plist(Superlist):
         else:
             super().__init__(*args, **kwargs)        
 
+    """ N.B.> could use linecollections for plotting https://matplotlib.org/stable/api/collections_api.html#matplotlib.collections.LineCollection
+    """
+    
 def test_load_plist(rfiles = None):
 
     if rfiles is None:
