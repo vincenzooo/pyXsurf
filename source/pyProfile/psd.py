@@ -174,8 +174,8 @@ def components(d,win=1):
     frequency grids!
     """
     #Handle window
-    if win is not 1:
-        if np.size(np.shape(d)) is 1:
+    if win != 1:
+        if np.size(np.shape(d)) == 1:
             win = win(np.size(d))/np.sqrt(np.mean(win(np.size(d))**2))
         else:
             win1 = win(np.shape(d)[0])
@@ -207,7 +207,7 @@ def realPSD(d0,win=np.hanning,dx=1.,axis=None,nans=False,minpx=10):
         c = c[0,:]
 
     #Reform into PSD
-    if np.size(np.shape(c)) is 2:
+    if np.size(np.shape(c)) == 2:
         f = [np.fft.fftfreq(np.shape(c)[0],d=dx)[:np.shape(c)[0]/2],\
                    np.fft.fftfreq(np.shape(c)[1],d=dx)[:np.shape(c)[1]/2]]
         c = c[:np.shape(c)[0]/2,:np.shape(c)[1]/2]
@@ -217,7 +217,7 @@ def realPSD(d0,win=np.hanning,dx=1.,axis=None,nans=False,minpx=10):
         c[0,:] = c[0,:]/np.sqrt(2.)
         c[:,0] = c[:,0]/np.sqrt(2.)
         
-    elif np.size(np.shape(c)) is 1:
+    elif np.size(np.shape(c)) == 1:
         f = np.fft.fftfreq(np.size(c),d=dx)
         f = f[:np.size(c)/2]
         c = c[:np.size(c)/2]
@@ -559,7 +559,7 @@ def plot_sig_psd(x,y,label="",realim=False,
     '''
     
     '''
-    The default normalization has the direct transforms unscaled and the inverse transforms are scaled by 1/n. It is possible to obtain unitary transforms by setting the keyword argument norm to "ortho" (default is None) so that both direct and inverse transforms will be scaled by 1/\sqrt{n}.
+    The default normalization has the direct transforms unscaled and the inverse transforms are scaled by 1/n. It is possible to obtain unitary transforms by setting the keyword argument norm to "ortho" (default is None) so that both direct and inverse transforms will be scaled by 1/sqrt{n}.
     
     N = len(y)
     L=span(x,True)
