@@ -52,7 +52,7 @@ def datzygo_reader(wfile,header=False,*args,**kwargs):
     """read .dat binary files (MetroPro/Zygo)."""
     
     '''from manual: Complete maps of the header formats can be obtained by running the dat_test.exe 
-program that is included with MetroPro in folder C:\MetroPro\Bin. Type the following at 
+program that is included with MetroPro in folder r"C:\MetroPro\Bin". Type the following at 
 a command prompt: 
 dat_test  –maps  >  maps.txt 
 File maps.txt will contain the output. '''
