@@ -13,18 +13,23 @@ Installation
 
 Download or clone the project. You can use git clone command by:
 ``git clone https://github.com/vincenzooo/pyXSurf.git`` or the button
-``download`` at top of page.
+``download`` at top of page. It can be advisable to update your environment, and especially ``pip`` to the most recent version.
 At this point you have two options:
 
 1. Python installer (suggested): move to the folder with the code and call
-``python setup.py install``.
+``python setup.py install``. This will perform a "regular" installation (meaning that the 
+code is copied to ``site-packages`` folders, which holds all installed Python libraries) and 
+made accessible to your system.
 
-2. Manual (developer): put the folder with code in a path accessible to 
-python on your system (generally this means it must be in the system path) 
-and start using it. In this case you must install
-all dependencies by yourself.
+2. Manual (developer): as in option 1, just use ``pip install -e .``.
+Doing this, the library will be installed from current position (no local copy), any change to the original code will be immediately
+available in the imported library.
 
-Developers branches can be installed in the same way and they should work equally (just have more unfinished stuff), so the only thing you need to do differently, is to switch branch, e.g. ``git checkout documentation`` (where ``documentation`` is the name of the branch) before running the setup. Also, if you plan to make changes to the code and want to avoid reinstalling every time for them to became effective, you can install the code in "developer mode" (as at point 1, but using command ``python setup.py develop`` instead of ``install``). Please check developers notes for a list of active branches and their features and for more details.
+At this point you can open Python and try ``import pySurf``, if this works without errors, you can go to the tutorials section.
+
+Code can be uninstalled in same way with ``pip uninstall pyXsurf``, or calling directly the setup file ``python setup.py develop  -u`` (uninstalling developer installation is expected to work only with most recent pip versions, at least >=19.1.1)).
+
+There are developer branches on github, which have extra functionalities at the moment under development (they are quite messy, so feel free to ask if you are looking for something in particular). These can be installed in the same way and should work equally (just have more unfinished stuff). For git beginners, the only thing you need to do differently, is to switch branch, e.g. ``git checkout documentation`` (where ``documentation`` is the name of the branch) before running the setup. Please check developers notes for a list of active branches and their features and for more details. Also, if you plan to make changes to the code and want to keep the changes automatically in synch, remember to install the code in "developer mode" (as explained above). 
 
 Status of the library
 --------------------------------
@@ -49,11 +54,11 @@ Expecially installation and release mechanism, are in phase of improvement, as w
 Contributing
 --------------------------------
 
-Please report bugs or feature requests, missing documentation, or open a issue on github.
+Please report bugs or feature requests, missing documentation, or open a issue on github https://github.com/vincenzooo/pyXsurf/issues.
 
 Expecially appreciated is if you can provide templates, examples or hints on how to handle, documentation (Sphinx), packaging, continuous integration (Github).
 
-Please check :ref:`README_developers` for the status of the development, or if you think you can help in any way. 
+Please check :ref:`README_developers` for the status of the development, or if are willing to help in any way. 
 
 
 Modules
