@@ -1,4 +1,4 @@
-__version__ = "0.0.4"
+__version__ = "1.6.0"
 __all__ = ['pySurf','dataIO','pyProfile','thermal','utilities']
 
 '''
