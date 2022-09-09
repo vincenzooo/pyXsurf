@@ -1909,9 +1909,9 @@ def readMetroProData(filename):
     dat = dat[::-1,:]
     # Auxiliary data to return
     dxy = hData['cameraRes']
-    #import pdb
-    #pdb.set_trace()
-    #print(dxy)
+    if dxy == 0.0:
+        print('WARNING: Unable to read pixel scale, set to unit.')
+        dxy = 1.  # unknowm, set to 1 (pixel)
     
     x1 = dxy * np.arange( -(len(dat[0,:])-1)/2, (len(dat[0,:])-1)/2 + 1)
     y1 = dxy * np.arange( -(len(dat[:,0])-1)/2, (len(dat[:,1])-1)/2 + 1)
@@ -1977,6 +1977,8 @@ def readHeaderMP(f):
     # Bin size of each measurement
     f.seek(184)
     hData['cameraRes'] = f.read('float')
+    # camera resolution in meters/pixel (unknown if zero). Multiply this number by the appropriate factor to obtain the resolution needed. The horizontal and vertical pixel resolution can be calculated as follows:
+    # CameraRes = 1.81512e-005, to get microns (10-6 meters): (.000018512)*(1000000) = 18.512 microns. The horizontal and vertical pixel resolutions are the same. 
     
     return hData
 

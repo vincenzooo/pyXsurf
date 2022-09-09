@@ -382,21 +382,23 @@ def test_datzygo_reader (wfile=None):
 
     if wfile is  None:
         #relpath
-        wfile=r'/Volumes/GoogleDrive/Il mio Drive/progetti/sandwich/dati/09_02_27/botta di culo 1a.dat'
+        #wfile=r'/Volumes/GoogleDrive/Il mio Drive/progetti/sandwich/dati/09_02_27/botta di culo 1a.dat'
+        wfile=r'C:\Users\kovor\Documents\python\pyXTel\source\pySurf\test\input_data\readers\botta di culo 1a.dat'
+        
         #wfile= os.path.join(os.path.dirname(__file__),relpath)
     (d1,x1,y1)=datzygo_reader(wfile)
     dd1=Data2D(d1,x1,y1)
     
-    dd2=Data2D(f,reader=datzygo_reader)
+    dd2=Data2D(wfile,reader=datzygo_reader)
     
     plt.figure()
-    plt.suptitle(wfile)
+    plt.suptitle(os.path.basename(wfile))
     plt.subplot(121)
-    plt.title('object from data')
     dd1.plot(aspect='equal')
+    plt.title('object from data')
     plt.subplot(122)
-    plt.title('object from reader ')
     dd2.plot(aspect='equal')
+    plt.title('object from reader ')
     return dd2
 
 
