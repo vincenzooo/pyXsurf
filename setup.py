@@ -8,7 +8,7 @@ from setuptools import find_packages, setup
 # see https://docs.python.org/2/distutils/examples.html#pure-python-distribution-by-package
 setup(
   name='pyXsurf',
-  version='1.5.15',
+  version='1.6.1',
   description="Python library for X-Ray Optics, Metrology Data Analysis and Telescopes Design.",
   url='https://github.com/vincenzooo/pyXSurf',
   author='Vincenzo Cotroneo',
