@@ -16,7 +16,8 @@ Download or clone the project. You can use git clone command by:
 ``download`` at top of page. It can be advisable to update your environment, and especially ``pip`` to the most recent version.
 At this point you have two options:
 
-1. Python installer (suggested): move to the folder with the code and call ``python setup.py install``. This will perform a "regular" installation (meaning that the 
+1. Python installer (suggested): move to the folder with the code and call
+``python setup.py install``. This will perform a "regular" installation (meaning that the 
 code is copied to ``site-packages`` folders, which holds all installed Python libraries) and 
 made accessible to your system.
 
