@@ -217,7 +217,7 @@ def level_data(data,x=None,y=None,degree=1,axis=None,byline=False,fit=False,*arg
     Degree can be scalar (it is duplicated) or 2-dim vector. must be scalar if leveling by line. Note the important difference between e.g. `degree = 2` and
       `degree = (2,2)`. The first one uses degree as total degree, it expands then to xl,yl = [0,1,0,1,2,0],[0,0,1,1,0,2]. The second
 
-    leveling by line (controlled by axis keyword) also hondle nans.
+    leveling by line (controlled by axis keyword) also handle nans.
     x and y are not used, but maintained for interface consistency.
     fit=True returns fit component instead of residuals
     """
@@ -740,17 +740,20 @@ def resample_data(d1,d2,method='mc',onfirst=False):
     except ValueError:
     #x and y not defined, use data1.
         x2,y2=np.linspace(*span(x1),d2.shape[1]),np.linspace(*span(y1),d2.shape[0])
-
-    try:
-        #if data_equal((data1,x1,y1),(data2,x2,y2)):
-        # x and y should not contain nan, but just in case do full comparison to avoid
-        # nan != nan
-        #raise ValueError
-        #breakpoint()
-        if ((x1 == x2) | (np.isnan(x1) & np.isnan(x2))).all() & ((y1 == y2) | (np.isnan(y1) & np.isnan(y2))).all():
-            return data1,x1,y1
-    except ValueError:
-        pass #elements have different shape, they are different and need resampling
+        
+    # replace following block because of DeprecationWarning: elementwise comparison failed; this will raise an error in the future.
+    if np.array_equal(x1,x2) and np.array_equal(y1,y2):  
+        return data1,x1,y1  
+    # try:
+    #     #if data_equal((data1,x1,y1),(data2,x2,y2)):
+    #     # x and y should not contain nan, but just in case do full comparison to avoid
+    #     # nan != nan
+    #     #raise ValueError
+    #     #breakpoint()
+    #     if ((x1 == x2) | (np.isnan(x1) & np.isnan(x2))).all() & ((y1 == y2) | (np.isnan(y1) & np.isnan(y2))).all():
+    #         return data1,x1,y1
+    # except ValueError:
+    #     pass #elements have different shape, they are different and need resampling
 
     #data2,x2,y2=d2
     if method=='gd':   #use griddata from scipy.interpolate
