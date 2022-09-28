@@ -34,12 +34,12 @@ def plane_fit (x, y, z):
     ty = np.sum(y)
     N = len(z)
 
-    a = np.matrix([[tx2, txy, tx],
+    a = np.array([[tx2, txy, tx],
         [txy, ty2, ty],
         [tx, ty, N ]])
 
     b = np.array([np.nansum(z*x), np.nansum(z*y), np.nansum(z)])
-    out = np.array(a.I * b[:,None])
+    out = np.array(np.linalg.inv(a) @ b[:,None])
     #plane=(out[0]*x+out[1]*y+out[2])
 
     return out

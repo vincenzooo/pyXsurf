@@ -701,7 +701,7 @@ class Data2D(object):  # np.ndarrays
     def slope(self, *args, **kwargs):
         # import pdb
         # pdb.set_trace()
-        scale = kwargs.pop("scale", None)
+        scale = kwargs.pop("scale", (1.0, 1.0, 1.0))
         if self.units is not None:
             if scale is None:
                 # check if x and y in mm and z in um.

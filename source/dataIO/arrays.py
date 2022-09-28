@@ -1,5 +1,6 @@
 import numpy as np
 from dataIO.span import span
+from itertools import product
 import pdb
 import logging
 import warnings
@@ -97,6 +98,25 @@ def split_on_indices(vector,indices):
     result = [vector[i1:i2] for i1,i2 in zip([0]+ind,ind)]
 
     return result
+
+
+
+
+def make_raster(*vectors, as_axis = False, extend = True):
+    """Create a raster grid on the base of a list of vectors.
+    
+    Vectors can be passed as axis if as_axis is False, in that case they are used as they are
+        or as ranges, in which case they must be 3-vectors with start, stop, range, to be used as
+        arguments for np.arange.
+        In the second case, extremes can be included by extending the range by one additional step.
+    
+    TODO: vectorize as_axis and extend.
+    """
+    
+    
+    if extend and not as_axis:   vectors = [ (v[0], v[1] + v[2], v[2]) for v in vectors]
+    gridaxis = (vectors if as_axis else [np.arange(*v) for v in vectors])    
+    return list(product(*gridaxis))
 
 
 def split_blocks (vector, sep = None, direction = None, split = False):
@@ -219,7 +239,18 @@ def test_is_nested_list():
     for tv in testvalues:
         #print('test string output:')
         print (tv,"|",is_nested_list(tv))
-        
+
+def test_make_raster(vectors):
+    print (make_raster((1.,2,0.5),(3,4.,0.5),(2,4,1),extend = False)) 
+    #[(1.0, 3.0, 2), (1.0, 3.0, 3), (1.0, 3.5, 2), (1.0, 3.5, 3), (1.5, 3.0, 2), (1.5, 3.0, 3), (1.5, 3.5, 2), (1.5, 3.5, 3)]
+    print (make_raster((1.,2,0.5),(3,4.,0.5)))
+    # [(1.0, 3.0), (1.0, 3.5), (1.0, 4.0), (1.5, 3.0), (1.5, 3.5), (1.5, 4.0), (2.0, 3.0), (2.0, 3.5), (2.0, 4.0)]    
+    print (make_raster((1.,2,0.5),(3,4.,0.5), as_axis=True))
+    # [(1.0, 3), (1.0, 4.0), (1.0, 0.5), (2, 3), (2, 4.0), (2, 0.5), (0.5, 3), (0.5, 4.0), (0.5, 0.5)]
+    print (make_raster((1.,2,0.5),(3,4.,0.5), as_axis=True, extend = True))
+    # [(1.0, 3), (1.0, 4.0), (1.0, 0.5), (2, 3), (2, 4.0), (2, 0.5), (0.5, 3), (0.5, 4.0), (0.5, 0.5)]
+
+
     
 if __name__ == "__main__":
     test_stats()

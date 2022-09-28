@@ -71,7 +71,7 @@ def plot_transform(points,plotLines=None,labels=None,transform=None):
     display(plt.gcf())
     """
     
-    syms = itertools.cycle((',', '+', 'x', 'o', '*')) 
+    syms = itertools.cycle(('^', '+', 'x', 'o', '*')) 
 
     if not(hasattr(points,'__len__')): #transform in list if passed as scalar
         points=[points]
@@ -183,10 +183,10 @@ def find_affine(markers1, markers2,pars=None):
 
     # Solve the least squares problem X * A = Y
     # to find our transformation matrix A
-    A, res, rank, s = np.linalg.lstsq(X, Y)
+    A, res, rank, s = np.linalg.lstsq(X, Y, rcond = None)
     
     #note: the transformation to and from matrix is needed to make it work also if x is a single point.
-    trans = lambda x: np.array(unpad(np.dot(pad(np.matrix(x)), A)))
+    trans = lambda x: np.array(unpad(np.dot(pad(np.array(x)), A)))
     if pars is not None:
         pars.append(A)
     
