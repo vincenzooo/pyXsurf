@@ -1913,8 +1913,12 @@ def readMetroProData(filename):
         print('WARNING: Unable to read pixel scale, set to unit.')
         dxy = 1.  # unknowm, set to 1 (pixel)
     
-    x1 = dxy * np.arange( -(len(dat[0,:])-1)/2, (len(dat[0,:])-1)/2 + 1)
-    y1 = dxy * np.arange( -(len(dat[:,0])-1)/2, (len(dat[:,1])-1)/2 + 1)
+    # # centered in 0, do we really want it ?
+    # x1 = dxy * np.arange( -(len(dat[0,:])-1)/2, (len(dat[0,:])-1)/2 + 1)
+    # y1 = dxy * np.arange( -(len(dat[:,0])-1)/2, (len(dat[:,1])-1)/2 + 1)
+    # axes from bottom left corner:
+    x1 = hData.get('X0',0) + dxy * np.arange(hData['Nx'])
+    y1 = hData.get('Y0',0) + dxy * np.arange(hData['Ny'])
 
     return dat, hData, x1, y1
 
@@ -1944,9 +1948,23 @@ def readHeaderMP(f):
         hData['format'] = -1
     # Read necessary data
     hData['invalid'] = int('7FFFFFF8',16)
-    f.seek(60)
-    # Intensity data, which we will skip over.
-    hData['intNBytes'] = f.read('int32')
+    # VC added Intensity data
+    # Top-left coordinates, which are useless.
+    hData['iX0'] = f.read('int16')
+    hData['iY0'] = f.read('int16')
+    # Number of data points alng x and y
+    hData['iNx'] = f.read('int16')
+    hData['iNy'] = f.read('int16')    
+    # Number of buckets
+    hData['nBuckets'] = f.read('int16')  # number of frames
+    hData['irange'] = f.read('int16')  # maximum expected intensity value
+    hData['intNBytes'] = f.read('int32') # total number of bytes occupied by the intensity matrix in the file
+    nip = hData['iX0']*hData['iY0']*hData['nBuckets']  #total number of points 
+    
+    ## original:
+    #f.seek(60)
+    ## Intensity data, which we will skip over.
+    #hData['intNBytes'] = f.read('int32')
     # Top-left coordinates, which are useless.
     hData['X0'] = f.read('int16')
     hData['Y0'] = f.read('int16')
