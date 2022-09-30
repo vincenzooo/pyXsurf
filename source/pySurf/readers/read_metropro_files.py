@@ -1882,11 +1882,13 @@ def read_map(filename, mapFormat='finesse', scaling=1.0e-9):
         return smap
 '''
     
-def readMetroProData(filename):
+def readMetroProData(filename, intensity = False):
     '''
     Reading the metroPro binary data files.
 
-    Translated from 'LoadMetroProData.m' by Hiro Yamamoto.
+    Translated and extended from 'LoadMetroProData.m' by Hiro Yamamoto.
+    
+    2022/09/30 added Intensity flag, to return intensity data (returns a list if more than one bucket is present), this might be revised in future.
     '''
     f = BinaryReader(filename)
     # Read header
@@ -1894,31 +1896,57 @@ def readMetroProData(filename):
     if hData['format'] < 0:
         print('Error: Format unknown to readMetroProData()\nfilename: {:s}'.format(filename))
         return 0
-    # Read phase map data
-    # Skipping header and intensity data
-    f.seek(hData['size']+hData['intNBytes'])
-    # Reading data
-    dat = f.read('int32',size=hData['Nx']*hData['Ny'])
-    # Marking unmeasured data as NaN
-    dat[dat >= hData['invalid']] = np.nan
-    # Scale data to meters
-    dat = dat*hData['convFactor']
-    # Reshaping into Nx * Ny matrix
-    dat = dat.reshape(hData['Ny'], hData['Nx'])
-    # Flipping up/down, i.e., change direction of y-axis.
-    dat = dat[::-1,:]
-    # Auxiliary data to return
+        
+    # Axis for both intensity and phase:    
     dxy = hData['cameraRes']
     if dxy == 0.0:
         print('WARNING: Unable to read pixel scale, set to unit.')
         dxy = 1.  # unknowm, set to 1 (pixel)
-    
-    # # centered in 0, do we really want it ?
-    # x1 = dxy * np.arange( -(len(dat[0,:])-1)/2, (len(dat[0,:])-1)/2 + 1)
-    # y1 = dxy * np.arange( -(len(dat[:,0])-1)/2, (len(dat[:,1])-1)/2 + 1)
-    # axes from bottom left corner:
-    x1 = hData.get('X0',0) + dxy * np.arange(hData['Nx'])
-    y1 = hData.get('Y0',0) + dxy * np.arange(hData['Ny'])
+        
+    # How to read intensity data
+    # Each data point is an unsigned 16-bit (2-byte) integer stored in big-endian byte order. 
+    # The points are in row-major order, beginning at the upper left. 
+    # The total number of points is: ac_width • ac_height • ac_n_buckets. 
+    # Valid points are in the range [0,ac_range]. Invalid points (dropouts) have value 65535 
+    # (hex 0xFFFF).
+
+    if intensity:
+        nip = hData['iX0']*hData['iY0']*hData['nBuckets']  #total number of intensity points 
+        f.seek(hData['size'])
+        ilist = []
+        for i in range(hData['nBuckets']):
+            idat = f.read('int16', size = hData['iNx']*hData['iNy'])
+            idat[idat >= 65535] = np.nan
+            # Reshaping into Nx * Ny matrix
+            idat = idat.reshape(hData['iNy'], hData['iNx'])
+            # Flipping up/down, i.e., change direction of y-axis.
+            idat = idat[::-1,:]        
+            ilist.append(idat)
+        if len(ilist) == 1: ilist = ilist[0]
+        dat = ilist
+        x1 = hData.get('iX0',0) + dxy * np.arange(hData['iNx'])
+        y1 = hData.get('iY0',0) + dxy * np.arange(hData['iNy']) 
+    else:
+        # Read phase map data
+        # Skipping header and intensity data
+        f.seek(hData['size']+hData['intNBytes'])
+        # Reading data
+        dat = f.read('int32',size=hData['Nx']*hData['Ny'])
+        # Marking unmeasured data as NaN
+        dat[dat >= hData['invalid']] = np.nan
+        # Scale data to meters
+        dat = dat*hData['convFactor']
+        # Reshaping into Nx * Ny matrix
+        dat = dat.reshape(hData['Ny'], hData['Nx'])
+        # Flipping up/down, i.e., change direction of y-axis.
+        dat = dat[::-1,:]
+        # # centered in 0, do we really want it ?
+        # x1 = dxy * np.arange( -(len(dat[0,:])-1)/2, (len(dat[0,:])-1)/2 + 1)
+        # y1 = dxy * np.arange( -(len(dat[:,0])-1)/2, (len(dat[:,1])-1)/2 + 1)
+        # axes from bottom left corner:
+        x1 = hData.get('X0',0) + dxy * np.arange(hData['Nx'])
+        y1 = hData.get('Y0',0) + dxy * np.arange(hData['Ny'])    
+
 
     return dat, hData, x1, y1
 
@@ -1948,7 +1976,9 @@ def readHeaderMP(f):
         hData['format'] = -1
     # Read necessary data
     hData['invalid'] = int('7FFFFFF8',16)
+    
     # VC added Intensity data
+    f.seek(48)
     # Top-left coordinates, which are useless.
     hData['iX0'] = f.read('int16')
     hData['iY0'] = f.read('int16')
@@ -1959,12 +1989,12 @@ def readHeaderMP(f):
     hData['nBuckets'] = f.read('int16')  # number of frames
     hData['irange'] = f.read('int16')  # maximum expected intensity value
     hData['intNBytes'] = f.read('int32') # total number of bytes occupied by the intensity matrix in the file
-    nip = hData['iX0']*hData['iY0']*hData['nBuckets']  #total number of points 
-    
-    ## original:
-    #f.seek(60)
-    ## Intensity data, which we will skip over.
-    #hData['intNBytes'] = f.read('int32')
+    # # original:
+    # f.seek(60)
+    # # Intensity data, which we will skip over.
+    # hData['intNBytes'] = f.read('int32')
+
+    f.seek(64)
     # Top-left coordinates, which are useless.
     hData['X0'] = f.read('int16')
     hData['Y0'] = f.read('int16')
@@ -1975,6 +2005,26 @@ def readHeaderMP(f):
     hData['phaNBytes'] = f.read('int32')
     f.seek(218)
     # Scale factor determined by phase resolution tag
+    # From p12-6 in MetroPro Reference Guide
+    # The phase_res value is an integer indirectly specifying the resolution of a zygo. (This is set by the MetroPro Phase Res control.) 
+    # Note that the interpretation of the phase_res value changed when the header_format was changed from 1 to 2. The following table 
+    # shows how to determine the resolution value (R) based on the header_format and 
+    # phase_res values: 
+    # header_format | phase_res | R 
+    # 1      | 0 | 4096
+    # 1      | 1 | 32768
+    # 2 or 3 | 0 | 4096
+    # 2 or 3 | 1 | 32768
+    # 2 or 3 | 2 | 131072
+    # The resolution of a zygo is (1/R) fringe. 
+    # To convert a phase data value from zygos to a height, use these formulas: 
+    # S = intf_scale_factor 
+    # W = wavelength_in 
+    # O = obliquity_factor 
+    # R = resolution from above table 
+    # To convert to a height in waves, multiply by (S • O / R). 
+    # To convert to a height in meters, multiply by (W • S • O / R). 
+    
     phaseResTag = f.read('int16')
     if phaseResTag == 0:
         phaseResVal = 4096
@@ -1989,7 +2039,7 @@ def readHeaderMP(f):
     hData['waveLength'] = f.read('float')
     f.seek(176)
     obliquity_factor = f.read('float')
-    # Eq. in p12-6 in MetroPro Reference Guide
+    
     hData['convFactor'] = intf_scale_factor*obliquity_factor*\
                           hData['waveLength']/phaseResVal
     # Bin size of each measurement
