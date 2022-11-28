@@ -109,16 +109,15 @@ def span(array:np.array,
         # return np.stack([min,max]).squeeze()  #?
 
 def span_from_pixels(p,n=None,delta = 0):
-    """From an array with positions of pixel centers `p`, returns the entire range for pixels from side to side. Useful to adjust plot extent in imshow.
-    
-    `n` is the number of pixels to consider in the output range.
-    
-    `p` (defaults to n) is uniquely used to extract the range, 
-    which makes it possible, as alternative, to pass `p` as range.
+    """From an array with positions of (same-size) pixel centers `p`, returns the entire range for pixels from side to side. Useful to adjust plot extent in imshow.
 
-    `delta` is used only if p has a single value (this is tested in the simplest way by checking `len(p) == 1`, doesn't account for any complex case, e.g. repeated values).
+    `p` is the center position of pixels **see notes at the end for `p` and `n` description
     
-    In this case, the pixel width cannot be evaluated from the single `p` value, and `delta` is assumend as half width of the pixel to use. Can be set to 0 returns two identical values, as default in `dataIO.span()`).
+    `n` (defaults to `p`) the number of pixels to consider in the output range.
+    It is uniquely used to extract the range, 
+    which makes it possible, as alternative, to pass range as `p`.
+
+    `delta` is used only if p has a single value (this is tested in the simplest way by checking `len(p) == 1`, doesn't account for any complex case, e.g. repeated values). In this case, the pixel width cannot be evaluated from the single `p` value, and `delta` is assumend as half width of the pixel to use. Can be set to 0 returns two identical values, as default in `dataIO.span()`).
     Not the most elegant, but if a negative value is passed, this is used as fraction of value. 
     
     Usage example:
@@ -128,7 +127,20 @@ def span_from_pixels(p,n=None,delta = 0):
     
     More examples in `test_span_from_pixels`.
 
-    note that np.linspace has flag retsteps to return step size."""
+    note that np.linspace has flag retsteps to return step size.
+    
+    ---
+    2022/11/28 previous documentation seems unanderstendable, tried to rewrite from what I understand from examples. Previous version is:
+    
+    def span_from_pixels(p,n=None,delta = 0):
+    
+    `n` is the number of pixels to consider in the output range.
+    
+    `p` (defaults to n) is uniquely used to extract the range, 
+    which makes it possible, as alternative, to pass `p` as range.
+
+    `delta` is used only if p has a single value (this is tested in the simplest way by checking `len(p) == 1`, doesn't account for any complex case, e.g. repeated values).
+    """
 
     p = np.array(p)
     
