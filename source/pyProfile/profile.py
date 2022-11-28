@@ -432,10 +432,10 @@ def subtract_profiles(x1,y1,x2,y2,*args,**kwargs):
 
 def merge_profile(x1,y1,x2,y2):
     """stitch profiles"""
-    raise NotImplementedError("see example of psd merging in G:\My Drive\progetti\read_nid.ipynb")
+    raise NotImplementedError(r"see example of psd merging in G:\My Drive\progetti\read_nid.ipynb")
     
     
-def merge_profiles(profiles,ranges=None):
+def merge_profiles(profiles,ranges=None,binned=False,removezero=False):
                     
 #def merge_profiles(ranges, profiles, labels,xrange=None,yrange=None,
 #                    outname=None):
@@ -444,19 +444,33 @@ def merge_profiles(profiles,ranges=None):
         Makes a single profile trimming and averaging multiple ones 
         according to selection.
     
-        this is lauched to trim a single set of psds related to same sample (or same context).
-        ranges, profiles, labels are lists with same number of elements,
+        no more related to psds, was originally created to trim a single set of psds related to same sample (or same context), but it maintain some reference in comments and variables.
+                
+        `ranges`, `profiles`, `labels` are lists with same number of elements,
         describing respectively: 
-        ranges for each psd (if None, the psd is not included in the output).
-            If set to None, include all data.
-        labels to be used in plot.
-        outname: if provided generate plot of trim and txt with resulting psd.
+        `ranges` :: (on horizontal axis, originally frequency) can be set to None (exclude profile), or to [None, None] (in which case, full range is used). Otherwise range [min,max] is expected each extreme can be set to None to include all data on that side.   
+        `profiles` (on y, originally psds) as list of couples of x,y vectors.
+        `labels`:: labels to be used in plot.
+        `outname`:: (disabled) if provided generate plot of trim and txt with resulting psd.
+        `bins`:: (TBD) input bins at intervals centers.
+        
+        N.B.: in case of PSDs binning can give irregular results because of the irregular spacing of frequencies. If intervals are not overlapping, it is irrelevant. See notes in code.
+        Rebinning starst from lower x (sorting items) and keeping x in non overlapping regions, while averaging on common regions.
+        
+        2022/11/28 Disabled `removezero` (was obligated in original PSD function).
+        2022/11/25 Enabled (experimentally) binned option. If selected, allows to merge by binning. 
+        See warnings in code.
         
         """
     if ranges is None:
         ranges = np.repeat([[None],[None]],
                            len(profiles),axis=1).T
-    xtot,ytot,bins,xvals,yvals = [] , [], [], [], []
+        
+    # test merge_profies: it is creating different length x and y 
+    # when binning is selected. This is because bins as array in binned_statistics
+    # includes both left and right extreme. Select center point of each interval.
+    # make option to set bin centers.
+    xtot,ytot,bins,xvals,yvals = [] , [], [], [], [] # these are cncatenated at the end, they don't necessarily have same number of elements.
     
     #plt.figure(figsize=(12,6))
     #for ran,pr,lab in zip(ranges,profiles,labels):
@@ -464,9 +478,10 @@ def merge_profiles(profiles,ranges=None):
         if ran is not None:
             #print(d)
             x,y = pr
-            if x[0] == 0:
-                x=x[1:]
-                y=y[1:]
+            if removezero:
+                if x[0] == 0:  # this is for PSD 
+                    x=x[1:]
+                    y=y[1:]
             xx,yy = crop_profile(x,y,ran)
             #plot_psd(xx,yy,label=lab,units=['um','um','nm'])
             xtot.append(xx)
@@ -484,7 +499,8 @@ def merge_profiles(profiles,ranges=None):
     """
     
     ### The following part is of interest only for rebinning,
-    ###   not included in this version's output
+    ###   not included in this version's output #modified on 20221125:
+    # with binned return one less point in y, tested in G:\Shared drives\Carbon Coatings\Elettra\run02\analysis\elettra\Test_functions.ipynb
     ###   because result will in general not be smooth in transitions between
     ###   different intervals.
     ###   if intervals are not overlapping, it is irrelevant.
@@ -496,34 +512,38 @@ def merge_profiles(profiles,ranges=None):
     #   of same psds. Then overlapping intervals of two psds typically have one with
     #   broader spacing. Most of intervals have points only from psds with tighter spacing
     #      when points from the other enter, you get spike. This is why interpolation is needed.
-    #sort groups in xtot in ascending order
-    pmin=[a.min() for a in xtot]
+    #
+    ## sort groups in xtot in ascending order
+    pmin = [a.min() for a in xtot]   #xtot and ytot are now lists of profiles
     igroup =np.argsort(pmin)
+    
+    # xtot include all points, xvals the ones inside range, bins are calculated bins.
     for i in igroup:
         x = xtot[i]
         y = ytot[i]
-        if len(bins) == 0:
+        if len(bins) == 0:      # if first profile, keeps all
             bins.append(x)
             xvals.append(x)
             yvals.append(y)
-        else:
-            sel = x>max(bins[-1])
-            xint = np.hstack([ bins[-1][bins[-1]>=min(x)] , x[sel] ])
-            #pdb.set_trace()
-            xvals.append(xint)
-            yvals.append(np.interp(xint,x,y))
-            if any(sel):
-                #pdb.set_trace()
+        else:                   # otherwise handles overlapping
+            x1 = bins[-1]
+            sel = x>max(x1)     #p2 indices for points of p2 above p1.x
+            xint = np.hstack([ x1[x1>=min(x)] , x[sel] ]) # stitch x for overlapping points taking from x1 up to max, then x2
+            xvals.append(xint) # complete non overlapping profile 
+            yvals.append(np.interp(xint,x,y))  #interpolate p2 on p1 on common region
+            if any(sel): # if empty is simply skipped. 
                 #resample second vector on common range
-                bins.append(x[sel])
+                bins.append(x[sel])   #not clear difference between xvals and bins
+        
     xtot=np.hstack(xtot)
     ytot=np.hstack(ytot)
     xvals=np.hstack(xvals)
     yvals=np.hstack(yvals)
-    xbins = np.hstack(bins)
-    ybins = binned_statistic(xvals,yvals,bins=xbins,statistic='mean') [0]
+    xbins = (xvals[:1]+xvals[1:])/2 #np.hstack(bins)
+    ybins = binned_statistic(xtot,ytot,bins=xbins,statistic='mean') [0]
     ###
-    
+    if  binned:
+        xtot,ytot = (xvals[:1]+xvals[1:])/2, ybins
     """
     plot_psd(xbins[:-1],ybins,label='binned',units=['um','um','nm'],
              linestyle='--')
@@ -785,6 +805,42 @@ def test_reflect(xx=None,yy=None,center=None,outfolder=None):
     plt.show()
     print('done!')
     return xx,yy
+
+def test_merge():
+    datafolder = r'test\input_data\psds'
+    # obtained with dopsd(files,name,outfolder,rmsthr= 0.5,psdrange=[1e-7,10],frange=[5e-3,5e2])
+    files = ['Image00093_psd.dat',    #038-10 1  Ir TD
+    'Image00094_psd.dat',    #038-10 10
+    'Image00095_psd.dat']    #038-10 50  #dopsd creates
+    files = [os.path.join(datafolder,f) for f in df]
+    '''
+    #outfolder = os.path.join(outdir,r'surface\038-10')
+    #name = 'Cr/Ir 038-10 TD'
+
+    #labels =['AFM - 1 um','AFM - 10 um','AFM - 50 um']
+    #datadic[name] = [[os.path.join(outfolder,f) for f in df],labels]
+
+    # here we start directly from PSDs as profiles
+    name = 'IrTD_test'
+    ranges = [[7, 300], [0.2,15.], [0.4, 10], 
+            [0.01,0.6]]
+
+    # from:
+    # tdic[name] = trim_psds_group(ranges,*datadic['Cr/Ir 038-10 TD first'],xrange=xrange,yrange=yrange, outname=os.path.join(outfolder,name))
+    
+    P = trim_psds_group(ranges,[files,ranges],'Cr/Ir 038-10 TD first'],xrange=xrange,yrange=yrange) #, outname=os.path.join(outfolder,name))
+    
+    # which is basically a merge with additional following output:
+    plot_psd(xbins[:-1],ybins,label=trinned',units=['um','um','nm'],
+             linestyle='--')
+    #if outname:
+    #    save_profile(fn_add_subfix(outname,'_binpsd','.dat'),xbins[:-1],ybins)
+    #if outname:
+    #    plt.savefig(fn_add_subfix(outname,'_trimpsds','.png'))
+    
+    tdic[name] = trim_psds_group(ranges,*datadic['Cr/Ir 038-10 TD first'],xrange=xrange,yrange=yrange,
+                        outname=os.path.join(outfolder,name))
+    '''
 
 def test_HEW():
     #datafile=r'test\01_mandrel3_xscan_20140706.txt'
