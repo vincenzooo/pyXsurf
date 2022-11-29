@@ -406,12 +406,12 @@ def crop_profile(x,y=None,xrange=None,yrange=None,*args,**kwargs):
 
     return x[sel],y[sel]  
 
-def resample_profile(x1,y1,x2,y2=None):
+def resample_profile(x1,y1,x2,y2=None, trim = True):
     """resample y1 (defined on x1) on x2.
     Both x1 and y1 need to be set for input data,
         x2 is returned together with interpolated values as a tuple.
     y2 is not used and put for consistency (can be omitted).
-    
+    N.B.: this is inconsistent with ``np.interp`` arguments order which is x2,x1,y1.
     """
     if np.any(np.diff(x1) <= 0): 
         if np.any(np.diff(x1) >= 0): 
@@ -421,19 +421,56 @@ def resample_profile(x1,y1,x2,y2=None):
             raise ValueError ('x2 must be monotonic for interpolation')    
     
     y2 = np.interp(x2,x1,y1)
+    if trim:
+        x2,y2 = crop_profile(x2,y2,span(x1))
+        #y2 = removenanends(x2,y2)
      
     return x2,y2
 
 def sum_profiles(x1,y1,x2,y2,*args,**kwargs):
-    return x1,y1+resample_profile(x2,y2,x1)[1]  
+    # beware that here a resampling is done on x1. If this is out of x2 range
+    #  points number will change and cannot be summed with y1.
+    # return x1,y1+resample_profile(x2,y2,x1)[1]
+    xx2,yy2  = resample_profile(x2,y2,x1) # p2 resampled on p1, can have fewer points than p1
+    xx1,yy1 = resample_profile(x1,y1,xx2)
+    return xx1, yy1+yy2
         
 def subtract_profiles(x1,y1,x2,y2,*args,**kwargs):
     return x1,y1-resample_profile(x2,y2,x1)[1] 
 
 def merge_profile(x1,y1,x2,y2):
-    """stitch profiles"""
+    """stitch profiles
+    20221129 see implementation below, was before (original file cannot be found):"""
     raise NotImplementedError(r"see example of psd merging in G:\My Drive\progetti\read_nid.ipynb")
+
+def merge_profile(x1,y1,x2,y2=None, range = None, mode = 'First'):
     
+    """resample y1 (defined on x1) on x2.
+    Both x1 and y1 need to be set for input data,
+        x2 is returned together with interpolated values as a tuple.
+    y2 is not used and put for consistency (can be omitted).
+    N.B.: this is inconsistent with ``np.interp`` arguments order which is x2,x1,y1.
+    """
+    
+    if mode == 'First':  # keeps points of first profile in 
+                         # overlapping region
+        sel = x2 > max(x1)
+        x2 = x2[sel]
+        y2 = y2[sel]
+    elif mode == 'raw':  #stack them without changes
+        pass
+    elif mode == 'AvgOnFirst':  # resample points of second profile on first
+        
+        yy2 = resample_profile(x2,y2,x1,y2,trim=False)
+        
+        y2 = y1 + yy2
+        
+    else: raise ValueError("Unreconginze merging mode")
+
+    xres = np.hstack([x1,x2])
+    yres = np.hstack([y1,y2])
+                
+    return xres,yres
     
 def merge_profiles(profiles,ranges=None,binned=False,removezero=False):
                     
@@ -515,35 +552,81 @@ def merge_profiles(profiles,ranges=None,binned=False,removezero=False):
     #
     ## sort groups in xtot in ascending order
     pmin = [a.min() for a in xtot]   #xtot and ytot are now lists of profiles
-    igroup =np.argsort(pmin)
+    igroup =np.argsort(pmin)  # sorted by minimum x
     
-    # xtot include all points, xvals the ones inside range, bins are calculated bins.
-    for i in igroup:
-        x = xtot[i]
-        y = ytot[i]
-        if len(bins) == 0:      # if first profile, keeps all
-            bins.append(x)
-            xvals.append(x)
-            yvals.append(y)
-        else:                   # otherwise handles overlapping
-            x1 = bins[-1]
-            sel = x>max(x1)     #p2 indices for points of p2 above p1.x
-            xint = np.hstack([ x1[x1>=min(x)] , x[sel] ]) # stitch x for overlapping points taking from x1 up to max, then x2
-            xvals.append(xint) # complete non overlapping profile 
-            yvals.append(np.interp(xint,x,y))  #interpolate p2 on p1 on common region
-            if any(sel): # if empty is simply skipped. 
-                #resample second vector on common range
-                bins.append(x[sel])   #not clear difference between xvals and bins
+    # xtot include all points, xvals the ones inside range and keeping x sorted (x values are from first profile on overlapping intervals), y from interpolated average.
+    # add bins as arguments.
+
+    #first iteration
+    #bins.append(xtot[0])
+    ix0 = xtot[igroup[0]]<min(xtot[igroup[1]])
+    if len(ix0)>1:
+        xvals.append(xtot[igroup[0]][ix0])  
+        yvals.append(ytot[igroup[0]][ix0]) # only non overlapping values 
+    #pdb.set_trace()
+    for i in igroup[1:]:
+        x2 = xtot[i]
+        y2 = ytot[i]
+        x1 = xtot[i-1] # fulls vector in i-th file
+        y1 = ytot[i-1] 
         
-    xtot=np.hstack(xtot)
-    ytot=np.hstack(ytot)
+        ## initialize lists with first profile:
+        # xint: x of common range from first vector x1
+        # x[sel]: indices of second profile "x1" on interval non in common
+        # note that here we compare max(x1) with min(x2),
+        # they might overlap or be separated.
+        
+        # if both i1int and i2int are empty, x1 and x2 don't overlap
+        #i1int = [min([min(x2),max(x1)]), min([min(x2),max(x1)])
+        
+        i1int = (min(x2) <= x1) & (x1 <= max(x2)) # in common region, from x1
+        if len(i1int):
+            x1int = x1[i1int] 
+            y1int = y1[i1int]
+        i2int = (min(x1) <= x2) &(x2 < max(x1)) # in common region, from x1
+        if len(i2int):
+            x2int = x2[i2int] 
+            y2int = y2[i2int]
+        
+        # handle overlapping region according to `mode``
+        mode = 'xfirst'
+        '''
+        mode = 'xfirst'
+        if mode == 'xfirst':  #keep x from x1, average x1 and x2.
+            # xint = np.hstack([ x1[x1>=min(x)] , x[sel] ]) # stitch x for overlapping points taking from x1 up to max, then x2
+            #if any(sel): # if empty is simply skipped. 
+            #    bins.append(x[sel])   #not clear difference between xvals and bins
+            xvals.append(x1int)    
+            yv = np.interp(np.hstack(xvals),x2,y2) # interpolation of y2 on x1 on all y2 over x1 points (x not in common are unchanged)
+            sel = x2>max(x1)     # x2 indices for points of x2 above x1
+            xvals.append(x2[sel]) # complete non overlapping profile, overlapping is already in xvals 
+            #here, to obtain y, we have different way to interpolate
+            
+            yvals.append((yv+yint)/2)  #interpolate p2 on p1 on common region and average
+            yvals.append(y[sel])     
+        elif mode == 'overlap': # keep all points in the overlapping region.
+            x2int = x2<max(x1)
+            x1int = x1 >= min(x2)
+            xint = x1[x1int]+x2[x2int]
+            print(x1)
+            pdb.set_trace()   
+        '''    
+        
+    
+    #xtot=np.hstack(xtot)
+    #ytot=np.hstack(ytot)
+    
     xvals=np.hstack(xvals)
     yvals=np.hstack(yvals)
-    xbins = (xvals[:1]+xvals[1:])/2 #np.hstack(bins)
-    ybins = binned_statistic(xtot,ytot,bins=xbins,statistic='mean') [0]
+    #xbins = (xvals[:1]+xvals[1:])/2 #np.hstack(bins)
+    #ybins = binned_statistic(xtot,ytot,bins=xbins,statistic='mean') [0]
     ###
+    if mode == 'all':  #include all points, sorted by value
+        ix = np.argsort(xtot)
+        xtot = xtot[ix]
+        ytot = ytot[ix]
     if  binned:
-        xtot,ytot = (xvals[:1]+xvals[1:])/2, ybins
+        xtot,ytot = xvals, yvals #(xvals[:1]+xvals[1:])/2, ybins
     """
     plot_psd(xbins[:-1],ybins,label='binned',units=['um','um','nm'],
              linestyle='--')
