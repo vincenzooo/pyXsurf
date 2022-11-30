@@ -33,8 +33,8 @@ def line(x,y=None):
     #account for nan
     sel=~np.isnan(y)
     if sel.any():
-        y0=[y[sel][0],y[sel][-1]]
-        if len(x)==len(y):
+        y0=[y[sel][0],y[sel][-1]]  # y0 is the span of y
+        if len(x)==len(y):  # L is 2-vector with range of useful x
             x0=x[sel]
         else:
             x0=x
@@ -373,9 +373,15 @@ def rebin_profile(x,y,*args,**kwargs):
     return x2,y2  
     rebin_profile = update_docstring(rebin_profile, stats.binned_statistics)
 
-def crop_profile(x,y=None,xrange=None,yrange=None,*args,**kwargs):
+## Resampling and Merging
+
+def crop_profile(x,y=None,xrange=None,yrange=None,open=False,*args,**kwargs):
     """Crop a profile to range (can be set to None) in x and y.
-    Experimental, crop on y leaves holes in profile."""
+    Experimental, crop on y leaves holes in profile.
+    2022/11/25 this function include edges. It is not clear if it is better to leave
+    control outside or with options in this routine. Added experimental `open` option,
+    if True leaves intervals open (excludes points on exactly the extreme of ranges from result.
+    )."""
     #qui sarebbe utile impostare gli argomenti come x e y necessariamente args e i ranges kwargs.
     #Si potrebbe anche implementare una funzione piu' potente come clip in IDL
     
@@ -383,35 +389,48 @@ def crop_profile(x,y=None,xrange=None,yrange=None,*args,**kwargs):
         y=x
         x=np.arange(np.size(y))
     
+    sel = np.ones(len(x),dtype=bool)
     if xrange is None: 
         xrange=[None,None]
-    if xrange[0] is None:
-        xrange[0]=np.nanmin(x)
-    if xrange[1] is None:
-        xrange[1]=np.nanmax(x)
-
-    sel=(x>=xrange[0])&(x<=xrange[1])
+        
+    if xrange[0] is not None:
+        sel=(sel & (x>xrange[0])) if open else (sel & (x>=xrange[0]))     
+    if xrange[1] is not None:
+        sel=(sel & (x<xrange[1])) if open else (sel & (x<=xrange[1]))
+        
     x=x[sel]
     y=y[sel]
     
+    sel = np.ones(len(x),dtype=bool)
     if yrange is None: 
         yrange=[None,None]
-    if yrange[0] is None:
-        yrange[0]=np.nanmin(y)
-    if yrange[1] is None:
-        yrange[1]=np.nanmax(y)
-
-    sel=(y>=yrange[0])&(y<=yrange[1]) 
-    
+        
+    if yrange[0] is not None:
+        sel=(sel & (y>yrange[0])) if open else (sel & (y>=yrange[0]))     
+    if yrange[1] is not None:
+        sel=(sel & (y<yrange[1])) if open else (sel & (y<=yrange[1]))
 
     return x[sel],y[sel]  
 
-def resample_profile(x1,y1,x2,y2=None, trim = True):
-    """resample y1 (defined on x1) on x2.
+def resample_profile(x1,y1,x2,y2=None, trim = True,*args,**kwargs):
+    """resample y1 (defined on x1) on x2 return resampled x2,y2.
     Both x1 and y1 need to be set for input data,
         x2 is returned together with interpolated values as a tuple.
     y2 is not used and put for consistency (can be omitted).
+    
     N.B.: this is inconsistent with ``np.interp`` arguments order which is x2,x1,y1.
+    2022/11/25 completely redesigned to account for more control of endpoints
+    and beyond. Return x,y that handles trimming by barely cropping on x1.
+    former behavior was default from interp to extend with last values on edge
+    is emulated with trim = False and passing `left` and `right` options for `np.interp`.
+    
+    N.B. sometimes (e.g. in implementing algebraic operations) it useful
+    to obtain data from p1 on resampled interval.
+    This can be done e.g. in:
+    
+        xx2,yy2 = resample_profile(x2,y2,x1) # p2 resampled on p1, can have fewer points than p1
+        xx1,yy1 = resample_profile(x1,y1,xx2) # gives points of x1 on overlap.
+     
     """
     if np.any(np.diff(x1) <= 0): 
         if np.any(np.diff(x1) >= 0): 
@@ -420,30 +439,20 @@ def resample_profile(x1,y1,x2,y2=None, trim = True):
         if np.any(np.diff(x1) >= 0): 
             raise ValueError ('x2 must be monotonic for interpolation')    
     
-    y2 = np.interp(x2,x1,y1)
+    y2 = np.interp(x2,x1,y1,*args,**kwargs) # this is same length than x2     
+    
     if trim:
         x2,y2 = crop_profile(x2,y2,span(x1))
         #y2 = removenanends(x2,y2)
      
     return x2,y2
 
-def sum_profiles(x1,y1,x2,y2,*args,**kwargs):
-    # beware that here a resampling is done on x1. If this is out of x2 range
-    #  points number will change and cannot be summed with y1.
-    # return x1,y1+resample_profile(x2,y2,x1)[1]
-    xx2,yy2  = resample_profile(x2,y2,x1) # p2 resampled on p1, can have fewer points than p1
-    xx1,yy1 = resample_profile(x1,y1,xx2)
-    return xx1, yy1+yy2
-        
-def subtract_profiles(x1,y1,x2,y2,*args,**kwargs):
-    return x1,y1-resample_profile(x2,y2,x1)[1] 
-
 def merge_profile(x1,y1,x2,y2):
     """stitch profiles
     20221129 see implementation below, was before (original file cannot be found):"""
     raise NotImplementedError(r"see example of psd merging in G:\My Drive\progetti\read_nid.ipynb")
 
-def merge_profile(x1,y1,x2,y2=None, range = None, mode = 'First'):
+def merge_profile(x1,y1,x2,y2=None, range = None, mode = 'avgon1st'):
     
     """resample y1 (defined on x1) on x2.
     Both x1 and y1 need to be set for input data,
@@ -452,18 +461,43 @@ def merge_profile(x1,y1,x2,y2=None, range = None, mode = 'First'):
     N.B.: this is inconsistent with ``np.interp`` arguments order which is x2,x1,y1.
     """
     
-    if mode == 'First':  # keeps points of first profile in 
+    # x2 and y2 are filtered and stacked for result. 
+    if mode == 'first':  # keeps points of first profile in 
                          # overlapping region
-        sel = x2 > max(x1)
-        x2 = x2[sel]
-        y2 = y2[sel]
+        x2,y2 = crop_profile(x2,y2,[max(x1),None],open=True) #this will include overlappint edges
+       
+    elif mode == 'second':  # keeps points of second profile in 
+                         # overlapping region
+        x1,y1 = crop_profile(x1,y1,[None,min(x2)],open=True) #this will include overlappint edges
     elif mode == 'raw':  #stack them without changes
         pass
-    elif mode == 'AvgOnFirst':  # resample points of second profile on first
+    elif mode == 'avgon1st':  # resample points of second profile on first and avg
         
-        yy2 = resample_profile(x2,y2,x1,y2,trim=False)
+        # average of inputs on overlapping region
+        xx2, yy2 = sum_profiles(x1,y1,x2,y2)
+        yy2 = yy2/2        
         
-        y2 = y1 + yy2
+        # stitch vectors
+        x1,y1 = merge_profile(x1,y1,xx2,yy2,mode = 'second') #joins x1,y1 below overlapping region with interpolated points on overlapped region
+        x2,y2 = crop_profile(x2,y2,[max(x1),None], open = True)  # second segment is points of x2,y2 above overlapping 
+    elif mode == 'smoothon1st':  # weighted average on first with linear weight
+        
+        raise NotImplementedError
+        # weighted average of inputs on overlapping region
+        wx,wy = line(xx2,[0,1])
+         
+        # xx2, yy2 = sum_profiles(x1,y1,x2,y2)
+        # yy2 = yy2/2        
+        # internally
+        xx2,yy2  = resample_profile(x2,y2,x1) # p2 resampled on p1, can have fewer points than p1
+        xx1,yy1 = resample_profile(x1,y1,xx2) # gives points of x1 on overlap.
+        
+        # - end sum - 
+        # stitch vectors
+        x1,y1 = merge_profile(x1,y1,xx2,yy2,mode = 'second') #joins x1,y1 below overlapping region with interpolated points on overlapped region
+        x2,y2 = crop_profile(x2,y2,[max(x1),None], open = True)  # second segment is points of x2,y2 above overlapping         
+        
+        
         
     else: raise ValueError("Unreconginze merging mode")
 
@@ -471,12 +505,242 @@ def merge_profile(x1,y1,x2,y2=None, range = None, mode = 'First'):
     yres = np.hstack([y1,y2])
                 
     return xres,yres
+
+### Test of merge and resample
+
+def test_merge_init():
+    """create basic couple of vectors for merge tests."""
+    x1 = np.arange(6)+1
+    y1 = line(x1,[2.5,2])
+    x2 = np.arange(6)+4.5
+    y2 = line(x2,[0.5,2.5])
     
-def merge_profiles(profiles,ranges=None,binned=False,removezero=False):
+    return x1,y1,x2,y2
+
+def test_merge_init_plot(x1,y1,x2,y2):
+    """Basic plot of two initial profiles for tests."""
+    plt.figure()
+    plt.plot(x1,y1,'v-',markersize=10,label = '1')
+    plt.plot(x2,y2,'^-',markersize=10,label = '2')
+    
+def test_resample_profile(x1,y1,x2,y2,*args,**kwargs):
+    """
+    plots initial and final results of resample. resampled data are returned.
+    
+    To compare different resamplings, use e.g.:
+    
+        m = test_resample_profile(x1,y1,x2,y2,trim=True) #default
+        m2 = resample_profile(x1,y1,x2,y2,trim=False)
+        m3 = resample_profile(x1,y1,x2,y2,trim=False,left=np.nan,right=np.nan)
+
+        plt.plot(*m2,label='without Trim',marker='+',ms=20)
+        plt.plot(*m3,label='with np.nan edges',marker='x',ms=10)
+    """
+    
+    test_merge_init_plot(x1,y1,x2,y2)
+    m = resample_profile(x1,y1,x2,y2,*args,**kwargs)
+
+    plt.plot(*m,marker='o',ls=':',label = 'resample 1 on 2')
+    plt.grid()
+    plt.legend()
+    
+    plt.title("resampled with options `%s`"%str(args))
+    
+    return m
+
+def test_resample_trim (x1,y1,x2,y2):
+    """test different trim options of resample."""
+    
+    test_merge_init_plot(x1,y1,x2,y2)
+    xx2,yy2 = resample_profile(x2,y2,x1,y1,trim = True) #Trim True by default
+    plt.plot(xx2,yy2,'s',label='trim=True, len:%i'%len(xx2),markersize=15)
+    xx3,yy3 = resample_profile(x2,y2,x1,y1,trim = False) #Trim True by default
+    plt.plot(xx3,yy3,'o',label='trim=False, len:%i'%len(xx3),markersize=15)
+    xx3,yy3 = resample_profile(x2,y2,x1,y1,trim = False,left=np.nan,right=np.nan) #Trim True by default
+    plt.plot(xx3,yy3,'o',label='trim=False, left/right nan,len:%i'%len(xx3))
+    plt.grid()
+    plt.legend()
+    plt.title('All modes of `trim` option.')
+
+def test_merge_profile(x1,y1,x2,y2,mode='first',*args,**kwargs):
+    """plots initial and final results of merge. merged data is returned.
+    
+    for additional plots use:
+        m = test_merge_profile(x1,y1,x2,y2,mode='raw')
+        plt.figure()  # to generate plots in a new figure rather than erasing it
+        m2 = test_merge_profile(x1,y1,x2,y2,mode='first')
+    
+        plt.plot(*m,marker='o',ls=':',label = 'merge 1 // 2')
+    """    
+    test_merge_init_plot(x1,y1,x2,y2)
+    m = merge_profile(x1,y1,x2,y2,mode=mode,*args,**kwargs)
+
+    plt.plot(*m,marker='o',ls=':',color='cyan',label = 'merge 1 // 2')
+    plt.grid()
+    plt.legend()
+    plt.title("merged with options `%s`"%mode)
+    return m
+
+def test_merge_mode(x1,y1,x2,y2):  
+    '''test all possible merge modes.
+    It is one of the tests launched by `test_merge` (TBD).''' 
+    
+    m = test_merge_profile(x1,y1,x2,y2,mode='raw')
+
+    plt.figure()  # to generate plots in a new figure rather than erasing it
+    m2 = test_merge_profile(x1,y1,x2,y2,mode='first')
+    print(m2)
+
+    plt.figure()
+    m3 = test_merge_profile(x1,y1,x2,y2,mode='second')
+    print(m3)
+
+    plt.figure()
+    m4 = test_merge_profile(x1,y1,x2,y2,mode='avgon1st')
+    print(m4)
+
+
+    
+def merge_profiles(profiles,ranges=None,binned=False,removezero=False,mode = 'raw'):
                     
 #def merge_profiles(ranges, profiles, labels,xrange=None,yrange=None,
 #                    outname=None):
-    """ da trim_psds_group in ICSO2020_review
+    """ 2022/11/29 completely under rewriting in `merge_profile`, doesn't belong here, it is more
+    for Plist. A copy merge_profiles2 is kept for back compatibility.
+    
+    copy of the previous in status of development (there might be a better version in last commits).
+    
+        Makes a single profile trimming and averaging multiple ones 
+        according to selection.
+    
+        From trim_psds_group in ICSO2020_review, no more related to psds, was originally created to trim a single set of psds related to same sample (or same context), but it maintain some reference in comments and variables.
+                
+        `ranges`, `profiles`, `labels` are lists with same number of elements,
+        describing respectively: 
+        `ranges` :: (on horizontal axis, originally frequency) can be set to None (exclude profile), or to [None, None] (in which case, full range is used). Otherwise range [min,max] is expected each extreme can be set to None to include all data on that side.   
+        `profiles` (on y, originally psds) as list of couples of x,y vectors.
+        `labels`:: labels to be used in plot.
+        `outname`:: (disabled) if provided generate plot of trim and txt with resulting psd.
+        `bins`:: (TBD) input bins at intervals centers.
+        
+        N.B.: in case of PSDs binning can give irregular results because of the irregular spacing of frequencies. If intervals are not overlapping, it is irrelevant. See notes in code.
+        Rebinning starst from lower x (sorting items) and keeping x in non overlapping regions, while averaging on common regions.
+        
+        2022/11/28 Disabled `removezero` (was obligated in original PSD function).
+        2022/11/25 Enabled (experimentally) binned option. If selected, allows to merge by binning. 
+        See warnings in code.
+        
+        """
+    if ranges is None:
+        ranges = np.repeat([[None],[None]],
+                           len(profiles),axis=1).T
+        
+    # test merge_profies: it is creating different length x and y 
+    # when binning is selected. This is because bins as array in binned_statistics
+    # includes both left and right extreme. Select center point of each interval.
+    # make option to set bin centers.
+    xtot,ytot,bins,xvals,yvals = [] , [], [], [], [] # these are cncatenated at the end, they don't necessarily have same number of elements.
+    
+    #plt.figure(figsize=(12,6))
+    #for ran,pr,lab in zip(ranges,profiles,labels):
+    for ran,pr in zip(ranges,profiles):
+        if ran is not None:
+            #print(d)
+            x,y = pr
+            if removezero:
+                if x[0] == 0:  # this is for PSD 
+                    x=x[1:]
+                    y=y[1:]
+            xx,yy = crop_profile(x,y,ran)
+            #plot_psd(xx,yy,label=lab,units=['um','um','nm'])
+            xtot.append(xx)
+            ytot.append(yy)
+        """
+        plt.legend( prop={'size': 12},loc = 1) #bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.xlim(xrange)
+        plt.ylim(yrange)
+        if outname:
+            plt.title(os.path.basename(outname))
+        plt.grid( which='minor', linestyle='--')
+        plt.tight_layout()
+    if outname:
+        plt.savefig(fn_add_subfix(outname,'_trimpsds','.png'))
+    """
+    
+    ### The following part is of interest only for rebinning,
+    ###   not included in this version's output #modified on 20221125:
+    # with binned return one less point in y, tested in G:\Shared drives\Carbon Coatings\Elettra\run02\analysis\elettra\Test_functions.ipynb
+    ###   because result will in general not be smooth in transitions between
+    ###   different intervals.
+    ###   if intervals are not overlapping, it is irrelevant.
+    # makes rebinning and averaging.
+    # we want to start from lower x (assuming inputs are passed not in order),
+    # keep x in non overlapping regions, while averaging on common regions.
+    # psd frequencies (x) are not equally spacing. If I do average, I get
+    #   spikes when typically lower freqs of each psd are more spaced than higher freq
+    #   of same psds. Then overlapping intervals of two psds typically have one with
+    #   broader spacing. Most of intervals have points only from psds with tighter spacing
+    #      when points from the other enter, you get spike. This is why interpolation is needed.
+    #
+    ## sort groups in xtot in ascending order
+    pmin = [a.min() for a in xtot]   #xtot and ytot are now lists of profiles
+    igroup =np.argsort(pmin)
+    
+    # xtot include all points, xvals the ones inside range, bins are calculated bins.
+    for i in igroup:
+        x = xtot[i]
+        y = ytot[i]
+        if len(bins) == 0:      # if first profile, keeps all
+            bins.append(x)
+            xvals.append(x)
+            yvals.append(y)
+        else:                   # otherwise handles overlapping
+            x1 = bins[-1]
+            sel = x>max(x1)     #p2 indices for points of p2 above p1.x
+            xint = np.hstack([ x1[x1>=min(x)] , x[sel] ]) # stitch x for overlapping points taking from x1 up to max, then x2
+            xvals.append(xint) # complete non overlapping profile 
+            yvals.append(np.interp(xint,x,y))  #interpolate p2 on p1 on common region
+            if any(sel): # if empty is simply skipped. 
+                #resample second vector on common range
+                bins.append(x[sel])   #not clear difference between xvals and bins
+    
+    xtot=np.hstack(xtot)
+    ytot=np.hstack(ytot)
+    xvals=np.hstack(xvals)
+    yvals=np.hstack(yvals)
+    xbins = (xvals[:1]+xvals[1:])/2 #np.hstack(bins)
+    ybins = binned_statistic(xtot,ytot,bins=xbins,statistic='mean') [0]
+    ###
+    if mode == 'raw':  #include all points, sorted by value
+        ix = np.argsort(xtot)
+        xtot = xtot[ix]
+        ytot = ytot[ix]
+    if  binned:
+        xtot,ytot = (xvals[:1]+xvals[1:])/2, ybins
+    """
+    plot_psd(xbins[:-1],ybins,label='binned',units=['um','um','nm'],
+             linestyle='--')
+    #plot_psd(xtot,ytot,label='total',units=['um','um','nm'])
+    if outname:
+        save_profile(fn_add_subfix(outname,'_binpsd','.dat'),xbins[:-1],ybins)
+    
+    if outname:
+        plt.savefig(fn_add_subfix(outname,'_trimpsds','.png'))
+    """
+    
+    return xtot, ytot   
+
+
+
+def merge_profiles2(profiles,ranges=None,binned=False,removezero=False,mode = 'raw'):
+                    
+#def merge_profiles(ranges, profiles, labels,xrange=None,yrange=None,
+#                    outname=None):
+    """ 2022/11/29 completely under rewriting in `merge_profile`, doesn't belong here, it is more
+    for Plist. A copy merge_profiles 2 i kept for back compatibility.
+    copy of the previous in status of development (there might be a better version in last commits).
+    
+        da trim_psds_group in ICSO2020_review
     
         Makes a single profile trimming and averaging multiple ones 
         according to selection.
@@ -552,81 +816,39 @@ def merge_profiles(profiles,ranges=None,binned=False,removezero=False):
     #
     ## sort groups in xtot in ascending order
     pmin = [a.min() for a in xtot]   #xtot and ytot are now lists of profiles
-    igroup =np.argsort(pmin)  # sorted by minimum x
+    igroup =np.argsort(pmin)
     
-    # xtot include all points, xvals the ones inside range and keeping x sorted (x values are from first profile on overlapping intervals), y from interpolated average.
-    # add bins as arguments.
-
-    #first iteration
-    #bins.append(xtot[0])
-    ix0 = xtot[igroup[0]]<min(xtot[igroup[1]])
-    if len(ix0)>1:
-        xvals.append(xtot[igroup[0]][ix0])  
-        yvals.append(ytot[igroup[0]][ix0]) # only non overlapping values 
-    #pdb.set_trace()
-    for i in igroup[1:]:
-        x2 = xtot[i]
-        y2 = ytot[i]
-        x1 = xtot[i-1] # fulls vector in i-th file
-        y1 = ytot[i-1] 
-        
-        ## initialize lists with first profile:
-        # xint: x of common range from first vector x1
-        # x[sel]: indices of second profile "x1" on interval non in common
-        # note that here we compare max(x1) with min(x2),
-        # they might overlap or be separated.
-        
-        # if both i1int and i2int are empty, x1 and x2 don't overlap
-        #i1int = [min([min(x2),max(x1)]), min([min(x2),max(x1)])
-        
-        i1int = (min(x2) <= x1) & (x1 <= max(x2)) # in common region, from x1
-        if len(i1int):
-            x1int = x1[i1int] 
-            y1int = y1[i1int]
-        i2int = (min(x1) <= x2) &(x2 < max(x1)) # in common region, from x1
-        if len(i2int):
-            x2int = x2[i2int] 
-            y2int = y2[i2int]
-        
-        # handle overlapping region according to `mode``
-        mode = 'xfirst'
-        '''
-        mode = 'xfirst'
-        if mode == 'xfirst':  #keep x from x1, average x1 and x2.
-            # xint = np.hstack([ x1[x1>=min(x)] , x[sel] ]) # stitch x for overlapping points taking from x1 up to max, then x2
-            #if any(sel): # if empty is simply skipped. 
-            #    bins.append(x[sel])   #not clear difference between xvals and bins
-            xvals.append(x1int)    
-            yv = np.interp(np.hstack(xvals),x2,y2) # interpolation of y2 on x1 on all y2 over x1 points (x not in common are unchanged)
-            sel = x2>max(x1)     # x2 indices for points of x2 above x1
-            xvals.append(x2[sel]) # complete non overlapping profile, overlapping is already in xvals 
-            #here, to obtain y, we have different way to interpolate
-            
-            yvals.append((yv+yint)/2)  #interpolate p2 on p1 on common region and average
-            yvals.append(y[sel])     
-        elif mode == 'overlap': # keep all points in the overlapping region.
-            x2int = x2<max(x1)
-            x1int = x1 >= min(x2)
-            xint = x1[x1int]+x2[x2int]
-            print(x1)
-            pdb.set_trace()   
-        '''    
-        
+    # xtot include all points, xvals the ones inside range, bins are calculated bins.
+    for i in igroup:
+        x = xtot[i]
+        y = ytot[i]
+        if len(bins) == 0:      # if first profile, keeps all
+            bins.append(x)
+            xvals.append(x)
+            yvals.append(y)
+        else:                   # otherwise handles overlapping
+            x1 = bins[-1]
+            sel = x>max(x1)     #p2 indices for points of p2 above p1.x
+            xint = np.hstack([ x1[x1>=min(x)] , x[sel] ]) # stitch x for overlapping points taking from x1 up to max, then x2
+            xvals.append(xint) # complete non overlapping profile 
+            yvals.append(np.interp(xint,x,y))  #interpolate p2 on p1 on common region
+            if any(sel): # if empty is simply skipped. 
+                #resample second vector on common range
+                bins.append(x[sel])   #not clear difference between xvals and bins
     
-    #xtot=np.hstack(xtot)
-    #ytot=np.hstack(ytot)
-    
+    xtot=np.hstack(xtot)
+    ytot=np.hstack(ytot)
     xvals=np.hstack(xvals)
     yvals=np.hstack(yvals)
-    #xbins = (xvals[:1]+xvals[1:])/2 #np.hstack(bins)
-    #ybins = binned_statistic(xtot,ytot,bins=xbins,statistic='mean') [0]
+    xbins = (xvals[:1]+xvals[1:])/2 #np.hstack(bins)
+    ybins = binned_statistic(xtot,ytot,bins=xbins,statistic='mean') [0]
     ###
-    if mode == 'all':  #include all points, sorted by value
+    if mode == 'raw':  #include all points, sorted by value
         ix = np.argsort(xtot)
         xtot = xtot[ix]
         ytot = ytot[ix]
     if  binned:
-        xtot,ytot = xvals, yvals #(xvals[:1]+xvals[1:])/2, ybins
+        xtot,ytot = (xvals[:1]+xvals[1:])/2, ybins
     """
     plot_psd(xbins[:-1],ybins,label='binned',units=['um','um','nm'],
              linestyle='--')
@@ -639,6 +861,24 @@ def merge_profiles(profiles,ranges=None,binned=False,removezero=False):
     """
     
     return xtot, ytot    
+
+## Algebraic
+
+def sum_profiles(x1,y1,x2,y2,*args,**kwargs):
+    #  2022/11/30 beware that here a resampling is done on x1. If this is out of x2 range
+    #  points number will change and cannot be summed with y1.
+    #  return x1,y1+resample_profile(x2,y2,x1)[1] is replaced
+    
+    xx2,yy2 = resample_profile(x2,y2,x1) # p2 resampled on p1, can have fewer points than p1
+    xx1,yy1 = resample_profile(x1,y1,xx2) # gives points of x1 on overlap.
+    
+    
+    return xx2, yy1+yy2
+        
+def subtract_profiles(x1,y1,x2,y2,*args,**kwargs):
+    return sum_profiles(x1,y1,x2,-y2)  # changed 2022/11/30 was: return x1,y1-resample_profile(x2,y2,x1)[1]  #probably not working because resample can change number of points and range.
+
+# PROFILE STATS AND DERIVED QUANTITIES
 
 def calculate_barycenter(x,y):
     """return the x of barycenter using y as weight function."""
@@ -733,7 +973,6 @@ def plot_HEW(xout,yout,center=None,fraction=0.5):
     plt.show()   
     return hew
 
-#PROFILE STATS AND DERIVED QUANTITIES
 def PSF_spizzichino(x,y,alpha=0,xout=None,energy=1.,level=True, HEW=True):
     """Try to use spizzichino theory as in PR notes to calculate Hthe PSF,
     return a vector of same length as xout.
@@ -857,38 +1096,6 @@ def autotilt(x,y):
 '''
 
 ##TESTS AND USE
-
-def test_reflect(xx=None,yy=None,center=None,outfolder=None):
-    
-    print ("specularly reflect a profile about a center position on x axis")
-    xx=np.arange(30)
-    yy=-0.03*xx**2+0.2*xx-5
-    center=15
-    
-    
-    plt.close('all')
-    plt.figure()
-    plt.plot(xx,yy,label='starting profile')
-    plt.plot(*reflect_profile(xx,yy,center=center),label='reflect about 15')
-    plt.plot(*reflect_profile(xx,yy,center=center),'o')
-    for i,p in enumerate(reflect_profile(xx,yy,center=center,split=1)):
-        plt.plot(*p,'-.',label='reflect about 15, split#%i'%i) 
-    plt.legend(loc=0)
-
-    plt.figure()
-    xout=15+np.arange(5)*2
-    plt.title('test interpolated output')
-    plt.plot(xx,yy,label='starting profile')
-    plt.plot(*reflect_profile(xx,yy,center=center,xout=xout),label='reflect about 15')
-    plt.plot(*reflect_profile(xx,yy,center=center,xout=xout),'o')
-    for i,p in enumerate(reflect_profile(xx,yy,center=center,split=1,xout=xout)):
-        plt.plot(*p,'-.',label='reflect about 15, split#%i'%i) 
-    plt.legend(loc=0)
-    
-    plt.show()
-    print('done!')
-    return xx,yy
-
 def test_merge():
     datafolder = r'test\input_data\psds'
     # obtained with dopsd(files,name,outfolder,rmsthr= 0.5,psdrange=[1e-7,10],frange=[5e-3,5e2])
@@ -925,6 +1132,38 @@ def test_merge():
                         outname=os.path.join(outfolder,name))
     '''
 
+
+def test_reflect(xx=None,yy=None,center=None,outfolder=None):
+    
+    print ("specularly reflect a profile about a center position on x axis")
+    xx=np.arange(30)
+    yy=-0.03*xx**2+0.2*xx-5
+    center=15
+    
+    
+    plt.close('all')
+    plt.figure()
+    plt.plot(xx,yy,label='starting profile')
+    plt.plot(*reflect_profile(xx,yy,center=center),label='reflect about 15')
+    plt.plot(*reflect_profile(xx,yy,center=center),'o')
+    for i,p in enumerate(reflect_profile(xx,yy,center=center,split=1)):
+        plt.plot(*p,'-.',label='reflect about 15, split#%i'%i) 
+    plt.legend(loc=0)
+
+    plt.figure()
+    xout=15+np.arange(5)*2
+    plt.title('test interpolated output')
+    plt.plot(xx,yy,label='starting profile')
+    plt.plot(*reflect_profile(xx,yy,center=center,xout=xout),label='reflect about 15')
+    plt.plot(*reflect_profile(xx,yy,center=center,xout=xout),'o')
+    for i,p in enumerate(reflect_profile(xx,yy,center=center,split=1,xout=xout)):
+        plt.plot(*p,'-.',label='reflect about 15, split#%i'%i) 
+    plt.legend(loc=0)
+    
+    plt.show()
+    print('done!')
+    return xx,yy
+
 def test_HEW():
     #datafile=r'test\01_mandrel3_xscan_20140706.txt'
     print ("uses Spizzichino's formula to predict PSF on sinusoidal ")
@@ -953,5 +1192,7 @@ def test_HEW():
     return xout,yout
     
 if __name__=="__main__":
-    test_HEW()
     
+    # test_resample()
+    # test_merge()
+    test_HEW()
