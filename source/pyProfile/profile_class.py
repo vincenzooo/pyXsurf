@@ -104,7 +104,6 @@ from dataIO.arrays import split_blocks, split_on_indices
 from dataIO.functions import update_docstring
 
 from pySurf.affine2D import find_affine
-from pyProfile import profile
 from pyProfile.profile import crop_profile
 from pyProfile.profile import level_profile
 from pyProfile.profile import resample_profile
@@ -112,9 +111,11 @@ from pyProfile.profile import sort_profile
 from pyProfile.profile import sum_profiles, subtract_profiles
 from pyProfile.psd import psd as profpsd
 from pyProfile.profile import movingaverage, rebin_profile
-from pyProfile.profile import merge_profiles
+from pyProfile.profile import merge_profile
 from pyProfile.profile import register_profile
 from pyProfile.profile import save_profile
+
+from pyProfile import profile   # functions passed to update_docstring will be from here
 
 
 '''
@@ -186,14 +187,16 @@ def read_mca(filename,*args,**kwargs):
     import re
     from scipy import interpolate
 
-    a = open(filename,'r').readlines()
-    a = [aa.strip() for aa in a if len(aa.strip())]
+    with open(filename, 'r') as f:  # close is not needed
+        content = f.readlines()   
+    content = [l.strip() for l in content] # trimmed list of lines
+    a = [aa for aa in content if len(aa)>0]   # list of not blank lines
 
-    p=re.compile("<<.*>>")
-    i = p.match("".join(a))
+    #  p=re.compile("<<.*>>")  # mi sembrano inutili
+    #  i = p.match("".join(a))
 
     itags = [i for i,l in enumerate(a) if re.compile("<<.*>>").match(l)] #posizione dei tags in linee
-    tags = [a[i] for i in itags]  #tags
+    tags = [a[i] for i in itags]  # corresponding tags
     
     blocks = {'<<CALIBRATION>>':['LABEL - Channel','0 0.','1 1']} #default calibration if not defined in file, in a consistent format for conversion.
     for i,t in enumerate(tags[:-1]):  #last tag is assumed to be closing tag
@@ -322,9 +325,15 @@ class Profile(object):  #np.ndarrays
     """
 
     def __add__(self,other,*args,**kwargs):
+        # print('self (id,type):',id(type(self)),type(self))
+        # print('other (id,type):',id(type(other)),type(other))
+        # print('Profile (id,type):',id(Profile),type(Profile))
+        # print(isinstance(other,Profile))
+        # print(other is Profile)
         
-        if isinstance(other,Profile):
+        if isinstance(other,self.__class__):
             res = sum_profiles(*self(),*other(),*args,**kwargs)
+            #res = other()
             res = Profile(*res,units=self.units,name=self.name + " + " + other.name)
         else:
             try:
@@ -405,6 +414,22 @@ class Profile(object):  #np.ndarrays
             a = me()
             a'''
     
+    # def __add__(self,other,*args,**kwargs):
+    #     print(type(other))
+    #     print(Profile)
+    #     print(isinstance(other,Profile))
+    #     print(type(Profile))
+    #     if isinstance(other,Profile):
+    #         res = sum_profiles(*self(),*other(),*args,**kwargs)
+    #         res = Profile(*res,units=self.units,name=self.name + " + " + other.name)
+    #     else:
+    #         try:
+    #             res = self.copy()
+    #             res.y = res.y + other
+    #             res.units = self.units
+    #         except ValueError:
+    #             raise ValueError("Unrecognized type in sum")
+    #     return res
     
     def __mul__(self,scale,*args,**kwargs):
         """mutiplocation: accept Profile, scalars or 2-vector [x,y]. """
@@ -421,25 +446,34 @@ class Profile(object):  #np.ndarrays
         res = self.copy()
         #breakpoint()
         if np.size(scale)==1:  # scalar object or value
-            if isinstance(scale,Profile):
+            # print(type(scale))
+            # print(Profile)
+            # print(isinstance(scale,Profile))
+            # print(type(Profile))
+            if isinstance(scale,self.__class__):
                 """if it is Profile, do pointwise multiplication rescaling on firts."""
                 # resample and multiply. For surface result, use matrix multiplication.
                 #raise NotImplementedError ('can be ambigous (return point to point multipl. or surface? Fix in code, at the momeb accept only x and (y) scalars.')
-                tmp=scale.resample(self)
+                tmp = scale.resample(self,trim=False,left = np.nan, right = np.nan) # this can have fewer points  
                 res=self.copy()
                 res.y = self.y * tmp.y
                 
                 #FIXME questo non convince, ad es, se none, ad es se divisione
-                if scale.units[1] == self.units[1]:
-                    res.units[1] = scale.units[1]+'^2'
+                # changed 2022/11/30 to implement None
+                # see also how it is handled if units is None
+                u1 = '' if res.units[1] is None else res.units[1]
+                u2 = '' if scale.units[1] is None else scale.units[1]
+                if u1 == u2:
+                    res.units[1] = u2+'^2'
                 else:
-                    res.units[1]='%s %s'%(self.units[1], scale.units[1])
+                    res.units[1]='%s %s'%(u1,u2)
+                    
                 if self.name and scale.name:
                     res.name = self.name + ' x ' + scale.name
                 else: 
                     res.name = (self.name if self.name else scale.name) + ' product'
             else:     # value
-                breakpoint()
+                #breakpoint()
                 res.y = scale * res.y 
                 if self.name:
                     res.name = '%s x %s'%(self.name,scale)
@@ -449,7 +483,7 @@ class Profile(object):  #np.ndarrays
             res.x = scale[0] * res.x
             res.y = scale[1] * res.y
         else:
-            raise ValueError('Multiply Data2D by wrong format!')
+            raise ValueError('Multiply Profile by wrong format!')
         return res
 
     def __rmul__(self,scale,*args,**kwargs):
@@ -485,13 +519,16 @@ class Profile(object):  #np.ndarrays
                 res.y[~sel] = np.nan
                 #breakpoint()
                 if other.units[1] == self.units[1]:
-                    res.units[1] = ''
+                    res.units[1] = ''  # adimensional
                 else:
-                    res.units[1]='%s / %s'%(other.units[1], self.units[1])
+                    u1 = '' if res.units[1] is None else res.units[1]
+                    u2 = '' if other.units[1] is None else other.units[1]
+                    res.units[1]='%s / %s'%(u1,u2)
                 res.name = '%s ratio'%(other.name if other.name is not None else '' ) + (' / %s'%(self.name) if self.name is not None else '') 
             else:     # value
                 #breakpoint()
                 res.y = other / res.y 
+                
                 if self.units[1]:
                     res.units[1] = '/'+self.units[1] 
                 if self.name:
@@ -527,9 +564,12 @@ class Profile(object):  #np.ndarrays
         #breakpoint()
         res = self*(1./other)
         u = getattr(other,'units',['',''])[1]  # assegna units y or ''
+        
         if self.units[1] == u:
-            res.units[1] = ''
+            res.units[1] = ''   # self and other have same units, cancel out
         else:
+            if self.units[1] is None:
+                self.units[1] = ''
             res.units[1] = self.units[1]+('/'+u if u else '')
         if self.name is not None:
             #res.name = '__truediv__'
@@ -540,10 +580,11 @@ class Profile(object):  #np.ndarrays
     def merge(self,other,*args,**kwargs):
         
         if isinstance(other,Profile):
-            res = merge_profiles([[self.x,self.y],[other.x,other.y]],*args,**kwargs)
-            res = Profile(*res,units=self.units,name=self.name + " + " + other.name)
+            #res = merge_profiles([[self.x,self.y],[other.x,other.y]],*args,**kwargs)
+            res = merge_profile(self.x,self.y,other.x,other.y,*args,**kwargs)
+            res = Profile(*res,units=self.units,name=self.name + " // " + other.name)
         else:
-            raise ValueError("Unrecognized type in sum")
+            raise ValueError("Unrecognized type in merge")
         return res
         
     def min (self):
@@ -703,7 +744,8 @@ class Profile(object):  #np.ndarrays
     remove_nan_ends=update_docstring(remove_nan_ends,profile.remove_nan_ends)
 
     def std(self):
-        """return standard deviation of data excluding nans"""
+        """return standard deviation of data excluding nans.
+        TODO: it should be weighted average over x interval for non-equally spaced points."""
         return np.nanstd(self.y)
 
     def copy(self):
