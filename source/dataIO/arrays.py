@@ -7,6 +7,90 @@ import warnings
 
 warnings.simplefilter("once")
 
+def isvector(val):
+    """return True if it is scalar or single element. named in contrast to `np.isvector`"""
+    
+    l = np.shape(val)
+
+    if len(l) == 0 : 
+        return True
+        
+    if np.product(np.shape(val)) == 1 :      
+        return True
+    else:
+        return False
+
+
+
+def vectorize(val, n=1, mult = False):
+    
+    """ transform `val` it in a list of `n` elements.
+        `mult` defines what to do when val is already composed on `n` items,
+            in that case replicates if set to True, else take it as a vector.
+            
+        ex.:
+        
+        In [55]: vectorize ([1, 2], 1, True)
+        Out[55]: [[1, 2]]
+
+        In [56]: vectorize ([1, 2], 2, False)
+        Out[56]: [1, 2]
+
+        In [57]: vectorize ([1, 2], 2, True)
+        Out[57]: [[1, 2], [1, 2]]
+        
+        In [58]: vectorize ([1], 1, True)
+        Out[58]: [[1]]
+
+        In [60]: vectorize ([1], 1, False)
+        Out[60]: [1]
+    """
+    
+    l = np.shape(val)
+
+    if len(l) > 1 : 
+        res =  val  # rank > 1. it should not happen 
+
+    elif len(l) == 0 :         # scalar
+        res = [val for i in range(n)]
+    elif mult or l[0] != n:
+        res = [val for i in range(n)] # mult or (not mult and l[0] != n)
+    else:
+        res = val 
+        
+    return res
+
+def test_vectorize():
+    
+    testvals = (1,
+                0,
+              'cane',
+              [1,2],
+              [1,2,3],
+              [],
+              np.array('cane'),
+              [1],
+              (1,),
+              ['cane'],
+              np.array([1,2,3])
+              )
+
+    print ('vectorize, n=1!\n')
+    for v in testvals:
+        print (v,'-->',vectorize(v,1))
+
+    print ('\nWith mult = True')
+    for v in testvals:
+        print (v,'-->',vectorize(v,1, mult = True))
+
+    print ('\n\n--------------------\nvectorize, n=2!\n')        
+    for v in testvals:
+        print (v,'-->',vectorize(v,2))
+    
+    print ('\nWith mult = True')    
+    for v in testvals:
+        print (v,'-->',vectorize(v,2, mult = True))
+
 def stats (data=None,units=None,string=False,fmt=None,vars=None):
     """ Return selected statistics on data as numerical array or list of strings (one for each stats).  
     
@@ -88,12 +172,19 @@ def stats (data=None,units=None,string=False,fmt=None,vars=None):
     
     return st
 
-def split_on_indices(vector,indices):
+def split_on_indices(vector,indices,absolute=False):
     """Split an array on a list of lengths (indices represent the number of items in each block). 
-    Return a list of splitted sub-arrays. """
+    Return a list of splitted sub-arrays.
+    N.B.: the preferred implementation is block length and not absolute indices to avoid ambiguity in meaning of
+    indices and first/last blocks. If absolute is set, indices are assumed as starting indices, last block is
+    automatically included, if first one is wanted, must be explicetely included passing 0 as first index."""
+    
+    if absolute:
+        istartblock = [b for a,b in zip([0]+indices[:-1],indices) if b-a!=1]+[len(vector)]
+        indices = [b-a for a,b in zip([0]+istartblock[:-1],istartblock)]
     
     if np.sum(indices) != len(vector):
-        Warning('len of indices for splitting is not matching vector length!')
+        warnings.warn ('len of indices for splitting is not matching vector length!')
     ind = np.cumsum(indices).tolist()
     result = [vector[i1:i2] for i1,i2 in zip([0]+ind,ind)]
 
