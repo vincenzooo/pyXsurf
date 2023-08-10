@@ -37,20 +37,26 @@ def read_blocks(filename,delimiter = '\n\n', comment = None,*args,**kwargs):
 
     return pList
     
-def test_read_blocks(filename=None):
-
-    def print_results(a, title):
-        '''pass result and descriptive title for a test.'''
-        
-        print('\n======',title)
-        print('%i blocks read'%len(a))
-        print('block shapes: ',[aa.shape for aa in a])
-        print('block contents: ')
-        for i,aa in enumerate(a):
-            print('%i)\n'%(i+1),'[%s\n..\n..\n%s]'%(','.join(map(str,aa[:3])),','.join(map(str,aa[-2:]))))
-        return a
     
-    filename = r'C:\Users\kovor\Documents\python\pyXTel\source\pyProfile\test\input_data\data_blocks_spaced.dat'
+def print_results(a, title):
+    '''pass result and descriptive title for a test.'''
+    
+    print('\n====== ',title, ' ======\n')
+    print('%i blocks read'%len(a))
+    print('block shapes: ',[aa.shape for aa in a])
+    print('block contents: ')
+    for i,aa in enumerate(a):
+        print('block #%i:\n'%(i+1),'[%s\n..\n..\n%s]\n'%(','.join(map(str,aa[:3])),','.join(map(str,aa[-2:]))))
+    return a
+    
+def test_read_blocks(filename=None):
+    
+    #infolder = r'C:\Users\kovor\Documents\python\pyXTel\source\pyProfile\test\input_data\'
+    
+    infolder = r'C:\Users\kovor\Documents\python\pyXTel\source\dataIO\test\test_data\blocks'
+    
+    if filename is None:
+        filename = os.path.join(infolder,'data_blocks_spaced.dat')
     
     print('read "%s", contains three white-line-separated blocks with initial 3-line # comment followed by 94 couples of data. First block has 6-line comment.'%os.path.join(os.path.basename(os.path.dirname(filename)),os.path.basename(filename)))
     
@@ -132,3 +138,5 @@ def test_program_path():
         
 if __name__ == "__main__":
     a = test_program_path()
+    test_read_blocks()
+    test_read_blocks(r'C:\Users\kovor\Documents\python\pyXTel\source\dataIO\test\test_data\blocks\data_blocks_spaced_irreg.dat')
