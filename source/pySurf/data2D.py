@@ -244,6 +244,7 @@ def level_data(data,x=None,y=None,degree=1,axis=None,byline=False,fit=False,*arg
         else:
             xo,yo=degree 
         
+        # this is to adjust to legendre2d interface
         xl,yl = [f.flatten() for f in np.meshgrid(np.arange(xo+2),np.arange(yo+1))]
         
         if np.size(degree)==1:
@@ -724,9 +725,11 @@ def resample_data(d1,d2,method='mc',onfirst=False):
     To get a (plottable) matrix of data use:
     plt.imshow(rpoints[:,2].reshape(ygrid.size,xgrid.size)).
     """
+    
     from scipy.interpolate import interp1d
 
     if onfirst:
+        if d2 is None: raise ValueError("d2 must be set if you use ``onfirst`` flag.")
         d1,d2=d2,d1
 
     try:
@@ -738,8 +741,12 @@ def resample_data(d1,d2,method='mc',onfirst=False):
     try:
         _,x2,y2=d2 #grid for resampling. data is useless.
     except ValueError:
-    #x and y not defined, use data1.
-        x2,y2=np.linspace(*span(x1),d2.shape[1]),np.linspace(*span(y1),d2.shape[0])
+        #x and y not defined, use data1.
+        #x2,y2=np.linspace(*span(x1),d2.shape[1]),np.linspace(*span(y1),d2.shape[0])
+        # see https://stackoverflow.com/questions/1952464/in-python-how-do-i-determine-if-an-object-is-iterable#:~:text=Checking%20isinstance(obj%2C%20Iterable),to%20call%20iter(obj)%20.
+        if not hasattr(d2, '__iter__'): #(not isiterable(d2)):
+            raise ValueError("d2 must be either Data2D or 2-el list.")
+        x2,y2 = d2
         
     # replace following block because of DeprecationWarning: elementwise comparison failed; this will raise an error in the future.
     if np.array_equal(x1,x2) and np.array_equal(y1,y2):  
@@ -1098,6 +1105,8 @@ def get_stats(data=None,x=None,y=None,units=None,vars=None,string=False,fmt=None
     else:  # if 3 units are already ok
         raise ValueError ("Unrecognized units.")
     
+    u = [uu if uu is not None else "" for uu in u] # to avoid error is [None, None, None] or similar is passed.
+    
     # this handles all special cases and converts vars to a three-el list of lists.
     #   with elements (possibly empty) lists of indices.
     if vars is None:
@@ -1141,6 +1150,7 @@ def get_stats(data=None,x=None,y=None,units=None,vars=None,string=False,fmt=None
     st = list(itertools.chain.from_iterable(st)) # flatten list   
     if data is not None and fmt is not None and string:
         st=(("\n".join(fmt))%tuple(st)).split('\n')
+        #st=("\n".join(fmt).format(tuple(st)).split('\n')
     
     return st
 get_stats = update_docstring(get_stats, stats)
@@ -1221,7 +1231,14 @@ def test_get_stats(*value,help=True):
         print("vars=[[2,3],[],[3]]:\n",
               get_stats(data,x,y,string=True,vars=[[2,3],[],[3]],units=['um','mm','cm']),"\n-------------\n")
         #[['StdDev: 3.1 mm'], ['PV: 97.4 mm', 'min: -48.7 mm'], ['min: -50.8 mm']]
-
+        
+        '''
+        print("vars=[[2,3],[],[3]]:\n",
+              get_stats(data,x,y,string=True,vars=[[2,3],[],[3]],units=['%%%','%%','%']),"\n-------------\n")
+        #2022/10/7 fails because % is interpreted in string format, double percent solves, but doesn't work in plot labels.
+        '''
+    
+    
     except:
         raise
 
@@ -1353,11 +1370,12 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     largs is a dictionary of arguments passed to caption in plotting.caption.legendbox
     (used only if stats are plotted).
         (e.g. {'color':'r'}
-    Returns axim as returned by plt.imshow.
+    Returns axis (modified 2023/01/17, was returning axim as returned by plt.imshow).
     nsigma set colorscale to this multiple of data standard deviation.
     In alternative can be a dictionary containing arguments for remove_outliers. 
     If None (default) range is not changed from matplotlib defaults.
     If dict, a nummber of parameters for can be passed to remove_outliers.remove_outliers to determine color range (data are left intact).
+    
     2020/11/05 updated all stats functions.
     2020/07/14 added flag `contour` to overplot contours, and colors,
     to be passed to `plt.contour`"""
@@ -1425,10 +1443,11 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     
     ## PLOT
     # this fails if unknown kwargs is passed:
-    axim=plt.imshow(data,extent=(sx[0],sx[1],sy[0],sy[1]),
+    plt.imshow(data,extent=(sx[0],sx[1],sy[0],sy[1]),
             aspect=aspect,origin=origin,interpolation='none',
             vmin=vmin, vmax=vmax,**kwargs) 
     
+    axim = plt.gca()
     # adjust for the specific case of a single value on x or y axis
     #pdb.set_trace()
     if span(x,size=True) == 0:
