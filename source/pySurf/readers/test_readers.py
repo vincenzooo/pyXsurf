@@ -103,6 +103,15 @@ def csv_zygo_reader(wfile,*args,**kwargs):
     pdata=resample_grid(w,matrix=True)
     return pdata,x,y
 '''
+'''
+from pySurf.readers.read_metropro_files import readMetroProData, readHeaderMP
+d,_,x,y = readMetroProData(df1,intensity=True)
+a=Data2D(d,x,y,units=['mm','mm',r'%'],
+        scale=[1000.,1000.,1000000.],
+        name=os.path.basename(df1), strip=False,intensity = True)
+        
+        
+'''
 
 def test_readers(tests):
     """test readers as list of 3-element lists, each one corresponding to
