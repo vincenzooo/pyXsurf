@@ -151,10 +151,37 @@ def strip_kw(kws,funclist,split=False,exclude=None,**kwargs):
         res=tmp
 
     return res
+    
+def prep_kw(function, kwargs, strip = False):
+    """
+    return a dictionary only of `kwargs` pertaining to `function`.
+    Arguments can be stripped from kwargs as they are used, if strip is set to True, otherwise kwargs is left unchanged.
+    This can be useful to check against extraneous args, e.g.:    
+    intended use (inside a function called with **kwargs):
+    
+    function (*args, **kwargs):
+    
+        kwargs = kwargs.copy() # this is copied to avoid modification as side effect, can be avoided if you don't need a final check, in that case, simply remove strip = True from subfunction calls
 
-def print_tree(tree, depth = 0):
+        a = subfunction1(**prep_kw(function1, kwargs, strip=True))
+        b= subfunction2(**prep_kw(function2, kwargs, strip=True))
+        
+        if len(kwargs):  # check there are not unused keywords.
+            raise TypeError("invalid arguments in function.")
+    
+    see also https://stackoverflow.com/questions/26534134/python-pass-different-kwargs-to-multiple-functions
+    
+    There might be a problem with multiple-level nested functions, for example if instead of plt.plot there is a function which itself calls other functions which accept **kwargs."""
+    
+    if not strip:
+        kwargs = kwargs.copy()
+    kwlist = list(inspect.signature(function).parameters)
+    return {k: kwargs.pop(k) for k in dict(kwargs) if k in kwlist}
+    
+def print_tree(tree, depth = 0, maxlen = None):
     """print dictionary as tree, recursively calling itself,
     based on http://www.siafoo.net/snippet/91"""
+    
     if tree == None or len(tree) == 0:
         #print () #"--" * depth)
         pass
@@ -163,13 +190,13 @@ def print_tree(tree, depth = 0):
             #print ("\t" * depth, key)
             #printTree(lst_view_path(val), depth+1)    
             
-            
             if isinstance(val,dict): #folder:
                 print ("\t" * depth+'|', key.upper(),"----\\")  #print ("\t" * depth, key.upper())
                 print_tree(val, depth+1)    
             else:  #file:
-                print ("\t" * depth+'|', key,':',val[:6])  #print ("\t" * depth, key,':',val[:6])
-                # non so perche' qui sopra si limita a 6, forse per array grandi, ma fallisce se altri dati.
+                v = val if maxlen is None else val[:maxlen]
+                print ("\t" * depth+'|', key,':',v)  #print ("\t" * depth, key,':',val[:6])
+                # non so perche' qui sopra si limita a 6, forse per array grandi, ma non va bene per altri dati.
                
  
 def test_filterByKey():
