@@ -25,7 +25,7 @@ of creating a class. Points are in format (Npoints,Ndim).
 Note also that shape, when used (mostly is just a visual parameter for plots), is in format (nx,ny), that is opposite to python convention.
 """
 
-method='linear' #used for ip.griddata (scipy.interpolate.griddata)
+defaultmethod='linear' #used for ip.griddata (scipy.interpolate.griddata)
 # note from scipy.interpolate import interp2d to interpolate from grid to grid
 # also scipy.ndimage.map_coordinates
 
@@ -525,7 +525,9 @@ def save_points(filename,points,xgrid=None,ygrid=None,shape=None,matrix=False,fi
                 points=data
             #if not, they are already in the correct format
 
+    points = points.copy() #to avoid side effects
     points[np.isnan(points[:,2]),2]=fill_value
+    
     np.savetxt(filename,points,**kwargs)
 
 '''
@@ -819,7 +821,7 @@ d=vstack([d.T,d[:,0]**2+d[:,1]**2]).T
 ##      in data2D. The argument cut was also introduced in resample_grid to overcome this problem
 ##      in a brutal way. Another possibility is to introduce crop interval as argument.
 
-def resample_points(tpoints,positions):
+def resample_points(tpoints,positions,method = defaultmethod):
     """resample tpoints [Npoints x 3] on the points defined in positions [Mpoints x 2], or [Mpoints x 3]
     (in this case 3rd column is ignored).
     Return a [Nx x Ny , 3] vector of points. To get a (plottable) matrix of data use:
@@ -829,15 +831,15 @@ def resample_points(tpoints,positions):
     rpoints=np.hstack([positions[:,0:2],z[:,np.newaxis]])
     return rpoints
 
-def resample_grid(tpoints,xgrid=None,ygrid=None,matrix=False,resample=True):
+def resample_grid(tpoints,xgrid=None,ygrid=None,matrix=False,resample=True,method = defaultmethod):
 
     """resample tpoints [Npoints x 3] on the grid defined by two vectors xgrid [Nx] and ygrid [Ny].
     Return a [Nx * Ny , 3] vector of points, sorted in standard python order
     (x changes faster) or a matrix if matrix=True. if resample is set to False
-    only x and y are changed and values are not touched (must maintain number of points).
+    only x and y are changed and values are not touched (must maintain number of points and order).
     matrix=True-->points to matrix
     p=resample_grid(p) #straighten the grid of p changing data as little as possible
-    matrix=False,resample=False-> Convert from matrix to points without resampling if matrix input, useless if input is points (do two opposite operations that should cancel each other).
+    matrix=False,resample=False-> Convert from matrix to points without resampling if matrix input?, useless if input is points (do two opposite operations that should cancel each other).
 
     """
     """ old (matrix=False):
@@ -847,8 +849,8 @@ def resample_grid(tpoints,xgrid=None,ygrid=None,matrix=False,resample=True):
     assert tpoints.shape[1]==3
     if (xgrid is None) and (ygrid is None):
         xgrid,ygrid=points_find_grid(tpoints,'grid')[1]
-
-    tpoints=tpoints[np.isfinite(tpoints[:,2]),:]  #2018/10/01
+    if resample: # 2022/10/20 if not resampling, you want to keep invalids
+        tpoints=tpoints[np.isfinite(tpoints[:,2]),:]  #2018/10/01
     x,y=np.meshgrid(xgrid,ygrid)
     if resample:  #if both resample and matrix are False, two useless operations are performed and the final array is unchanged.
         z=ip.griddata(tpoints[:,0:2],tpoints[:,2],(x,y),method=method) #this is super slow, but still faster than the one in matplotlib
@@ -893,7 +895,7 @@ def points_autoresample(points,edge=0):
 
 
 
-def extract_profile(points,xy0,xy1=None,npoints=None,along=True,plot=False):
+def extract_profile(points,xy0,xy1=None,npoints=None,along=True,plot=False,method = defaultmethod):
     """extract a profile from xy0=(x0, y0) to xy1=(x1,y1).
     Return a couple of vectors x, y, z. The number of points can be set, otherwise is set
     accordingly to the longest profile dimension.
@@ -1108,7 +1110,7 @@ def plot_points(points,xgrid=None,ygrid=None,shape=None,units=None,resample=True
         from pySurf.data2D import get_stats
         if scatter:
             xgrid,ygrid=x,y
-        legendbox(get_stats(z,xgrid,ygrid))
+        legendbox(get_stats(z,xgrid,ygrid,string=True))
     
     if bar:
         cb=plt.colorbar()
