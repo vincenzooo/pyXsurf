@@ -108,7 +108,7 @@ from pyProfile.profile import crop_profile
 from pyProfile.profile import level_profile
 from pyProfile.profile import resample_profile
 from pyProfile.profile import sort_profile
-from pyProfile.profile import sum_profiles, subtract_profiles
+from pyProfile.profile import sum_profiles, subtract_profiles, multiply_profiles
 from pyProfile.psd import psd as profpsd
 from pyProfile.profile import movingaverage, rebin_profile
 from pyProfile.profile import merge_profile
@@ -176,18 +176,27 @@ def get_header_field(db, tag, header='<<PMCA SPECTRUM>>'):
     headers = [d.header[header] for d in db['data']]
     return [namelist_from_string(t,separator='-')[tag] for t in headers]
     
-def read_mca(filename,*args,**kwargs):
+def read_mca(filename, encoding='iso-8859-1',*args,**kwargs):
     """ Given a .mca file, return a `Profile` object.
     
     temptative routine to read mca files from amptek energy sensitive detector. Return a profile with metadata information in a `.header` property (temporarily a dictionary obtained from string blocks) of all profiles.
-    Like all other readers will be incorporated in some form of reader in a 
-    more mature version.
+    Like all other readers will be incorporated in some form of reader in a more mature version.
+    Normally the header contains keys
+    ['<<CALIBRATION>>', 
+    '<<PMCA SPECTRUM>>', 
+    '<<DATA>>', 
+    '<<DP5 CONFIGURATION>>', 
+    '<<DPP STATUS>>']
+    with the first one set to default in code (if data are uncalibrated, the key is missing).
+    
+    In the future can be included in a inherited Profile class with proper methods.
+    
     """
 
     import re
     from scipy import interpolate
 
-    with open(filename, 'r') as f:  # close is not needed
+    with open(filename, 'r', encoding = encoding) as f:  # close is not needed
         content = f.readlines()   
     content = [l.strip() for l in content] # trimmed list of lines
     a = [aa for aa in content if len(aa)>0]   # list of not blank lines
@@ -216,6 +225,9 @@ def read_mca(filename,*args,**kwargs):
     
     return profiles
 
+
+        
+    
     
 class Profile(object):  #np.ndarrays
     """A class containing x,y data. It has a set of methods for analysis and visualization.
@@ -444,6 +456,52 @@ class Profile(object):  #np.ndarrays
         # 5*p2 calls p2.__rmul__(5) <-- fallback from 5.__mul__(p2)  
         
         res = self.copy()
+        
+        
+        #breakpoint()
+        if isinstance(scale,self.__class__):
+            #if np.size(scale)==1:  # scalar object or value
+            
+            """if it is Profile, do pointwise multiplication rescaling on firts."""
+            # resample and multiply. For surface result, use matrix multiplication.
+            #raise NotImplementedError ('can be ambigous (return point to point multipl. or surface? Fix in code, at the momeb accept only x and (y) scalars.')
+            
+            res.x,res.y = multiply_profiles(*self(),*scale(),*args,**kwargs)
+            #res = Profile(*res,units=self.units,name=self.name + " + " + scale.name)
+            #tmp = scale.resample(self,trim=False,left = np.nan, right = np.nan) # this can have fewer points  
+            #res=self.copy()
+            #res.y = self.y * tmp.y
+            
+            #FIXME questo non convince, ad es, se none, ad es se divisione
+            # changed 2022/11/30 to implement None
+            # see also how it is handled if units is None
+            u1 = '' if res.units[1] is None else res.units[1]
+            u2 = '' if scale.units[1] is None else scale.units[1]
+            if u1 == u2:
+                res.units[1] = u2+'^2'
+            else:
+                res.units[1]='%s %s'%(u1,u2)
+                
+            if self.name and scale.name:
+                res.name = self.name + ' x ' + scale.name
+            else: 
+                res.name = (self.name if self.name else scale.name) + ' product'
+        elif np.size(scale)==2:      # x and y scales      
+            res.x = scale[0] * res.x
+            res.y = scale[1] * res.y
+        else:     # era value if np.size(scale) != 1
+            #breakpoint()
+            res.y = scale * res.y 
+            if self.name:
+                res.name = '%s x %s'%(self.name,scale)
+            else:
+                res.name = 'x %s'%scale
+        # else:
+        #     raise ValueError('Multiply Profile by wrong format!')
+        return res
+        '''
+    
+    
         #breakpoint()
         if np.size(scale)==1:  # scalar object or value
             # print(type(scale))
@@ -454,9 +512,12 @@ class Profile(object):  #np.ndarrays
                 """if it is Profile, do pointwise multiplication rescaling on firts."""
                 # resample and multiply. For surface result, use matrix multiplication.
                 #raise NotImplementedError ('can be ambigous (return point to point multipl. or surface? Fix in code, at the momeb accept only x and (y) scalars.')
-                tmp = scale.resample(self,trim=False,left = np.nan, right = np.nan) # this can have fewer points  
-                res=self.copy()
-                res.y = self.y * tmp.y
+                
+                res = multiply_profiles(*self(),*scale(),*args,**kwargs)
+                #res = Profile(*res,units=self.units,name=self.name + " + " + scale.name)
+                #tmp = scale.resample(self,trim=False,left = np.nan, right = np.nan) # this can have fewer points  
+                #res=self.copy()
+                #res.y = self.y * tmp.y
                 
                 #FIXME questo non convince, ad es, se none, ad es se divisione
                 # changed 2022/11/30 to implement None
@@ -485,7 +546,8 @@ class Profile(object):  #np.ndarrays
         else:
             raise ValueError('Multiply Profile by wrong format!')
         return res
-
+        '''
+        
     def __rmul__(self,scale,*args,**kwargs):
         # this is called on the second term (self) if mul of the first (scale) failed in scale * self.
         
@@ -579,7 +641,7 @@ class Profile(object):  #np.ndarrays
     
     def merge(self,other,*args,**kwargs):
         
-        if isinstance(other,Profile):
+        if isinstance(other,self.__class__):
             #res = merge_profiles([[self.x,self.y],[other.x,other.y]],*args,**kwargs)
             res = merge_profile(self.x,self.y,other.x,other.y,*args,**kwargs)
             res = Profile(*res,units=self.units,name=self.name + " // " + other.name)
@@ -642,7 +704,11 @@ class Profile(object):  #np.ndarrays
 
     def save(self,filename,*args,**kwargs):
         """Save data using `pyProfile.profile.save_profile`."""
-        res = save_profile(filename,self.x,self.y,*args,**kwargs)
+        
+        # if not explicitly set, header is built joining units with the proper delimiter
+        delimiter = kwargs.pop('delimiter','\t')
+        h = kwargs.pop('header',delimiter.join(self.units) if self.units else None) 
+        res = save_profile(filename,self.x,self.y,header = h,*args,**kwargs)
         return res
     save.__doc__=save_profile.__doc__
     
@@ -652,8 +718,6 @@ class Profile(object):  #np.ndarrays
         #pdb.set_trace()
         self.x,self.y = register_profile(x,y,*args,**kwargs)
     register=update_docstring(register,register_profile)
-
-
 
     '''
     from functools import update_wrapper
@@ -724,7 +788,7 @@ class Profile(object):  #np.ndarrays
                     raise ValueError('If units are defined they must match in Profile.resample.')
             res.x,res.y=resample_profile(*res(),*other(),*args,**kwargs)   
         except AttributeError: #assume other is an array
-            res.x,res.y=resample_profile(*res(),None,other,*args,**kwargs)
+            res.x,res.y=resample_profile(*res(),other,*args,**kwargs) #try with other array of x points
         return res        
     resample=update_docstring(resample,resample_profile)
 
@@ -810,6 +874,8 @@ class Profile(object):  #np.ndarrays
 
 #from pySurf.psd2d import psd2d,plot_psd2d
 
+        
+        
 class PSD(Profile):
     """It is a type of profile with customized behavoiur and additional properties
     and methods."""
@@ -911,7 +977,7 @@ def load_plist(rfiles,reader=None,*args,**kwargs):
         
         # 2020/07/10 args overwrite kwargs (try to avoid duplicates anyway).
         # args were ignored before.
-        print(kwargs)
+        # print(kwargs)
         if not args:  #assume is correct number of elements
             args = [[]]*len(rfiles)
         
@@ -1001,10 +1067,9 @@ def test_plist():
     p = Plist(files = rfiles, delimiter = ',')
     p.plot()
     plt.title('Plist initialized with files')
-    
+
     plt.figure()
-    profiles  = [ Profile(file = f, delimiter = ',') for f in rfiles]
-    p = Plist(profiles)
+    p = Plist([ Profile(file = f, delimiter = ',') for f in rfiles])
     p.plot()
     plt.title('Initialized with Profiles read at init')
 
@@ -1013,6 +1078,9 @@ def test_plist():
     p = Plist(profiles)
     p.plot()
     plt.title('Initialized with profiles loaded with function')
+    
+    # interessante questa e' plist
+    a=p.max()
   
 def test_class_init(wfile=None):
     """test init and plot"""
