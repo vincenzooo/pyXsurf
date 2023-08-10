@@ -1,3 +1,4 @@
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from dataIO.span import span
@@ -68,10 +69,21 @@ def updating_plot(ax=None,title=None):
             crange=span(cdata)
         #print ax.__repr__(),cdata
         
-        #make a copy of zoom history
+        #make a copy of zoom history    
         fig=ax.figure
-        s = copy.copy( fig.canvas.toolbar._views )
-        p = copy.copy( fig.canvas.toolbar._positions )
+        
+        # print(matplotlib.__version__) # see https://stackoverflow.com/questions/66000179/attributeerror-navigationtoolbar2qt-object-has-no-attribute-active 
+        # https://stackoverflow.com/questions/56450918/matplotlib-navigation-bar-error-figurecanvastkagg-object-has-no-attribute-man >2.2
+        try:
+            active = fig.canvas.manager.toolbar._active
+        except AttributeError:
+            active = fig.canvas.manager.toolbar.mode.value
+        active = True
+        
+        print ('active:',active)
+        if active: 
+            s = copy.copy( fig.canvas.toolbar._views )
+            p = copy.copy( fig.canvas.toolbar._positions )
         
         title="min:%4.1f max:%4.1f rms:%4.3f"%(np.nanmin(cdata),np.nanmax(cdata),np.nanstd(cdata))
         #print crange
@@ -84,11 +96,12 @@ def updating_plot(ax=None,title=None):
         plt.colorbar()
         plt.clim(crange)
         
-        #restore zoom history
-        fig.canvas.toolbar._views = s
-        fig.canvas.toolbar._positions = p
+        if active: 
+            #restore zoom history
+            fig.canvas.toolbar._views = s
+            fig.canvas.toolbar._positions = p
         
-        ax.figure.canvas.draw_idle()
+            ax.figure.canvas.draw_idle()
     
     if ax is None: ax=plt.gca()
     
