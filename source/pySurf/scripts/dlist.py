@@ -31,6 +31,7 @@ from IPython.display import display
 from dataIO.superlist import Superlist
 import itertools
 from plotting.multiplots import commonscale
+from copy import deepcopy
 
 ## FUNCTIONS ##
 
@@ -87,7 +88,7 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
             if np.size(args) != len(rfiles):
                 raise ValueError
     '''
-
+    #pdb.set_trace()
     if kwargs : #passed explicit parameters for each reader
         # Note, there is ambiguity when rfiles and a kwargs value have same
         # number of elements()
@@ -95,29 +96,43 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
         #vectorize all values
         for k,v in kwargs.items():
             if (np.size(v) == 1):
-                kwargs[k]=[v]*len(rfiles)    
+                kwargs[k]=[[] for dummy in rfiles]    
             elif (len(v) != len(rfiles)):
-                kwargs[k]=[v]*len(rfiles)
+                try:
+                    kwargs[k]=[v.copy() for dummy in rfiles]
+                except AttributeError:  #fails e.g. if tuple which don't have copy method
+                    kwargs[k]=[v for dummy in rfiles]  
             #else:  #non funziona perche' ovviamente anche chiamando esplicitamente, sara'
             #  sempre di lunghezza identica a rfiles.
             #    print ('WARNING: ambiguity detected, it is not possible to determine'+
             #    'if `%s` values are intended as n-element value or n values for each data.\n'+
             #    'To solve, call the function explicitly repeating the value.'%k)
     
-    # 2020/07/10 args overwrite kwargs (try to avoid duplicates anyway).
-    # args were ignored before.
-    
-    #if not args:  #assume is correct number of elements
-    #    args = [[]]*len(rfiles)   ## Non va fatto cosi'!! senno' duplica "by ref"
-    
-    #pdb.set_trace()
-    
-    #transform vectorized kwargs in list of kwargs
-    kwargs=[{k:v[i] for k,v in kwargs.items()} for i in np.arange(len(rfiles))]
-    
+        # 2020/07/10 args overwrite kwargs (try to avoid duplicates anyway).
+        # args were ignored before.
+        
+        #if not args:  #assume is correct number of elements
+        #    args = [[]]*len(rfiles)   ## Non va fatto cosi'!! senno' duplica "by ref"
+        
+        #pdb.set_trace()
+        
+        #transform vectorized kwargs in list of kwargs
+        kwargs=[{k:deepcopy(v[i]) for k,v in kwargs.items()} for i in np.arange(len(rfiles))]
+    else:
+        kwargs = [{} for dummy in rfiles] 
+        
+    if args:
+        for a in args:
+            if (np.size(a) == 1):
+                args=[[] for dummy in rfiles]    
+            elif (len(a) != len(rfiles)):
+                args=[args for dummy in rfiles]  
+    else:
+        args=[args for dummy in rfiles]
+        
     #kwargs here is a list of dictionaries {option:value}, matching the readers
     #dlist=[Data2D(file=wf1,reader=r,**{**k, **a}) for wf1,r,k,a in zip(rfiles,reader,args,kwargs)]
-    dlist=[Data2D(file=wf1,reader=r,*a,**k) for wf1,r,a,k in zip(rfiles,reader,args,kwargs)]
+    dlist=Dlist([Data2D(file=wf1,reader=r,*a,**k) for wf1,r,a,k in zip(rfiles,reader,args,kwargs)])
     
     return dlist
 
@@ -133,7 +148,8 @@ def test_load_dlist(rfiles):
     return dlist,dlist2
 
 def plot_data_repeat(dlist,name="",num=None,*args,**kwargs):
-    """"given a list of Data2D objects dlist, plots them as subplots on a grid with shared x and y scales in maximized window. colorscale is independent for each subplot.
+    """"given a list of Data2D objects dlist, plots them as subplots on a grid with shared x and y scales in maximized window. 
+    colorscale is independent for each subplot.
     returns stats.
     num is the figure number to plot on a specofic figure, other arguments are passed to plot.
     """
@@ -151,7 +167,10 @@ def plot_data_repeat(dlist,name="",num=None,*args,**kwargs):
         ll.plot(stats=True,*args,**kwargs)
         res.append(ll.std())
         #plt.clim([-3,3])
-        plt.clim(*(np.nanmean(ll.data)+np.nanstd(ll.data)*np.array([-1,1])))
+        try:
+            plt.clim(*(np.nanmean(ll.data)+np.nanstd(ll.data)*np.array([-1,1])))
+        except AttributeError:
+            plt.ylim([ll.min(),ll.max()])
     plt.suptitle(name+' RAW (plane level)')
     for ax in axes[:len(dlist)-1:-1]:
         fig.delaxes(ax)
@@ -161,17 +180,31 @@ def plot_data_repeat(dlist,name="",num=None,*args,**kwargs):
         
     return res       
 
-def dcouples_plot(dlist,level=True):
+def dcouples_plot(dlist):  # level=True, dfunk = None,
     """calculate and plots rotating differences, data are supposed to be already aligned. 
     plots are generated on a grid, x and y axes are shared, color scale is automatic for each subplot.
-    Note, data are leveled by default (level=True).
     
-    """
+    2023/04/11 removed `level` and `dfunk` parameters, data need to be manually leveled. Note, data are leveled by default (level=True).
+    
+    2022/11/23 added modification to vertical axis, now it works also with Plist. removed on 24 because it was wrong and setting to range of last plot. ``plotting.multiplots.commonscale`` can be called after the plot to uniform ranges. 
+    - removed level, data can be level externally before or afterwards.
+    
+    """    
     
     dcouples=[c[1]-c[0] for c in list(itertools.combinations(dlist, 2))]
-    if level:
-        dcouples=[d.level() for d in dcouples]
-
+    
+    # if level:
+    #    dcouples=[d.level() for d in dcouples]
+    
+    # dcouples = []
+    # for c in itertools.combinations(dlist, 2):    
+    #     if dfunk is None:
+    #         dfunk = c[0].__sub__
+    #     else:
+    #         dfunk = getattr(c[0],dfunk)
+            
+    #     dcouples.append(dfunk(c[1]))
+            
     plt.clf()
     maximize()
     
@@ -186,15 +219,64 @@ def dcouples_plot(dlist,level=True):
     for i,(ll,ax) in enumerate(zip(dcouples,axes)):
         plt.subplot(xs,ys,i+1,sharex=axes[0],sharey=axes[0])
         ll.plot()
-        plt.clim(*(ll.std()*np.array([-1,1])))
     for ax in axes[:len(dcouples)-1:-1]:
         fig.delaxes(ax)
         #plt.pause(0.1)
     #plt.tight_layout()
-    
+    #commonscale()
 
     #return [d.std() for d in [diff21,diff31,diff32]]
     return dcouples
+
+from plotting.fignumber import fignumber
+
+''''''
+def plot_datalist(datalist, *args, **kwargs):
+    
+    """attempt to build as an iterator, so it can be called in differente settings,
+    like grid or multiples figures, also vectorizing arguments.
+    It can be a good idea, but only partially implemented. It is needed to keep into account the
+    size of the generator, e.g. to set figure or axis before the single plot is called, which partially 
+    defeats the simplicity of the approach, even if the following code works well:
+    
+        from pySurf.scripts.dlist import plot_datalist
+        from plotting.multiplots import subplot_grid
+
+
+        plt.close('all')
+        datalist = [d() for d in dl]
+        
+        n = len(datalist)
+        a = plot_datalist(datalist)
+
+        # on separate figures
+        for i in range(n):
+            try:
+                plt.figure()
+                next(a)
+            except StopIteration:
+                break
+            
+        '''
+        # on a grid
+        fig, grid = subplot_grid(n)
+        for ax in grid:
+            try:
+                plt.sca(ax)
+                next(a)
+            except StopIteration:
+                break
+        '''
+    """
+        
+    for d in datalist:
+    
+        data, x, y = d
+        plot_data(data,x,y,*args,**kwargs)
+        ax = plt.gca()
+        
+        yield ax
+
 
 
 def compare_images(datalist, x=None, y=None, fignum=None, titles=None,
@@ -239,7 +321,9 @@ def compare_images(datalist, x=None, y=None, fignum=None, titles=None,
 
     for i, d in enumerate(datalist):
         """adjust to possible input formats"""
+        
         data, x, y = d
+        
         if x is None:
             x = np.arange(data.shape[1])
         if y is None:
@@ -259,6 +343,8 @@ def compare_images(datalist, x=None, y=None, fignum=None, titles=None,
                           vmax=kwargs.get('vmax', d1mean+s),
                           *args, **kwargs)
         plt.colorbar()
+        
+        
         yield ax
 
 def multimarkers(datalist):
@@ -450,10 +536,39 @@ def psd2d(dlist,ymax=None,subfix='_psd2d',*args,**kwargs):
 
 # Minimal implementation, should broadcast properties
 
+from dataIO.superlist import prep_kw
+
 class Dlist(Superlist):
     """A list of pySurf.Data2D objects on which unknown operations are performed serially."""           
     
+    '''
+    def __init__(self,reader=None,*args,**kwargs):
+        if reader is not None:
+            datalist = load_dlist(reader,*args,**kwargs)
+        super().__init__(*args,**kwargs)
+    '''
+        
     def topoints(self,level=True):
         """convert a dlist to single set of points containing all data."""
         plist = topoints(self.data,level = None)
         return plist  
+        
+    def plot(self,type='figures',*args,**kwargs):
+        """
+        types: grid - makes a grid of plots
+               separate - plot each graph in a separate window
+               
+        return a list of axis
+        """
+        if type == 'figures': 
+            axes = [plt.figure(**prep_kw(plt.figure,kwargs)) for dummy in self]
+        elif type == 'grid':
+            axes = subplot_grid(len(self))[1]
+            from plotting.backends import maximize
+            maximize()            
+        for ax,d in zip(axes,self):
+            plt.sca(ax)
+            d.plot(*args,**prep_kw(plt.plot,kwargs))
+        #print(args)
+        
+            
