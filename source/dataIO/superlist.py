@@ -25,6 +25,7 @@ import os, sys
 import matplotlib.pyplot as plt
 import numpy as np
 import pdb
+from dataIO.dicts import pop_kw,prep_kw  # to be imported from outside
 
 class xSuperlist(list):
     """A list of pySurf.Data2D objects on which unknown operations are performed serially."""    
@@ -40,7 +41,7 @@ class xSuperlist(list):
                 return result
             return newfunc
             
-class Superlist(list):
+class xxSuperlist(list):
     """Working version from Superlist6. """   
     # A problem is that a list is returned, not a superlist, so for example calling
     #   s.crop([2,10]) returns a list of objects, but I cannot apply a second time about
@@ -300,8 +301,11 @@ class Superlist(list):
             # return a list of the results obtained applying function to each item.
             def newfunc(*args, **kwargs):
                 attr = [object.__getattribute__(name) for object in self]
-                result = Superlist()
-                result.extend([a(*args, **kwargs) for a in attr])
+                # 2023/01/17 replaced:
+                #result = Superlist()
+                #result.extend([a(*args, **kargs) for a in attr])
+                # which was returning a Superlist, now returns the right type (e.g. Dlist).
+                result = self.__class__([a(*args, **kwargs) for a in attr])
                 return result
             return newfunc
         else:
@@ -314,9 +318,18 @@ class Superlist(list):
             def newfunc(*args, **kwargs):
                 result = attr(*args, **kwargs)
                 return result
+                #return self.__class__(result)  #doesn't work, big crash
             return newfunc
         else:
             return attr
+        
+    def __getitem__(self, index):
+        """This implements slicing, according to chatGPT suggestions."""
+        
+        result = super().__getitem__(index)
+        if isinstance(result, list):
+            return self.__class__(result) #Superlist(result)
+        return result
 
 
 def test_superlist_dlist(D):
