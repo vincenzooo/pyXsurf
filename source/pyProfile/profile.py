@@ -148,7 +148,7 @@ def remove_nan_ends(x,y=None,internal=False):
             istart=0
             
         try:
-            istop=nanpts[np.arange(data.shape[1])[-len(nanpts):]==nanpts][0]
+            istop=nanpts[np.arange(len(y))[-len(nanpts):]==nanpts][0]
         except IndexError:
             istop=np.size(y)+1
         x=x[istart:istop]
@@ -354,7 +354,7 @@ def movingaverage(values,window,method='same',*args,**kwargs):
         assert int(window/2.)*2==(window-1)
         weights = np.repeat(1.0, window)/window
     
-    print(values,weights)
+    #print(values,weights)
     #including valid will REQUIRE there be enough datapoints.
     #for example, if you take out valid, it will start @ point one,
     #not having any prior points, so itll be 1+0+0 = 1 /3 = .3333
@@ -364,10 +364,10 @@ def movingaverage(values,window,method='same',*args,**kwargs):
         smas[-i]=np.mean(values[-2*i-1:])
     return smas # as a numpy array
 
-def rebin_profile(x,y,*args,**kwargs):
+def rebin_profile(x,y,statistic='mean',*args,**kwargs):
     """ Flexible rebin of a profile. Reduces number of points without losing information.
     Uses `stats.binned_statistics` of which keeps the interface. """
-    ss=stats.binned_statistic(x,y,statistic='mean',*args,**kwargs)
+    ss=stats.binned_statistic(x,y,statistic=statistic,*args,**kwargs)
     x2=np.array([(x+y)/2. for x,y in zip(ss[1][:-1],ss[1][1:])])  #centra su punto centrale
     y2=ss[0]
     return x2,y2  
@@ -417,7 +417,7 @@ def resample_profile(x1,y1,x2,y2=None, trim = True,*args,**kwargs):
     Both x1 and y1 need to be set for input data,
         x2 is returned together with interpolated values as a tuple.
     y2 is not used and put for consistency (can be omitted).
-    
+    print()
     N.B.: this is inconsistent with ``np.interp`` arguments order which is x2,x1,y1.
     2022/11/25 completely redesigned to account for more control of endpoints
     and beyond. Return x,y that handles trimming by barely cropping on x1.
@@ -441,9 +441,9 @@ def resample_profile(x1,y1,x2,y2=None, trim = True,*args,**kwargs):
     
     y2 = np.interp(x2,x1,y1,*args,**kwargs) # this is same length than x2     
     
-    if trim:
-        x2,y2 = crop_profile(x2,y2,span(x1))
-        #y2 = removenanends(x2,y2)
+    if trim: # if not return same length with nan.
+        x2,y2 = crop_profile(x2,y2,span(x1))  # open ?
+        #x2,y2 = removenanends(x2,y2)
      
     return x2,y2
 
@@ -462,7 +462,11 @@ def merge_profile(x1,y1,x2,y2=None, range = None, mode = 'avgon1st'):
     """
     
     # x2 and y2 are filtered and stacked for result. 
-    if mode == 'first':  # keeps points of first profile in 
+    
+    #print (max(x1),min(x2),max(x1)<min(x2))
+    if max(x1)<min(x2): #trivial case, same for all modes.
+        pass  # in a more advanced version will interpolate if gap is too large. 
+    elif mode == 'first':  # keeps points of first profile in 
                          # overlapping region
         x2,y2 = crop_profile(x2,y2,[max(x1),None],open=True) #this will include overlappint edges
        
@@ -508,13 +512,58 @@ def merge_profile(x1,y1,x2,y2=None, range = None, mode = 'avgon1st'):
 
 ### Test of merge and resample
 
-def test_merge_init():
+def test_merge_init(set = 1):
     """create basic couple of vectors for merge tests."""
-    x1 = np.arange(6)+1
-    y1 = line(x1,[2.5,2])
-    x2 = np.arange(6)+4.5
-    y2 = line(x2,[0.5,2.5])
     
+    if set == 0:
+        def read_enscan(file1,xcol=1):
+            #fromo processa_enescan
+            """return monitor and diode as Profile object."""
+            from pyProfile.profile_class import Profile
+            with open(file1,'r',encoding='ISO-8859-1') as ff:
+                f = ff.readlines()
+                first = [i for i,l in enumerate(f) if  ('___________' in l) ][-1]+2
+                p1m = Profile(*np.genfromtxt(file1,usecols=[xcol,5],
+                    delimiter='',unpack=1,skip_header=first,encoding='ISO-8859-1'),
+                    name='dir mon',units=['eV','']).sort()
+                p1d = Profile(*np.genfromtxt(file1,usecols=[xcol,6],
+                    delimiter='',unpack=1,skip_header=first,encoding='ISO-8859-1'),
+                    name='dir dio',units=['eV','']).sort()
+            
+            return p1m, p1d
+        
+        infolder = r'input_data\Elettra_20221107' #data from synchrotron scan
+        files = [os.path.join(infolder,f) for f in 
+            ['file(1)_Region 1__0164.txt',
+            'file(1)_Region 2__0164.txt',
+            'file(1)_Region 3__0164.txt',
+            'file(1)_Region 4__0164.txt']]      
+        #load a:
+        a = [read_enscan(f) for f in files]  #each file gives a couple detector/monitor
+        a = [bb/aa for aa, bb in a]   #normalize each file
+        
+        # set initial data for both merge_profiles and merge_profile from real data
+        profiles = [a[0](),a[1]()]
+        x1,y1 = a[0]()
+        x2,y2 = a[1]()
+        
+    elif set == 1: # two points overlapping
+        x1 = np.arange(6)+1
+        y1 = line(x1,[2.5,2])
+        x2 = np.arange(6)+4.5
+        y2 = line(x2,[0.5,2.5])
+    
+    elif set == 2:  # no overlapping
+        x1,y1,x2,y2 = test_merge_init(set = 1)
+        x2 = x2 + 3
+        
+        
+    elif set == 3:  # overlapping 2 pts of first on 1 point of 2nd
+        x1 = np.arange(6)+1
+        y1 = line(x1,[2.5,2])
+        x2 = np.arange(3)*2+ 4.5
+        y2 = line(x2,[0.5,2.5])
+        
     return x1,y1,x2,y2
 
 def test_merge_init_plot(x1,y1,x2,y2):
@@ -872,8 +921,17 @@ def sum_profiles(x1,y1,x2,y2,*args,**kwargs):
     xx2,yy2 = resample_profile(x2,y2,x1) # p2 resampled on p1, can have fewer points than p1
     xx1,yy1 = resample_profile(x1,y1,xx2) # gives points of x1 on overlap.
     
-    
     return xx2, yy1+yy2
+
+def multiply_profiles(x1,y1,x2,y2,*args,**kwargs):
+    # N.B.: there can be difference in resampling the first on the second, according to the direction
+    #  of resampling, so operation is not commutative.
+
+    xx2,yy2 = resample_profile(x2,y2,x1) # p2 resampled on p1, can have fewer points than p1
+    xx1,yy1 = resample_profile(x1,y1,xx2) # gives points of x1 on overlap.
+    
+    return xx2, yy1*yy2
+
         
 def subtract_profiles(x1,y1,x2,y2,*args,**kwargs):
     return sum_profiles(x1,y1,x2,-y2)  # changed 2022/11/30 was: return x1,y1-resample_profile(x2,y2,x1)[1]  #probably not working because resample can change number of points and range.
