@@ -1,0 +1,16 @@
+psds:
+Image0009x_psd.dat
+2022/11/25 set of three PSDs from AFM measurements on different scales, from ICSO 2020 esperiments. 
+
+P01: 
+2023/01/11 6 files with PSDs from AFM data, and PSD information dictionary, from MUSE P01 prototype mirror. Used for test of profile merging and PSD dictionary operations in pySurf.scripts
+
+Description:
+Misure AFM dopo riparazione aria, AFM montato su spaziatori e senza piatto di supporto campione, piedi a massima altezza-
+Dati. A partire da file 00643
+01  1 um, forse artefatto punta
+02  10 um, appare sfuocato
+03  100 um, la parte di sotto fatta a 2 Hz presenta righe diagonali, dopo di che è stato portato a 1 Hz.
+04  100 um, riacquisita le prime poche righe in alto (inizio nuovo ciclo) e la parte bassa (ripartendo dal basso)
+05  100 um, continuando da 04 fino a bordo superiore. Presenta comunque bordino rialzato a sx come le precedenti.
+06   10 um dopo aver livellato, reingaggiato e cambiato i parametri.
