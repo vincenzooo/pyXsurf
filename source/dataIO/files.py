@@ -70,6 +70,26 @@ def test_read_blocks(filename=None):
     a = print_results(read_blocks(filename, dtype = float),"dtype, but no comment character, comment lines break consistency. Return string vector with lines.") #lista di array
     
     
+def count_header_lines(filename, comment_char="#"):
+    """
+    Count the number of header lines in a file, identified by a comment character.
+    
+    Args:
+    - filename (str): The path to the text file.
+    - comment_char (str): The character that indicates a header or comment line.
+    
+    Returns:
+    - int: The number of header lines in the file.
+    """
+    with open(filename, 'r') as file:
+        header_lines = 0
+        for line in file:
+            if line.startswith(comment_char):
+                header_lines += 1
+            else:
+                # Once we hit a line that doesn't start with the comment character, break
+                break
+        return header_lines
     
     
 def head(fn,N=10):
@@ -79,6 +99,7 @@ def head(fn,N=10):
     with open(fn) as myfile:
         return [next(myfile) for x in range(N)]
     
+
 
 def program_path0():
     """first version. Both are from 
