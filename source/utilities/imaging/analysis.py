@@ -149,7 +149,7 @@ def getPoints(img,log=False):
     #When user presses enter, close the pointGetter class and
     #return the list of coordinates
     try:
-        eval(input("Press enter when finished selecting points..."))
+        input("Press enter when finished selecting points...")
     except:
         pass
     x = p.x
