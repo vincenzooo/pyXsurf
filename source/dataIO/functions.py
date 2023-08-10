@@ -11,6 +11,6 @@ def update_docstring(func,source,delimiter=''):
        parameter foo is changed of sign."""
        
        
-    doc0="" if func.__doc__ is None else func.__doc__
+    doc0="" if func.__doc__ is None else func.__doc__  # retrieve current docstring
     func.__doc__='\n'.join([doc0,delimiter,source.__name__+str(inspect.signature(source)),source.__doc__])
     return func
