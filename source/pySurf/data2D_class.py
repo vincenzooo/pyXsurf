@@ -23,6 +23,8 @@ from pySurf.psd2d import (plot_psd2d, plot_rms_power, psd2d, psd2d_analysis,
                           rms_power)
 from pySurf.readers.format_reader import auto_reader
 
+from pyProfile.profile_class import Profile
+
 """
 2018/06/07 v1.3
 v1.2 was not convenient, switch back to same interface as 1.1:
@@ -380,7 +382,8 @@ class Data2D(object):  # np.ndarrays
     def plot(self, title=None, *args, **kwargs):
         """plot using data2d.plot_data and setting automatically labels and colorscales.
         by default data are filtered at 3 sigma with 2 iterations for visualization, pass nsigma = None to include all data.
-        Additional arguments are passed to plot. """
+        Additional arguments are passed to plot. 
+        2023/01/17 was returnign aximage modified to return axis."""
 
         units = self.units if self.units is not None else ["","",""]
         nsigma0 = 1  # default number of stddev for color scale
@@ -392,11 +395,11 @@ class Data2D(object):  # np.ndarrays
         else: 
             stats = [[0,1,3],[6],[6]]
             # format for legend labels (replace "stdev" with "rms")
-            fmt = kwargs.pop("fmt", ['mean: %.3g '+units[2],
+            fmt = kwargs.pop("fmt", ['mean: %.3g '+units[2],  # f'mean: {units[2]}% ',
                'rms: %.3g '+units[2],
                'PV: %.3g '+units[2],
                'size: %i X %i'])
-        
+
         # to change the default behavior
         nsigma = kwargs.pop("nsigma", nsigma0)
         m = self.data
@@ -550,12 +553,18 @@ class Data2D(object):  # np.ndarrays
     def resample(self, other, *args, **kwargs):
         """TODO, add option to pass x and y instead of other as an object."""
         res = self.copy()
-        if self.units is not None and other.units is not None:
-            if self.units != other.units:
-                raise ValueError(
-                    "If units are defined they must match in Data2D resample."
-                )
-        res.data, res.x, res.y = resample_data(res(), other(), *args, **kwargs)
+        if isinstance(other,Data2D):
+            if self.units is not None and other.units is not None:
+                if self.units != other.units:
+                    raise ValueError(
+                        "If units are defined they must match in Data2D resample."
+                    )
+            resampled = resample_data(res(), other(), *args, **kwargs)
+        else:
+            resampled = resample_data(res(), other, *args, **kwargs)
+            
+        res.data, res.x, res.y = resampled
+        
         return res
 
     resample = update_docstring(resample, resample_data)
@@ -577,11 +586,11 @@ class Data2D(object):  # np.ndarrays
         subfix="",
         name=None,
         *args,
-        **kwargs
-    ):
+        **kwargs):
         """return a PSD2D object with 2D psd of self.
-        If analysis is set True, psd2d_analysis plots are generated and related parameters
-          are passed as args. You need to pass also title, it generates output,
+        If analysis is set True, `psd2d_analysis` function is called to generate plots.
+        Parameters proper of this function are passed as args. 
+        You need to pass also title, it generates output,
           this is subject to change, at the moment, pass empty string to generate plots
           or string to create output graphics.
         subfix and name are used to control the name of returned object.
@@ -619,6 +628,7 @@ class Data2D(object):  # np.ndarrays
         return PSD2D(p, self.x, f, units=self.units, name=newname)
 
     psd = update_docstring(psd, psd2d)
+    psd = update_docstring(psd, psd2d_analysis)
 
     def remove_nan_frame(self, *args, **kwargs):
         res = self.copy()
@@ -673,7 +683,7 @@ class Data2D(object):  # np.ndarrays
     def remove_outliers(self, fill_value=np.nan, mask=False, *args, **kwargs):
         """use dataIO.remove_outliers to remove outliers from data. return a new Data2D object with outliers replaced by `fill_value`. If `mask` is set returns mask (easier than extracting it from returned object)."""
         res = self.copy()
-        m = remove_outliers(res.data, *args, **kwargs)  # boolean mask
+        m = outliers.remove_outliers(res.data, *args, **kwargs)  # boolean mask
         # pdb.set_trace()
         if mask:
             return m
@@ -684,10 +694,18 @@ class Data2D(object):  # np.ndarrays
 
     def extract_profile(self, *args, **kwargs):
         p = self.topoints()
-        prof = points.extract_profile(p, *args, **kwargs)
+        prof = points.extract_profile(p,  *args, **kwargs)
         return prof
 
     extract_profile = update_docstring(extract_profile, points.extract_profile)
+    
+    def projection(self, axis = 0, *args, **kwargs):
+        """avg, returns f and p. Can use data2D.projection keywords `span` and `expand` to return PSD ranges."""
+        
+        # print(self)
+        return Profile(self.y, projection(self.data, axis=axis, *args, **kwargs), units = [self.units[1], self.units[2]]) 
+    
+    projection = update_docstring(projection, data2D.projection)
 
     def histostats(self, *args, **kwargs):
         res = data_histostats(
@@ -711,18 +729,20 @@ class Data2D(object):  # np.ndarrays
                             scale = (1.0, 1.0, 1000.0)
                 else:
                     raise ValueError("x and y different units in slope calculation")
+            u = [self.units[0], self.units[1], "arcsec"]
         else:
             scale = (1.0, 1.0, 1.0)
+            u = ["", "", "arcsec"]
 
         say, sax = slope_2D(self.data, self.x, self.y, scale=scale, *args, **kwargs)
 
         return Data2D(
             *sax,
-            units=[self.units[0], self.units[1], "arcsec"],
+            units = u ,
             name=self.name + " xslope"
         ), Data2D(
             *say,
-            units=[self.units[0], self.units[1], "arcsec"],
+            units=u,
             name=self.name + " yslope"
         )
 
@@ -749,8 +769,10 @@ class PSD2D(Data2D):
 
     def avgpsd(self, *args, **kwargs):
         """avg, returns f and p. Can use data2D.projection keywords `span` and `expand` to return PSD ranges."""
-        return self.y, projection(self.data, axis=1, *args, **kwargs)
-
+        
+        #return Profile(self.y, projection(self.data, axis=1, *args, **kwargs), units = [self.units[1], self.units[2]]) 
+        return self.projection(axis = 1, *args, **kwargs)
+    
     def rms_power(self, plot=False, rmsrange=None, *args, **kwargs):
         """Calculate rms slice power by integrating .
         If plot is set also plot the whole thing."""
