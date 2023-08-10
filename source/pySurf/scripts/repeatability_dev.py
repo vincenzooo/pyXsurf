@@ -1,4 +1,5 @@
-#2018/11/02 moved to scripts.repeatabilty from WFS_repeatability in POOL\PSD\WFS_repeatability
+# 2023/04/11 functions for development or legacy use. Updated ones are in `repeatability.py`.
+# 2018/11/02 moved to scripts.repeatabilty from WFS_repeatability in POOL\PSD\WFS_repeatability
 #v4 2018/09/18 include functions from reproducibility plot. Includes transformations
 #  and differences for any number of plots (it was 3).
 #v3 added functions all functions from repeatability.
@@ -32,24 +33,51 @@ from pySurf.affine2D import find_affine, find_rototrans
 from plotting.multiplots import find_grid_size, subplot_grid
 import itertools
 
-from pySurf.data2D_class import align_interactive
+from pySurf.scripts.dlist import align_interactive
 from plotting.multiplots import commonscale
-from config.interface import conf_from_json
+from dataIO.config.interface import conf_from_json
 
-from scripts.repeatability import dcouples_plot
+from pySurf.scripts.dlist import dcouples_plot  #, plot_repeat  #see also plot_data_repeat in pySurf.scripts.dlist
 
+"""
+Each script here should have parameters:
+    dis :       call display after plots (and/or prints)
+    outfile/outfolder :   produce output with this root name/folder 
+    """
+
+def removemis(D2D,func):
+    """ convenience function.
+    return a copy of data2D object D2D subtracting the results of a function 2D->2D applied to data.
+    Original object is not modified."""
+    res=D2D.copy() #avoid modification inplace
+    res.data=res.data-func(res.data)[0]
+    return res
     
-def plot_cross_diff_rms(stats):
-    """Plots a colormap with values of rms for all cross differences."""
+def plot_cross_diff_rms(stats, units = ''):
+    """ 2023/04/11 wanted to move to `repeatability.plot_cross_stats` from `repeatability_dev.plot_cross_diff_rms`
+    but the function can probably be completely replaced by seaborn heatmap,
+    so I just added the docstring and made a few changes for general use.
+    
+    Plots a colormap with values of root mean square (rms) for all cross differences. 
+    
+    It takes in an argument stats which is a dictionary containing the cross-difference statistics. 
+    The original plotted the value `'con'` (= cone removed) from stats dictionary and another key with a string descriptor 
+    of the two files involved.
+
+    """
+    
+    # The function first creates an empty matrix of size (nfiles,nfiles) where nfiles is the number of files in the input dictionary. Then it fills this matrix with the cross-difference statistics from the input dictionary. Finally, it plots the matrix as a colormap using plot_data() function and adds text labels to each cell of the matrix showing its value. The text color is chosen based on the luminance of the cell color. The function also adds x and y labels to the plot and displays it using display() function.
+    
+    
     nfiles=len(stats)
+    # create error matrix by extracting values from dictionary.
     m_err=np.zeros((nfiles,nfiles))*np.nan
     for j in range(1,nfiles):
         for i in range(j):
             m_err[j,i]=stats['con']['%02i-%02i'%(i+1,j+1)]
 
     plt.figure()
-    plot_data(m_err,range(1,nfiles+1),range(1,nfiles+1),units=['','','$\mu$m'])
-
+    plot_data(m_err,range(1,nfiles+1),range(1,nfiles+1),units=['','',units])   # units was set to microns
 
     cmap=matplotlib.cm.get_cmap()
 
@@ -76,14 +104,191 @@ def plot_cross_diff_rms(stats):
 
 
     display(plt.gcf())
-
+    
 # PLOTTING FOR SINGLE SET OF FILES
 
-
+def plot_data_repeat_leveling(dlist,outfile=None,dis=True,name = ""):
+    """Create a multiplot on a grid with plots of all data with
+    same leveling: raw, conical, cyliindrical, sag removed by line
     
+    abused function in old notebooks when type of leveling was uncertain or of interest."""
 
+    xs,ys=find_grid_size(len(dlist),3,square=False)
+    res=[]
+    r=plot_data_repeat(dlist,name=name,num=1)
+    res.append(r)
+    if outfile:
+        os.makedirs(os.path.dirname(outfile)+'\\raw\\',exist_ok=True)
+        plt.savefig(fn_add_subfix(outfile,'_raw','.png',pre='raw\\'))
+    if dis: display(plt.gcf())
+    
+    fig,axes=plt.subplots(xs,ys,num=2)
+    axes=axes.flatten()
+    maximize()
+    res.append([])
+    for i,(ll,ax) in enumerate(zip(dlist,axes)):
+        plt.subplot(xs,ys,i+1,sharex=axes[0],sharey=axes[0])
+        tmp=ll.copy()
+        tmp.data=ll.data-fit.fitCylMisalign(ll.data)[0]
+        tmp.plot(stats=True)
+        res[-1].append(tmp.std())
+        #plt.clim([-3,3])
+        plt.clim(*(tmp.std()*np.array([-1,1])))
+    for ax in axes[:len(dlist)-1:-1]:
+        fig.delaxes(ax)
+        #plt.pause(0.1)
+    plt.suptitle(name+' CYL corrected')
+    if outfile:
+        os.makedirs(os.path.dirname(outfile)+'\\cyl\\',exist_ok=True)
+        plt.savefig(fn_add_subfix(outfile,'_cyl','.png',pre='cyl\\'))
+    if dis: display(plt.gcf())
+    
+    fig,axes=plt.subplots(xs,ys,num=3)
+    axes=axes.flatten()
+    maximize()
+    res.append([])
+    for i,(ll,ax) in enumerate(zip(dlist,axes)):
+        plt.subplot(xs,ys,i+1,sharex=axes[0],sharey=axes[0])
+        tmp=ll.copy()
+        tmp.data=ll.data-fit.fitConeMisalign(ll.data)[0]
+        tmp.plot(stats=True)
+        res[-1].append(tmp.std())
+        #plt.clim([-3,3])
+        plt.clim(*(tmp.std()*np.array([-1,1])))
+    for ax in axes[:len(dlist)-1:-1]:
+        fig.delaxes(ax)
+        #plt.pause(0.1)
+    plt.suptitle(name+' CONE corrected')
+    if outfile:
+        os.makedirs(os.path.dirname(outfile)+'\\cone\\',exist_ok=True)
+        plt.savefig(fn_add_subfix(outfile,'_cone','.png',pre='cone\\'))
+    if dis: display(plt.gcf())    
+    
+    fig,axes=plt.subplots(xs,ys,num=4)
+    axes=axes.flatten()
+    maximize()
+    res.append([])
+    for i,(ll,ax) in enumerate(zip(dlist,axes)):
+        plt.subplot(xs,ys,i+1,sharex=axes[0],sharey=axes[0])
+        tmp=ll.copy()
+        #tmp.data=level_data(*ll(),2)[0]
+        tmp=tmp.level(2,axis=1)
+        tmp.plot(stats=True)
+        res[-1].append(tmp.std())
+        #plt.clim([-1,1])
+        plt.clim(*(tmp.std()*np.array([-1,1])))
+    for ax in axes[:len(dlist)-1:-1]:
+        fig.delaxes(ax)
+        #plt.pause(0.1)
+    plt.suptitle(name+' SAG removed by line')
+    plt.tight_layout(rect=[0,0,1,0.95])
+    
+    if outfile:
+        os.makedirs(os.path.dirname(outfile)+'\\leg\\',exist_ok=True)
+        plt.savefig(fn_add_subfix(outfile,'_leg','.png',pre='leg\\'))
+    if dis: display(plt.gcf())  
+        
+    return res
 
+def plot_rep_diff(dlist,outfile=None,dis=True):
+    """Get three 2d arrays in a list. Calculate rotating differences for different component
+    removal: plane, cylinder, cone, legendre.
+    returns an 4 element list with the 4 possible removal for the 3 combinations of files to diff  """
 
+    res=[]    
+    
+    plt.close('all')
+    plt.figure(1)
+    res.append(dcouples_plot(dlist))
+    plt.suptitle('Differences RAW')
+    if outfile is not None:
+        plt.savefig(fn_add_subfix(outfile,'_raw','.png',pre='raw\\diff_'))
+    if dis: display(plt.gcf())    
+    
+    plt.figure(2)
+    res.append(dcouples_plot([removemis(dd,fit.fitCylMisalign) for dd in dlist]))
+    plt.suptitle('Differences CYL removed')
+    if outfile is not None:
+        plt.savefig(fn_add_subfix(outfile,'_cyl','.png',pre='cyl\\diff_'))
+    if dis: display(plt.gcf())    
+
+    plt.figure(3)
+    res.append(dcouples_plot([removemis(dd,fit.fitConeMisalign) for dd in dlist]))
+    plt.suptitle('Differences CONE removed')
+    if outfile is not None:
+        plt.savefig(fn_add_subfix(outfile,'_cone','.png',pre='cone\\diff_'))
+    if dis: display(plt.gcf())    
+
+    plt.figure(4)
+    res.append(dcouples_plot([dd.level((2,2)) for dd in dlist]))
+    plt.suptitle('Differences 2,2 Legendre removed')
+    if outfile is not None:
+        plt.savefig(fn_add_subfix(outfile,'_leg','.png',pre='leg\\diff_'))
+    if dis: display(plt.gcf())    
+    
+    return res
+
+def plot_repeat(rfiles,outfile=None,dis=True,name = "",plot_func=plot_data_repeat_leveling,ro=None):
+    """Functions to plot a list of files side to side (e.g. repeatability or reproducibility)
+    with different levelings. Return list of Data2D objects.
+    plot_func is a function that accepts a dlist and possibly accepts arguments
+       outfile, dis and name (it can have them ignored in **kwargs, or not passed at all to plot_repeat).
+    This way, becomes a wrapper around plot_func (that doesn't necessarily have to plot,
+      just have an interface outfile, dis, name.
+    
+    2019/04/08 made function general.
+    2018/11/02 moved to scripts. Modified to make it format independent acting on
+    data rather than on file extracting the data part in outer routine plot_data_repeat_leveling
+    in ."""
+    
+    plt.close('all')
+
+    if ro is None:
+        ro={'reader':fitsWFS_reader,
+                'scale':(-1,-1,1),
+                'units':['mm','mm','um'],
+                'ytox':220/200,
+                'ypix':101.6/120,
+                'center':(0,0)}
+    
+    #if name is None:
+    #    name = os.path.basename(outfile) if outfile is not None else ""
+    
+    dlist=[Data2D(file=wf1,**ro).level() for i,wf1 in enumerate(rfiles)]
+    res = plot_func(dlist,outfile=outfile,dis=dis,name = name)
+    
+    return dlist
+
+def plot_repeat(rfiles,outfile=None,dis=True,name = "",plot_func=plot_data_repeat_leveling,ro=None):
+    """Functions to plot a list of files side to side (e.g. repeatability or reproducibility)
+    with different levelings. Return list of Data2D objects.
+    plot_func is a function that accepts a dlist and possibly accepts arguments
+       outfile, dis and name (it can have them ignored in **kwargs, or not passed at all to plot_repeat).
+    This way, becomes a wrapper around plot_func (that doesn't necessarily have to plot,
+      just have an interface outfile, dis, name.
+    
+    2019/04/08 made function general.
+    2018/11/02 moved to scripts. Modified to make it format independent acting on
+    data rather than on file extracting the data part in outer routine plot_data_repeat_leveling
+    in ."""
+    
+    plt.close('all')
+
+    if ro is None:
+        ro={'reader':fitsWFS_reader,
+                'scale':(-1,-1,1),
+                'units':['mm','mm','um'],
+                'ytox':220/200,
+                'ypix':101.6/120,
+                'center':(0,0)}
+    
+    #if name is None:
+    #    name = os.path.basename(outfile) if outfile is not None else ""
+    
+    dlist=[Data2D(file=wf1,**ro).level() for i,wf1 in enumerate(rfiles)]
+    res = plot_func(dlist,outfile=outfile,dis=dis,name = name)
+    
+    return dlist
 
 def process_set(flist,m_trans=None,m_arr=None,outfolder=None):
     rmslist=[]       
@@ -176,111 +381,7 @@ def process_set2(flist,names,outname,crop=None,dis=True):
     
 ## FUNCTIONS TO HANDLE MULTIPLE FILES    
     
-def make_styles(s1,cf,argsdic,legshow=None):
-    """given a dataframe s1, associate to each element in s1 a plotting style in form of dictionary
-        according to values of columns for s1 indices in cf.
-        argsdic has the form {'graphic_property':{'colkey':[style1,style2]}},
-        where col_to is the column index that is used to determine the graphic style.
-        it is done in this format {gp:{ck:stylst}} rather than the more intuitive {ck:{gp:stylst}}
-        to conform to the standard {gp:values}.
-        Note that for each graphic_property, there should be a single key for the associated dictionary 
-        {kc:stylst}
-        Also, the entire dataframe s1 is passed instead of its index, so that a function on s1
-        columns can be added subsequently (maybe this is useless and all processing should be
-        handled on cf, that can also be =s1 if this contains already all information).
-        Legshow is a list with indices (in form of `colkey`) that tells
-        which legend to plots (locations are determined in increasing values of loc starting from 1, with legend plotted in order as 
-        in argsdic). Set to empty string to disable plotting, legends can
-        be plotted at later time using legenddic.
-        """
-    # TODO:
-    # - come posso dare un doppio stile (e.g. red circles vs blue triangles
-    # - aggiustare legende per plottare solo simboli o solo linee con stili comuni inclusi 
-    # - how to apply a legend different than value (e.g. chiller on/off instead of 0/1)
-    
-    stylelist=[]
-    #stylelist=[{} for i in range(len(s1.index))]  #[{}]*len doesn't work, it creates n copies of same dictionary, so any inplace change to an element is reflected to other elements
-    if legshow is None:
-        legshow=[list(argsdic[k].keys())[0] for k in list(argsdic.keys()) if isinstance(argsdic[k], collections.Mapping)]
-    legenddic={}
-    pos=1
-    j=0  #ugly way to check when it's first iteration and creating item    
-    for k,v in argsdic.items():   #iterate over column tags associated with the property
-        if isinstance(v, collections.Mapping): #dictionary
-            assert len(v.keys())==1            
-            import pdb
-            for p,c in v.items(): #iterate over properties, anyway this will always be a single key,
-                newkeys=np.unique(cf[p].values)
-                if isinstance(c, collections.Mapping): #dictionary
-                    sd={kk:{k:vv} for kk,vv in c.items()}
-                elif isinstance(c, list):            
-                    #so there might be neater ways to unpack
-                    p_cycle=cycler(k,c)
-
-                    #builds a dictionary with unique values as keys and property value as value
-                    sd={}
-                    for nk,sty in zip(newkeys,cycle(p_cycle)):
-                        sd[nk]=sty
-                    #{'LSKG': {'color': 'r'}, 'VC': {'color': 'g'}}
-                    #{'CylRef': {'marker': 'x'}, 'PCO1.2S01': {'marker': 'o'}, 'PCO1S23': {'marker': '+'}}
-                    #print(sd)
-                    
-            # builds the return value stylelist (list of graphic properties
-            # associate a style to each row of stats
-            for i,cc in enumerate(cf[p].values):
-                #stylelist,legenddic=test_make_styles(sc,cc,   #doesn't plot others
-            #{"color":{"operator":{'KG':'r','LS':'b'}}})
-                #stylelist[i].update(sd.get(None,sd.get(cc,{'marker':'','linestyle':''})))
-                #pdb.set_trace()
-                #stylelist[i]= 
-                if isinstance(v, collections.Mapping): #dictionary
-                    s = sd.get(cc,sd.get(None,None)) #set to key if in sd, otherwise to the graph prop dictionary for None if it was
-                    #set, or set the style to None (exclude in plot_historical) if not.   
-                else:
-                    s = {k:v}
-                
-                if j == 0:
-                    stylelist.append(s)
-                else:
-                    stylelist[i] = None if (stylelist[i] is None or s is None) else {**stylelist[i],**s}        
-            j=1   
-
-            #pdb.set_trace()
-            #make a dictionary of legends for each of the keys in stylelist
-            legenddic[p]=[[sd[t],t] if t is not None else [sd[t],'Other'] for t in sd.keys()]
-            #handles, labels = plt.gca().get_legend_handles_labels() # get existing handles and labels
-            #empty_patch = mpatches.Patch(color='none', label='Extra label') # create a patch with no color
-            #handles.append(empty_patch)  # add new patches and labels to list
-            #labels.append("Extra label")
-
-            #plt.legend(handles, labels) # apply new handles and labels to plot
-            handles=[Line2D([], [], label= vv[1], **(vv[0])) for vv in legenddic[p]]
-            labels=[vv[1] for vv in legenddic[p]]
-            #handles=[v[0] for v in ]
-            
-            if p in legshow:
-                plt.gca().add_artist(plt.legend(handles,labels,title=p,loc=pos))
-            pos=pos+1
-            
-        else:
-            for i in range(len(cf.index)):
-                s = {k:v}
-                if j == 0:
-                    stylelist.append(s)
-                else:
-                    stylelist[i] = None if (stylelist[i] is None or s is None) else {**stylelist[i],**s}        
-            j=1   
-        
-    return stylelist,legenddic
-        
-def test_make_styles(s1,cf,kwargs):
-    plt.clf()
-    stylelist,legenddic=make_styles(s1,cf,kwargs)
-    print("styledic(styles for each line):\n%s \nlegenddic(dictionary of legends):\n%s\n"%
-          (stylelist,legenddic))
-    display(plt.gcf())
-    print ("\n")
-    return stylelist,legenddic
+from plotting.linestyles import make_styles
 
 
 def build_database(confdic,outfolder=None,columns=None,dis=False,
