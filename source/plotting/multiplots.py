@@ -36,14 +36,17 @@ def align_axis_y(ax, ax_target):
     posn_old, posn_target = ax.get_position(), ax_target.get_position()
     ax.set_position([posn_old.x0, posn_target.y0, posn_old.width, posn_target.height])
 
-def commonscale(fig=None):
-    """set scale of all axes in a figure to the range that includes all axes data."""
+def commonscale(fig=None,axis='xy'):
+    """set scale of all axes in a figure to the range that includes all axes data.
+    
+    2022/11/23 axis can be set to 'x', 'y' or 'xy'."""
+    
     rx=[]
     ry=[]
     sax = [] #scalable axis
     if fig is None: fig=plt.gcf()
     for ax in fig.axes:
-        if len(ax.images) != 0:  #dirty way to exclude e.g. colorbars
+        if len(ax.images) + len(ax.lines) != 0:  #dirty way to exclude e.g. colorbars
             rx.append(ax.xaxis.get_data_interval())  #under the assumption it has both x and ylim
             ry.append(ax.yaxis.get_data_interval())
             sax.append(ax)
@@ -52,13 +55,111 @@ def commonscale(fig=None):
                 [min([r[0] for r in ry]),max([r[1] for r in ry])]]
     
     for ax in sax:
-        ax.set_xlim(*commonlim[0])
-        ax.set_ylim(*commonlim[1])
+        if 'x' in axis: ax.set_xlim(*commonlim[0])
+        if 'y' in axis: ax.set_ylim(*commonlim[1])
 
     plt.draw()
     
-    
+def test_commonscale():
+    from pySurf.data2D import make_surf_legendre
+    from plotting.multiplots import commonscale
 
+    # create two surfaces of different shapes
+    a = make_surf_legendre(np.arange(3),np.arange(4),[1,2])
+    b = make_surf_legendre(np.arange(5),np.arange(2),[0,0.5])
+
+    # single image
+    plt.figure()
+    plt.imshow(a)
+    commonscale()
+
+    # double image
+    plt.figure()
+    plt.subplot(121)
+    plt.imshow(a)
+    plt.subplot(122)
+    plt.imshow(b)
+    commonscale()
+
+    # double line plot
+    plt.figure()
+    plt.subplot(121)
+    plt.plot([1,2,3],[4,5,6])
+    plt.subplot(122)
+    plt.plot([2,4,5],[2,5,8])
+    commonscale()
+
+    # single image w cbar
+    plt.figure()
+    plt.imshow(a)
+    plt.colorbar()
+    commonscale()
+
+    # double image w cbar
+    plt.figure()
+    plt.subplot(121)
+    plt.imshow(a)
+    plt.colorbar()
+    plt.subplot(122)
+    plt.imshow(b)
+    plt.colorbar()
+    commonscale()
+    
+    # mixed test figure
+    plt.figure()
+    plt.subplot(121)
+    plt.plot([1,2,3],[4,5,6])
+    plt.subplot(122)
+    plt.imshow(np.arange(12).reshape([4,3]))
+    plt.colorbar()
+    commonscale()
+    
+    fig=plt.gcf()
+    l,i,cb = fig.axes
+    for o in l,i,cb: 
+        print(o.lines)
+        print(o.get_xlim())
+    
+''' 
+def xfind_grid_size(number, smax=0):
+    """given a number of plots determine the grid size that better fits all plots.
+    First number returned is biggest, it is up to the user to switch 
+    for use as rows or cols. 
+    for example 
+    print(find_grid_size(10))  #gives 4,3
+    print(find_grid_size(10,3))  #gives 4,3
+    print(find_grid_size(9))  #gives 3,3
+    print(find_grid_size(9,2))  #gives 5,2
+    
+    for i in range(11):print(i,find_grid_size(i))
+    for i in range(11):print(i,find_grid_size(i,2))
+
+    """
+    s = int(math.sqrt(number))  # 
+
+    if number == s**2:
+        res = (s, s)
+    elif number <= (s+1)*s:
+        res = (s+1, s)
+    else:
+        res = (s+1, s+1)
+    """
+    if (number-s**2) < ((s+1)**2-number):
+        res = (s, s) 
+    else:
+        res = (s+1, s)
+    """
+    
+    if smax > 0:
+        if s + 1 > smax:
+            res = (1+((number-1)//smax) , smax)
+
+    #if direction == 1:
+    #    res = res[::-1]
+
+    return res
+'''
+ 
 def find_grid_size(number, smax=0, square = True, fill = False):
     #upgraded version. under development
     """given a number of plots determine the grid size that better fits all plots.
@@ -118,93 +219,7 @@ def find_grid_size(number, smax=0, square = True, fill = False):
     #    res = res[::-1]
 
     return res
-
-from dataIO.outliers import remove_outliers
-
-def plot_difference(p1t,p4, trim = None, dis=False):
-    """plots and return difference of two Data2D objects, return difference.
-    All data are plane leveled before plots, a common color scale is set after excluding outliers. Leveled difference is returned.
-    If trim is other than None, plots are adjusted on valid data x and y range,
-    if Trim = True empty borders are removed also from difference data."""
     
-    if trim is not None:
-        if trim:
-            p1t=p1t.remove_nan_frame()
-            p4=p4.remove_nan_frame()
-        xr=span(np.array([span(d.remove_nan_frame().x) for d in [p1t,p4]]))
-        yr=span(np.array([span(d.remove_nan_frame().y) for d in [p1t,p4]]))
-    else:
-        xr=span(np.array([span(d.x) for d in [p1t,p4]]))
-        yr=span(np.array([span(d.y) for d in [p1t,p4]]))
-        
-    plt.clf()
-    
-    ax1=plt.subplot(131)
-    p1t.level((1,1)).plot()
-    #plt.title('PZT + IrC')
-    plt.clim(*remove_outliers(p1t.level().data,nsigma=2,itmax=3,span=1))
-    plt.grid()
-
-
-    ax2=plt.subplot(132,sharex=ax1,sharey=ax1)
-    p4.level((1,1)).plot()
-    #plt.title('PZT')
-    plt.clim(*remove_outliers(p4.level().data,nsigma=2,itmax=3,span=1))
-    plt.grid()
-    
-    ax3=plt.subplot(133,sharex=ax1,sharey=ax1)
-    diff=(p1t-p4).level((1,1))
-    diff.name='Difference 1-2'
-    diff.plot()
-    plt.clim(*remove_outliers(diff.level().data,nsigma=2,itmax=3,span=1))
-    plt.grid()
-    plt.xlim(*xr) #this adjust all plots to common scale
-    plt.ylim(*yr)   
-    
-    if dis:
-        display(plt.gcf())
-    
-    return diff
-    
-    
-def xfind_grid_size(number, smax=0):
-    """given a number of plots determine the grid size that better fits all plots.
-    First number returned is biggest, it is up to the user to switch 
-    for use as rows or cols. 
-    for example 
-    print(find_grid_size(10))  #gives 4,3
-    print(find_grid_size(10,3))  #gives 4,3
-    print(find_grid_size(9))  #gives 3,3
-    print(find_grid_size(9,2))  #gives 5,2
-    
-    for i in range(11):print(i,find_grid_size(i))
-    for i in range(11):print(i,find_grid_size(i,2))
-
-    """
-    s = int(math.sqrt(number))  # 
-
-    if number == s**2:
-        res = (s, s)
-    elif number <= (s+1)*s:
-        res = (s+1, s)
-    else:
-        res = (s+1, s+1)
-    """
-    if (number-s**2) < ((s+1)**2-number):
-        res = (s, s) 
-    else:
-        res = (s+1, s)
-    """
-    
-    if smax > 0:
-        if s + 1 > smax:
-            res = (1+((number-1)//smax) , smax)
-
-    #if direction == 1:
-    #    res = res[::-1]
-
-    return res
-
 
 def subplot_grid(number,size=0,smax=0,*args,**kwargs):
     
@@ -267,7 +282,8 @@ def subplot_grid(number,size=0,smax=0,*args,**kwargs):
         axes = list(axes)
     
     # remove extra axis
-    for i in np.arange(number,len(axes)): #a in axes[(np.arange(len(axes))+1)>number]: 
+    for i in np.arange(number,len(axes))[::-1]: #remove from ends to avoid out of range index
+        #a in axes[(np.arange(len(axes))+1)>number]: 
         a=axes.pop(i)
         a.remove()
     
@@ -339,6 +355,57 @@ def compare_images(datalist, x=None, y=None, fignum=None, titles=None,
         yield ax
 '''
 
+# i prossimi due sono piuttosto simili, si dovrebbero uniformare in una versione per data, x, y che viene poi chiamato anche da Data2D e
+# spostare in pacchetto pySurf. Il leveling non e' necessario, andrebbe rimosso
+#   in caso livellando a mano prima di chiamare la funzione.
+
+from dataIO.outliers import remove_outliers
+
+def plot_difference(p1t,p4, trim = None, dis=False):
+    """plots and return difference of two Data2D objects, return difference.
+    All data are plane leveled before plots, a common color scale is set after excluding outliers. Leveled difference is returned.
+    If trim is other than None, plots are adjusted on valid data x and y range,
+    if Trim = True empty borders are removed also from difference data."""
+    
+    if trim is not None:
+        if trim:
+            p1t=p1t.remove_nan_frame()
+            p4=p4.remove_nan_frame()
+        xr=span(np.array([span(d.remove_nan_frame().x) for d in [p1t,p4]]))
+        yr=span(np.array([span(d.remove_nan_frame().y) for d in [p1t,p4]]))
+    else:
+        xr=span(np.array([span(d.x) for d in [p1t,p4]]))
+        yr=span(np.array([span(d.y) for d in [p1t,p4]]))
+        
+    plt.clf()
+    
+    ax1=plt.subplot(131)
+    p1t.level((1,1)).plot()
+    #plt.title('PZT + IrC')
+    plt.clim(*remove_outliers(p1t.level().data,nsigma=2,itmax=3,span=1))
+    plt.grid()
+
+
+    ax2=plt.subplot(132,sharex=ax1,sharey=ax1)
+    p4.level((1,1)).plot()
+    #plt.title('PZT')
+    plt.clim(*remove_outliers(p4.level().data,nsigma=2,itmax=3,span=1))
+    plt.grid()
+    
+    ax3=plt.subplot(133,sharex=ax1,sharey=ax1)
+    diff=(p1t-p4).level((1,1))
+    diff.name='Difference 1-2'
+    diff.plot()
+    plt.clim(*remove_outliers(diff.level().data,nsigma=2,itmax=3,span=1))
+    plt.grid()
+    plt.xlim(*xr) #this adjust all plots to common scale
+    plt.ylim(*yr)   
+    
+    if dis:
+        display(plt.gcf())
+    
+    return diff
+    
 def diff_images(data1,data2,x=None,y=None,fignum=None,titles=None,vmin=None,vmax=None,
     commonscale=False, direction=0, *args, **kwargs):
     """plots two data sets with common axis and their difference. Return the three axis.
