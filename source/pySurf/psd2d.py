@@ -21,8 +21,8 @@ from pySurf.data2D import get_data
 import pdb
 
 
-def psd2d(data, x, y, wfun=None, norm=1, rmsnorm=False):
-        """Calculate the 2d psd. return freq and psd.
+def psd2d(data, x, y, wfun=None, norm=1, rmsnorm=False, axis=1,includezerofreq=False):
+        """Calculate the 2d psd by lines along axis. return freq and psd.
         
         doesnt work with nan.
         use 2d function for psd np.fft.rfft2 for efficiency and mimics
@@ -39,6 +39,10 @@ def psd2d(data, x, y, wfun=None, norm=1, rmsnorm=False):
         # window, the rms is the rms of the windowed function.
         
         #assert data.shape[0]==data.shape[1]
+        
+        if axis == 0: # do psds along lines, but note that the result will not be transposed ()        
+            data=data.T
+            
         if wfun is None:
             win=np.ones(data.shape[0])[:,None]
         else:
@@ -54,7 +58,12 @@ def psd2d(data, x, y, wfun=None, norm=1, rmsnorm=False):
         psd=2*normfactor*(np.abs(yfft))**2
         psd[0,:]=psd[0,:]/2.
 
-        freqs = np.fft.rfftfreq(N,np.float(L)/(N-1))
+        freqs = np.fft.rfftfreq(N,float(L)/(N-1))
+        
+        if not includezerofreq:
+            if freqs[0]==0:
+                freqs=freqs[1:]
+                psd=psd[1:,...]
 
         return freqs,psd
 
@@ -244,8 +253,7 @@ def plot_psd2d(f,p,x,prange=None,includezerofreq=False,units=None,*args,**kwargs
     if np.size(units)==1:
         units=np.repeat(units,3)
     #pdb.set_trace()
-    #plt.yscale('log')
-    plt.title('2D PSD')
+
     if not includezerofreq:
         if f[0]==0:
             f=f[1:]
@@ -258,6 +266,8 @@ def plot_psd2d(f,p,x,prange=None,includezerofreq=False,units=None,*args,**kwargs
     
     cbunits = psd_units(units)
     #pdb.set_trace()
+    #plt.yscale('log')
+    plt.title('2D PSD')
     ax = plot_data(p,x,f,norm=LogNorm(vmin=prange[0],vmax=prange[1]),
     units=cbunits,aspect='auto',*args,**kwargs)
     plt.ylabel('freq. ('+cbunits[1]+')')
@@ -277,7 +287,7 @@ def plot_psd2d(f,p,x,prange=None,includezerofreq=False,units=None,*args,**kwargs
 #PLOTTING
 
 def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,
-    rmsrange=None,prange=None,fignum=5,rmsthr=None, 
+    rmsrange=None,prange=None,fignum=5,rmsthr=None,includezerofreq=False,
     aspect='auto', ax2f=None, units=None,outname=None,norm=1,rmsnorm=True):
     """ Calculates 2D PSD as image obtained combining all profile PSDS calculated along vertical slices of data. Resulting image has size 
     If title is provided rms slice power is also calculated and plotted on three panels with figure and PSD.
@@ -340,8 +350,13 @@ def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,
             print("psd2d(data,x,y)")
             x,y,wdata=wdata,x,y
 
-    f, p = psd2d(wdata, x, y, wfun=wfun, norm=norm, rmsnorm=rmsnorm)  # calculate PSD 2D
-       
+    f, p = psd2d(wdata, x, y, wfun=wfun, norm=norm, rmsnorm=rmsnorm, includezerofreq=includezerofreq)  # calculate PSD 2D
+    
+    if not includezerofreq:
+        if f[0]==0:
+            f=f[1:]
+            p=p[1:,...]
+    
     # GENERATE OUTPUT
     if title is not None:
 
