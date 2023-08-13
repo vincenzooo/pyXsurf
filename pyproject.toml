@@ -1,0 +1,26 @@
+[project]
+name = "pyXsurf"
+description = "Python Library for Surface Metrology, X-Ray Optics, and Telescopes Design."
+readme = "README.rst"
+authors = [
+    { name = "Vincenzo Cotroneo", email = "vincenzo.cotroneo@inaf.it" }
+]
+license = { text = "BSD 3-Clause License" }
+dependencies = [
+    "numpy",
+    "astropy>=3.2",
+]
+dynamic = ["version"]
+
+[project.urls]
+homepage = "https://github.com/vincenzooo/pyXsurf"
+
+[build-system]
+requires = ["setuptools", "wheel", "setuptools_scm"]
+build-backend = 'setuptools.build_meta'
+
+
+[tool.setuptools.packages.find]
+
+[tool.setuptools_scm]
+write_to = "source/version.py"
