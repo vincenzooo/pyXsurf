@@ -247,6 +247,20 @@ def test_is_nested_list():
         #print('test string output:')
         print (tv,"|",is_nested_list(tv))
 
+def is_iterable(obj):
+    """ Check if an object is iterable.
+    
+    Apparently there is no standard way of diung it in Python, so this function is created to introduce
+    a consistent check. Note that this is the suggested way, as checkng an __iter__ method is not enough
+    because it can be iterated by __get_items__"""
+    
+    
+    try:
+        iter(obj)
+        return True
+    except TypeError:
+        return False
+
 def test_make_raster(vectors):
     print (make_raster((1.,2,0.5),(3,4.,0.5),(2,4,1),extend = False)) 
     #[(1.0, 3.0, 2), (1.0, 3.0, 3), (1.0, 3.5, 2), (1.0, 3.5, 3), (1.5, 3.0, 2), (1.5, 3.0, 3), (1.5, 3.5, 2), (1.5, 3.5, 3)]
