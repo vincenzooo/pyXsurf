@@ -8,7 +8,9 @@
 Welcome to pyXsurf's documentation!
 ===================================
 
-See the following sections
+Please be patient, this project is under heavy revision, come back in one month to see what is changed.
+
+For the moment you can check:
 
 .. toctree::
    :maxdepth: 1
@@ -18,6 +20,7 @@ See the following sections
 ..      
       HowTo <howto>
 
+See also Github page <https://github.com/vincenzooo/pyXsurf>
 
 .. include:: readme
 
