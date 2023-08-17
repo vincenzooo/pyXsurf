@@ -68,20 +68,20 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-#html_theme = 'alabaster'
+html_theme = 'bizstyle'
 
 
 #html_theme = 'haiku'
 
-import astropy_sphinx_theme
-html_theme_path = astropy_sphinx_theme.get_html_theme_path()
-html_theme = 'bootstrap-astropy'
-html_theme_options = {
-    'logotext1':'py',
-    'logotext2': 'X',  # orange, light
-    'logotext3': 'surf'   # white,  light,
-}
-html_logo = 'resources/surf-board-wave_small.png'
+# import astropy_sphinx_theme
+# html_theme_path = astropy_sphinx_theme.get_html_theme_path()
+# html_theme = 'bootstrap-astropy'
+# html_theme_options = {
+    # 'logotext1':'py',
+    # 'logotext2': 'X',  # orange, light
+    # 'logotext3': 'surf'   # white,  light,
+# }
+# html_logo = 'resources/surf-board-wave_small.png'
 
 # Static files to copy after template files
 # https://docs.astropy.org/projects/package-template/en/latest/nextsteps.html
