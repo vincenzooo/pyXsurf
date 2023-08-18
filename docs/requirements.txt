@@ -3,10 +3,6 @@ sphinx==5.3.0
 sphinx_rtd_theme==1.1.1
 readthedocs-sphinx-search==0.1.1
 
-extensions = ['notfound.extension']
-
 ipykernel
 nbsphinx
 sphinx_automodapi
-sphinx_astropy
-pyXsurf
