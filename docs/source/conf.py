@@ -32,6 +32,13 @@ author = 'Vincenzo Cotroneo'
 # The full version, including alpha/beta/rc tags
 release = 'v1.5.6'
 
+#  ----------- VC Sphinx Gallery settings according to https://sphinx-gallery.github.io/stable/getting_started.html#create-simple-gallery
+# paths are relative to this file.
+sphinx_gallery_conf = {
+     'examples_dirs': 'examples',   # path to your example scripts
+     'gallery_dirs': 'gallery_auto_examples',  # path to where to save gallery generated output
+}
+
 
 # -- General configuration ---------------------------------------------------
 
@@ -41,7 +48,8 @@ release = 'v1.5.6'
 extensions = ['myst_parser',
               #"myst_nb",
               'sphinx.ext.duration',
-              'sphinx_gallery.load_style',
+              'sphinx_gallery.gen_gallery',
+              #'sphinx_gallery.load_style',   #not present in latest documentation
               #"guzzle_sphinx_theme",
               'sphinx.ext.autodoc',
               'sphinx.ext.doctest',
@@ -51,6 +59,7 @@ extensions = ['myst_parser',
               'sphinx.ext.autosectionlabel',
               'sphinx.ext.inheritance_diagram'
 ]
+
 
 autosummary_generate = True
 
