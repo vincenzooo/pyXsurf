@@ -11,7 +11,7 @@ Here it is shown in details how to start or perform specific operations.
 
     Installation
     Running
-    Basic_usage <doc_files/basic_usage.ipynb>
+    Basic_usage <notebooks/basic_usage.ipynb>
     First steps <notebooks/pySurf_demo.ipynb>
 
 How to
