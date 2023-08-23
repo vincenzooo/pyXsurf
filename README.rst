@@ -4,7 +4,7 @@ pyXsurf (formerly pyXTel)
 Python library for X-Ray Optics, Metrology Data Analysis and Telescopes
 Design. 
 
-This library starts from code collected during many years of work on surface metrology and X-ray optics and wants to offer to the community an extensible tool to perfom common operations on surface and profile data.
+This library starts from code collected during many years of work on surface metrology and X-ray optics and wants to offer to the community an extensible tool to perfom common operations on surface and profile data, together with a set of tools to perform typical operations on data, in particular related to X-ray optics.
 
 
 Changes
@@ -17,27 +17,28 @@ Changes
 
 Installation
 ------------
+Before proceding, it can be advisable to update your environment, and especially ``pip``, to the most recent version.
 
-Last stable release can be installed from command line with:
+Last stable release can be downloaded and installed in one step from command line with:
 
 ``pip install pyXsurf==1.6.1`` 
-   
-However this is not advised, as the most updated versions can contain bug fixes and updated functionalities.
-To install these you should install from code, which can be done quite easily. This can also be useful if you plan to make changes to the code.
 
-In this case, first you need to download or clone the source code from github. You can use the ``Code`` button at top of page, or git clone from command-line
+However this is not the last version (we are working on that), it is much better, and simple enough. 
+
+To install the newest version, which contains many bug fixes and updated functionalities.
+To do this, you can clone the source code from github. You can use the ``Code`` button at top of page, or git clone from command-line
 ``git clone https://github.com/vincenzooo/pyXSurf.git``. 
 
-At this point you have two options (before proceding, it can be advisable to update your environment, and especially ``pip``, to the most recent version):
+At this point you should move to the folder with the code and call ``pip install .`` (equivalend to ``python setup.py install``). 
+This will perform a "regular" installation  (meaning that the code is copied to ``site-packages`` folders, which holds all installed Python libraries, and made accessible to your system).
 
-1. Python installer (suggested for basic users): move to the folder with the code and call ``python setup.py install``. This will perform a "regular" installation  (meaning that the code is copied to ``site-packages`` folders, which holds all installed Python libraries, and made accessible to your system).
-
-2. developer: as in option 1, just use ``pip install -e .``or ``pip install -e '.[dev]'``. Doing this, the library will be installed from current position (no local copy), any change to the code in this folder will be immediately available in the imported library (the second command, with the ``[dev]``\ option, will install also additional files with tests and tools).
+If instead you plan to modify the code, it is suggest to install the library in "developer" mode,
+use ``pip install -e .``or ``pip install -e '.[dev]'`` (experimental). Doing this, the library will be installed from current position (no local copy), any change to the code in this folder will be immediately available in the imported library (the second command, with the ``[dev]``\ option, will install also additional files with tests and tools).
 
 Uninstalling
 ------------
 
-Code can be uninstalled callig ``pip uninstall pyXsurf``, or from source code folder calling directly the setup file ``python setup.py develop  -u`` (if you installed as developer, deinstallation is expected to work only with most recent pip versions, at least >=19.1.1, otherwise it should be enough to delete the folder).
+Code can be uninstalled calling ``pip uninstall pyXsurf`` from a command prompt, or from source code folder calling directly the setup file ``python setup.py develop  -u`` (if you installed as developer, deinstallation is expected to work only with most recent pip versions, at least >=19.1.1, otherwise it should be enough to delete the folder).
 
 How to use
 ----------
@@ -47,25 +48,20 @@ works without errors, you can now import and use the different modules (see desc
 
 .. code:: python
 
-   from pySurf.data2D import data2D
-   
-Some examples and data can be found in a ``test`` subfolder of each
+    from pySurf.data2D import data2D
+
+In addition to the `official documentation <https://pyxsurf.readthedocs.io>`_ , you can find examples and data in a ``test`` subfolder of each
 module and at the end of module files. Functions are usually documented with docstrings (but these might be in the wrong place, please be patient and look well in the code). 
 There is a lot more, but this is a big work-in-progress, and they are not easily accessible yet, please read below for details, or write an email or an issue.
 
 Modules
 -------
 
-.. image:: /docs/resources/wip.png
-   :class: wip-icon
-   
 A basic description of the different modules is (N.B.: some of these functions have been temporarily moved out of the codebase to simplify the reimplementation, in case these are needed, please send an email):
 
--  **dataIO** Generic routines for accessing and manipulating data and
-   files.
+-  **dataIO** Generic routines for accessing and manipulating data and files.
 
--  **notebooks** Jupyter notebooks, not necessarily related to the
-   libraries, include test and experiments on python.
+-  **notebooks** Jupyter notebooks, not necessarily related to the libraries, include test and experiments on python.
 
 -  **plotting** Plotting functions for pySurf data.
 
