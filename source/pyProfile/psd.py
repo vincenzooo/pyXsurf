@@ -261,6 +261,10 @@ def xrealPSD(d,win=1,dx=1.,axis=None):
     return f,np.abs(c)**2    
 import pdb
 
+
+## Here four different plot functions for PSD, 
+# TODO: to be integrated
+
 def plot_psd(f,p,units=None,label=None,span=0,psdrange=None,
     includezerofreq=False,*args,**kwargs):
     """Plot a PSD on logaritmic axis with standard labels.
@@ -358,7 +362,13 @@ def linearTrend(x,y):
         plt.legend(loc=0)
 
 class PSDplot(object):
-    """Contains a number of psds in form (f,psd)."""
+    """Contains a number of psds in form (f,psd).
+    This is an attempt to create a plot of PSDs as an object with properties
+    that can be set and modified. fixed values for plot parameters can be stored
+    in self.kwargs. psds are internally stored as list but modified with `append`
+    methods. Probably it could be convenient to inherit from a list or dict, like datadic
+    and tdic in miro_analysis_functions scripts."""
+    
     def __init__(self):
         self.psds=[]
         #self.labels=[]
