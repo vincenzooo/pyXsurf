@@ -97,18 +97,18 @@ def csv4D_reader(wfile,ypix=None,ytox=None,header=False,delimiter=',',endline=Tr
 
     if ypix == None:
         try:
-            ypix=np.float(head['xpix'])
+            ypix=float(head['xpix'])
         except KeyError:
             ypix=1.
 
     if ytox == None:
         try:
-            ytox=np.float(head['aspect'])
+            ytox=float(head['aspect'])
         except KeyError:
             ytox=1.
 
     try:
-        zscale=np.float(head['wavelength'])
+        zscale=float(head['wavelength'])
     except KeyError:
         zscale=1.
     
@@ -308,13 +308,13 @@ def read_nid(file_name,index=0,header=False,read_tags=False):
      units). This function extracts a single scan.
      
     Metadata have a hyerarchical structure, with first level general settings,
-    then subfields for singl scans
+    then subfields for single scans
     if `header` is set, the full file metadata are returned "raw" as list of string,
     it is left to user to extract the subset of metadata corresponding to the 
     extracted data.
     A convenient way to explore the metadata is to convert them to a 
     configparser object. This is already implemented in this routine, where
-    values should already include settings and convertions from metadata.
+    values should already include settings and conversions from metadata.
     TODO: consider extracting only relevant metadata (if possible/convenient). 
     
     `read_tags` if set, keys for channels with data are returned (to return also the empty ones call `make_channel_tags`)
