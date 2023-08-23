@@ -1,23 +1,56 @@
 .. _developersnotes:
 
-Developers Notes
-=================
+Contributing
+============
 
-Here is summarised the status of development for code, documentation, packaging, testing.
+If you find bugs, errors, omissions or other things that need improvement,
+please create an issue or a pull request at
+https://github.com/vincenzooo/pyXsurf.
+Contributions are always welcome!
 
-There are many things which don't evolve so fast because I am still learning or deciding how to handle. Help about these topics are highly welcome.
-Also very welcome are signaling any problem or missing information, especially if anything is not work as documented or if you can point to templates or examples.
+Here is summarised the current status and the best practices for development for code, documentation, packaging, and testing.
+This is a work in progress, the project is going through a major restyling with the intent of standardizing the workflow for updates of software and documentation, but many aspects are still being defined.
 
-To start contributing, or just to understand more in depth the status of develpment, you can just checkout the developer branches, and give a look around: the only developer branch at the moment is ``documentation ``, you can check it out with ``git checkout documentation``.
+If you are interested in contributing, please check often these pages. In the meanwhile you are very welcome to signal any problem or missing information, especially if anything is not working as documented or if you can point to templates or examples.
 
-At this point you can compile the documentation by putting yourself in the ``docs`` directory and calling:
+Developers Installation
+------------------------
+
+To start, you need to make sure that the necessary prerequisites_ are installed.
+Then, instead of ``pip``-installing the latest release from PyPI_,
+you should get the newest development version (a.k.a. "master") with Git, then move to the project folder and install as developer::
+
+   git clone https://github.com/vincenzooo/pyXsurf.git
+   cd pyXsurf
+   pip install -e .
+
+... where ``-e`` stands for ``--editable``.
+This maintains the import synchronized with the software (in other words, you don't need to reinstall the package every time you make changes). This will work also if you checkout another branch (you might need to reimport the module in that case).
+
+In addition, if you are using IPython or derived tools (e.g. Jupyter notebooks) it is suggested to add the following magic commands at the beginning of your work:
+
+	%load_ext autoreload
+	%autoreload 2
+
+This will automatically make sure that the code is reimported at any change.
+
+Working on documentation
+-------------------------
+
+If you want to work on the documentation only, or you want to test it, you can put yourself in the ``docs`` directory and call:
 
 * ``make html`` will normally compile the "official" documentation for the pyXsurf library at the current status of development.
 * ``make html .\source_test_doc`` will compile also the test documentation, creating a front page which links to the "official" documentation, but also at a test documentation, where the dubious concepts are tested in details.
 
 In both cases the compiled HTML documentation will be visible in ``docs\build\html\index.html``.
 
-If you modify any file, and you suspect it could be an improvement, please send it to vincenzo.cotroneo@inaf.it, or use regular git functions (that you probably better than I do).
+You can refer to the official pages of `Sphinx` and `nbspinx` tools for reference and syntax guide:
+
+.. _PSphinx: https://www.sphinx-doc.org/en/master/tutorial/getting-started.html
+.. _nbsphinx: https://nbsphinx.readthedocs.io/
+
+
+If you modify any file, and you suspect it could be an improvement, please write to vincenzo.cotroneo@inaf.it, or use regular git functions (`pull requests` or `issue tracker`, you probably know this stuff better than I do).
 
 .. note::
     Themes are defined in the ``conf.py`` file of each folder, so there might be a difference in the aspect of the "official" documentation, according to which compilation command is run. TODO: make this point uniform, by making the configuration for tests to recall the configuration for the "official page".
@@ -25,14 +58,14 @@ If you modify any file, and you suspect it could be an improvement, please send 
 
 Active Branches
 -------------------------------------------------
-There a couple of branches active at the moment:
+At the moment, the updated project is on the master branch, which is the only used. In the past there were attempts to establish development branches, which are now not maintained and are:
 
 * **documentation** The most recent branching, it is mostly devoted at developing better sphinx documentation
 * **readers_dev** Development to Reader routines for I/O of file formats 
 
 
 Roadmap
----------------
+=======
 
 The roadmap is detailed in the following section, main area of work are:
 
@@ -43,6 +76,9 @@ The roadmap is detailed in the following section, main area of work are:
 
 Status of installer
 -------------------------------------------------
+
+The library is installable with common python practices, 
+
 I have tried the installation on a few computers and it worked smoothly 
 by `setup.py`. The folder ``test_install`` contains tests 
 that verify a correct installation.
@@ -57,8 +93,6 @@ Status of code
 Code is quite consistent, and usually commented, but there are still a few modules in early stage of development or which might be removed or integrated somewhere else. Some are included for backwards compatibility, future needs or just to stay on the safe side of breaking dependencies. 
 There might be additional features which I lost along the way while experimenting with git and might decide to reintegrate if I recover them for other needs.
 
-The plan here is to add all possible code to a "developer version", and only the relevant to the official distribution. Which packages are installed should be maintained from the distribution. 
-
 Status of docs
 -------------------------------------------------
 
@@ -67,7 +101,7 @@ but this is quite non-uniform,
 as it mixes different conventions I tried over the time, and it will remain like this
 until I find one tool that I can use to maintain the documentation.
 
-I am not very skilled in using sphinx features, but I am studying.
+I am not very skilled in using sphinx features, but I am learning.
 I started a new ``documentation`` branch for the development of documentation, which includes also tests on the different sphinx features. Basic api documentation is very rough, but seems to contain a good amount of documentation, so the obvious step is to obtain a minimally effective, decently clean API documentation, as a starting point for a refinement of the standard in documentation format, which is often not homogeneous.  
 
 Formatting is indeed at the moment very poor, I have tried experimenting with templates (e.g. astropy), ipynb, rst and integration with github, things that I am really not sure how to handle. See more details in the homepage of the documentation branch.

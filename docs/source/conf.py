@@ -41,6 +41,7 @@ release = 'v1.5.6'
 extensions = ['myst_parser',
               #"myst_nb",
               'sphinx.ext.duration',
+              'nbsphinx',
               #'sphinx_gallery.gen_gallery',
               #'sphinx_gallery.load_style',   #not present in latest documentation
               #"guzzle_sphinx_theme",
@@ -62,7 +63,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns = ['_build', '**.ipynb_checkpoints']
 
 #  ----------- VC Sphinx Gallery settings according to https://sphinx-gallery.github.io/stable/getting_started.html#create-simple-gallery
 # paths are relative to this file.
