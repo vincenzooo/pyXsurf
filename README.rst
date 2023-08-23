@@ -56,7 +56,7 @@ There is a lot more, but this is a big work-in-progress, and they are not easily
 Modules
 -------
 
-.. image:: /resources/wip.png
+.. image:: /docs/resources/wip.png
    :class: wip-icon
    
 A basic description of the different modules is (N.B.: some of these functions have been temporarily moved out of the codebase to simplify the reimplementation, in case these are needed, please send an email):
