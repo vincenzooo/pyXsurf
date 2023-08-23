@@ -254,7 +254,6 @@ def is_iterable(obj):
     a consistent check. Note that this is the suggested way, as checkng an __iter__ method is not enough
     because it can be iterated by __get_items__"""
     
-    
     try:
         iter(obj)
         return True

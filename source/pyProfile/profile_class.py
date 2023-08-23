@@ -116,7 +116,7 @@ from pyProfile.profile import register_profile
 from pyProfile.profile import save_profile
 
 from pyProfile import profile   # functions passed to update_docstring will be from here
-
+from pyProfile.psd import plot_psd
 
 '''
 def update_docstring(func,source):

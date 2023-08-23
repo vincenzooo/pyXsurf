@@ -16,6 +16,8 @@ from pyProfile.profile_class import Profile, Plist
 from plotting.backends import maximize
 import pdb
 
+from time import sleep
+
 '''
 def dopsd(files,name,outfolder=None,rmsthr=None,psdrange=None,frange=None):
     plt.close('all')
@@ -61,8 +63,10 @@ def dopsd(files,name,outfolder=None,rmsthr=None,psdrange=None,frange=None):
 
 # without hardcoded exceptions edit
 
-def dopsd(files,name,outfolder=None,rmsthr=None,psdrange=None,frange=None,axis=1):
+def dopsd(files,titles,outfolder=None,rmsthr=None,psdrange=None,frange=None,axis=1):
     """from review. 
+    files: full path to input file
+    titles: can be a single string or array same length of files, used for plot titles
     Make PSDs from AFM data from a list of .nid files generating some outputs if `outfolder` is provided.
     Return psds as couples f,psd with proper units for AFM images.
     rmsthr is used in calculation of psd for Data2D object.
@@ -73,17 +77,22 @@ def dopsd(files,name,outfolder=None,rmsthr=None,psdrange=None,frange=None,axis=1
     os.makedirs(outfolder,exist_ok=True)
     psds = []
     
-    if np.size(name) == 1:
-        name = [name for f in files]
+    from dataIO.arrays import is_iterable
+    
+    if not is_iterable(titles): titles = [titles for f in files]
+    #if np.size(titles) == 1:
+    #    titles = [titles for f in files]
+    #pdb.set_trace()
         
-    for f,n in zip(files,name):
+    for f,n in zip(files,titles):
         try:
             # replace with data,x,y = read_nid
             # units um,um,mm; scae=1e,1e6,1e96
             print (f)
             #a = read_nid(f)
             data,x,y = read_nid(f)  # a['Gr0-Ch1']
-            d = Data2D(data,x,y,units=['um','um','nm'],scale=[1000000.,1000000.,1000000000.],name=n) 
+            d = Data2D(data,x,y,units=['um','um','nm'],scale=[1000000.,1000000.,1000000000.],
+                       center = (0,0), name=n) 
             
             # custom edit for some files, level all deg 2 along x (individual lines) in dd
             # if f == 'Image00098.nid':
@@ -109,7 +118,10 @@ def dopsd(files,name,outfolder=None,rmsthr=None,psdrange=None,frange=None,axis=1
                 plt.savefig(os.path.join(outfolder,fn_add_subfix(f,'_psd2d','.png',strip=True)))
             
             # average psd
-            fs,ps = p2.avgpsd()
+            try:
+                fs,ps = p2.avgpsd()
+            except:
+                fs,ps = p2.avgpsd()()  # probably changed to return profile, convert to x,y
             plt.figure(3) #,figsize=(10,8))
             plot_psd(fs,ps,units=p2.units) # psd_units(p2.units))
             plt.ylim(psdrange)
@@ -233,45 +245,8 @@ def mft_psd(files,outfolder=None,rmsthr=None,psdrange=None,frange=None):
     return res # 2021/06/30
 
         
-def plot_all_psds(datadic,outfolder=None,subfix='_psd',xrange=None,yrange=None):
-    """passing a datadic plots all psds for each key.
     
-    `datadic` is in format {label:[(datafile1_full_path,label1),..]} 
-    subfix is the subfix of input files, whose names are in the values of datadic 
-       as first item. They must contains freq. e PSD on two cols.
-    Plot all PSDs for each datadic item in a single graph and prints their rms.
-    Output files are created in outfolder if this is provided and named as
-        numbered files with _fullpsd subfix (can be improved, but keys shouldn't be used as they can contain 
-        invalid characters, while using info from datafiles can give raise to repetitions."""
-    
-    for i,name in enumerate(datadic.keys()):
-        plt.figure(figsize=(12,6))
-        for d,l in zip(*datadic[name]):
-            fs,ps = np.genfromtxt(fn_add_subfix(d,subfix,'.dat'), unpack=True,skip_header=1)
-            if fs[0] == 0:
-                fs = fs[1:]
-                ps = ps[1:]
-            rms = np.sqrt(np.trapz(ps,fs))
-            print (os.path.basename(d),l,' : ',rms)
-            plot_psd(fs,ps,label=l+', rms = %6.2f nm'%rms,units=['$\mu$m','$\mu$m','nm'])
-        plt.xlabel('Spatial frequency ($\mu$m$^{-1}$)')
-        plt.ylabel('PSD (nm$^{2}$ $\mu$m)')
-        plt.legend( prop={'size': 12},loc = 1) #bbox_to_anchor=(1.05, 1), loc='upper left')
-        plt.xlim(xrange)
-        plt.ylim(yrange)
-        plt.gca().xaxis.label.set_size(12)
-        plt.gca().yaxis.label.set_size(12)
-        plt.xticks(fontsize=12)
-        plt.yticks(fontsize=12)
-        plt.title(name)
-        plt.grid( which='minor', axis = 'x', linestyle='--')
-        plt.tight_layout()
-        if outfolder:
-            fn = '%02i'%i #os.path.basename(os.path.dirname(d))  #last file containing folder
-            plt.savefig(fn_add_subfix(fn,'_fullpsd','.png',pre=outfolder+os.path.sep))
-            
-        
-def trim_psds_group(ranges, datafiles, labels,xrange=None,yrange=None,
+def trim_psds_group(ranges, datafiles, labels, xrange=None,yrange=None,
                     outname=None):
     """ Makes a single psd trimming and averaging multiple ones according to selection. 
         An equivalent updated version (or an attempt to it) in trim_psds_group2
@@ -296,12 +271,21 @@ def trim_psds_group(ranges, datafiles, labels,xrange=None,yrange=None,
     plt.figure(figsize=(12,6))
     for ran,fn,lab in zip(ranges,datafiles,labels):
         if ran is not None:
-            #print(d)
-            x,y = np.genfromtxt(fn_add_subfix(fn,'_psd','.dat'),unpack=True,skip_header=1)
+            x,y = np.genfromtxt(fn_add_subfix(fn,'_psd','.dat'),unpack=True,skip_header=1, comments='#')  
+            if len(x)==0:
+                raise ValueError('No data read from file '+fn_add_subfix(fn,'_psd','.dat'))      
             if x[0] == 0:
                 x=x[1:]
-                y=y[1:]
-            xx,yy = crop_profile(x,y,ran)
+                y=y[1:]  
+            try:     
+                xx,yy = crop_profile(x,y,ran)         
+            except(IndexError):
+                Warning('possible conflict between range and PSD values for input file\n'+
+                        fn_add_subfix(fn,'_psd','.dat')+
+                        'and range'+str(ran))
+                _ = psds_table(tdic) # in case of problems with range, run some diagnostics        
+            
+            #print(x,y)
             plot_psd(xx,yy,label=lab,units=['um','um','nm'])
             xtot.append(xx)
             ytot.append(yy)
@@ -485,8 +469,7 @@ def trim_psds_group2(ranges, datafiles, labels,xrange=None,yrange=None,
     
     return xtot, ytot
 
-
-
+'''
 def trim_datadic(datadic,to_trim,xrange=None,yrange=None,
                  tdic=None,outname=None):
     """"""
@@ -503,14 +486,85 @@ def trim_datadic(ranges,datadic_val,xrange=None,yrange=None,
     """inutile esempio di come chiamare la funzione."""
     return trim_psds_group(ranges,*datadic_val,outname=outname,
                            xrange=xrange,yrange=yrange)
+'''
 
+def plot_all_psds(pathlabels,outfolder=None,subfix='_psd',xrange=None,yrange=None):
+    """passing a datadic plots all psds for each key.
+    
+    Generate a formatted plot (N.B.: units are fixed) of all PSDs for zipping pathlabel in a single graph 
+    and prints their rms.
+    Return a list of psds corresponding to the ones read from `pathlabels`, list of couples (file,label)
+    No output files are created or returned, must be saved externally.
+    
+    Note that this was initially accepting a dictionary, of pathlabel values, generating one plot
+        per each group of psds, but keys were not used, so this was deprecated.
+        If this is the desired behavior, loop can be handled externally.
+    
+    `pathlabels` is a 2-el list in format [datafile_full_paths,labels] as the values of datadic,
+    (modified 2023/08/20 with deprecation warning, it was {label:[(datafile1_full_path,label1),..]} i.e. datadic). 
+    `subfix` is the subfix of input files, whose names are in as first item. They must contains freq. e PSD on two cols.
+    
+    
+    `outfolder` is deprecated 2023/08/20 it was only saving plots overwriting them, it can be done externally.
+    
+    e.g.:
+    
+        psds = plot_all_psds(pathlabels,outfolder=None,subfix='_psd',xrange=None,yrange=None)
+        # plt.title('test')   #modify plot as you like
+        plt.savefig('plot_all_psds_demo.png') 
+    
+    old version: Output files are created in outfolder and sequentially numbered as ##_fullpsd.png using a sequence of numbers
+    (can be improved, but keys shouldn't be used as they can contain invalid characters, 
+    while using info from datafiles can give raise to repetitions."""
+    
+    if type(pathlabels) == dict:
+        DeprecationWarning("WARNING: deprecated, modify your code to accept a list [fullpaths_beforesubfix, labels]")
+        for k in pathlabels.keys():
+            plot_all_psds(pathlabels[k], 
+                            outfolder = outfolder, subfix = subfix, xrange = xrange, yrange = yrange)
+        sleep (10)
+        return
+    
+    filelist, labels = pathlabels
+    psds = []
+    
+    plt.figure(figsize=(12,6))
+    for d,l in zip(filelist,labels):
+        #read psds from files, add to plot and tdic
+        fs,ps = np.genfromtxt(fn_add_subfix(d,subfix,'.dat'), unpack=True,skip_header=1)
+        if fs[0] == 0:
+            fs = fs[1:]
+            ps = ps[1:]
+        rms = np.sqrt(np.trapz(ps,fs))
+        print (os.path.basename(d),l,' : ',rms)
+        plot_psd(fs,ps,label=l+', rms = %6.2f nm'%rms,units=['$\mu$m','$\mu$m','nm'])
+        psds.append((fs,ps))
+    plt.xlabel('Spatial frequency ($\mu$m$^{-1}$)')
+    plt.ylabel('PSD (nm$^{2}$ $\mu$m)')
+    plt.legend( prop={'size': 12},loc = 1) #bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.xlim(xrange)
+    plt.ylim(yrange)
+    plt.gca().xaxis.label.set_size(12)
+    plt.gca().yaxis.label.set_size(12)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    #plt.title(name)  #it doesn't make sense, as it ends up using the last key
+    plt.grid( which='minor', axis = 'x', linestyle='--')
+    plt.tight_layout()
+    # if outfolder:
+    #     fn = '%02i'%i #os.path.basename(os.path.dirname(d))  #last file containing folder
+    #     plt.savefig(fn_add_subfix(fn,'_fullpsd','.png',pre=outfolder+os.path.sep))
+    
+    return psds
 
 
 # MAKE PSD TABLE
-
+from pyProfile.profile import crop_profile
 def psds_table(tdic,outfolder=None,subfix='_psdtable',ranges = None):
-    """ make a table of rms from trimmed PSD in tdic, integrated over 
-    outfolder not used, kept only for format consinstency"""
+    """ make a table of rms from trimmed PSD in tdic as sqrt of psd integral over range.
+    
+    This is mostly useless, can be incorporated in plot_all_psds or similer, as psd 
+    outfolder not used, kept only for format consinstency. """
     rdic = {}
     for i,name in enumerate(tdic.keys()):
         rmss=[]
@@ -526,9 +580,14 @@ def psds_table(tdic,outfolder=None,subfix='_psdtable',ranges = None):
         print (os.path.basename(name),' : ','full freq. range [%6.3f:%6.3f], rms %6.3f'%(*(span(fs)),rms_full))
         rmss.append([span(fs),rms_full])
         #pdb.set_trace()
-        if ranges is not None:
-            for r in ranges:
-                if r[0]<fs[0] or r[1]>fs[-1]:
+        if ranges is not None:   #replace with a more sofisticated filter, from other functions
+            for r in ranges:  
+                if r[0] is None:    #None set auto
+                    r[0] = np.min(fs)
+                if r[1] is None:
+                    r[1] = np.max(fs)
+                    
+                if r[0]<fs[0] or r[1]>fs[-1]:       # if the range is larger than data, return nan 
                     rms = np.nan
                 else:
                     f,p = crop_profile(fs,ps,r)
@@ -576,28 +635,27 @@ def psd_compare(plotnames,psdfolder,labels = None, outname=None,
         plt.savefig(fn_add_subfix(outname,'_psdcomp','.png'))  
 
 '''
-def psd_compare(plotnames,psdfolder,labels = None,
+def psd_compare(filelist,psdfolder,labels = None,
                 subfix='_binpsd',xrange=None,yrange=None):
     """Uses `plot_all_psds` to plot comparison between different (binned) psds.
     
-    plotnames is a list of keys used to generate input psd files (the only requirement is that 
-        `"psdfolder\plotnames+subfix.dat` is a valid psd file). 
-        Here they can be `tdic` keys.
-      
+    filelist is a list of files in psdfolder to use input psd files 
+    as `psdfolder\plotnames+subfix.dat'.
     labels if provided are used for each plot line
         
+    2023/08/20 modified for a more consistent interface, it is mostly a different
+    interface to plot_all_psds. Can be removed in future versions,
+    see e.g. MUSE_analysis notebooks.
     """
-    #   tag is used passed to plot_all_psd where is used for print and title 
-    #   (no output files are generated). 
-    #   output file is created at savefig.
+    #   
 
     if labels is None:
-        labels = plotnames
+        labels = filelist
     
-    toplot = {None:[[fn_add_subfix(name,subfix,'.dat',pre=psdfolder+os.path.sep) 
-                    for name in plotnames],labels]}
+    filelist = [fn_add_subfix(name,subfix,'.dat',pre=psdfolder+os.path.sep) 
+                    for name in plotnames]
 
-    plot_all_psds(toplot,outfolder=None,subfix='',xrange=xrange,yrange=yrange) 
+    plot_all_psds(filelist,labels,outfolder=None,subfix='',xrange=xrange,yrange=yrange) 
 
 
 
