@@ -72,6 +72,7 @@ exclude_patterns = ['_build', '**.ipynb_checkpoints']
      # 'gallery_dirs': 'gallery_auto_examples',  # path to where to save gallery generated output
 # }
 
+html_logo = 'resources/Transparent Logo.png'
 
 # -- Options for HTML output -------------------------------------------------
 
