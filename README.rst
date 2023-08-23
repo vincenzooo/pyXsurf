@@ -4,9 +4,12 @@ pyXsurf (formerly pyXTel)
 Python library for X-Ray Optics, Metrology Data Analysis and Telescopes
 Design. 
 
+This library starts from code collected during many years of work on surface metrology and X-ray optics and wants to offer to the community an extensible tool to perfom common operations on surface and profile data.
+
+
 Changes
 -------
-
+2023/07/15 Starting implementing major changes towards common standards and best-practices. 
 2022/09/06 Created new branch ``pyXsurf_nbdev`` for experimenting with
 2021/07/21 Upgraded installation mechanism.
 2020/11/09 Changed repository name from ``pyXTel`` to
@@ -19,7 +22,8 @@ Last stable release can be installed from command line with:
 
 ``pip install pyXsurf==1.6.1`` 
    
-Versions more recent than this are likely to contain bug fixes and updated functionalities, but I am still experimenting with packaging, so ``pip`` installation might work or not. Your best option is then to install from code, which can be done quite easily. This can also be useful if you plan to make changes to the code.
+However this is not advised, as the most updated versions can contain bug fixes and updated functionalities.
+To install these you should install from code, which can be done quite easily. This can also be useful if you plan to make changes to the code.
 
 In this case, first you need to download or clone the source code from github. You can use the ``Code`` button at top of page, or git clone from command-line
 ``git clone https://github.com/vincenzooo/pyXSurf.git``. 
@@ -52,7 +56,10 @@ There is a lot more, but this is a big work-in-progress, and they are not easily
 Modules
 -------
 
-A basic description of the different modules is:
+.. image:: /_static/wip.png
+   :class: wip-icon
+   
+A basic description of the different modules is (N.B.: some of these functions have been temporarily moved out of the codebase to simplify the reimplementation, in case these are needed, please send an email):
 
 -  **dataIO** Generic routines for accessing and manipulating data and
    files.

@@ -8,9 +8,9 @@
 Welcome to pyXsurf's documentation!
 ===================================
 
-Please be patient, this project is under heavy revision, come back in one month to see what is changed.
+Please be patient, this project is under heavy revision, come back in a while and see what is changed.
 
-For the moment you can check:
+For the moment you can look:
 
 .. toctree::
    :maxdepth: 1
