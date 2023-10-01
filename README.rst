@@ -19,17 +19,12 @@ Installation
 ------------
 Before proceding, it can be advisable to update your environment, and especially ``pip``, to the most recent version.
 
-Last stable release can be downloaded and installed in one step from command line with:
+At the moment the best way to install the most updated version, which contains many bug fixes and updated functionalities, is to clone the source code from github and install from there. 
 
-``pip install pyXsurf==1.6.1`` 
-
-However this is not the last version (we are working on that), it is much better, and simple enough. 
-
-To install the newest version, which contains many bug fixes and updated functionalities.
-To do this, you can clone the source code from github. You can use the ``Code`` button at top of page, or git clone from command-line
+You can use the ``Code`` button at top of page, or git clone from command-line
 ``git clone https://github.com/vincenzooo/pyXSurf.git``. 
 
-At this point you should move to the folder with the code and call ``pip install .`` (equivalend to ``python setup.py install``). 
+At this point you should move to the folder with the code and call from command line ``pip install .`` (equivalend to ``python setup.py install``). 
 This will perform a "regular" installation  (meaning that the code is copied to ``site-packages`` folders, which holds all installed Python libraries, and made accessible to your system).
 
 If instead you plan to modify the code, it is suggest to install the library in "developer" mode,
