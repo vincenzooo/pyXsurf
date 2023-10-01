@@ -16,18 +16,19 @@ It also includes a set of convenience functions and other tools for X-ray optics
 
 Find how to get started in the :ref:`readme file <readme>`, and :ref:`how to contribute <readmedev>`.
 
-Or look at these examples:
+Here some example (more coming soon!):
 
 .. toctree::
     :maxdepth: 1
 
     tutorials
+    Poster at SPIE San Diego 2023
 
+🛠️ Ongoing Improvements!
+Thanks for your interest to this project. We're currently making significant updates. Please check back soon to see the enhancements!
 
-HowTo <howto>
-
-|wip2| Please be patient, this project is under a major revision, come back in a while and see what is changed. 
 See also `Github page of the project <https://github.com/vincenzooo/pyXsurf>`_ 
+for more examples in source subfolders. 
 
 
 pyXsurf API
