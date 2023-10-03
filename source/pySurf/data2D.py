@@ -824,7 +824,7 @@ def crop_data(data,x,y,xrange=None,yrange=None,zrange=None,mask=False,poly=None,
     selected rectangular region.
 
     axis ranges are passed as a 2-element vector of which each can be None
-        or None, where None indicates automatic range (adjust to data).
+    or None, where None indicates automatic range (adjust to data).
     If mask is set to True, return a boolean mask of the cropped region.
     poly is a list of vertex for a polygon.
 
