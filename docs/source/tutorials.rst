@@ -9,8 +9,7 @@ Here it is shown in details how to start or perform specific operations.
 .. toctree::
     :maxdepth: 1 
 
-    Installation
-    Running
-    Basic_usage <notebooks/basic_usage.ipynb>
-    First steps <notebooks/pySurf_demo.ipynb>
+    Basic Usage <notebooks/pySurf_demo.ipynb>
+    Other examples <notebooks/basic_usage.ipynb>
+    
 
