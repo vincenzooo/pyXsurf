@@ -424,7 +424,7 @@ def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,
         #pdb.set_trace()
         #questa era qui, ma dava errore perche' mask e' lineare
         #mask = np.all(mask,axis =0) # if any of mask is False -> False
-        p[:,~mask]=np.nan
+        #p[:,~mask]=np.nan  #questo da errore se mask e' piu' di una dimensione
         ax3.grid(1)
         #plt.tight_layout(rect=(0, 0.03, 1, 0.95) if title else (0, 0, 1, 1))
         

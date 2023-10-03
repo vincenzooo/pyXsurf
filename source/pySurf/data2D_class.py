@@ -113,21 +113,22 @@ def __array_finalize__(self, obj):
 
 class Data2D(object):  # np.ndarrays
     """A class containing 2D data with x and y coordinates and methods for analysis.
+    """ 
+    
+    # Args:
+    #     object ([type]): [description]
 
-    Args:
-        object ([type]): [description]
+    # Raises:
+    #     ValueError: [description]
+    #     ValueError: [description]
+    #     ValueError: [description]
+    #     ValueError: [description]
+    #     ValueError: [description]
+    #     ValueError: [description]
 
-    Raises:
-        ValueError: [description]
-        ValueError: [description]
-        ValueError: [description]
-        ValueError: [description]
-        ValueError: [description]
-        ValueError: [description]
-
-    Returns:
-        [type]: [description]
-    """    
+    # Returns:
+    #     [type]: [description]
+       
 
     """
     
@@ -192,8 +193,6 @@ class Data2D(object):  # np.ndarrays
         **kwargs
     ):
         """
-        A class for 2D data with coordinates and their analysis.
-        
         Can be initialized with data | data, x, y | file | file, x, y.
         if x and y are coordinates if match number of elements, 
             or used as range if two element. 
