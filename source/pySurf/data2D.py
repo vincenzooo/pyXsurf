@@ -1337,6 +1337,7 @@ def plot_stats(datalist,x=None,y=None,bins=100,labels=None,*args,**kwargs):
 def data_histostats(data,x=None,y=None,bins=100,density=True,units=None,loc=0,*args,**kwargs):
     """wrapper around plt.hist, plot histogram of data (over existing window) adding label with stats. 
     `density` set tu True normalizes distribution to have sum equal 1. Return 3-uple according to `plt.hist`:"""
+    
     units=units if units is not None else ['[X]','[Y]','[Z]']
     #pdb.set_trace()
     res = plt.hist(data[np.isfinite(data)],bins=bins,density=density,*args,**kwargs)
@@ -1344,7 +1345,7 @@ def data_histostats(data,x=None,y=None,bins=100,density=True,units=None,loc=0,*a
     plt.ylabel('Fraction of points #')
     
     stats = get_stats(data,x,y,units=units,string=True)
-    legend=["\n".join(s) for s in stats] 
+    legend=stats #["\n".join(s) for s in stats] 
         
     # get_stats returns a string and it's not very flexible
     # maybe with a better implementation could add styles
