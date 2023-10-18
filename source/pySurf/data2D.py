@@ -1,8 +1,7 @@
 """Similar to points, but manage matrix data with x and y. All functions accept arguments in form data,x,y where x and y can be optional in some routines.
 
-# 2016/10/09 copied from PSDanalysis.py, quite rough, it contains also psd functions that should go in psd2d.
-
-IDL differentiate between functions and procedure. Code synyax is rough (do begin end, -> for methods, comparison operators), but very clear to read.
+2016/10/09 copied from PSDanalysis.py, quite rough, it contains also psd functions that should go in psd2d.
+IDL differentiate between functions and procedure. Code syntax is rough (do begin end, -> for methods, comparison operators), but very clear to read.
 For example, allows to understand if modify object (procedure) or
 return a result (function). Nobody forbids to a function to modify the argument (e.g. if I modify an object or a variable inside a function, are these changes reflected outside?), however it is usually (always?) not needed, because there is a procedure for that. This also enforces the user to think to the correct interface when the subroutine is called.
 A flag is called as
@@ -13,17 +12,13 @@ self.data=newdata makes a method a procedure, self.copy().data=newdata; return r
 
 import matplotlib.pyplot as plt
 import numpy as np
-import warnings
-#from pySurf.points import *
-#from pySurf.psd2d import *
+#from pySurf.points import *#from pySurf.psd2d import *
 from pyProfile.profile import polyfit_profile
 #from plotting.multiplots import compare_images
-from IPython.display import display
 from dataIO.fn_add_subfix import fn_add_subfix
 from dataIO.span import span, span_from_pixels
 from dataIO.outliers import remove_outliers, EmptyRangeWarning
-from dataIO import outliers
-from dataIO.dicts import strip_kw,pop_kw
+from dataIO.dicts import strip_kw
 import logging
 import os
 import pdb
@@ -53,7 +48,7 @@ test_folder = r'C:\Users\kovor\Documents\python\pyXTel\pySurf\test'
 
 class EmptyPlotRangeWarning(EmptyRangeWarning):
     def __init__(self, *args, **kwargs):
-        super().__init__( *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 ## SEMI-OBSOLETE LEVELING WITH 1D AUXILIARY FUNCTIONS
 ## STILL ONLY WAY TO HANDLE GENERIC (non-legendre) leveling by line,
