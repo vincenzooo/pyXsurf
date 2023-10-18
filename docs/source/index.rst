@@ -22,9 +22,6 @@ Here some example (more coming soon!):
     :maxdepth: 1
 
     tutorials
-    Poster at SPIE San Diego 2023 <_static/vcotroneo_SPIE2023.pdf>
-
-    Poster at SPIE 2023 San Diego <poster_link>
 
 `Poster at SPIE San Diego 2023 <_static/vcotroneo_SPIE2023.pdf>`_
 
