@@ -10,6 +10,13 @@ Here it is shown in details how to start or perform specific operations.
     :maxdepth: 1 
 
     Basic Usage <notebooks/pySurf_demo.ipynb>
-    Other examples <notebooks/basic_usage.ipynb>
-    
+    Importing and basic parameters 🛠️ <notebooks/basic_usage.ipynb>
+	Profiles Examples <profiles.rst>
+
+	
+	
+   
+
+
+
 
