@@ -495,8 +495,13 @@ class Data2D(object):  # np.ndarrays
         # None, 2, None
         # 1, None, 3
         # 1, 2, None
+        
+        res = self.copy()
+        res.x = res.x + offsets[0]
+        res.y = res.y + offsets[1]
+        res.data = res.data + offsets[2]
 
-        return offsets
+        return res
 
     tv = [
         [1, 2, 3],

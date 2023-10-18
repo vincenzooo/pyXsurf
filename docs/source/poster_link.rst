@@ -1,1 +1,0 @@
-`Poster at SPIE San Diego 2023 <_static/vcotroneo_SPIE2023.pdf>`_

@@ -573,7 +573,7 @@ def save_points(points,filename,xgrid=None,ygrid=None,shape=None,matrix=False,fi
 
 #SHAPE AND RESAMPLING FUNCTIONS
 
-def points_find_grid2(points,result='shape',sort=None,steps=None):
+def points_find_grid2(points,result='shape',sort='head',steps=None):
     """Given points as pointcloud, do some basic guess on shape and axis orientation
     of the grid.
     Works for raster points, even irregular and non rectangular, but not for scatter
@@ -611,7 +611,7 @@ def points_find_grid2(points,result='shape',sort=None,steps=None):
         fastind=0
     elif sort == 'yx':
         fastind=1
-    elif sort is None:
+    elif sort is 'center':
         #try to guess
         #determines the fastest from the smallest step.
         # if steps are the same cannot determine. Use some point at the middle
@@ -624,6 +624,16 @@ def points_find_grid2(points,result='shape',sort=None,steps=None):
             fastind=0  #y in points
         elif np.abs(min(d[0]))>np.abs(min(d[1])):
             fastind=1   #x
+        else:
+            fastind=np.nan
+    elif sort is 'head':   # determine fast index from the first points, this is same method as in the first implementation in points_find_grid (not 2)
+        #determines the fastest from the smallest step.
+        # if steps are the same cannot determine.
+        d=[points[1,0]-points[0,0],points[1,1]-points[0,1]]
+        if np.abs(d[0])<np.abs(d[1]):
+            fastind=1  #y in points
+        elif np.abs(d[0])>np.abs(d[1]):
+            fastind=0   #x
         else:
             fastind=np.nan
     elif sort == 'none':
@@ -642,9 +652,16 @@ def points_find_grid2(points,result='shape',sort=None,steps=None):
     sign=np.sign(d[fastind])
     #nfast=(np.sign(np.diff(points[:,fastind]))!=sign)[0]).sum()+1
     id=np.where(np.sign(np.diff(points[:,fastind]))!= sign)[0] #positions of change of sign, it's last point in line
+    
     id=np.hstack([id,[points.shape[0]-1]])
-    nslow=np.max(np.diff(id)) #diff is the length of each line
     nfast=len(id)
+    if len(id) == 1:
+        # no change in slow coordinate, it is a single profile in fast coordinate
+        print("""WARNING: single coordinate array with %i points detected."""%(points.shape[0]))
+        nslow =  points.shape[0]
+    else:
+        nslow=np.max(np.diff(id)) #diff is the length of each line
+        
     #nslow=points.shape[0]/nfast
     if nslow*nfast!=points.shape[0]:
         if verbose: 
@@ -652,6 +669,7 @@ def points_find_grid2(points,result='shape',sort=None,steps=None):
         print("""WARNING: points number [%i] doesn't match regular grid for size determined by points_find_grid [%i x %i],
         usually OK, but please double check results."""%(points.shape[0],nslow,nfast))
 
+    # pdb.set_trace()
     if steps is not None:
         if steps==(0,0):
             steps=d #automatically determine
@@ -659,26 +677,30 @@ def points_find_grid2(points,result='shape',sort=None,steps=None):
 
     slowind=int(not(fastind))
     if result=='step':  #uses d
-        if steps is not None:
-            retval = steps
-        else:
-            steps=[d[fastind],d[fastind]]
+        if steps is None:
+            steps=[d[fastind],d[fastind]]  #set all to fastind, then replace the slow one
             slowsteps=np.diff(points[id,slowind])
-            steps[slowind]=slowsteps[np.argmax(np.abs(slowsteps))]
-            retval=steps
+            if len(slowsteps) != 0:  # if one dim slowsteps is 1-element
+                steps[slowind]=slowsteps[np.argmax(np.abs(slowsteps))]
+            else:
+                steps[slowind] = 0
+        retval = steps
+
     elif result=='shape':  #uses nslow
-        if steps is not None:
-            retval = steps
-        else:
+        if steps is None:
             #here axis are switched meaning the position of index to
             # access the matrix, i.e. the matrix has shape (ny,nx)
             shape=[nslow,nslow]
             shape[slowind]=nfast
-            retval=shape
+            retval=shape            
+        else:
+            retval = steps
+
     elif result=='grid':  #use points to calculate by points_find_grid
         #xs,ys,zs=np.hsplit(span(points,axis=0),3)
         xs,ys,zs=span(points,axis=0)
-        nx,ny=points_find_grid(points)[1]
+        # nx,ny=points_find_grid(points)[1]
+        nx,ny=points_find_grid2(points, sort = 'head')[1]  # this replaces original call to points_find_grid
         xgrid=np.linspace(xs[0],xs[1],nx)
         ygrid=np.linspace(ys[0],ys[1],ny)
         retval=[xgrid,ygrid]
@@ -688,8 +710,7 @@ def points_find_grid2(points,result='shape',sort=None,steps=None):
     return fastind,tuple(retval)
 
 def points_find_grid(points,result='shape',sort=None):
-    """Given points as pointcloud, do some basic guess on shape and axis orientation
-    of the grid. Not many checks in this first version, you need to verify results.
+    """Given points as pointcloud, do some basic guess on shape and axis orientation of the grid. Not many checks in this first version, you need to verify results.
     Works for raster points, even irregular and non rectangular, but not for scatter (step is estimated from the first two
     elements, it fails if elements are not sorted, points can be
     sorted xy or yx to avoid failure, like (xysort):
@@ -720,15 +741,22 @@ def points_find_grid(points,result='shape',sort=None):
         fastind=np.nan
 
     # calculate the shape of the matrix detecting
-    # first change of sign of derivative oof scanning
+    # first change of sign of derivative of scanning
     # coordinate (end of line and return to first point)
     # in fast axis.
     sign=np.sign(d[fastind])
     #nfast=(np.sign(np.diff(points[:,fastind]))!=sign)[0]).sum()+1
-    id=np.where(np.sign(np.diff(points[:,fastind]))!= sign)[0] #positions of change of sign, it's last point in line
+    id=np.where(np.sign(np.diff(points[:,fastind]))!= sign)[0] #positions of changes of sign, list of last point of each line
+    
     id=np.hstack([id,[points.shape[0]-1]])
-    nslow=np.max(np.diff(id)) #diff is the length of each line
     nfast=len(id)
+    if len(id) == 1:
+        # no change in slow coordinate, it is a single profile in fast coordinate
+        print("""WARNING: single coordinate array with %i points detected."""%(points.shape[0]))
+        nslow =  points.shape[0]
+    else:
+        nslow=np.max(np.diff(id)) #diff is the length of each line
+    
     #nslow=points.shape[0]/nfast
     if nslow*nfast!=points.shape[0]:
         if verbose: 
@@ -740,7 +768,8 @@ def points_find_grid(points,result='shape',sort=None):
     if result=='step':
         steps=[d[fastind],d[fastind]]
         slowsteps=np.diff(points[id,slowind])
-        steps[slowind]=slowsteps[np.argmax(np.abs(slowsteps))]
+        if len(slowsteps) != 0:  # if one dim slowsteps is 1-element
+            steps[slowind]=slowsteps[np.argmax(np.abs(slowsteps))]
         retval=steps
     elif result=='shape':
         #here axis are switched meaning the position of index to

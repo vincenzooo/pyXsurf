@@ -240,7 +240,7 @@ class Profile(object):  #np.ndarrays
 
 
     def __init__(self,x=None,y=None,file=None,reader=None,
-        scale = (1.,1.), units=None,name=None,*args,**kwargs):
+        scale = (1.,1.), units=["",""],name=None,*args,**kwargs):
         """can be initialized with data; x,y; file; file, x
         if x is provided, they override x from data if matching number of elements, 
            or used as range if two element (error is raised in case of ambiguity)."""
@@ -673,9 +673,17 @@ class Profile(object):  #np.ndarrays
         stats=kwargs.pop('stats',0) #to change the default behavior
         loc=kwargs.pop('loc',0) #location for stats legend
         framealpha=kwargs.pop('framealpha',0.5) #transparency for stats legend
-        l = kwargs.pop('label',None)
-        if l is None and self.name:
-            l = self.name
+        
+        # N.B. this must allow to pass None to omit plotting,
+        #   and use name if label is undefined and name is defined.
+        
+        l=None
+        try:
+            l = kwargs.pop('label',self.name)
+        except UnboundLocalError:
+            l = None
+        
+           
         res=plt.plot(self.x,self.y,label=l,*args,**kwargs)
         
         if stats: #add stats to plot

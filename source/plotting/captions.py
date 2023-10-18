@@ -36,7 +36,7 @@ def change_labels(newlab):
     return plt.legend()
         
 def legendbox(text,ax=None,loc=0,clear = False, *args,**kwargs):
-    """Create a legend from class matplotlib.legend.Legend and add it to axis.
+    """deprecated: Create a legend from class matplotlib.legend.Legend and add it to axis.
         `text` is a list of strings to be passed to `labels` parameter in Legend.
         Unclear how line styles are set (probably none).
     if clear is set to True, remove previous legends.
