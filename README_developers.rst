@@ -16,11 +16,13 @@ If you are interested in contributing, please check often these pages. In the me
 Developers Installation
 ------------------------
 
-To start, you need to make sure that the necessary prerequisites_ are installed.
-Then, instead of ``pip``-installing the latest release from PyPI_,
-you should get the newest development version (a.k.a. "master") with Git, then move to the project folder and install as developer::
+To start, it is suggested to clone the latest
+development version (a.k.a. "master") with Git::
 
    git clone https://github.com/vincenzooo/pyXsurf.git
+
+then move to the project folder and install as developer::
+    
    cd pyXsurf
    pip install -e .
 
