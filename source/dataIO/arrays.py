@@ -139,7 +139,12 @@ def split_blocks (vector, sep = None, direction = None, split = False):
     Return a list: if ``split`` is False (default), a list of the lengths of blocks is returned, otherwise a list of blocks is returned. 
     
     (e.g. [1,2,3,1,2,3] -> return [3,3])
-    (e.g. [1,1,1,2,2,2,3,3,3,4,4,4], equal = True -> return [3,3,3,3]) """
+    (e.g. [1,1,1,2,2,2,3,3,3,4,4,4], direction = 0 -> return [3,3,3,3]) 
+    (e.g. [5,2,8,7,6,8], direction = 1 -> return [1,2,1,1,1])
+    (e.g. [5,2,8,7,6,8], direction = None -> return [2,3,1])
+    (e.g. [5,2,8,7,6,8], direction = -1 -> return [2,3,1]) # inferred from first two
+    
+    """
     
     if direction is None:  # exclude invalid points
         x = [vector[i] for i in np.where(np.isfinite(vector))[0]]

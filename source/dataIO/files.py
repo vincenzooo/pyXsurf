@@ -70,26 +70,33 @@ def test_read_blocks(filename=None):
     a = print_results(read_blocks(filename, dtype = float),"dtype, but no comment character, comment lines break consistency. Return string vector with lines.") #lista di array
     
     
-def count_header_lines(filename, comment_char="#"):
+def count_header_lines(filename, comment_char="#", method = 'all',*args,**kwargs):
     """
     Count the number of header lines in a file, identified by a comment character.
     
     Args:
     - filename (str): The path to the text file.
     - comment_char (str): The character that indicates a header or comment line.
+    - method (str): 'all' header starts from beginning and has comment_char in all lines
+                    'last' consider last line starting with comment_char as the last line of header.
     
     Returns:
     - int: The number of header lines in the file.
     """
-    with open(filename, 'r') as file:
-        header_lines = 0
-        for line in file:
-            if line.startswith(comment_char):
-                header_lines += 1
-            else:
-                # Once we hit a line that doesn't start with the comment character, break
-                break
-        return header_lines
+    
+    with open(filename, 'r',*args,**kwargs) as file:
+        lines = file.readlines()
+        
+    comment_lines = [l[0]== comment_char for l in lines]
+
+    if method == 'last':
+        header_lines = np.where(comment_lines)[0][-1]
+    elif method == 'all':
+        header_lines = np.where(comment_lines == np.arange(len(comment_lines)))[0][-1]
+    else:
+        raise ValueError("non valid method.")
+    
+    return header_lines
     
     
 def head(fn,N=10):
@@ -100,6 +107,32 @@ def head(fn,N=10):
         return [next(myfile) for x in range(N)]
     
 
+def search_encoding(filename,encode_list=None, verbose = False):
+    """brute-force search for encoding.
+    
+    from stack-overflow, adding some extra function."""
+    
+    if encode_list is None:
+        encode_list = ['ascii','big5','big5hkscs','cp037','cp273','cp424','cp437','cp500','cp720','cp737','cp775','cp850','cp852','cp855','cp856','cp857','cp858','cp860','cp861','cp862','cp863','cp864','cp865','cp866','cp869','cp874','cp875','cp932','cp949','cp950','cp1006','cp1026','cp1125','cp1140','cp1250','cp1251','cp1252','cp1253','cp1254','cp1255','cp1256','cp1257','cp1258','euc_jp','euc_jis_2004','euc_jisx0213','euc_kr','gb2312','gbk','gb18030','hz','iso2022_jp','iso2022_jp_1','iso2022_jp_2','iso2022_jp_2004','iso2022_jp_3','iso2022_jp_ext','iso2022_kr','latin_1','iso8859_2','iso8859_3','iso8859_4','iso8859_5','iso8859_6','iso8859_7','iso8859_8','iso8859_9','iso8859_10','iso8859_11','iso8859_13','iso8859_14','iso8859_15','iso8859_16','johab','koi8_r','koi8_t','koi8_u','kz1048','mac_cyrillic','mac_greek','mac_iceland','mac_latin2','mac_roman','mac_turkish','ptcp154','shift_jis','shift_jis_2004','shift_jisx0213','utf_32','utf_32_be','utf_32_le','utf_16','utf_16_be','utf_16_le','utf_7','utf_8','utf_8_sig']
+
+    nfound = 0
+    for encode in encode_list:
+        try:
+            df= pd.read_csv(fn, encoding = encode)
+            print(encode)
+            nfound = nfound + 1
+
+        except Exception as e:
+            if verbose:
+                print(f"error: {e}")
+            pass
+
+    if nfound == 0:
+        print('\n\nno encoding found.')
+        if verbose:
+            print('searched:','\n'.join(encode_list))
+    else:
+        print('\nfound %i encodings'%(nfound))
 
 def program_path0():
     """first version. Both are from 
