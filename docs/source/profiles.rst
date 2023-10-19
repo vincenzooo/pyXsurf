@@ -11,8 +11,6 @@ Presentation and interfaces
 -----------------------------
 
 `Tutorial 2 <../../../source/pyProfile/test/Profile_class_tutorial.html>`_
-
-* :doc:`Basic<notebooks/basic_usage.ipynb>`
 	
 Profile Example <../../../source/pyProfile/test/Profile_class_tutorial.ipynb>_
 
