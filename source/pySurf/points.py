@@ -611,7 +611,7 @@ def points_find_grid2(points,result='shape',sort='head',steps=None):
         fastind=0
     elif sort == 'yx':
         fastind=1
-    elif sort is 'center':
+    elif sort == 'center':
         #try to guess
         #determines the fastest from the smallest step.
         # if steps are the same cannot determine. Use some point at the middle
@@ -626,7 +626,7 @@ def points_find_grid2(points,result='shape',sort='head',steps=None):
             fastind=1   #x
         else:
             fastind=np.nan
-    elif sort is 'head':   # determine fast index from the first points, this is same method as in the first implementation in points_find_grid (not 2)
+    elif sort == 'head':   # determine fast index from the first points, this is same method as in the first implementation in points_find_grid (not 2)
         #determines the fastest from the smallest step.
         # if steps are the same cannot determine.
         d=[points[1,0]-points[0,0],points[1,1]-points[0,1]]
