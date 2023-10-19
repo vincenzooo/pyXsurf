@@ -26,7 +26,7 @@ then move to the project folder and install as developer::
    cd pyXsurf
    pip install -e .
 
-... where ``-e`` stands for ``--editable``.
+... where ``-e`` stands for ``--editable`` (don't forget the final `.` for the current directory).
 This maintains the import synchronized with the software (in other words, you don't need to reinstall the package every time you make changes). This will work also if you checkout another branch (you might need to reimport the module in that case).
 
 In addition, if you are using IPython or derived tools (e.g. Jupyter notebooks) it is suggested to add the following magic commands at the beginning of your work:

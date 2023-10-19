@@ -2,7 +2,7 @@
 import sys
 import numpy as np
 import sys
-sys.ps1 = 'SOMETHING'
+# sys.ps1 = ' message from C:\Users\kovor\Documents\python\pyXTel\source\plotting\add_clickable_markers.py'
 from matplotlib import pyplot as plt
 
 
