@@ -17,11 +17,21 @@ Changes
 
 Installation
 ------------
-Before proceding, it can be advisable to update your environment, and especially ``pip``, to the most recent version.
 
-At the moment the best way to install the most updated version, which contains many bug fixes and updated functionalities, is to clone the source code from github and install from there. 
+Preparation
+***********
+Especially for testing purpose, or just to keep things clean, it can be useful to work in a separate space, so you may want to create a new environment (e.g. this is done in ``conda`` with  ``conda env create <envname>`` and ``conda activate <envname>``, you can check https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/ for the equivalent `venv` commands). In any case, make sure you are working in the right environment.
 
-You can use the ``Code`` button at top of page, or git clone from command-line
+It can be advisable to update your environment, and especially ``pip``, to the most recent version. You can run ``python -m pip install --upgrade pip`` to upgrade pip, or install it as described in https://pip.pypa.io/en/stable/installation.
+
+You should now be able to install ``pyXsurf`` and all dependencies.
+
+Installing
+***********
+
+You can get the most updated version by cloning the source code from github and installing from there. 
+
+To do this, use the ``Code`` button at top of page, or ``git clone`` from command-line
 ``git clone https://github.com/vincenzooo/pyXSurf.git``. 
 
 At this point you should move to the folder with the code and call from command line ``pip install .`` (equivalend to ``python setup.py install``). 

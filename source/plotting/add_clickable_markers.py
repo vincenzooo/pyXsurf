@@ -2,7 +2,9 @@
 import sys
 import numpy as np
 import sys
-# sys.ps1 = ' message from C:\Users\kovor\Documents\python\pyXTel\source\plotting\add_clickable_markers.py'
+# sys.ps1 = 'SOMETHING' # this redefines the primary prompt of system command line, not sure
+# why it was here, but it is called a number of times when importing
+print ('cane')
 from matplotlib import pyplot as plt
 
 
