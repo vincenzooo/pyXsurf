@@ -301,7 +301,7 @@ def rotate_data(data,x=None,y=None,ang=0,k=None,center=None,
 
     rot90 determination of rotated axis can probably be extended to general case, but in the meanwhile
     the implementation based on points offers an accurate interpolation (even if slower),
-      can be enabled setting flag `usepoints`.
+    can be enabled setting flag `usepoints`.
     """
     #establish data coordinates if not provided
     if x is None:
@@ -650,8 +650,8 @@ def get_data(*args,**kwargs):
     """
     '''
     def get_data(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,
-             addaxis=False,center=None,skip_header=None,delimiter=' ',
-             autocrop=False):
+            addaxis=False,center=None,skip_header=None,delimiter=' ',
+            autocrop=False):
     '''
     from pySurf.data2D import data_from_txt
     
@@ -665,7 +665,7 @@ def data_from_txt(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,
     
     handle addaxis, center and strip nan, on top of all `np.genfromtxt` options.
     This function shouldn't be called directly, there are smarter ways of doing it using read_data and readers,
-      however, this is a quick way to get data from text if you don't know what I am talking about.
+    however, this is a quick way to get data from text if you don't know what I am talking about.
 
     center: is the position of the center of the image in final coordinates (changed on 2016/08/10, it was '(before any scaling or rotation) in absolute coordinates.') If None coordinates are left unchanged.
         Set to (0,0) to center the coordinate system to the data.
@@ -956,28 +956,29 @@ def projection(data,axis=0,span=False,expand=False):
     span: if set, return  3 vectors [avg, min, max] with min and max calculated 
     pointwise along same direction.
     expand: instead of a single vector with point-wise minima, returns lists of 
-    all vectors having at least one point
-        that is minimum (maximum) between all vectors parallel to axis. Overrides span.
-    ex:
-    a=array([[21, 16,  3, 14],
-             [22, 17,  6, 15],
-             [ 0,  3, 21, 16]])
+    all vectors having at least one point that is minimum (maximum) between all vectors parallel to axis. Overrides span. ex:
+    
+        a=array([[21, 16,  3, 14],
+                [22, 17,  6, 15],
+                [ 0,  3, 21, 16]])
 
-    In [62]: projection(a)
-    Out[62]: array([ 14.33333333,12.,10.,15.])
+        In [62]: projection(a)
+        Out[62]: array([ 14.33333333,12.,10.,15.])
 
-    In [73]: projection(a,span=True)
-    Out[73]:
-    [array([ 14.33333333,12.,10.,15.]),
-     array([ 0,  3,  3, 14]),
-     array([22, 17, 21, 16])]
+        In [73]: projection(a,span=True)
+        Out[73]:
+        [array([ 14.33333333,12.,10.,15.]),
+        array([ 0,  3,  3, 14]),
+        array([22, 17, 21, 16])]
 
-    In [71]: projection(a,expand=True)
-    Out[71]:
-    [array([ 14.33333333,12.,10.,15.]),
-     array([[21, 16,  3, 14],[ 0,  3, 21, 16]]),
-     array([[22, 17,  6, 15],[ 0,  3, 21, 16]])]
+        In [71]: projection(a,expand=True)
+        Out[71]:
+        [array([ 14.33333333,12.,10.,15.]),
+        array([[21, 16,  3, 14],[ 0,  3, 21, 16]]),
+        array([[22, 17,  6, 15],[ 0,  3, 21, 16]])]
+    
     """
+    
     pm=np.nanmean(data,axis=axis)
 
     if expand:
@@ -1049,10 +1050,9 @@ def get_stats(data=None,x=None,y=None,units=None,vars=None,string=False,fmt=None
     
     `vars` is an array of indices selecting which variables must be included in the statistics. You can call `stats` with no argument to see the list of variables (and standard format).    
     The options are:
-        scalar: use a preset (=1 basic statistics, =2 for extended statistics)
-        single level list of integer indices (e.g. =[0,1]): it is applied only to data. 
-        two-level nested list (e.g. =[[0,1]]) and the outer list has a single element, the selection is used replicated to data, x, y. 
-        3-element nested list =[[0,1],[1],[2]]: indicates different choices for data, x and y.
+    *scalar: use a preset (=1 basic statistics, =2 for extended statistics) single level list of integer indices (e.g. =[0,1]): it is applied only to data. 
+    * two-level nested list (e.g. =[[0,1]]) and the outer list has a single element, the selection is used replicated to data, x, y. 
+    * 3-element nested list =[[0,1],[1],[2]]: indicates different choices for data, x and y.
     
     In this context, special values can be used to indicate different type of defaults (N.B.: vars are in order matching `data, x, y`), these are internally converted to the proper format:
     None: don't include element (e.g. [1,2] is equivalent to [[1,2],None,None])
@@ -1065,7 +1065,7 @@ def get_stats(data=None,x=None,y=None,units=None,vars=None,string=False,fmt=None
     
     `fmt` uses `dataIO.arrays.stats`, but it is not divided in axis. All axis settings are combined in a single list. If `string` is set to True `get_stats` returns a flattened array of strings, so an array of equal lenght can be passed, or a scalar, used for all axis and stats. 
     Note that strings are assembled here without accessing to `dataIO.arrays.stats` function, whose `fmt` argument is not used at all here. 
-     
+
     `units` are used and appended to `fmt` if not None or set to empty string.
     The length of the two must match, and are converted to the correct format inside this function.
     Conversion is made in this case in dependance on the format of `vars`. For example, `vars = [[1,2,3],None,None]` requires to convert ['mm','mm','um'] to ['um','um','um']
@@ -1352,7 +1352,7 @@ def data_histostats(data,x=None,y=None,bins=100,density=True,units=None,loc=0,*a
     plt.axvline(np.nanmean(data)+np.nanstd(data),ls=':')
     #plt.legend(loc=0)
     return res
-data_histostats=update_docstring(data_histostats,plt.hist)
+#data_histostats=update_docstring(data_histostats,plt.hist)
 
 
 ## PLOT FUNCTIONS
@@ -1365,7 +1365,7 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     or integer value: True or 1 plots statistics, 2 plots x and y spans
     largs is a dictionary of arguments passed to caption in plotting.caption.legendbox
     (used only if stats are plotted).
-        (e.g. {'color':'r'}
+    (e.g. {'color':'r'}
     Returns axis (modified 2023/01/17, was returning axim as returned by plt.imshow).
     nsigma set colorscale to this multiple of data standard deviation.
     In alternative can be a dictionary containing arguments for remove_outliers. 
@@ -1727,8 +1727,8 @@ def plot_slope_2D(wdata,x,y,scale=(1.,1.,1.),vrange=None,srange=None,filter=Fals
     plot map and slice slope rms in x and y. Return the three axis.
     Set scale to (1,1,1000.) for z in micron, x,y in mm.
     If filter is set, data out of srange are removed and automatic scale is
-      used for plot. If not, srange is used for plot axis, but all data
-      are used in plots and rms calculation. """
+    used for plot. If not, srange is used for plot axis, but all data
+    are used in plots and rms calculation. """
 
     slopeax,slopeaz=calculate_slope_2D(wdata,x,y,scale=scale)
     if filter:
