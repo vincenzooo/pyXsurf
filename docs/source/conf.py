@@ -10,9 +10,11 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+
+# according to below and https://sphinx-rtd-tutorial.readthedocs.io/en/latest/sphinx-config.html
+sys.path.insert(0, os.path.abspath('..\..\..\source'))
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here.
@@ -46,11 +48,10 @@ extensions = ['myst_parser',
               #'sphinx_gallery.load_style',   #not present in latest documentation
               #"guzzle_sphinx_theme",
               'sphinx.ext.autodoc',
-              'sphinx.ext.doctest',
+              #'sphinx.ext.doctest',
               'sphinx.ext.autosummary',
-              'nbsphinx',
               'sphinx_automodapi.automodapi',
-              'sphinx.ext.autosectionlabel',
+              #'sphinx.ext.autosectionlabel',
               'sphinx.ext.inheritance_diagram'
 ]
 

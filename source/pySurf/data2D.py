@@ -120,7 +120,7 @@ def fitlegendre(x,y=None,deg=None,nanstrict=False,fixnans=False):
     
     2020/09/16 modified 1D/2D mechanism, where all the code,
     including the part in common 1D/2D was moved to the 2D specific part, 
-    while the 1D part is completely delegated to functions in `pyProfile.profile`.
+    while the 1D part is completely delegated to functions in ``pyProfile.profile``.
     """
     '''
     note this was working with nan
@@ -209,8 +209,8 @@ def levellegendre(x,y,deg,nanstrict=False):
 def level_data(data,x=None,y=None,degree=1,axis=None,byline=False,fit=False,*args,**kwargs):
     """Use RA routines to remove degree 2D legendres or levellegendre if leveling by line.
     
-    Degree can be scalar (it is duplicated) or 2-dim vector. must be scalar if leveling by line. Note the important difference between e.g. `degree = 2` and
-      `degree = (2,2)`. The first one uses degree as total degree, it expands then to xl,yl = [0,1,0,1,2,0],[0,0,1,1,0,2]. The second
+    Degree can be scalar (it is duplicated) or 2-dim vector. must be scalar if leveling by line. Note the important difference between e.g. ``degree = 2`` and
+      ``degree = (2,2)``. The first one uses degree as total degree, it expands then to xl,yl = [0,1,0,1,2,0],[0,0,1,1,0,2]. The second
 
     leveling by line (controlled by axis keyword) also handle nans.
     x and y are not used, but maintained for interface consistency.
@@ -297,11 +297,11 @@ def rotate_data(data,x=None,y=None,ang=0,k=None,center=None,
     Added 2018/12/12
     args and kwargs are passed to the function that handles the rotation.
 
-    See also comments on resampling in `data2D.apply_transform`.
+    See also comments on resampling in ``data2D.apply_transform``.
 
     rot90 determination of rotated axis can probably be extended to general case, but in the meanwhile
     the implementation based on points offers an accurate interpolation (even if slower),
-    can be enabled setting flag `usepoints`.
+    can be enabled setting flag ``usepoints``.
     """
     #establish data coordinates if not provided
     if x is None:
@@ -428,7 +428,7 @@ def register_data(data,x,y,scale=(1,1,1.),
     """Get data,x,y and register them using usual set of parameters.
 
     registering operation are performed in the following order and are:
-        scale: scale the three axis of the `scale` factor, if sign is changed, reorder.
+        scale: scale the three axis of the ``scale`` factor, if sign is changed, reorder.
         strip: if True, strip all nans at the border of the data.
         crop: list of ranges (3 axis) to pass to data2D.crop_data
         center: final position of data center (0,0) in x and y data coordinates, 
@@ -483,10 +483,9 @@ def data_equal(d1,d2,nanstrict=False):
 
 
 def read_data(file,rreader,**kwargs):
-    """Read data from a file using a given raw reader `rreader`, with custom options in `args, kwargs`.
+    """Read data from a file using a given raw reader ``rreader``, with custom options in ``args, kwargs``.
 
-    The function calls raw reader, but, before this, strips all options that are recognized by register_data,
-      all remaining unkown parameters are passed to rreader.
+    The function calls raw reader, but, before this, strips all options that are recognized by register_data, all remaining unkown parameters are passed to rreader.
     Then register_data is called with the previously stored settings (or defaults if not present).
 
     This was made to hide messy code beyond interface. See old notes below, internal behavior can be better fixed e.g. by using dataIO.dicts.pop_kw and inspect.signature and fixing header interface.
@@ -663,7 +662,7 @@ def data_from_txt(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,
     addaxis=False,center=None,skip_header=None,delimiter=' ',strip=False,**kwargs):
     """Read matrix from text file. Return data,x,y.
     
-    handle addaxis, center and strip nan, on top of all `np.genfromtxt` options.
+    handle addaxis, center and strip nan, on top of all ``np.genfromtxt`` options.
     This function shouldn't be called directly, there are smarter ways of doing it using read_data and readers,
     however, this is a quick way to get data from text if you don't know what I am talking about.
 
@@ -1043,49 +1042,51 @@ def slope_2D(wdata,x,y,scale=(1.,1.,1.)):
 
 
 def get_stats(data=None,x=None,y=None,units=None,vars=None,string=False,fmt=None):
-    """ Return selected statistics for each of data,x,y as numeric array or string, wrapping `dataIO.stats`. 
+    """ Return selected statistics for each of data,x,y as numeric array or string, wrapping ``dataIO.stats``. 
     
-    `vars` determines which statistical indicators are included in stats, while `string`, `fmt` and `units` are used to generate and control a string output in a similar way as in wrapped function `dataIO.arrays.stats`. `get_stats` implements a more versatile syntax handling statistics on  three coordinates axis.
-    See the test function `test_get_stats` for more examples.
+    ``vars`` determines which statistical indicators are included in stats, while ``string``, ``fmt`` and ``units`` are used to generate and control a string output in a similar way as in wrapped function ``dataIO.arrays.stats``. ``get_stats`` implements a more versatile syntax handling statistics on  three coordinates axis.
+    See the test function ``test_get_stats`` for more examples.
     
-    `vars` is an array of indices selecting which variables must be included in the statistics. You can call `stats` with no argument to see the list of variables (and standard format).    
+    ``vars`` is an array of indices selecting which variables must be included in the statistics. You can call ``stats`` with no argument to see the list of variables (and standard format).    
+    
     The options are:
-    *scalar: use a preset (=1 basic statistics, =2 for extended statistics) single level list of integer indices (e.g. =[0,1]): it is applied only to data. 
+    
+    * scalar: use a preset (=1 basic statistics, =2 for extended statistics) single level list of integer indices (e.g. =[0,1]): it is applied only to data. 
     * two-level nested list (e.g. =[[0,1]]) and the outer list has a single element, the selection is used replicated to data, x, y. 
     * 3-element nested list =[[0,1],[1],[2]]: indicates different choices for data, x and y.
     
-    In this context, special values can be used to indicate different type of defaults (N.B.: vars are in order matching `data, x, y`), these are internally converted to the proper format:
+    In this context, special values can be used to indicate different type of defaults (N.B.: vars are in order matching ``data, x, y``), these are internally converted to the proper format:
     None: don't include element (e.g. [1,2] is equivalent to [[1,2],None,None])
     []:  use default (e.g. [[0,2],[],None] uses default for x and doesn't report y)
     [[]]: use full set of variables (e.g. [[0,2],[],[[]]] uses default for x and full stats for y, [[[]]] uses full for data).
 
-    Statistics are returned as array of numerical values, unless `string` flag is set. In that case, `units` and `fmt` are used to control the output format.
+    Statistics are returned as array of numerical values, unless ``string`` flag is set. In that case, ``units`` and ``fmt`` are used to control the output format.
         
-    `units` (scalar in `dataIO.arrays.stats`) can be passed as 3-element list of strings to individually set the units for each axis. These are appended to every value in the respective axis (a more flexible behavior can be obtained by using `fmt`). If scalar is used on data axis, if single element string array, use for all axis (i.e. set `units` as array to obtain different behavior like units=['','',u] to set only the data axis).
+    ``units`` (scalar in ``dataIO.arrays.stats``) can be passed as 3-element list of strings to individually set the units for each axis. These are appended to every value in the respective axis (a more flexible behavior can be obtained by using ``fmt``). If scalar is used on data axis, if single element string array, use for all axis (i.e. set ``units`` as array to obtain different behavior like units=['','',u] to set only the data axis).
     
-    `fmt` uses `dataIO.arrays.stats`, but it is not divided in axis. All axis settings are combined in a single list. If `string` is set to True `get_stats` returns a flattened array of strings, so an array of equal lenght can be passed, or a scalar, used for all axis and stats. 
-    Note that strings are assembled here without accessing to `dataIO.arrays.stats` function, whose `fmt` argument is not used at all here. 
+    ``fmt`` uses ``dataIO.arrays.stats``, but it is not divided in axis. All axis settings are combined in a single list. If ``string`` is set to True ``get_stats`` returns a flattened array of strings, so an array of equal lenght can be passed, or a scalar, used for all axis and stats. 
+    Note that strings are assembled here without accessing to ``dataIO.arrays.stats`` function, whose ``fmt`` argument is not used at all here. 
 
-    `units` are used and appended to `fmt` if not None or set to empty string.
+    ``units`` are used and appended to ``fmt`` if not None or set to empty string.
     The length of the two must match, and are converted to the correct format inside this function.
-    Conversion is made in this case in dependance on the format of `vars`. For example, `vars = [[1,2,3],None,None]` requires to convert ['mm','mm','um'] to ['um','um','um']
+    Conversion is made in this case in dependance on the format of ``vars``. For example, ``vars = [[1,2,3],None,None]`` requires to convert ['mm','mm','um'] to ['um','um','um']
     
-    If default, units are built from vars and from strings obtained from `dataIO.arrays.stats` (called without data).
+    If default, units are built from vars and from strings obtained from ``dataIO.arrays.stats`` (called without data).
     
     TODO: span doesn't exclude nan data, put flag to tune this option.
-    TODO: there is some confusion in creating labels for `plot_data` because it can be unclear which one is X, Y, Z. A label should be added externally or in a routine. Also, statistics cannot be sorted (a list is returned, so it is possible to sort the list).
+    TODO: there is some confusion in creating labels for ``plot_data`` because it can be unclear which one is X, Y, Z. A label should be added externally or in a routine. Also, statistics cannot be sorted (a list is returned, so it is possible to sort the list).
     TODO: make a default extended stats, with  span and pts nr. for x and y and mean, span, rms for z. 
     
     """
     
     """
-    If a single scalar value is passed as `vars`, this is intended as a preset (1,2 for backward compatibility, where 1 is basic data statistics, and 2 more extended, including x and y size). These presets are defined in `data2D.get_stats`, which can also be called directly to test generation of legend for `data2D.plot_data`, like e.g.:
+    If a single scalar value is passed as ``vars``, this is intended as a preset (1,2 for backward compatibility, where 1 is basic data statistics, and 2 more extended, including x and y size). These presets are defined in ``data2D.get_stats``, which can also be called directly to test generation of legend for ``data2D.plot_data``, like e.g.:
 
         from pySurf.data2D import get_stats 
         get_stats(data,x,y,vars=[1,2,3],units=['mm','mm','mm'],string=True,fmt=None)
         
     """
-    # put value of `units` in u, converted to standard 3-el string array 
+    # put value of ``units`` in u, converted to standard 3-el string array 
     if units is None or not string:
         u = ["","",""]
     elif isinstance(units,str): #assumes z
@@ -1331,7 +1332,7 @@ def plot_stats(datalist,x=None,y=None,bins=100,labels=None,*args,**kwargs):
 
 def data_histostats(data,x=None,y=None,bins=100,density=True,units=None,loc=0,*args,**kwargs):
     """wrapper around plt.hist, plot histogram of data (over existing window) adding label with stats. 
-    `density` set tu True normalizes distribution to have sum equal 1. Return 3-uple according to `plt.hist`:"""
+    ``density`` set tu True normalizes distribution to have sum equal 1. Return 3-uple according to ``plt.hist``:"""
     
     units=units if units is not None else ['[X]','[Y]','[Z]']
     #pdb.set_trace()
@@ -1373,8 +1374,8 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     If dict, a nummber of parameters for can be passed to remove_outliers.remove_outliers to determine color range (data are left intact).
     
     2020/11/05 updated all stats functions.
-    2020/07/14 added flag `contour` to overplot contours, and colors,
-    to be passed to `plt.contour`"""
+    2020/07/14 added flag ``contour`` to overplot contours, and colors,
+    to be passed to ``plt.contour``"""
 
     from mpl_toolkits.axes_grid1 import make_axes_locatable
     

@@ -1,0 +1,355 @@
+
+
+<!doctype html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Getting Started &#8212; pyXsurf v1.5.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=649a27d8" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css?v=532c1bf3" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+    
+    <script src="_static/documentation_options.js?v=74e2a9bf"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pyXsurf v1.5.6 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Getting Started</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="getting-started">
+<span id="readme"></span><h1>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading">¶</a></h1>
+</section>
+<section id="pyxsurf-formerly-pyxtel">
+<h1>pyXsurf (formerly pyXTel)<a class="headerlink" href="#pyxsurf-formerly-pyxtel" title="Link to this heading">¶</a></h1>
+<p>Python library for X-Ray Optics, Metrology Data Analysis and Telescopes
+Design.</p>
+<p>This library starts from code collected during many years of work on surface metrology and X-ray optics and wants to offer to the community an extensible tool to perfom common operations on surface and profile data, together with a set of tools to perform typical operations on data, in particular related to X-ray optics.</p>
+<section id="changes">
+<h2>Changes<a class="headerlink" href="#changes" title="Link to this heading">¶</a></h2>
+<p>2023/07/15 Starting implementing major changes towards common standards and best-practices.
+2022/09/06 Created new branch <code class="docutils literal notranslate"><span class="pre">pyXsurf_nbdev</span></code> for experimenting with
+2021/07/21 Upgraded installation mechanism.
+2020/11/09 Changed repository name from <code class="docutils literal notranslate"><span class="pre">pyXTel</span></code> to
+<code class="docutils literal notranslate"><span class="pre">pyXSurf</span></code>.</p>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
+<p>It is the generic procedure, see links for the details of different environments. It is described how to prepare the system (update packages and optionally create a dedicated environment), and installing and testing the library.</p>
+<section id="preparation">
+<h3>Preparation<a class="headerlink" href="#preparation" title="Link to this heading">¶</a></h3>
+<p>It is reccomended to update <code class="docutils literal notranslate"><span class="pre">pip</span></code>, to the most recent version. You can run <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--upgrade</span> <span class="pre">pip</span></code> to upgrade pip, or install it as described in <a class="reference external" href="https://pip.pypa.io/en/stable/installation">https://pip.pypa.io/en/stable/installation</a>.</p>
+<p>If you want to try the package without modifying your current environment, it can be useful to work in a separate space, creating a new environment (e.g. this is done in <code class="docutils literal notranslate"><span class="pre">conda</span></code> with  <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">env</span> <span class="pre">create</span> <span class="pre">&lt;envname&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">&lt;envname&gt;</span></code>, you can check <a class="reference external" href="https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/">https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/</a> for the equivalent <cite>venv</cite> commands). In any case, make sure you are working in the right environment.</p>
+<p>You should now be ready to install <code class="docutils literal notranslate"><span class="pre">pyXsurf</span></code> and all dependencies.</p>
+</section>
+<section id="id1">
+<h3>Installation<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<p>You can get the most updated version by cloning the source code from github and installing from there.</p>
+<p>To do this:</p>
+<p>1. use the <code class="docutils literal notranslate"><span class="pre">Code</span></code> button at top of page, or <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span></code> from command-line
+<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/vincenzooo/pyXSurf.git</span></code>.</p>
+<p>2. move to the folder with the code and call from command line <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">.</span></code> (equivalend to <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span></code>).
+This will perform a “regular” installation  (meaning that the code is copied to <code class="docutils literal notranslate"><span class="pre">site-packages</span></code> folders, which holds all installed Python libraries, and made accessible to your system).</p>
+<p>If instead you plan to modify pyXsurf code, please read the additional information on the :ref:<code class="docutils literal notranslate"><span class="pre">README_developers</span></code> page.</p>
+</section>
+</section>
+</section>
+<section id="uninstalling">
+<h1>Uninstalling<a class="headerlink" href="#uninstalling" title="Link to this heading">¶</a></h1>
+<p>Code can be uninstalled calling <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">uninstall</span> <span class="pre">pyXsurf</span></code> from a command prompt, or from source code folder calling directly the setup file <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">develop</span>&#160; <span class="pre">-u</span></code> (if you installed as developer, deinstallation is expected to work only with most recent pip versions, at least &gt;=19.1.1, otherwise it should be enough to delete the folder).</p>
+<section id="how-to-use">
+<h2>How to use<a class="headerlink" href="#how-to-use" title="Link to this heading">¶</a></h2>
+<p>At this point you can open Python and try <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pySurf</span></code>, if this
+works without errors, you can now import and use the different modules (see description below) which are part of the library, e.g., with:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pySurf.data2D</span> <span class="kn">import</span> <span class="n">data2D</span>
+</pre></div>
+</div>
+<p>In addition to the <a class="reference external" href="https://pyxsurf.readthedocs.io">official documentation</a> , you can find examples and data in a <code class="docutils literal notranslate"><span class="pre">test</span></code> subfolder of each
+module and at the end of module files. Functions are usually documented with docstrings (but these might be in the wrong place, please be patient and look well in the code).
+There is a lot more, but this is a big work-in-progress, and they are not easily accessible yet, please read below for details, or write an email or an issue.</p>
+</section>
+<section id="modules">
+<h2>Modules<a class="headerlink" href="#modules" title="Link to this heading">¶</a></h2>
+<p>A basic description of the different modules is (N.B.: some of these functions have been temporarily moved out of the codebase to simplify the reimplementation, in case these are needed, please send an email):</p>
+<ul class="simple">
+<li><p><strong>dataIO</strong> Generic routines for accessing and manipulating data and files.</p></li>
+<li><p><strong>notebooks</strong> Jupyter notebooks, not necessarily related to the libraries, include test and experiments on python.</p></li>
+<li><p><strong>plotting</strong> Plotting functions for pySurf data.</p></li>
+<li><p><strong>pyGeo3D</strong> Functions for geometry in space (lines and planes).</p></li>
+<li><p><strong>pyProfile</strong> Equivalent of pySurf acting on Profiles.</p></li>
+<li><p><strong>pySurf</strong> Functions and classes acting on 3D points or surfaces.</p></li>
+<li><p><strong>thermal</strong> Functions for modelling of thermal forming of glass.</p></li>
+</ul>
+</section>
+<section id="status-of-the-library-and-additional-resources">
+<h2>Status of the library and additional resources<a class="headerlink" href="#status-of-the-library-and-additional-resources" title="Link to this heading">¶</a></h2>
+<p>The main part of the library is well defined and it works well. I am
+constantly adding functions when I find they are needed during my daily work.</p>
+<p>I have tried the installation according to the above instructions on a few computers and it worked smoothly. You are very welcome to help signaling any problem or missing information, please see <span class="xref std std-ref">Contributing</span> below.</p>
+<p>There are many examples scattered around in different folders <code class="docutils literal notranslate"><span class="pre">Demo</span></code>, <code class="docutils literal notranslate"><span class="pre">Tutorial</span></code>, <code class="docutils literal notranslate"><span class="pre">Test</span></code>, etc. , some of which are not precisely documented, or even finished. I am still trying to give an organic structure to documentation (it might takes time, as I am completely inesperienced). Until then, the best thing is to dig for notebooks .ipynb or .py files in these folders, or look in the single .py files from code library, which often contain small test functions or examples.</p>
+<p>There is not a real API documentation, as I am still trying to understand the standards, but there are a good amount of docstrings (even if they might be in the wrong place or format, sorry for that). Please use Python introspection (<code class="docutils literal notranslate"><span class="pre">?</span></code>, <code class="docutils literal notranslate"><span class="pre">??</span></code>, autocompletion, etc.), and some patience, to find more. If you are a documentation expert I could really use some advice on that.</p>
+<p>There are developer branches on github, which have extra functionalities, at the moment under development (they are quite messy, and some of the features might have been forgotten, so feel free to ask if you are looking for something in particular). These can be installed from code in the same way as the main branch and should work equally (just have more unfinished stuff). For git beginners, the only thing you need to do differently, is to switch branch, e.g. <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">checkout</span> <span class="pre">documentation</span></code> (where <code class="docutils literal notranslate"><span class="pre">documentation</span></code> is the name of the branch) after cloning the repository and before running the setup. Please check developers notes for a list of active branches and their features and for more details. Also, if you plan to make changes to the code and want to keep the changes automatically in synch, remember to install the code as “developer” (as explained above). Otherwise you can still make changes to the installed code (in site-packages), but you will need to reimport after every change.</p>
+<p>See developer notes <span class="xref std std-doc">README_developers.rst</span> for a detailed status of developement, how to access more recent features and last status of documentation (on developer brach), especially if you think you can help.
+Expecially installation and release mechanism, are in phase of improvement, as well as documentation.</p>
+</section>
+<section id="contributing">
+<h2>Contributing<a class="headerlink" href="#contributing" title="Link to this heading">¶</a></h2>
+<p>Please report bugs or feature requests, missing documentation, or open a
+issue on github <a class="reference external" href="https://github.com/vincenzooo/pyXsurf/issues">https://github.com/vincenzooo/pyXsurf/issues</a>.</p>
+<p>Expecially appreciated is if you can provide templates, examples or
+hints on how to handle, documentation (Sphinx), packaging, continuous
+integration (Github).</p>
+<p>Please check <span class="xref std std-ref">developersnotes</span> for the status of the
+development, or if are willing to help in any way.</p>
+</section>
+<section id="citation">
+<h2>Citation<a class="headerlink" href="#citation" title="Link to this heading">¶</a></h2>
+<a class="reference external image-reference" href="https://zenodo.org/badge/latestdoi/165474659"><img alt="https://zenodo.org/badge/165474659.svg" src="https://zenodo.org/badge/165474659.svg" /></a>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Link to this heading">¶</a></h2>
+<p>This project is Copyright (c) Vincenzo Cotroneo and licensed under
+the terms of the BSD 3-Clause license. See the licenses folder for
+more information.</p>
+</section>
+<section id="author">
+<h2>Author<a class="headerlink" href="#author" title="Link to this heading">¶</a></h2>
+<p>Vincenzo Cotroneo <a class="reference external" href="mailto:vincenzo&#46;cotroneo&#37;&#52;&#48;inaf&#46;it">vincenzo<span>&#46;</span>cotroneo<span>&#64;</span>inaf<span>&#46;</span>it</a></p>
+</section>
+</section>
+<section id="for-developers">
+<span id="readmedev"></span><h1>For developers<a class="headerlink" href="#for-developers" title="Link to this heading">¶</a></h1>
+<section id="developersnotes-contrib">
+<span id="id2"></span><h2>Contributing<a class="headerlink" href="#developersnotes-contrib" title="Link to this heading">¶</a></h2>
+<p>If you find bugs, errors, omissions or other things that need improvement,
+please create an issue or a pull request at
+<a class="reference external" href="https://github.com/vincenzooo/pyXsurf">https://github.com/vincenzooo/pyXsurf</a>.
+Contributions are always welcome!</p>
+<p>Here is summarised the current status and the best practices for development for code, documentation, packaging, and testing.
+This is a work in progress, the project is going through a major restyling with the intent of standardizing the workflow for updates of software and documentation, but many aspects are still being defined.</p>
+<p>If you are interested in contributing, please check often these pages. In the meanwhile you are very welcome to signal any problem or missing information, especially if anything is not working as documented or if you can point to templates or examples.</p>
+</section>
+</section>
+<section id="developers-installation">
+<span id="developersnotes-install"></span><h1>Developers Installation<a class="headerlink" href="#developers-installation" title="Link to this heading">¶</a></h1>
+<p>To start, it is suggested to clone the latest
+development version (a.k.a. “master”) with Git:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">vincenzooo</span><span class="o">/</span><span class="n">pyXsurf</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+<p>then move to the project folder and install as developer:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">pyXsurf</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span>
+</pre></div>
+</div>
+<p>… where <code class="docutils literal notranslate"><span class="pre">-e</span></code> stands for <code class="docutils literal notranslate"><span class="pre">--editable</span></code> (don’t forget the final <code class="docutils literal notranslate"><span class="pre">.</span></code> for the current directory).
+Doing this, the library will be installed from current position (no local copy), any change to the code in this folder will be immediately available in the imported library (the second command (see <a class="reference external" href="https://packaging.python.org/en/latest/guides/distributing-packages-using-setuptools/">https://packaging.python.org/en/latest/guides/distributing-packages-using-setuptools/</a> for detailed information on how this works).</p>
+<p>This maintains the import synchronized with the software (in other words, you don’t need to reinstall the package every time you make changes). This will work also if you checkout another branch (you might need to reimport the module in that case).</p>
+<p>In addition, if you are using IPython or derived tools (e.g. Jupyter notebooks) it is suggested to add the following magic commands at the beginning of your work:</p>
+<blockquote>
+<div><p>%load_ext autoreload
+%autoreload 2</p>
+</div></blockquote>
+<p>This will automatically make sure that the code is reimported at any change.</p>
+</section>
+<section id="working-on-documentation">
+<h1>Working on documentation<a class="headerlink" href="#working-on-documentation" title="Link to this heading">¶</a></h1>
+<p>If you want to work on the documentation only, or you want to test it, you can put yourself in the <code class="docutils literal notranslate"><span class="pre">docs</span></code> directory and call:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">html</span></code> will normally compile the “official” documentation for the pyXsurf library at the current status of development.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">html</span> <span class="pre">.\source_test_doc</span></code> will compile also the test documentation, creating a front page which links to the “official” documentation, but also at a test documentation, where the dubious concepts are tested in details.</p></li>
+</ul>
+<p>In both cases the compiled HTML documentation will be visible in <code class="docutils literal notranslate"><span class="pre">docs\build\html\index.html</span></code>.</p>
+<p>You can refer to the official pages of <code class="docutils literal notranslate"><span class="pre">Sphinx</span></code> and <code class="docutils literal notranslate"><span class="pre">nbspinx</span></code> tools for reference and syntax guide:</p>
+<p>If you modify any file, and you suspect it could be an improvement, please write to <a class="reference external" href="mailto:vincenzo&#46;cotroneo&#37;&#52;&#48;inaf&#46;it">vincenzo<span>&#46;</span>cotroneo<span>&#64;</span>inaf<span>&#46;</span>it</a>, or use regular git functions (<code class="docutils literal notranslate"><span class="pre">pull</span> <span class="pre">requests</span></code> or <code class="docutils literal notranslate"><span class="pre">issue</span> <span class="pre">tracker</span></code>, you probably know this stuff better than I do).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Themes are defined in the <code class="docutils literal notranslate"><span class="pre">conf.py</span></code> file of each folder, so there might be a difference in the aspect of the “official” documentation, according to which compilation command is run. TODO: make this point uniform, by making the configuration for tests to recall the configuration for the “official page”.</p>
+</div>
+</section>
+<section id="active-branches">
+<h1>Active Branches<a class="headerlink" href="#active-branches" title="Link to this heading">¶</a></h1>
+<p>At the moment, the updated project is on the master branch, which is the only used. In the past there were attempts to establish development branches, which are now not maintained and are:</p>
+<ul class="simple">
+<li><p><strong>documentation</strong> The most recent branching, it is mostly devoted at developing better sphinx documentation</p></li>
+<li><p><strong>readers_dev</strong> Development to Reader routines for I/O of file formats</p></li>
+</ul>
+<section id="roadmap">
+<h2>Roadmap<a class="headerlink" href="#roadmap" title="Link to this heading">¶</a></h2>
+<p>The roadmap is detailed in the following section, main area of work are:</p>
+<ul class="simple">
+<li><p>documentation</p></li>
+<li><p>testing</p></li>
+<li><p>installation</p></li>
+<li><p>continuous Integration</p></li>
+</ul>
+</section>
+</section>
+<section id="status-of-installer">
+<h1>Status of installer<a class="headerlink" href="#status-of-installer" title="Link to this heading">¶</a></h1>
+<p>The library is installable with common python practices,</p>
+<p>I have tried the installation on a few computers and it worked smoothly
+by <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>. The folder <code class="docutils literal notranslate"><span class="pre">test_install</span></code> contains tests
+that verify a correct installation.</p>
+<p>I can upload the package on test-PyPI, but not on the main PyPI, as I get an error, related to the too large size of the package.</p>
+<p>Plan is to achieve a full installable distribution on PyPI, and possibly on conda, and be able to maintain it through Continuous Integration.</p>
+</section>
+<section id="status-of-code">
+<h1>Status of code<a class="headerlink" href="#status-of-code" title="Link to this heading">¶</a></h1>
+<p>Code is quite consistent, and usually commented, but there are still a few modules in early stage of development or which might be removed or integrated somewhere else. Some are included for backwards compatibility, future needs or just to stay on the safe side of breaking dependencies.
+There might be additional features which I lost along the way while experimenting with git and might decide to reintegrate if I recover them for other needs.</p>
+</section>
+<section id="status-of-docs">
+<h1>Status of docs<a class="headerlink" href="#status-of-docs" title="Link to this heading">¶</a></h1>
+<p>Docstrings are scattered around the code and sometimes even in the right place for self-documentation to work,
+but this is quite non-uniform,
+as it mixes different conventions I tried over the time, and it will remain like this
+until I find one tool that I can use to maintain the documentation.</p>
+<p>I am not very skilled in using sphinx features, but I am learning.
+I started a new <code class="docutils literal notranslate"><span class="pre">documentation</span></code> branch for the development of documentation, which includes also tests on the different sphinx features. Basic api documentation is very rough, but seems to contain a good amount of documentation, so the obvious step is to obtain a minimally effective, decently clean API documentation, as a starting point for a refinement of the standard in documentation format, which is often not homogeneous.</p>
+<p>Formatting is indeed at the moment very poor, I have tried experimenting with templates (e.g. astropy), ipynb, rst and integration with github, things that I am really not sure how to handle. See more details in the homepage of the documentation branch.</p>
+<p>Also, some experiment with jupyter book, that looks a very appealing option on a long term, but implies a shift in paradygm.</p>
+</section>
+<section id="changes2">
+<h1>Changes2<a class="headerlink" href="#changes2" title="Link to this heading">¶</a></h1>
+<p>2022/03/31 started documentation branch. Upgrades to sphinx docs and github readme and readme_developers. did more attempts in separate folder based on astropy and astropy templates. See VS workspace.</p>
+<p>2022/03/22 Started restructuring repository. Renamed “source” folder to source (from pyXsurf). Add installation instructions for developers to this file and readme.txt.</p>
+<p>2021/07/21 Upgraded installation mechanism.</p>
+<p>2020/11/09 Changed repository name from <code class="docutils literal notranslate"><span class="pre">pyXTel</span></code> to
+<code class="docutils literal notranslate"><span class="pre">pyXSurf</span></code>.</p>
+<p>2021/07/21 Really trying to improve installation and release.
+Mostly following <a class="reference external" href="https://medium.com/free-code-camp/from-a-python-project-to-an-open-source-package-an-a-to-z-guide-c34cb7139a22">https://medium.com/free-code-camp/from-a-python-project-to-an-open-source-package-an-a-to-z-guide-c34cb7139a22</a> and based on astropy template.</p>
+</section>
+<section id="references">
+<h1>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h1>
+<p>For users new to Python, the library was developed on anaconda
+distribution. Any other distribution should be equivalent, however I
+never had any problem with Anaconda and find it very easy to work with,
+so I can only recommend it. Same way, I used for developement
+notepad++/IPython/jupyter on Windows; Spyder; VScode and feel to
+recommend any of these. Of course any other environment or editor works
+same way.</p>
+<p>if you are not sure of what you are doing (as I am most of the time), feel free to keep it locally and use only <code class="docutils literal notranslate"><span class="pre">git</span></code> or to use any expertise you have (and I don’t necessarily do have).</p>
+<p>This is a good page explaining the basic usage of <code class="docutils literal notranslate"><span class="pre">git</span></code>
+<a class="reference external" href="https://kbroman.org/github_tutorial/pages/routine.html">https://kbroman.org/github_tutorial/pages/routine.html</a></p>
+<p>See <a class="reference external" href="https://stackoverflow.com/questions/19048732/python-setup-py-develop-vs-install">https://stackoverflow.com/questions/19048732/python-setup-py-develop-vs-install</a> for comments on installation modes.
+TODO: summarize here.</p>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/Transparent Logo.png" alt="Logo"/>
+            </a></p>
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Getting Started</a></li>
+<li><a class="reference internal" href="#pyxsurf-formerly-pyxtel">pyXsurf (formerly pyXTel)</a><ul>
+<li><a class="reference internal" href="#changes">Changes</a></li>
+<li><a class="reference internal" href="#installation">Installation</a><ul>
+<li><a class="reference internal" href="#preparation">Preparation</a></li>
+<li><a class="reference internal" href="#id1">Installation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#uninstalling">Uninstalling</a><ul>
+<li><a class="reference internal" href="#how-to-use">How to use</a></li>
+<li><a class="reference internal" href="#modules">Modules</a></li>
+<li><a class="reference internal" href="#status-of-the-library-and-additional-resources">Status of the library and additional resources</a></li>
+<li><a class="reference internal" href="#contributing">Contributing</a></li>
+<li><a class="reference internal" href="#citation">Citation</a></li>
+<li><a class="reference internal" href="#license">License</a></li>
+<li><a class="reference internal" href="#author">Author</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#for-developers">For developers</a><ul>
+<li><a class="reference internal" href="#developersnotes-contrib">Contributing</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#developers-installation">Developers Installation</a></li>
+<li><a class="reference internal" href="#working-on-documentation">Working on documentation</a></li>
+<li><a class="reference internal" href="#active-branches">Active Branches</a><ul>
+<li><a class="reference internal" href="#roadmap">Roadmap</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#status-of-installer">Status of installer</a></li>
+<li><a class="reference internal" href="#status-of-code">Status of code</a></li>
+<li><a class="reference internal" href="#status-of-docs">Status of docs</a></li>
+<li><a class="reference internal" href="#changes2">Changes2</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/readme_link.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pyXsurf v1.5.6 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Getting Started</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2022, Vincenzo Cotroneo.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.2.
+    </div>
+  </body>
+</html>
