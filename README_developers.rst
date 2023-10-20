@@ -1,7 +1,7 @@
-.. _developersnotes:
+.. _developersnotes_contrib:
 
 Contributing
-============
+=============
 
 If you find bugs, errors, omissions or other things that need improvement,
 please create an issue or a pull request at
@@ -12,6 +12,8 @@ Here is summarised the current status and the best practices for development for
 This is a work in progress, the project is going through a major restyling with the intent of standardizing the workflow for updates of software and documentation, but many aspects are still being defined.
 
 If you are interested in contributing, please check often these pages. In the meanwhile you are very welcome to signal any problem or missing information, especially if anything is not working as documented or if you can point to templates or examples.
+
+.. _developersnotes_install:
 
 Developers Installation
 ------------------------
@@ -26,13 +28,16 @@ then move to the project folder and install as developer::
    cd pyXsurf
    pip install -e .
 
-... where ``-e`` stands for ``--editable`` (don't forget the final `.` for the current directory).
+... where ``-e`` stands for ``--editable`` (don't forget the final ``.`` for the current directory).
+Doing this, the library will be installed from current position (no local copy), any change to the code in this folder will be immediately available in the imported library (the second command (see https://packaging.python.org/en/latest/guides/distributing-packages-using-setuptools/ for detailed information on how this works).
+
 This maintains the import synchronized with the software (in other words, you don't need to reinstall the package every time you make changes). This will work also if you checkout another branch (you might need to reimport the module in that case).
+
 
 In addition, if you are using IPython or derived tools (e.g. Jupyter notebooks) it is suggested to add the following magic commands at the beginning of your work:
 
-	%load_ext autoreload
-	%autoreload 2
+    %load_ext autoreload
+    %autoreload 2
 
 This will automatically make sure that the code is reimported at any change.
 
@@ -41,18 +46,18 @@ Working on documentation
 
 If you want to work on the documentation only, or you want to test it, you can put yourself in the ``docs`` directory and call:
 
-* ``make html`` will normally compile the "official" documentation for the pyXsurf library at the current status of development.
-* ``make html .\source_test_doc`` will compile also the test documentation, creating a front page which links to the "official" documentation, but also at a test documentation, where the dubious concepts are tested in details.
++ ``make html`` will normally compile the "official" documentation for the pyXsurf library at the current status of development.
++ ``make html .\source_test_doc`` will compile also the test documentation, creating a front page which links to the "official" documentation, but also at a test documentation, where the dubious concepts are tested in details.
 
 In both cases the compiled HTML documentation will be visible in ``docs\build\html\index.html``.
 
-You can refer to the official pages of `Sphinx` and `nbspinx` tools for reference and syntax guide:
+You can refer to the official pages of ``Sphinx`` and ``nbspinx`` tools for reference and syntax guide:
 
 .. _PSphinx: https://www.sphinx-doc.org/en/master/tutorial/getting-started.html
 .. _nbsphinx: https://nbsphinx.readthedocs.io/
 
 
-If you modify any file, and you suspect it could be an improvement, please write to vincenzo.cotroneo@inaf.it, or use regular git functions (`pull requests` or `issue tracker`, you probably know this stuff better than I do).
+If you modify any file, and you suspect it could be an improvement, please write to vincenzo.cotroneo@inaf.it, or use regular git functions (``pull requests`` or ``issue tracker``, you probably know this stuff better than I do).
 
 .. note::
     Themes are defined in the ``conf.py`` file of each folder, so there might be a difference in the aspect of the "official" documentation, according to which compilation command is run. TODO: make this point uniform, by making the configuration for tests to recall the configuration for the "official page".
@@ -60,6 +65,7 @@ If you modify any file, and you suspect it could be an improvement, please write
 
 Active Branches
 -------------------------------------------------
+
 At the moment, the updated project is on the master branch, which is the only used. In the past there were attempts to establish development branches, which are now not maintained and are:
 
 * **documentation** The most recent branching, it is mostly devoted at developing better sphinx documentation
@@ -82,7 +88,7 @@ Status of installer
 The library is installable with common python practices, 
 
 I have tried the installation on a few computers and it worked smoothly 
-by `setup.py`. The folder ``test_install`` contains tests 
+by ``setup.py``. The folder ``test_install`` contains tests 
 that verify a correct installation.
 
 I can upload the package on test-PyPI, but not on the main PyPI, as I get an error, related to the too large size of the package.
@@ -110,7 +116,7 @@ Formatting is indeed at the moment very poor, I have tried experimenting with te
 
 Also, some experiment with jupyter book, that looks a very appealing option on a long term, but implies a shift in paradygm.
 
-Changes
+Changes2
 -------------------------------------------------
 
 2022/03/31 started documentation branch. Upgrades to sphinx docs and github readme and readme_developers. did more attempts in separate folder based on astropy and astropy templates. See VS workspace.

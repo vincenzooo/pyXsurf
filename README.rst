@@ -1,5 +1,5 @@
 pyXsurf (formerly pyXTel)
-=========================
+-------------------------
 
 Python library for X-Ray Optics, Metrology Data Analysis and Telescopes
 Design. 
@@ -8,7 +8,8 @@ This library starts from code collected during many years of work on surface met
 
 
 Changes
--------
+=======
+
 2023/07/15 Starting implementing major changes towards common standards and best-practices. 
 2022/09/06 Created new branch ``pyXsurf_nbdev`` for experimenting with
 2021/07/21 Upgraded installation mechanism.
@@ -16,29 +17,34 @@ Changes
 ``pyXSurf``.
 
 Installation
-------------
+=============
+
+It is the generic procedure, see links for the details of different environments. It is described how to prepare the system (update packages and optionally create a dedicated environment), and installing and testing the library.
 
 Preparation
-***********
-Especially for testing purpose, or just to keep things clean, it can be useful to work in a separate space, so you may want to create a new environment (e.g. this is done in ``conda`` with  ``conda env create <envname>`` and ``conda activate <envname>``, you can check https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/ for the equivalent `venv` commands). In any case, make sure you are working in the right environment.
+^^^^^^^^^^^
 
-It can be advisable to update your environment, and especially ``pip``, to the most recent version. You can run ``python -m pip install --upgrade pip`` to upgrade pip, or install it as described in https://pip.pypa.io/en/stable/installation.
+It is reccomended to update ``pip``, to the most recent version. You can run ``python -m pip install --upgrade pip`` to upgrade pip, or install it as described in https://pip.pypa.io/en/stable/installation.
 
-You should now be able to install ``pyXsurf`` and all dependencies.
+If you want to try the package without modifying your current environment, it can be useful to work in a separate space, creating a new environment (e.g. this is done in ``conda`` with  ``conda env create <envname>`` and ``conda activate <envname>``, you can check https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/ for the equivalent `venv` commands). In any case, make sure you are working in the right environment.
 
-Installing
-***********
+You should now be ready to install ``pyXsurf`` and all dependencies.
+
+Installation
+^^^^^^^^^^^^^
 
 You can get the most updated version by cloning the source code from github and installing from there. 
 
-To do this, use the ``Code`` button at top of page, or ``git clone`` from command-line
+To do this:
+
+1. use the ``Code`` button at top of page, or ``git clone`` from command-line
 ``git clone https://github.com/vincenzooo/pyXSurf.git``. 
 
-At this point you should move to the folder with the code and call from command line ``pip install .`` (equivalend to ``python setup.py install``). 
+2. move to the folder with the code and call from command line ``pip install .`` (equivalend to ``python setup.py install``). 
 This will perform a "regular" installation  (meaning that the code is copied to ``site-packages`` folders, which holds all installed Python libraries, and made accessible to your system).
 
-If instead you plan to modify the code, it is suggest to install the library in "developer" mode,
-use ``pip install -e .``or ``pip install -e '.[dev]'`` (experimental). Doing this, the library will be installed from current position (no local copy), any change to the code in this folder will be immediately available in the imported library (the second command, with the ``[dev]``\ option, will install also additional files with tests and tools).
+If instead you plan to modify pyXsurf code, please read the additional information on the :ref:``README_developers`` page.
+
 
 Uninstalling
 ------------
@@ -46,7 +52,7 @@ Uninstalling
 Code can be uninstalled calling ``pip uninstall pyXsurf`` from a command prompt, or from source code folder calling directly the setup file ``python setup.py develop  -u`` (if you installed as developer, deinstallation is expected to work only with most recent pip versions, at least >=19.1.1, otherwise it should be enough to delete the folder).
 
 How to use
-----------
+==========
 
 At this point you can open Python and try ``import pySurf``, if this
 works without errors, you can now import and use the different modules (see description below) which are part of the library, e.g., with:
@@ -60,7 +66,7 @@ module and at the end of module files. Functions are usually documented with doc
 There is a lot more, but this is a big work-in-progress, and they are not easily accessible yet, please read below for details, or write an email or an issue.
 
 Modules
--------
+========
 
 A basic description of the different modules is (N.B.: some of these functions have been temporarily moved out of the codebase to simplify the reimplementation, in case these are needed, please send an email):
 
@@ -81,7 +87,7 @@ A basic description of the different modules is (N.B.: some of these functions h
 
 
 Status of the library and additional resources
------------------------------------------------
+===============================================
 
 The main part of the library is well defined and it works well. I am
 constantly adding functions when I find they are needed during my daily work. 
@@ -94,13 +100,11 @@ There is not a real API documentation, as I am still trying to understand the st
 
 There are developer branches on github, which have extra functionalities, at the moment under development (they are quite messy, and some of the features might have been forgotten, so feel free to ask if you are looking for something in particular). These can be installed from code in the same way as the main branch and should work equally (just have more unfinished stuff). For git beginners, the only thing you need to do differently, is to switch branch, e.g. ``git checkout documentation`` (where ``documentation`` is the name of the branch) after cloning the repository and before running the setup. Please check developers notes for a list of active branches and their features and for more details. Also, if you plan to make changes to the code and want to keep the changes automatically in synch, remember to install the code as "developer" (as explained above). Otherwise you can still make changes to the installed code (in site-packages), but you will need to reimport after every change.
 
-See developer notes :ref:`developersnotes` for a detailed status of developement, how to access more recent features and last status of documentation (on developer brach), especially if you think you can help.
+See developer notes :doc:`README_developers.rst` for a detailed status of developement, how to access more recent features and last status of documentation (on developer brach), especially if you think you can help.
 Expecially installation and release mechanism, are in phase of improvement, as well as documentation.
 
-.. _contributing
-
 Contributing
-------------
+============
 
 Please report bugs or feature requests, missing documentation, or open a
 issue on github https://github.com/vincenzooo/pyXsurf/issues.
@@ -109,26 +113,24 @@ Expecially appreciated is if you can provide templates, examples or
 hints on how to handle, documentation (Sphinx), packaging, continuous
 integration (Github).
 
-Please check :ref:``README_developers`` for the status of the
+Please check :ref:`developersnotes` for the status of the
 development, or if are willing to help in any way.
 
 Citation
---------
+========
 
 .. image:: https://zenodo.org/badge/165474659.svg
    :target: https://zenodo.org/badge/latestdoi/165474659
 
 License
--------
+=========
 
 This project is Copyright (c) Vincenzo Cotroneo and licensed under
-the terms of the BSD 3-Clause license. Parts of this package are based upon
-the `Astropy package template <https://github.com/astropy/package-template>`_
-which is licensed under the BSD 3-clause license. See the licenses folder for
+the terms of the BSD 3-Clause license. See the licenses folder for
 more information.
 
 
 Author
-------
+=======
 
 Vincenzo Cotroneo vincenzo.cotroneo@inaf.it
