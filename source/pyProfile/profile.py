@@ -452,13 +452,16 @@ def merge_profile(x1,y1,x2,y2):
     20221129 see implementation below, was before (original file cannot be found):"""
     raise NotImplementedError(r"see example of psd merging in G:\My Drive\progetti\read_nid.ipynb")
 
-def merge_profile(x1,y1,x2,y2=None, range = None, mode = 'avgon1st'):
+def merge_profile(x1,y1,x2,y2=None, range = None, mode = 'avgon1st', toll = 0):
     
     """resample y1 (defined on x1) on x2.
     Both x1 and y1 need to be set for input data,
         x2 is returned together with interpolated values as a tuple.
     y2 is not used and put for consistency (can be omitted).
     N.B.: this is inconsistent with ``np.interp`` arguments order which is x2,x1,y1.
+    
+    2023/11/15 added parameter toll, which is used to distinguish points overlapping in x for some modes
+        (first, second).
     """
     
     # x2 and y2 are filtered and stacked for result. 
@@ -468,11 +471,11 @@ def merge_profile(x1,y1,x2,y2=None, range = None, mode = 'avgon1st'):
         pass  # in a more advanced version will interpolate if gap is too large. 
     elif mode == 'first':  # keeps points of first profile in 
                          # overlapping region
-        x2,y2 = crop_profile(x2,y2,[max(x1),None],open=True) #this will include overlappint edges
+        x2,y2 = crop_profile(x2,y2,[max(x1)+toll,None],open=True) #this will include overlappint edges
        
     elif mode == 'second':  # keeps points of second profile in 
                          # overlapping region
-        x1,y1 = crop_profile(x1,y1,[None,min(x2)],open=True) #this will include overlappint edges
+        x1,y1 = crop_profile(x1,y1,[None,min(x2)-toll],open=True) #this will include overlappint edges
     elif mode == 'raw':  #stack them without changes
         pass
     elif mode == 'avgon1st':  # resample points of second profile on first and avg
