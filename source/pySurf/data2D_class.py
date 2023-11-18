@@ -672,7 +672,7 @@ class Data2D(object):  # np.ndarrays
         print(s)
         return s
 
-    def align_interactive(self, other, find_transform=find_affine):
+    def align_interactive(self, other, find_transform=find_affine, retall = False):
         """interactively set markers and align self to other.
         Alignment is performed using the transformation returned by
         find_transform(markers1,markers2) after markers are interactively set.
@@ -682,7 +682,11 @@ class Data2D(object):  # np.ndarrays
 
         m1, m2 = add_markers([self, other])
         trans = find_transform(m1, m2)
-        return self.apply_transform(trans)
+        
+        if retall:
+            return self.apply_transform(trans), (m1,m2), trans
+        else:
+            return self.apply_transform(trans)
 
     def remove_outliers(self, fill_value=np.nan, mask=False, *args, **kwargs):
         """use dataIO.remove_outliers to remove outliers from data. return a new Data2D object with outliers replaced by `fill_value`. If `mask` is set returns mask (easier than extracting it from returned object)."""
