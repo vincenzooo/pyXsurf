@@ -1677,8 +1677,6 @@ def plot_slope_slice(wdata,x,y,scale=(1.,1.,1.),vrange=None,srange=None,filter=F
 
     plt.clf()
     ax1=plt.subplot(221)
-    #import pdb
-    #pdb.set_trace()
     plt.imshow(wdata,extent=(span(x)[0],span(x)[1],span(y)[0],span(y)[1]),aspect='auto',origin='lower')
     plt.clim(vrange)
     plt.xlabel('X(mm)')
@@ -1706,19 +1704,22 @@ def plot_slope_slice(wdata,x,y,scale=(1.,1.,1.),vrange=None,srange=None,filter=F
     plt.title('total slope rms %6.3f arcsec'%np.nanstd(slopeax))
     plt.xlabel('X(mm)')
     plt.ylabel('Slice Y Slope rms (arcsec)')
-    plt.tight_layout()
-    plt.colorbar().remove() #dirty trick to adjust size to other panels
+    #plt.tight_layout()
+    #cb = plt.colorbar() #will be removed at the end, dirty trick to adjust size to other panels
+    
     #display(plt.gcf())
 
     ax4=plt.subplot(224)
     #histogram
-    plt.hist(np.nanstd(slopeax,axis=0)[~np.isnan(np.nanstd(slopeax,axis=0))],bins=100,label='AX slope',alpha=0.2,color='r',normed=True);
-    plt.hist(np.nanstd(slopeaz,axis=1)[~np.isnan(np.nanstd(slopeaz,axis=1))],bins=100,label='AZ slope',alpha=0.2,color='b',normed=True);
+    plt.hist(np.nanstd(slopeax,axis=0)[~np.isnan(np.nanstd(slopeax,axis=0))],bins=100,label='AX slope',alpha=0.2,color='r',density=True);
+    plt.hist(np.nanstd(slopeaz,axis=1)[~np.isnan(np.nanstd(slopeaz,axis=1))],bins=100,label='AZ slope',alpha=0.2,color='b',density=True);
     plt.xlabel('Slope rms (arcsec)')
     plt.ylabel('Fraction of points')
     #plt.title ('rms: %5.3f, PV: %5.3f'%(np.nanstd(tmp[:,2]),span(tmp[:2],1)))
     plt.legend(loc=0)
     #display(plt.gcf())
+    plt.tight_layout()
+    #plt.colorbar(ax=ax3).remove()
 
     return ax1,ax2,ax3,ax4
 
@@ -1738,9 +1739,8 @@ def plot_slope_2D(wdata,x,y,scale=(1.,1.,1.),vrange=None,srange=None,filter=Fals
         psrange=None  #plot scale
     else:
         psrange=srange
+        
     plt.clf()
-
-    #plt.suptitle('PCO1S16')
     ax1=plt.subplot(221)
     plt.imshow(wdata,extent=(span(x)[0],span(x)[1],span(y)[0],span(y)[1]),aspect='auto',origin='lower')
     plt.xlabel('X(mm)')
@@ -1762,14 +1762,22 @@ def plot_slope_2D(wdata,x,y,scale=(1.,1.,1.),vrange=None,srange=None,filter=Fals
 
     ax4=plt.subplot(224)
     #histogram
-    plt.hist(slopeax[~np.isnan(slopeax)],bins=100,label='AX slope',alpha=0.2,color='r',normed=True);
-    plt.hist(slopeaz[~np.isnan(slopeaz)],bins=100,label='AZ slope',alpha=0.2,color='b',normed=True);
+    plt.hist(slopeax[~np.isnan(slopeax)],bins=100,label='AX slope',alpha=0.2,color='r',density=True);
+    plt.hist(slopeaz[~np.isnan(slopeaz)],bins=100,label='AZ slope',alpha=0.2,color='b',density=True);
     plt.xlabel('Slope (arcsec)')
     plt.ylabel('Fraction of points')
     #plt.title ('rms: %5.3f, PV: %5.3f'%(np.nanstd(tmp[:,2]),span(tmp[:2],1)))
     plt.legend(loc=0)
     #display(plt.gcf())
     plt.tight_layout()
+    
+    #plt.colorbar(ax=ax4).remove()  #questo sistema il 4o plot, ma incasina il 3o.
+    # il problema si verifica alla rimozione della cb, infatti rimpiazzando `plt.tight)layout` con:
+    # cb = plt.colorbar(ax=ax4)
+    # plt.tight_layout()
+    # #cb.remove()  # with this commented, alignment is ok. uncommenting it will mess up 3rd plot 
+    
+    
     return ax1,ax2,ax3,ax4
 
 ## CASE-SPECIFIC ANALYSIS FUNCTIONS
