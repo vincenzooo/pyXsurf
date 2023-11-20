@@ -14,7 +14,7 @@ import os
 import sys
 
 # according to below and https://sphinx-rtd-tutorial.readthedocs.io/en/latest/sphinx-config.html
-sys.path.insert(0, os.path.abspath('..\..\..\source'))
+sys.path.insert(0, os.path.abspath('..\..\source'))
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here.

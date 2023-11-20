@@ -9,7 +9,6 @@ workspace.ini
 *.code-workspace
 /notebooks
 pySurf/readers/PyMDT
-docs/build
 xpyxsurf
 dist
 *.egg-info*
