@@ -101,6 +101,12 @@ html_theme = 'bizstyle'
 #html_style = 'pyXsurf.css'
 
 
+# VC
+html_static_path = ['_static']
+html_css_files = [
+    'custom.css',
+]
+
 #import guzzle_sphinx_theme
 #html_theme_path = guzzle_sphinx_theme.html_theme_path()
 #html_theme = 'guzzle_sphinx_theme'

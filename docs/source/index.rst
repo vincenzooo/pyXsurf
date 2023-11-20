@@ -14,17 +14,32 @@ It also includes a set of convenience functions and other tools for X-ray optics
 
 .. .. image:: resources/wip.png   #this creates a large icon
 
+.. note that referring to tags in readme_link refers to sections of the page generated from the readme_link.rst content
+
+🛠️ Ongoing Improvements!
+Thanks for your interest to this project. We're currently making significant updates. 
+Please check back soon to see the enhancements!
+
 The available documentation is:
 
-* :ref:`Getting Started <readme>`
-* :ref:`Developers notes and how to contribute <readmedev>`
-* :ref:`Usage and examples (more coming soon!): <tutorials>`, see also subfolders in source code repository for more examples
-* `Poster at SPIE San Diego 2023 <_static/vcotroneo_SPIE2023.pdf>`_
+* `Getting Started <pages/readme_link.rst>`_
+* `Developers notes and how to contribute <pages/readmedev_link.rst>`_
+* `Usage and examples <pages/tutorials.rst>`_, see also subfolders in source code repository for more examples
+* `Poster (SPIE San Diego 2023) <_static/vcotroneo_SPIE2023.pdf>`_
 * `Source code (GitHub) <https://github.com/vincenzooo/pyXsurf>`_
 
 
-🛠️ Ongoing Improvements!
-Thanks for your interest to this project. We're currently making significant updates. Please check back soon to see the enhancements!
+
+.. .. image:: resources/wip.png
+   :width: 100px
+   :height: 100px
+
+.. .. figure:: resources/wip.png
+   :align: left
+   :width: 200px
+   :height: 200px
+
+   Your caption here.
 
 
 

@@ -1,4 +1,4 @@
-pyXsurf (formerly pyXTel)
+pyXsurf
 -------------------------
 
 Python library for X-Ray Optics, Metrology Data Analysis and Telescopes
@@ -6,25 +6,20 @@ Design.
 
 This library starts from code collected during many years of work on surface metrology and X-ray optics and wants to offer to the community an extensible tool to perfom common operations on surface and profile data, together with a set of tools to perform typical operations on data, in particular related to X-ray optics.
 
-
-Changes
+News
 =======
-
 2023/07/15 Starting implementing major changes towards common standards and best-practices. 
-2022/09/06 Created new branch ``pyXsurf_nbdev`` for experimenting with
-2021/07/21 Upgraded installation mechanism.
-2020/11/09 Changed repository name from ``pyXTel`` to
-``pyXSurf``.
 
-Installation
-=============
+
+Installation Process
+=====================
 
 It is the generic procedure, see links for the details of different environments. It is described how to prepare the system (update packages and optionally create a dedicated environment), and installing and testing the library.
 
-Preparation
-^^^^^^^^^^^
+Optional Steps 
+^^^^^^^^^^^^^^^^
 
-It is reccomended to update ``pip``, to the most recent version. You can run ``python -m pip install --upgrade pip`` to upgrade pip, or install it as described in https://pip.pypa.io/en/stable/installation.
+It is recommended to update ``pip``, to the most recent version. You can run ``python -m pip install --upgrade pip`` to upgrade pip, or install it as described in https://pip.pypa.io/en/stable/installation.
 
 If you want to try the package without modifying your current environment, it can be useful to work in a separate space, creating a new environment (e.g. this is done in ``conda`` with  ``conda env create <envname>`` and ``conda activate <envname>``, you can check https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/ for the equivalent `venv` commands). In any case, make sure you are working in the right environment.
 
@@ -37,13 +32,13 @@ You can get the most updated version by cloning the source code from github and 
 
 To do this:
 
-1. use the ``Code`` button at top of page, or ``git clone`` from command-line
+1. use the ``Code`` button at top of page, or clone from command-lineç
 ``git clone https://github.com/vincenzooo/pyXSurf.git``. 
 
-2. move to the folder with the code and call from command line ``pip install .`` (equivalend to ``python setup.py install``). 
+2. move to the folder with the code and call from command line ``pip install .`` (equivalent to ``python setup.py install``). 
 This will perform a "regular" installation  (meaning that the code is copied to ``site-packages`` folders, which holds all installed Python libraries, and made accessible to your system).
 
-If instead you plan to modify pyXsurf code, please read the additional information on the :ref:``README_developers`` page.
+If instead you plan to modify pyXsurf code, or want a non-permanente installation, you can install in developer mode ``pip install -e .`` (also, read the additional information on the :ref:``README_developers`` page).
 
 
 Uninstalling
@@ -54,7 +49,7 @@ Code can be uninstalled calling ``pip uninstall pyXsurf`` from a command prompt,
 How to use
 ==========
 
-At this point you can open Python and try ``import pySurf``, if this
+At this point you can open Python and try ``import pySurf`` (`pySurf` is the Python module responsible of surface data). If this
 works without errors, you can now import and use the different modules (see description below) which are part of the library, e.g., with:
 
 .. code:: python
@@ -115,6 +110,14 @@ integration (Github).
 
 Please check :ref:`developersnotes` for the status of the
 development, or if are willing to help in any way.
+
+Aknowledgements
+============
+
+The code in this library is the result of many years of work. Many colleagues from my current or former Institutions contributed directly and indirectly with exchange of code, ideas, data and good time.
+The ongoing improvements to this project are funded by INAF “Bando per innovazione tecnologica”, which the author also thanks for the supportive and stimulating working environment.
+
+.. Data used for development and in examples are courtesy of .. 
 
 Citation
 ========
