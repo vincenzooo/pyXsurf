@@ -4,6 +4,7 @@
 .*
 .*/
 !.gitignore
+!.readthedocs.yaml
 *.pyc
 workspace.ini
 *.code-workspace
