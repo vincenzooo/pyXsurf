@@ -9,27 +9,24 @@
 Welcome to pyXsurf's documentation!
 ===================================
 
-pyXSurf is a Python library to perform common operations on 2D or 1D data with coordinates.
+pyXSurf is a Python library to perform common operations on data defined over  2D or 1D coordinates.
 It also includes a set of convenience functions and other tools for X-ray optics. 
 
 .. .. image:: resources/wip.png   #this creates a large icon
 
-Find how to get started in the :ref:`readme file <readme>`, and :ref:`how to contribute <readmedev>`.
+The available documentation is:
 
-Here some example (more coming soon!):
+* :ref:`Getting Started <readme>`
+* :ref:`Developers notes and how to contribute <readmedev>`
+* :ref:`Usage and examples (more coming soon!): <tutorials>`, see also subfolders in source code repository for more examples
+* `Poster at SPIE San Diego 2023 <_static/vcotroneo_SPIE2023.pdf>`_
+* `Source code (GitHub) <https://github.com/vincenzooo/pyXsurf>`_
 
-.. toctree::
-    :maxdepth: 1
-
-    tutorials
-
-`Poster at SPIE San Diego 2023 <_static/vcotroneo_SPIE2023.pdf>`_
 
 🛠️ Ongoing Improvements!
 Thanks for your interest to this project. We're currently making significant updates. Please check back soon to see the enhancements!
 
-See also `Github page of the project <https://github.com/vincenzooo/pyXsurf>`_ 
-for more examples in source subfolders. 
+
 
 
 pyXsurf API
