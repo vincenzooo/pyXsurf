@@ -116,8 +116,14 @@ Formatting is indeed at the moment very poor, I have tried experimenting with te
 
 Also, some experiment with jupyter book, that looks a very appealing option on a long term, but implies a shift in paradygm.
 
-Changes2
+Changes
 -------------------------------------------------
+
+2023/07/15 Starting implementing major changes towards common standards and best-practices. 
+2022/09/06 Created new branch ``pyXsurf_nbdev`` for experimenting with
+2021/07/21 Upgraded installation mechanism.
+2020/11/09 Changed repository name from ``pyXTel`` to
+``pyXSurf``.
 
 2022/03/31 started documentation branch. Upgrades to sphinx docs and github readme and readme_developers. did more attempts in separate folder based on astropy and astropy templates. See VS workspace.
 
@@ -133,13 +139,12 @@ Mostly following https://medium.com/free-code-camp/from-a-python-project-to-an-o
 
 References
 ------------
-For users new to Python, the library was developed on anaconda
+The library was developed on anaconda
 distribution. Any other distribution should be equivalent, however I
-never had any problem with Anaconda and find it very easy to work with,
+suggest the use of a package manager, found Anaconda quite easy to work with,
 so I can only recommend it. Same way, I used for developement
-notepad++/IPython/jupyter on Windows; Spyder; VScode and feel to
-recommend any of these. Of course any other environment or editor works
-same way.
+VSCode (when memory allowed) or notepad++/IPython/jupyter on Windows; I feel to
+recommend any of these to new users and wiling contributors. Of course any other environment or editor works same way.
 
 if you are not sure of what you are doing (as I am most of the time), feel free to keep it locally and use only ``git`` or to use any expertise you have (and I don't necessarily do have).
 
@@ -148,4 +153,5 @@ https://kbroman.org/github_tutorial/pages/routine.html
 
 
 See https://stackoverflow.com/questions/19048732/python-setup-py-develop-vs-install for comments on installation modes.
+
 TODO: summarize here.
