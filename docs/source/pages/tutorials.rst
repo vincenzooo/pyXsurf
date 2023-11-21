@@ -16,7 +16,7 @@ Introductory docs
 A few introductory presentations to give an overall view of purposes and functionalities:
 
 * Poster (SPIE 2023, San Diego) `pdf <../_static/vcotroneo_SPIE2023.pdf>`_
-* `Presentation <../_static/profile_demo_rise.slides.html>`_, created from Jupyter notebook (NSFE NanoScientific Forum 2020)  `pdf <../_static/profile_demo_rise.slides.pdf>`_ :download:`download source <../_static/profile_demo_rise.ipynb>`
+* Jupyter Notebook converted to `Presentation <../_static/pySurf_NSFE2020.slides.html>`_, or  `report <../_static/pySurf_NSFE2020.html>`_ * presented at NSFE NanoScientific Forum 2020
 *  Gallery: Examples of different interfaces TODO 🛠️ 
 
 
@@ -32,23 +32,33 @@ These Jupyter notebooks illustrate practical examples on how to start or to perf
 Advanced Examples
 -----------------
 
-Some example from real life, TODO 🛠️ 
+Some example from real life, Still work in progress. TODO 🛠️ 
 
-`Example of interactive alignment <../_static/rotate and align.html>`_
+Surface Processing
+******************
 
+`Example of interactive alignment <../_static/rotate_and_align.html>`_
+
+A more complex analysis `report with toggleable code visualization <../_static/C1S04_PZT_WFS_stress_fit.html>`_ in which difference in two shapes before and after a treatment is measured and fit to a simulated deformation.
+
+Profile Class
+******************
 Example of class ``Profile``, 1D analogous of ``Data2D``:
+
+`Simple Signal <../notebooks/test_make_signal.ipynb>`_
+
+`Introduction to Profile <../_static/profile_demo_rise.slides.html>`_, created from Jupyter notebook in different formats: `pdf <../_static/profile_demo_rise.slides.pdf>`_ :download:`download source <../_static/profile_demo_rise.ipynb>`
 
 `Profile Tutorial <../_static/Profile_class_tutorial.html>`_  :download:`download source <../_static/Profile_class_tutorial.ipynb>`
 
-`Analysis of PSD and Merging tests <../_static/test_merge_P01.html>`_ `pdf <../_static/test_merge_P01.slides.pdf>`_ :download:`download source <../_static/test_merge_P01.ipynb>` 
+`Analysis of PSD and Merging tests <../_static/test_merge_P01.html>`_ `pdf <../_static/test_merge_P01.slides.pdf>`_ :download:`download source <../_static/test_merge_P01.ipynb>` PSDs can be extracted from `Data2D`` surfaces.
 
-
-`Merge PSD Test <../notebooks/test_make_signal.ipynb>`
+`Teoretical and numerical analysis of PSD <../_static/PSDtest.html>`_
 
 
 
 Where to find more
--------------------
+****************************
 
 More examples and tests can be found scattered in subfolders of source code repository, see also `Developer Notes <readmedev_link.rst>`_.
 	

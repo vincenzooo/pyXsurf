@@ -16,13 +16,13 @@ It also includes a set of convenience functions and other tools for X-ray optics
 
 .. note that referring to tags in readme_link refers to sections of the page generated from the readme_link.rst content
 
-🛠️ Ongoing Improvements!
+🛠️ Work in Progress!
 Thanks for your interest to this project. We're currently making significant updates. 
 Please check back soon to see the enhancements!
 
 The available documentation is:
 
-* `Getting Started <pages/readme_link.rst>`_
+* `Getting Started (install, etc.) <pages/readme_link.rst>`_
 * `Usage and examples <pages/tutorials.rst>`_
 * `Developers notes and how to contribute <pages/readmedev_link.rst>`_
 * `Source code (GitHub) <https://github.com/vincenzooo/pyXsurf>`_
@@ -38,8 +38,6 @@ The available documentation is:
    :height: 200px
 
    Your caption here.
-
-
 
 
 pyXsurf API

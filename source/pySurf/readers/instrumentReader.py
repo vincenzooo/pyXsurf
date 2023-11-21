@@ -266,7 +266,7 @@ def fitsWFS_reader(wfile,ypix=1.,ytox=1.,zscale=1.,crop=[None,None,None],
     
     from pySurf.readers.format_reader import fits_reader
     
-    data,x,y=fits_reader(fitsfile)
+    data,x,y=fits_reader(wfile)
 
     #adjust crop and scales
     ny,nx=data.shape
