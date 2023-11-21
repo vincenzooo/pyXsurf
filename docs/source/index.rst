@@ -23,11 +23,9 @@ Please check back soon to see the enhancements!
 The available documentation is:
 
 * `Getting Started <pages/readme_link.rst>`_
+* `Usage and examples <pages/tutorials.rst>`_
 * `Developers notes and how to contribute <pages/readmedev_link.rst>`_
-* `Usage and examples <pages/tutorials.rst>`_, see also subfolders in source code repository for more examples
-* `Poster (SPIE San Diego 2023) <_static/vcotroneo_SPIE2023.pdf>`_
 * `Source code (GitHub) <https://github.com/vincenzooo/pyXsurf>`_
-
 
 
 .. .. image:: resources/wip.png
