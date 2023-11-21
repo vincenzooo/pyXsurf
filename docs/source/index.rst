@@ -15,11 +15,13 @@ It also includes a set of convenience functions and other tools for X-ray optics
 .. .. image:: resources/wip.png   #this creates a large icon
 
 .. note that referring to tags in readme_link refers to sections of the page generated from the readme_link.rst content
+    but at same time adds the possibility of adding content at the end of the linked content.
 
-🛠️ Work in Progress!
+🛠️ Work in Progress! 
 Thanks for your interest to this project. We're currently making significant updates. 
-Please check back soon to see the enhancements!
+Please check back soon to see what's new!
 
+NEWS: 2023/11/21: Upgrade and bug fix to documentation
 The available documentation is:
 
 * `Getting Started (install, etc.) <pages/readme_link.rst>`_
@@ -27,6 +29,10 @@ The available documentation is:
 * `Developers notes and how to contribute <pages/readmedev_link.rst>`_
 * `Source code (GitHub) <https://github.com/vincenzooo/pyXsurf>`_
 
+
+.. TODO: add icon work in progress to text inline
+.. TODO: 
+.. TODO: 
 
 .. .. image:: resources/wip.png
    :width: 100px
