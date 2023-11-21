@@ -148,14 +148,13 @@ def plot_rms_power(f,p,x=None,rmsrange=None,ax2f=None,units=None,*args,**kwargs)
     rms=rms_power(f,p,rmsrange=None)
     plt.plot(x,rms,*args,**kwargs)
     
-    
     ax3=plt.gca()
     tit1,tit2=(['Left y axis','Right y axis'] if np.any(ax2f) else [None,None]) #legend title headers
     l1=ax3.legend(loc=loc1,title=tit1)
 
     #plt.title('Total rms power=%6.3g'%(np.sqrt((rms**2).sum()))+((" "+units[2]) if units[2] is not None else ""))  #wrong math, forgets average?
     plt.title('Total rms power=%6.3g'%(np.sqrt(np.nansum(rms**2)/(np.sum(~np.isnan(rms)))))+((" "+units[2]) if units[2] is not None else ""))
-    c=plt.gca()._get_lines.prop_cycler
+    c = plt.rcParams['axes.prop_cycle'] # c=plt.gca()._get_lines.prop_cycler
 
     rms_v=rms
     if rmsrange is not None:
@@ -439,12 +438,12 @@ def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,
             ax3.set_position([box1.x0, box3.y0, box1.width , box3.height])
             ax3.set_adjustable("box",share=True)
 
+        plt.tight_layout()
+
         cid = fig.canvas.mpl_connect('draw_event', resize)
         cid2 = fig.canvas.mpl_connect('resize_event', resize)
 
         resize(None)
-
-        #plt.tight_layout()
 
         if outname:    #kept for compatibility, will be removed in next version
             plt.savefig(fn_add_subfix(outname,'_2dpsd','.png'))

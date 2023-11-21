@@ -10,15 +10,16 @@ Tutorials
 
 .. TODO: some of the notebooks have been copied by source in _static or notebooks folder. The first are compiled, but are not in synch with the source.
 
-Introductory docs
+Overview
 -------------------------------
 
 A few introductory presentations to give an overall view of purposes and functionalities:
 
 * Poster (SPIE 2023, San Diego) `pdf <../_static/vcotroneo_SPIE2023.pdf>`_
-* Jupyter Notebook converted to `Presentation <../_static/pySurf_NSFE2020.slides.html>`_, or  `report <../_static/pySurf_NSFE2020.html>`_ * presented at NSFE NanoScientific Forum 2020
-*  Gallery: Examples of different interfaces TODO 🛠️ 
+* Jupyter Notebook converted to `Presentation <../_static/pySurf_NSFE2020.slides.html>`_, or  `report <../_static/pySurf_NSFE2020.html>`_ derived from presentation at NSFE NanoScientific Forum 2020
+* Gallery: Examples of different interfaces TODO 🛠️ 
 
+.. TODO: add link to SPIE and NSFE, also recording
 
 Examples
 --------
