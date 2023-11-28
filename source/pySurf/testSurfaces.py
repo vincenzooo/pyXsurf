@@ -234,7 +234,6 @@ def test_makeGaussian(N=100,rnd=3.):
     a=makeGaussian(N)*20
     a=a+np.random.random((N,N))*rnd
     fig=plt.figure()
-    fig.canvas.set_window_title('Gaussian surface N=%i, noise=%f'%(N,rnd))
     title="min:%4.1f max:%4.1f rms:%4.3f"%(np.nanmin(a),np.nanmax(a),np.nanstd(a))
     plt.title(title)
     plt.imshow(a,interpolation='none')
