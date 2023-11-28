@@ -8,7 +8,9 @@ Tutorials
 
 .. TODO: these files in _static etc. are not compiled, so ipynb are not tested.
 
-.. TODO: some of the notebooks have been copied by source in _static or notebooks folder. The first are compiled, but are not in synch with the source.
+.. TODO: some of the notebooks have been copied by source in _static or notebooks folder. The second are compiled, but are not in synch with the source, which can be elsewhere (e.g. pyXtel\source\test\..). These files are copied because sphinx doesn't compile notebooks above source folder.
+
+Here you can find documents, tests and examples of real applications. Examples have code that you can download, run, or adapt to your case (TODO 🛠️). Also don't hesitate to request a feature or submit your problem at https://github.com/vincenzooo/pyXsurf/issues.
 
 Overview
 -------------------------------
@@ -18,6 +20,7 @@ A few introductory presentations to give an overall view of purposes and functio
 * Poster (SPIE 2023, San Diego) `pdf <../_static/vcotroneo_SPIE2023.pdf>`_
 * Jupyter Notebook converted to `Presentation <../_static/pySurf_NSFE2020.slides.html>`_, or  `report <../_static/pySurf_NSFE2020.html>`_ derived from presentation at NSFE NanoScientific Forum 2020
 * Gallery: Examples of different interfaces TODO 🛠️ 
+.. TODO: white paper
 
 .. TODO: add link to SPIE and NSFE, also recording
 

@@ -241,7 +241,7 @@ def xrealPSD(d,win=1,dx=1.,axis=None):
         c = c[0,:]
 
     #Reform into PSD
-    if np.size(np.shape(c)) is 2:
+    if np.size(np.shape(c)) == 2:
         f = [np.fft.fftfreq(np.shape(c)[0],d=dx)[:np.shape(c)[0]/2],\
                    np.fft.fftfreq(np.shape(c)[1],d=dx)[:np.shape(c)[1]/2]]
         c = c[:np.shape(c)[0]/2,:np.shape(c)[1]/2]
