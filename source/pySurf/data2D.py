@@ -206,8 +206,12 @@ def levellegendre(x,y,deg,nanstrict=False):
     result=y-datarec
     return result #y-datarec
 
+
 def level_data(data,x=None,y=None,degree=1,axis=None,byline=False,fit=False,*args,**kwargs):
-    """Use RA routines to remove degree 2D legendres or levellegendre if leveling by line.
+    """
+    Level a 2D data array using Legendre polynomials.
+    
+    Use Ryan Allured's routines to remove degree 2D legendres or levellegendre if leveling by line.
     
     Degree can be scalar (it is duplicated) or 2-dim vector. must be scalar if leveling by line. Note the important difference between e.g. ``degree = 2`` and
       ``degree = (2,2)``. The first one uses degree as total degree, it expands then to xl,yl = [0,1,0,1,2,0],[0,0,1,1,0,2]. The second
@@ -215,48 +219,58 @@ def level_data(data,x=None,y=None,degree=1,axis=None,byline=False,fit=False,*arg
     leveling by line (controlled by axis keyword) also handle nans.
     x and y are not used, but maintained for interface consistency.
     fit=True returns fit component instead of residuals
+    
+    Parameters:
+    data (ndarray): The 2D data array to be leveled.
+    x (ndarray, optional): X-coordinates, unused but maintained for interface consistency.
+    y (ndarray, optional): Y-coordinates, unused but maintained for interface consistency.
+    degree (int or tuple): The degree of the Legendre polynomial. Scalar or 2D vector.
+    axis (int, optional): Axis along which to level. None for 2D leveling, 0 for vertical, 1 for horizontal.
+    fit (bool): If True, returns the fit component; otherwise, returns residuals.
+
+    Returns:
+    tuple: Leveled data array, x-coordinates, y-coordinates.
+
+    Raises:
+    ValueError: If input parameters are invalid.
+    
+    TODO specify details of routines and document formulas for better repeatabilities.
     """
+    
     from utilities.imaging.fitting import legendre2d
 
-    if x is None:  x = np.arange(data.shape[1])
-    if y is None:  y = np.arange(data.shape[0])
-    #note that x and y are not changed by leveling operations. These are performed on 2d array.
-    if byline:
-        print ("WARNING: data2D.level_data argument byline was replaced by AXIS, correct your code: replace `byline=True` with `axis=0` (along vertical lines) in calls.")
-        leg = level_data(data,x,y,degree,axis=0,fit=True,*args,**kwargs)
-    elif axis == 0:   #along y (level vertical lines independently. Operations for any value of parameters are performed here.
-        if np.size(degree)!=1:
-            raise ValueError("for line leveling (axis != None) degree must be scalar: %s"%degree)
-        leg=fitlegendre(y,data,degree,*args,**kwargs)  #levellegendre(x, y, deg, nanstrict=False)    
-    elif axis == 1: #level horizontal lines by double transposition
-        leg = level_data(data.T,y,x,degree,axis=0,fit=True,*args,**kwargs)[0].T
-    elif axis is None: #plane level   
-        
-        if np.size(degree)==1:
-            #this is enough to include everything
-            xo=degree
-            yo=degree
-        else:
-            xo,yo=degree 
-        
-        # this is to adjust to legendre2d interface
-        xl,yl = [f.flatten() for f in np.meshgrid(np.arange(xo+2),np.arange(yo+1))]
-        
-        if np.size(degree)==1:
-            #select use < (not <=) because I want to exclude
-            sel = [xxl + yyl <= degree for xxl,yyl in zip(xl,yl)]
-            if np.where(sel)[0].size == 0: #avoid emptying arrays if degree is 0
-                raise ValueError('someting wrong with degree settings!')
-            # make xl, yl
-            xl, yl = xl[sel],yl[sel]        
-        
-        #list(zip(*[f.flatten() for f in np.meshgrid(np.arange(xo+1),np.arange(yo+1))]))
-        #[(0, 0), (1, 0), (0, 1), (1, 1)] #xo=1,yo=1
+    def _validate_degree(degree, axis):
+        if axis is not None and np.size(degree) != 1:
+            raise ValueError("Degree must be scalar when leveling by line (axis != None): received {}".format(degree))
+        return degree
 
-        leg=legendre2d(data,x,y,xl=xl,yl=yl,*args,**kwargs)[0] #legendre2d(d, xo=2, yo=2, xl=None, yl=None)
-    
-    return (leg if fit else data-leg),x,y #fails with byline 
-    #return (leg[0] if fit else data-leg[0]),x,y
+    def _level_by_line(data, degree):
+        leg = fitlegendre(y, data, degree, *args, **kwargs)
+        return leg
+
+    def _level_plane(data, degree):
+        xo, yo = degree if np.size(degree) == 2 else (degree, degree)
+        xl, yl = [f.flatten() for f in np.meshgrid(np.arange(xo + 2), np.arange(yo + 1))]
+        leg = legendre2d(data, x, y, xl=xl, yl=yl, *args, **kwargs)[0]
+        return leg
+
+    if x is None:
+        x = np.arange(data.shape[1])
+    if y is None:
+        y = np.arange(data.shape[0])
+
+    degree = _validate_degree(degree, axis)
+
+    if axis == 0:
+        leg = _level_by_line(data, degree)
+    elif axis == 1:
+        leg = _level_by_line(data.T, degree).T
+    elif axis is None:
+        leg = _level_plane(data, degree)
+    else:
+        raise ValueError("Invalid axis value: {}. Axis must be None, 0, or 1.".format(axis))
+
+    return (leg if fit else data - leg), x, y #fails with byline 
 
 ## 2D FUNCTIONS
 
@@ -1783,8 +1797,7 @@ def plot_slope_2D(wdata,x,y,scale=(1.,1.,1.),vrange=None,srange=None,filter=Fals
 ## CASE-SPECIFIC ANALYSIS FUNCTIONS
 
 def levelpoints(w0):
-    """plot and return matrices of wdata, lwdata, lwdata2
-    from points w0"""
+    """plot and return matrices of wdata from points w0"""
 
     xwg,ywg=points_find_grid(w0,'grid')[1]
     wdata=resample_grid(w0,xwg,ywg,matrix=1)

@@ -170,14 +170,50 @@ def translate_points(points,offset=None):
     return points+offset
 
 def _get_plane(points,pars=None,xrange=None,yrange=None,zrange=None,mask=None,returnPars=False):
-    """Return points of a plane defined by pars on x,y coordinates of points.
-    pars is a 3 elements vector [A,B,C] according to Ax + By + C = z.
-    if pars is None, plane is calculated by best fit on selected points and two elements are returned:
-    the points of the best fit plane and its parameters A,B,C. The points are calculated on all
-    points positions."""
-    #2016/02/11 modified to return only plane (and not pars) by default, as it was before it was
-    #   returning a tuple (plane, pars) if and only if pars was not set.
-    #   this breaks the interface, so I added the initial undersore in the function name, that it
+    """
+    Calculate the points of a plane from a set of 3D points.
+
+    This function fits a plane to a set of 3D points and returns the points of the plane. 
+    The plane is defined by the equation Ax + By + C = z, where A, B, and C are plane parameters.
+
+    Parameters:
+    points (ndarray): A numpy array of shape (n,3) representing n points in 3D space.
+    pars (list or tuple, optional): A list or tuple of 3 elements [A, B, C] defining the plane. If None, the plane is calculated by best fit.
+    xrange (tuple, optional): Range of x values (min, max) to include in the fit.
+    yrange (tuple, optional): Range of y values (min, max) to include in the fit.
+    zrange (tuple, optional): Range of z values (min, max) to include in the fit.
+    mask (ndarray, optional): A boolean mask array to select points for fitting.
+    returnPars (bool): If True, returns both the plane points and the parameters [A, B, C].
+
+    Returns:
+    ndarray: The points of the plane if returnPars is False. Otherwise, a tuple (plane_points, [A, B, C]).
+
+    Raises:
+    ValueError: If 'points' is not a 2D numpy array with shape (n,3).
+    
+    Examples:
+    # Example 1: Using _get_plane with predefined parameters
+    points = np.array([[0, 0, 0], [1, 1, 1], [2, 2, 2]])
+    pars = [1, 1, 0]
+    plane = _get_plane(points, pars=pars)
+    
+        array([[0, 0, 0],
+        [1, 1, 2],
+        [2, 2, 4]])
+
+    # Example 2: Using _get_plane to fit a plane on a set of points
+    points = np.random.rand(100, 3)  # Random set of 100 points
+    plane, parameters = _get_plane(points, returnPars=True)
+    
+        array([[0.37765124, 0.45062742, 0.5609915 ],
+        ...
+       [0.25846592, 0.48957061, 0.58587243]])
+
+    """
+    
+    #2016/02/11 modified to return only plane (and not pars) by default.abs
+    # It was previously returning a tuple (plane, pars) if and only if pars was not set.
+    #   this breaks the interface, so I added the initial underscore in the function name, that it
     #   seems to be called only from inside points.py. If other programs are using the function
     #   they need to be adjusted by explicitly adding returnPars=True
 

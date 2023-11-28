@@ -49,7 +49,16 @@ def points_reader(wfile,header=False,*args,**kwargs):
     return pdata,x,y
 
 def datzygo_reader(wfile,header=False,*args,**kwargs):
-    """read .dat binary files (MetroPro/Zygo)."""
+    """read .dat binary files (MetroPro/Zygo).
+    
+    Height map is returned unless intensity is set to True to return Intensity map in same format.
+    Metadata are read from header, some can be overridden by
+        arguments in kwargs:
+
+    x0, y0 Starting offset in pixels 
+    cameraRes pixel size
+    intensity is an argument of readMetroProData, which is passed in kwargs
+    """
     
     '''from manual: Complete maps of the header formats can be obtained by running the dat_test.exe 
 program that is included with MetroPro in folder r"C:\MetroPro\Bin". Type the following at 
@@ -136,7 +145,7 @@ def csvZygo_reader(wfile,intensity=False,header=False,xyz=False,*args,**kwargs):
     """read .csv zygo files (and .xyz).
 
     Height map is returned unless intensity is set to True to return Intensity map in same format.
-    Metadata are reaad from header, some can be overridden by
+    Metadata are read from header, some can be overridden by
       arguments in kwargs:
       
       ypix defaults to CameraRes
