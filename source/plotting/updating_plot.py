@@ -69,39 +69,50 @@ def updating_plot(ax=None,title=None):
             crange=span(cdata)
         #print ax.__repr__(),cdata
         
-        #make a copy of zoom history    
         fig=ax.figure
-        
-        # print(matplotlib.__version__) # see https://stackoverflow.com/questions/66000179/attributeerror-navigationtoolbar2qt-object-has-no-attribute-active 
-        # https://stackoverflow.com/questions/56450918/matplotlib-navigation-bar-error-figurecanvastkagg-object-has-no-attribute-man >2.2
-        try:
-            active = fig.canvas.manager.toolbar._active
-        except AttributeError:
-            active = fig.canvas.manager.toolbar.mode.value
-        active = True
-        
-        print ('active:',active)
-        if active: 
-            s = copy.copy( fig.canvas.toolbar._views )
-            p = copy.copy( fig.canvas.toolbar._positions )
-        
         title="min:%4.1f max:%4.1f rms:%4.3f"%(np.nanmin(cdata),np.nanmax(cdata),np.nanstd(cdata))
+        ax.set_title(title)        
+        # previous version was manually updating colorbar, which messed up zoom/pan history.
+        # this will be copied and restored.
+        # it used to work with previous matplotlib version, using unsupported _views and _positions properties,
+        #   which are no more accessible, and _active, which changed interface.
+        # 
+        # print(matplotlib.__version__) # see https://stackoverflow.com/questions/66000179/attributeerror-navigationtoolbar2qt-object-has-no-attribute-active 
+        # # https://stackoverflow.com/questions/56450918/matplotlib-navigation-bar-error-figurecanvastkagg-object-has-no-attribute-man >2.2
+        # try:  #according to version of matplotlib
+        #     active = fig.canvas.manager.toolbar._active
+        # except AttributeError:
+        #     active = fig.canvas.manager.toolbar.mode.value == 'pan/zoom' or  fig.canvas.manager.toolbar.mode.value == 'zoom rect'
+        # # active = True
+        
+        # print ('PAN/ZOOM active:',active)
+        
+        # if active: 
+        #     # store zoom history
+        #     try:  #different versions of matplotlib and qt backend
+        #         tb = fig.canvas.manager.toolbar
+        #     except AttributeError:
+        #         tb = fig.canvas.toolbar
+                
+        #     s = copy.copy(tb._views)
+        #     p = copy.copy(tb._positions )
+        
+        #title="min:%4.1f max:%4.1f rms:%4.3f"%(np.nanmin(cdata),np.nanmax(cdata),np.nanstd(cdata))
         #print crange
-        ax.set_title(title)
-        if not (im.colorbar is None):
-            im.colorbar.remove()
-        #if not (title is None):
-        #    if title=="":
-        #these commands resets colorbar
-        plt.colorbar()
+        #ax.set_title(title)
+        # if not (im.colorbar is None):
+        #     im.colorbar.remove()
+        # #if not (title is None):
+        # #    if title=="":
+        # #these commands resets colorbar
+        # plt.colorbar()
         plt.clim(crange)
         
-        if active: 
-            #restore zoom history
-            fig.canvas.toolbar._views = s
-            fig.canvas.toolbar._positions = p
-        
-            ax.figure.canvas.draw_idle()
+        # if active: 
+        #     #restore zoom history
+        #     tb._views = s
+        #     tb._positions = p
+        #     ax.figure.canvas.draw_idle()
     
     if ax is None: ax=plt.gca()
     
@@ -169,16 +180,27 @@ def updating_mu(ax=None,title=None):
     ax.callbacks.connect('ylim_changed', on_lims_change)
     return ax
 
+
+def test_updating_plot(surf=None):
     
-    
-if __name__=="__main__":
     plt.ion()
     from pySurf.testSurfaces import test_makeGaussian
-    a=test_makeGaussian(100)
+    from pySurf.data2D import plot_data
+    if surf is None:
+        surf = test_makeGaussian(100)
+    else:
+        plot_data(surf)
+    
     fig=plt.gcf()
-    fig.canvas.set_window_title('A plot that updates colorscale on zoom')
+    try:    #depending on version, left as example
+        fig.canvas.set_window_title('A plot that updates colorscale on zoom')
+    except AttributeError:
+        fig.canvas.manager.set_window_title('A plot that updates colorscale on zoom')
     updating_plot()
-    plt.show()
+    plt.show()        
+    
+if __name__=="__main__":
 
+    test_updating_plot() # pass a 2d array to use your data.
 
     
