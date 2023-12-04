@@ -274,6 +274,28 @@ def level_data(data,x=None,y=None,degree=1,axis=None,byline=False,fit=False,*arg
 
 ## 2D FUNCTIONS
 
+def level_on_points(data,x,y, points):
+    """level for best fit plane passing by points.
+    points can be provided as x,y,z or as x,y alone, in that case data are interpolated.
+    
+    ex: xy = [[-0.025,-0.025], [0.025, -0.025], [0,0.042]]
+        data,x,y = level_on_points(data,x,y,xy)
+    """
+    
+    from pySurf.points import _get_plane, level_points, matrix_to_points2, plot_points,extract_profile, points_autoresample
+
+    if np.array(points).shape[1] == 2:
+        psurf = matrix_to_points2(data,x,y) 
+        # xy points
+        p = []
+        for pp in points:
+            p.append([extract_profile(psurf,pp)[0]])  #with single point, extract point
+        points = np.hstack([np.array(points),np.array(p)])
+
+    pars = _get_plane(points,returnPars=True)[1]
+    return points_autoresample(level_points(matrix_to_points2(data,x,y),pars=pars))
+    
+
 def transpose_data(data,x,y):
     """Transpose (in matrix sense) data and coordinates, switching x and y, return new data,x,y.
 
