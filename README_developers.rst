@@ -28,23 +28,20 @@ then move to the project folder and install as developer::
    cd pyXsurf
    pip install -e .
 
-... where ``-e`` stands for ``--editable`` (don't forget the final ``.`` for the current directory).
-Doing this, the library will be installed from current position (no local copy), any change to the code in this folder will be immediately available in the imported library (the second command (see https://packaging.python.org/en/latest/guides/distributing-packages-using-setuptools/ for detailed information on how this works).
-
-This maintains the import synchronized with the software (in other words, you don't need to reinstall the package every time you make changes). This will work also if you checkout another branch (you might need to reimport the module in that case).
-
+where ``-e`` stands for ``--editable`` (don't forget the final ``.`` for the current directory).
+This method installs the library directly from the current location, which differs from a standard installation. In a regular installation (without the -e option), Python compiles and links to a copy of the code, typically located in the site-packages folder. However, with an "editable" installation, the code isn't copied; instead, it's linked directly from the source folder. This means any modifications made to the code in the source folder are immediately reflected in the imported library, maintaining the import synchronized with the software (in other words, you don't need to reinstall the package every time you make changes). This will work also if you checkout another branch (you might need to reimport the module in that case).
 
 In addition, if you are using IPython or derived tools (e.g. Jupyter notebooks) it is suggested to add the following magic commands at the beginning of your work:
 
-    %load_ext autoreload
-    %autoreload 2
+   %load_ext autoreload
+   %autoreload 2
 
 This will automatically make sure that the code is reimported at any change.
 
 Working on documentation
 -------------------------
 
-If you want to work on the documentation only, or you want to test it, you can put yourself in the ``docs`` directory and call:
+If you want to work on the documentation only, you can modify the documentation source in ``docs\source`` folder. To compile documentation locally, you can call, from the ``docs`` directory:
 
 + ``make html`` will normally compile the "official" documentation for the pyXsurf library at the current status of development.
 + ``make html .\source_test_doc`` will compile also the test documentation, creating a front page which links to the "official" documentation, but also at a test documentation, where the dubious concepts are tested in details.
