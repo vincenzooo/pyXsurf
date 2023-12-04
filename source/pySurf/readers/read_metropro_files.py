@@ -1915,8 +1915,10 @@ def readMetroProData(filename, intensity = False):
         f.seek(hData['size'])
         ilist = []
         for i in range(hData['nBuckets']):
-            idat = f.read('int16', size = hData['iNx']*hData['iNy'])
-            idat[idat >= 65535] = np.nan
+            idat = f.read('uint16', size = hData['iNx']*hData['iNy'])  #originally int16, but it was giving -1 instead of 65535 for invalid values 
+            invalid = 65535 #hData.get('invalid',65535) # set to 2147483640 in header, probably good for data
+            print("invalid:",invalid)
+            idat[idat >= invalid] = np.nan
             # Reshaping into Nx * Ny matrix
             idat = idat.reshape(hData['iNy'], hData['iNx'])
             # Flipping up/down, i.e., change direction of y-axis.
