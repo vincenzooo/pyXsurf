@@ -85,17 +85,17 @@ The roadmap is detailed in the following section, main area of work are:
 Status of installer
 -------------------------------------------------
 
-The library is installable with common python practices, 
+The library is installable with common python practices, downloading code from github repository.
 
 I have tried the installation on a few computers and it worked smoothly 
 by ``setup.py``. The folder ``test_install`` contains tests 
 that verify a correct installation.
 
-I can upload the package on test-PyPI, but not on the main PyPI, as I get an error, related to the too large size of the package.
+Last time I tried, I could upload the package on test-PyPI, but not on the main PyPI, as I get an error, related to the too large size of the package. 
 
-Plan is to achieve a full installable distribution on PyPI, and possibly on conda, and be able to maintain it through Continuous Integration.
+A complete CI/CD mechanism needs to be implemented. Plan is to achieve a full installable distribution on PyPI, and possibly on conda, and be able to maintain it through Continuous Integration.
 
-Status of code
+Code and comments to code
 -------------------------------------------------
 
 Code is quite consistent, and usually commented, but there are still a few modules in early stage of development or which might be removed or integrated somewhere else. Some are included for backwards compatibility, future needs or just to stay on the safe side of breaking dependencies. 
@@ -109,16 +109,28 @@ but this is quite non-uniform,
 as it mixes different conventions I tried over the time, and it will remain like this
 until I find one tool that I can use to maintain the documentation.
 
-I am not very skilled in using sphinx features, but I am learning.
-I started a new ``documentation`` branch for the development of documentation, which includes also tests on the different sphinx features. Basic api documentation is very rough, but seems to contain a good amount of documentation, so the obvious step is to obtain a minimally effective, decently clean API documentation, as a starting point for a refinement of the standard in documentation format, which is often not homogeneous.  
+TODO: build a minimal set of commented modules and functions with a decently clean API documentation API automatic documentation, as a starting point for a refinement of the standard in documentation format, which is often not homogeneous.  
 
-Formatting is indeed at the moment very poor, I have tried experimenting with templates (e.g. astropy), ipynb, rst and integration with github, things that I am really not sure how to handle. See more details in the homepage of the documentation branch.
+There were past attempts of ``documentation`` branch or similar, they are now merged in the main branch. In `\docs\source\test_source_docs` contains some tests for documentation rendering and working to test syntax and features "offline". It can be compiled with ``make file\source_test_docs``.
 
-Also, some experiment with jupyter book, that looks a very appealing option on a long term, but implies a shift in paradygm.
+Jupyter notebooks are implemented in different ways according to the original position (which is most of the times arbitrary and not standardized):
+
+* `notebooks`: here are "well-behaving" jupyter notebooks. These work and can be referred from rst files and are compiled by means of jupyter extensions. Each of these generate a `.html` file in `\docs\build\html\notebooks` 
+* Some notebooks are originally located in directories above `docs\source` or in their subfolders (e.g.: `\source\pySurf\test`). These seems to be not accessible for compilation from `sphinx`. As a workaround, those were copied to `\docs\source\_static` and need to be manually compiled to html with `nbconvert`
+
+TODO: find a definitive solution for notebooks above sphinx root.
+TODO: understand different examples of link to notebook by embedding or linking from ipynb or rst pages. 
+
+Status of tests
+-------------------------------------------------
+
+There are no standardized tests. Each package has its tests in form of .ipynb or .py files and more in the source code.
+
+TODO: implement organized test structure (e.g.: pytest).
 
 Changes
 -------------------------------------------------
-
+2023/12/04 Updated status of the project and TODO on this file.
 2023/07/15 Starting implementing major changes towards common standards and best-practices. 
 2022/09/06 Created new branch ``pyXsurf_nbdev`` for experimenting with
 2021/07/21 Upgraded installation mechanism.
