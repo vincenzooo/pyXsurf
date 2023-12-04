@@ -31,7 +31,7 @@ These Jupyter notebooks illustrate practical examples on how to start or to perf
 
 *   `Introduction to the library <../notebooks/pySurf_demo.ipynb>`_ :download:`download source <../notebooks/pySurf_demo.ipynb>`
 
-*  `Usage <../notebooks/basic_usage.ipynb>`_ :download:`download source <../notebooks/basic_usage.ipynb>`
+*  🛠️ `Usage <../notebooks/basic_usage.ipynb>`_ :download:`download source <../notebooks/basic_usage.ipynb>`
 
 Advanced Examples
 -----------------
