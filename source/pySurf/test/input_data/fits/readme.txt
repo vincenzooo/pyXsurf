@@ -1,1 +1,0 @@
-180206_C1S06_GentexCut_Meas1,2,3  Three repetitions of slumped conical part on WFS saved in fits format.
