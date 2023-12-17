@@ -1,7 +1,0 @@
-pySurf
-======
-
-.. toctree::
-   :maxdepth: 4
-
-   pySurf
