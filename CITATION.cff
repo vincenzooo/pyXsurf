@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Cotroneo"
+  given-names: "Vincenzo"
+  orcid: "https://orcid.org/0000-0002-3503-1662"
+title: "vincenzooo/pyXSurf: v1.5.0-beta"
+version: 1.5.0
+doi: 10.5281/zenodo.6386356
+date-released: 2022-03-06
+url: "https://github.com/vincenzooo/pyXSurf"
