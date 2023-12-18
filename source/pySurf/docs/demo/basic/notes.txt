@@ -1,3 +1,0 @@
-2023/08/23
-reorganization of tutorials, see C:\Users\kovor\Documents\python\pyXTel\docs\source\notebooks
-This folder was completely copied and should be deleted. Keep only for reference until needed.
