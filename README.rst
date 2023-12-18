@@ -12,7 +12,7 @@ Installation
 
 .. code:: bash
 
-   pip install pyXsurf
+    pip install pyXsurf
 
 Uninstalling
 ============
@@ -22,11 +22,11 @@ Project can be uninstalled running ``pip uninstall pyXsurf`` or equivalent.
 How to use
 ==========
 
-All modules are packaged into `pyXsurf` package, you can import them with something like::
+All modules are packaged into `pyXsurf` package, you can import them with something like:
 
 .. code:: python
 
-   from pyXsurf.pySurf.data2D import data2D
+    from pyXsurf.pySurf.data2D import data2D
 
 
 Additional resources for usage guidance
