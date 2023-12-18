@@ -5,13 +5,23 @@ authors = [{ name = "Vincenzo Cotroneo", email = "vincenzo.cotroneo@inaf.it" }]
 readme = "README.rst"
 requires-python = ">=3.7"
 dynamic = ["version"]
-dependencies = ["numpy", "matplotlib", "scipy", "astropy"]
+dependencies = [
+    "astropy",
+    "importlib_resources",
+    "matplotlib",
+    "numpy",
+    "scipy",
+]
 
-[tool.setuptools.dynamic]
-version = { file = "VERSION" }
+[project.optional-dependencies]
+dev = ["pytest", "IPython", "sphinx"]
+
 
 [tool.setuptools]
 packages = ["pyXsurf"]
 
-[project.optional-dependencies]
-dev = ["pytest", "IPython"]
+[tool.setuptools.dynamic]
+version = { file = "VERSION" }
+
+[tool.setuptools.package-data]
+"pyXsurf.data" = ["*"]
