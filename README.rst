@@ -10,9 +10,38 @@ together with a set of tools to perform typical operations on data, in particula
 Installation
 ============
 
+Optionally create a virtual environment and activate it.
+
+.. code:: bash
+
+    python3 -m venv pyXsurf.venv
+    source pyXsurf.venv/bin/activate
+
+And then install the package with pip:
+
+1. Install released version from PyPI:
+
 .. code:: bash
 
     pip install pyXsurf
+
+or
+
+2. Install latest development version from github:
+
+.. code:: bash
+
+    pip install "pyXsurf @ git+ssh://git@github.com/robeyes/pyXsurf.git"
+
+or
+
+3. Clone the repository and install in editable mode for development:
+
+.. code:: bash
+
+    git clone https://github.com/robeyes/pyXsurf.git
+    cd pyXsurf
+    pip install -e .[dev]
 
 Uninstalling
 ============
@@ -26,7 +55,7 @@ All modules are packaged into `pyXsurf` package, you can import them with someth
 
 .. code:: python
 
-    from pyXsurf.pySurf.data2D import data2D
+    import pyXsurf.pySurf.data2D
 
 
 Additional resources for usage guidance
