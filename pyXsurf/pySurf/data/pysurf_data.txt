@@ -1,1 +1,1 @@
-pysurf_data
+pySurf functionality data
