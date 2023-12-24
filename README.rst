@@ -62,7 +62,7 @@ Additional resources for usage guidance
 =======================================
 
 - **docs** `official documentation <https://pyxsurf.readthedocs.io>`
-- **tests** contains a collection of tests and examples.
+- **test** contains a collection of tests and examples.
 - **notebooks** contains a collection of Jupyter notebooks with examples and tutorials.
 
 Modules

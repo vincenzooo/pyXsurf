@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "IPython", "sphinx"]
+dev = ["pytest", "testbook", "ipykernel", "sphinx"]
 
 
 [tool.setuptools]
@@ -25,3 +25,5 @@ version = { file = "VERSION" }
 
 [tool.setuptools.package-data]
 "pyXsurf.data" = ["*"]
+"pyXsurf.pyProfile.data" = ["*"]
+"pyXsurf.pySurf.data" = ["*"]
