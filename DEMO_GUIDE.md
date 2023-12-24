@@ -1,7 +1,7 @@
 1. Clone the repository
 
 ```
-git clone --branch new-pyproject-additions-plus https://github.com/robeyes/pyXsurf.git
+git clone --branch new-pyproject-additions-plus git@github.com:robeyes/pyXsurf.git
 cd pyXsurf
 ```
 
@@ -64,7 +64,7 @@ python test/scripts/pyGeo3D/test_standalone_demo.py
 4. Guide to updating this pull request:
 
 ```
-git clone --branch new-pyproject-additions-plus https://github.com/robeyes/pyXsurf.git
+git clone --branch new-pyproject-additions-plus git@github.com:robeyes/pyXsurf.git
 cd pyXsurf
 ```
 
