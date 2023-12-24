@@ -1,7 +1,7 @@
 1. Clone the repository
 
 ```
-git clone --branch new-pyproject https://github.com/robeyes/pyXsurf.git
+git clone --branch new-pyproject-additions-plus https://github.com/robeyes/pyXsurf.git
 cd pyXsurf
 ```
 
