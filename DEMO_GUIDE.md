@@ -60,3 +60,18 @@ Right now the way to run these scripts is run the script directly from the comma
 ```
 python test/scripts/pyGeo3D/test_standalone_demo.py
 ```
+
+4. Guide to updating this pull request:
+
+```
+git clone --branch new-pyproject-additions-plus https://github.com/robeyes/pyXsurf.git
+cd pyXsurf
+```
+
+- Make changes and add files as needed.
+- Commit the changes to the local repository
+- Push the changes to the remote repository as usual with
+
+```
+git push --set-upstream origin new-pyproject-additions-plus
+```
