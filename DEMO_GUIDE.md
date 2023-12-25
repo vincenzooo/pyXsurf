@@ -7,6 +7,7 @@ cd pyXsurf
 
 2. Install the package for development
 
+[comment]: <> (TODO: what is the function of `.[dev]`, rather than `.`?)
 ```
 pip install -e .[dev]
 ```
