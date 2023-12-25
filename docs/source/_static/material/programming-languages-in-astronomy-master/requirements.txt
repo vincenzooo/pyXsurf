@@ -1,0 +1,6 @@
+matplotlib
+tqdm
+pandas
+ads
+numpy
+jupyter

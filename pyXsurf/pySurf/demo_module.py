@@ -1,5 +1,7 @@
 from importlib_resources import as_file, files
 
+"""See analogous functions in pyProfile."""
+
 
 def function():
     return "pySurf function"
