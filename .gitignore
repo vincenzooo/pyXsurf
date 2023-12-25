@@ -7,7 +7,6 @@
 !.readthedocs.yaml
 *.pyc
 workspace.ini
-*.code-workspace
 /notebooks
 pySurf/readers/PyMDT
 xpyxsurf
@@ -54,6 +53,10 @@ docs/_build
 
 # Visual Studio Code project files
 .vscode
+*.code-workspace
+
+# Notepad++
+*.session
 
 # Packages/installer info
 *.egg
