@@ -1034,7 +1034,7 @@ class Plist(Superlist):
         if 'files' in kwargs:
             files = kwargs.pop('files')
             s = load_plist(files, *args, **kwargs)   # return a list
-            super().__init__(s, *args, **kwargs)
+            super().__init__(s)
         else:
             super().__init__(*args, **kwargs)        
 
