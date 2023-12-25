@@ -33,6 +33,9 @@ This is a demo implementation of couple of demo functions.
 
 - `common_data_function`: example of how to read a data file in `pyXsurf/data`. These data files will be used by multiple modules like `pySurf` and `pyProfile` etc. So, they are located in a the upper directory.
 
+- `image_generate_file`: example of generating binary file. And the corresponding test is in `test/units/pySurf/test_demo_module.py`
+shows how to test the binary file against a golden file.
+
 ## `test/units/pyProfile/test_demo_module.py` and `pyXsurf/pyProfile/demo_module.py`
 
 These are the same as the `pySurf` demo files, but for the `pyProfile` module.

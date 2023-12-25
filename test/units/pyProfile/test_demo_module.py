@@ -13,6 +13,3 @@ def test_data_function():
 
 def test_common_data_function():
     assert "common functionality data\n" == ppdm.common_data_function()
-
-
-# how do I compare images?
