@@ -1,7 +1,7 @@
 import filecmp
 from pathlib import Path
 
-import pyXsurf.pySurf.demo_module as psdm
+import pySurf.demo_module as psdm
 
 
 def test_function():
