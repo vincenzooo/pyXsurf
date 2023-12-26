@@ -55,7 +55,7 @@ All modules are packaged into `pyXsurf` package, you can import them with someth
 
 .. code:: python
 
-    import pyXsurf.pySurf.data2D
+    import pySurf.data2D
 
 
 Additional resources for usage guidance

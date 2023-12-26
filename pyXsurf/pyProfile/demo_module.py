@@ -12,10 +12,10 @@ def function():
 
 def data_function():
     """Return the contents of a text file
-    "pyprofile_data.txt" located in the "pyXsurf.pyProfile.data" package."""
-    return files("pyXsurf.pyProfile.data").joinpath("pyprofile_data.txt").read_text()
+    "pyprofile_data.txt" located in the "pyProfile.data" package."""
+    return files("pyProfile.data").joinpath("pyprofile_data.txt").read_text()
 
 
 def common_data_function():
-    """Return the contents of a text file "common_data.txt" located in the "pyXsurf.data" package."""
-    return files("pyXsurf.data").joinpath("common_data.txt").read_text()
+    """Return the contents of a text file "common_data.txt" located in the "data" package."""
+    return files("data").joinpath("common_data.txt").read_text()

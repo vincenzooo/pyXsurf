@@ -18,12 +18,12 @@ dev = ["pytest", "testbook", "ipykernel", "sphinx"]
 
 
 [tool.setuptools]
-packages = ["pyXsurf"]
+package-dir = {"" = "pyXsurf"}
 
 [tool.setuptools.dynamic]
 version = { file = "VERSION" }
 
 [tool.setuptools.package-data]
-"pyXsurf.data" = ["*"]
-"pyXsurf.pyProfile.data" = ["*"]
-"pyXsurf.pySurf.data" = ["*"]
+"data" = ["*"]
+"pyProfile.data" = ["*"]
+"pySurf.data" = ["*"]
