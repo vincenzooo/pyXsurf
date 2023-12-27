@@ -1,11 +1,4 @@
 # VC
-**/__pycache__
-/.*
-.*
-.*/
-!.gitignore
-!.readthedocs.yaml
-*.pyc
 workspace.ini
 /notebooks
 pySurf/readers/PyMDT
@@ -16,7 +9,10 @@ make_build.bat
 *.bak
 *.stackdump
 
+__pycache__/
+
 # Compiled files
+*.pyc
 *.py[cod]
 *.a
 *.o
