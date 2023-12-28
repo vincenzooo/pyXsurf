@@ -10,37 +10,37 @@ In python I need to look at code or docstring to understand if a value is modifi
 self.data=newdata makes a method a procedure, self.copy().data=newdata; return res is a function
 """
 
-import matplotlib.pyplot as plt
-import numpy as np
-#from pySurf.points import *#from pySurf.psd2d import *
-from pyProfile.profile import polyfit_profile
-#from plotting.multiplots import compare_images
-from dataIO.fn_add_subfix import fn_add_subfix
-from dataIO.span import span, span_from_pixels
-from dataIO.outliers import remove_outliers, EmptyRangeWarning
-from dataIO.dicts import strip_kw
+import itertools
 import logging
 import os
 import pdb
-from scipy.ndimage import map_coordinates
+
+import matplotlib.pyplot as plt
+import numpy as np
+from astropy.io import fits
+from dataIO.arrays import is_nested_list, stats
+from dataIO.dicts import strip_kw
+from dataIO.fn_add_subfix import fn_add_subfix
+from dataIO.functions import update_docstring
+from dataIO.outliers import EmptyRangeWarning, remove_outliers
+from dataIO.span import span, span_from_pixels
+from plotting.add_clickable_markers import add_clickable_markers2
+from plotting.captions import legendbox
+
+#from pySurf.points import *#from pySurf.psd2d import *
+from pyProfile.profile import PSF_spizzichino, line, polyfit_profile
+from pySurf.affine2D import find_affine
+from pySurf.find_internal_rectangle import find_internal_rectangle
+from pySurf.points import (
+    points_autoresample,
+    points_find_grid,
+    points_in_poly,
+    resample_grid,
+)
+from pySurf.testSurfaces import make_prof_legendre, make_surf_legendre
 from scipy import interpolate as ip
 from scipy import ndimage
-from plotting.captions import legendbox
-from astropy.io import fits
-from pySurf.testSurfaces import make_prof_legendre, make_surf_legendre
-from pySurf.points import points_find_grid
-from pySurf.points import resample_grid
-
-from pySurf.points import points_in_poly, points_autoresample
-from plotting.add_clickable_markers import add_clickable_markers2
-from pySurf.find_internal_rectangle import find_internal_rectangle
-import itertools
-
-from dataIO.functions import update_docstring
-from dataIO.arrays import stats, is_nested_list
-
-from pyProfile.profile import PSF_spizzichino,line
-from dataIO.functions import update_docstring
+from scipy.ndimage import map_coordinates
 
 rad_to_sec = 180/np.pi*3600.
 
@@ -282,7 +282,14 @@ def level_on_points(data,x,y, points):
         data,x,y = level_on_points(data,x,y,xy)
     """
     
-    from pySurf.points import _get_plane, level_points, matrix_to_points2, plot_points,extract_profile, points_autoresample
+    from pySurf.points import (
+        _get_plane,
+        extract_profile,
+        level_points,
+        matrix_to_points2,
+        plot_points,
+        points_autoresample,
+    )
 
     if np.array(points).shape[1] == 2:
         psurf = matrix_to_points2(data,x,y) 
@@ -311,7 +318,7 @@ def apply_transform(data,x,y,trans=None):
     TODO: add option to set final resampling grid keeping initial sampling, 
     initial number of points or on custom grid (use points.resample_grid, resample_data).
     """
-    from pySurf.points import matrix_to_points2,points_autoresample
+    from pySurf.points import matrix_to_points2, points_autoresample
 
     if trans is not None:
         p2=trans(matrix_to_points2(data,x,y))
@@ -353,7 +360,7 @@ def rotate_data(data,x=None,y=None,ang=0,k=None,center=None,
 
     if usepoints:
         #doesn't work well for some reason (nan?)
-        from pySurf.points import matrix_to_points2,rotate_points,resample_grid
+        from pySurf.points import matrix_to_points2, resample_grid, rotate_points
         p=matrix_to_points2(data,x,y)
         p=rotate_points(p,ang/180*np.pi,center=center,*args,**kwargs)
         #res=resample_grid(p,x,y,matrix=True),x,y  #this is wrong, needs to rescale on grid on rotated range
@@ -893,6 +900,7 @@ def crop_data(data,x,y,xrange=None,yrange=None,zrange=None,mask=False,poly=None,
         np.where([xx is None for xx in zrange],span(data),zrange)
 
     import pdb
+
     #spdb.set_trace()
     if poly:
         outmask=outmask & grid_in_poly(x,y,poly)
@@ -1414,7 +1422,7 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     to be passed to ``plt.contour``"""
 
     from mpl_toolkits.axes_grid1 import make_axes_locatable
-    
+
     ## SET PLOT OPTIONS
     aspect=kwargs.pop('aspect','equal')
     origin=kwargs.pop('origin',"lower")
@@ -1685,6 +1693,51 @@ def compare_2images(data,ldata,x=None,y=None,fignum=None,titles=None,vmin=None,v
     return list(compare_images([(data,x,y),(ldata,x,y)],
         aspect='auto',commonscale=True))
 
+def align_interactive(dlist, find_transform=find_affine, mref=None):
+    """plot a list of Data2D objects on common axis and allow to set
+    markers. When ENTER is pressed, return markers and transformations
+    
+    2023/12/28 from rotate_and_diff. This version is not used in the class,
+    it was the adaptation for N surfaces (Dlist)."""
+
+    m_arr = add_markers(dlist)
+
+    # populate array of transforms
+    mref = mref if mref is not None else m_arr[0]
+    m_trans = [find_transform(m, mref) for m in m_arr]
+
+    return m_arr, m_trans
+
+# add_markers and align_interactive from scripts.dlist
+
+
+def add_markers(dlist):
+    """interactively set markers, when ENTER is pressed,
+    return markers as list of ndarray.
+    It was align_active interactive, returning also trans, this returns only markers,
+    transforms can be obtained by e.g. :
+    m_trans=find_transform(m,mref) for m in m_arr]
+    """
+    from plotting.multiplots import find_grid_size, subplot_grid
+
+    # set_alignment_markers(tmp)
+    xs, ys = find_grid_size(len(dlist), 5)[::-1]
+
+    fig, axes = subplot_grid(len(dlist), (xs, ys), sharex="all", sharey="all")
+
+    # maximize()
+    for i, (d, ax) in enumerate(zip(dlist, axes)):
+        plt.sca(ax)
+        ll = d.level(4, byline=True)
+        ll.plot()
+        
+        plt.clim(*span(remove_outliers(ll.data, nsigma=2, itmax=1)))
+        add_clickable_markers2(ax, hold=(i == (len(dlist) - 1)))
+
+    return [np.array(ax.markers) for ax in axes]
+
+
+
 def plot_slope_slice(wdata,x,y,scale=(1.,1.,1.),vrange=None,srange=None,filter=False):
     """
     use calculate_slope_2D to calculate slope and
@@ -1842,7 +1895,8 @@ def leveldata(*args,**kwargs):
 def load_test_data():
     """load a standard Zygo file for tests."""
     
-    from pathlib import PureWindowsPath,Path
+    from pathlib import Path, PureWindowsPath
+
     from pySurf.readers.instrumentReader import matrixZygo_reader
     
     relpath=PureWindowsPath(r'test\input_data\zygo_data\171212_PCO2_Zygo_data.asc')
@@ -1857,8 +1911,8 @@ def test_leveling(d=None):
     """
     from IPython import get_ipython
     from IPython.display import display
+
     #from pySurf.data2D import load_test_data,plot_data
-    
     #get_ipython().run_line_magic('matplotlib', 'inline')
     
     if d is None:
@@ -1982,6 +2036,7 @@ def test_plot_data_aspect():
 
 if __name__=="__main__":
     from pySurf.outliers2d import remove_outliers2d
+
     #make a test array
     d=np.random.random(20).reshape((5,4))
     d[[3,2],[1,0]]=25
