@@ -2,13 +2,14 @@
 
 
 import math
-import numpy as np
-from matplotlib import pyplot as plt
-from dataIO.span import span
-from plotting.fignumber import fignumber
-from plotting.add_clickable_markers import add_clickable_markers2
-from pySurf.data2D import plot_data
 import pdb
+
+import numpy as np
+from dataIO.span import span
+from matplotlib import pyplot as plt
+from plotting.add_clickable_markers import add_clickable_markers2
+from plotting.fignumber import fignumber
+from pySurf.data2D import plot_data
 
 
 def smartcb(ax=None):
@@ -61,8 +62,8 @@ def commonscale(fig=None,axis='xy'):
     plt.draw()
     
 def test_commonscale():
-    from pySurf.data2D import make_surf_legendre
     from plotting.multiplots import commonscale
+    from pySurf.data2D import make_surf_legendre
 
     # create two surfaces of different shapes
     a = make_surf_legendre(np.arange(3),np.arange(4),[1,2])
@@ -233,7 +234,7 @@ def subplot_grid(number,size=0,smax=0,*args,**kwargs):
     num: if integer is passed, plot on the corresponding figure. if None is passed, create a new one. TBD: pass a figure obj.
     Additional *args and **kwargs are passed to `plt.subplots`.
     
-    
+    2023/12/28 In code using this function there was a call to axes.flatten(), which fails because it is a list.
     2020/05/14 fixed bug on subplots removal, updated doc from:
     return a generator that plots n plots. It has advantage wrt plt.subplots of 
     not creating empty axes. The idea of making a generator is weird.
@@ -361,6 +362,7 @@ def compare_images(datalist, x=None, y=None, fignum=None, titles=None,
 
 from dataIO.outliers import remove_outliers
 
+
 def plot_difference(p1t,p4, trim = None, dis=False):
     """plots and return difference of two Data2D objects, return difference.
     All data are plane leveled before plots, a common color scale is set after excluding outliers. Leveled difference is returned.
@@ -382,21 +384,22 @@ def plot_difference(p1t,p4, trim = None, dis=False):
     ax1=plt.subplot(131)
     p1t.level((1,1)).plot()
     #plt.title('PZT + IrC')
-    plt.clim(*remove_outliers(p1t.level().data,nsigma=2,itmax=3,span=1))
+    #plt.clim(*remove_outliers(p1t.level().data,nsigma=2,itmax=3,span=1))
+    plt.clim(*span(remove_outliers(p1t.level().data,nsigma=2,itmax=3)))
     plt.grid()
 
 
     ax2=plt.subplot(132,sharex=ax1,sharey=ax1)
     p4.level((1,1)).plot()
     #plt.title('PZT')
-    plt.clim(*remove_outliers(p4.level().data,nsigma=2,itmax=3,span=1))
+    plt.clim(*span(remove_outliers(p4.level().data,nsigma=2,itmax=3)))
     plt.grid()
     
     ax3=plt.subplot(133,sharex=ax1,sharey=ax1)
     diff=(p1t-p4).level((1,1))
     diff.name='Difference 1-2'
     diff.plot()
-    plt.clim(*remove_outliers(diff.level().data,nsigma=2,itmax=3,span=1))
+    plt.clim(*span(remove_outliers(diff.level().data,nsigma=2,itmax=3)))
     plt.grid()
     plt.xlim(*xr) #this adjust all plots to common scale
     plt.ylim(*yr)   
