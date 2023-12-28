@@ -16,7 +16,7 @@ def test_common_data_function():
     assert "common functionality data\n" == psdm.common_data_function()
 
 
-def test_test_data(test_path):
+def test_test_data(test_path: Path):
     with open(test_path / "data" / "test_data.txt", "r") as f:
         assert "test data\n" == f.read()
 
