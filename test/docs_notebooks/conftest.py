@@ -11,9 +11,3 @@ def notebooks_path():
     notebooks_dir = project_root / "docs" / "source" / "notebooks"
     with patch.dict(os.environ, {"PYXSURF_NOTEBOOKS_PATH": str(notebooks_dir)}):
         yield notebooks_dir
-
-
-@pytest.fixture(scope="module")
-def monkeymodule():
-    with pytest.MonkeyPatch.context() as mp:
-        yield mp

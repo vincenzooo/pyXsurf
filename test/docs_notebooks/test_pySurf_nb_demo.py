@@ -3,12 +3,15 @@ from testbook import testbook
 
 
 @pytest.fixture(scope="module")
-def notebook(notebooks_path, monkeymodule):
+def notebook(notebooks_path):
     nb_dir = notebooks_path / "nb_demo"
-    # Change current working directory to the notebooks directory
-    # so that the notebook can find the data files
-    monkeymodule.chdir(nb_dir)
-    with testbook(nb_dir / "pySurf_nb_demo.ipynb", execute=True) as nb:
+    with testbook(
+        nb_dir / "pySurf_nb_demo.ipynb",
+        execute=True,
+        # Set the run_path to the notebook directory so that
+        # it can find the test data with in that directory.
+        resources={"metadata": {"path": nb_dir}},
+    ) as nb:
         yield nb
 
 
