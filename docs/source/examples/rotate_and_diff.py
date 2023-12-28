@@ -11,16 +11,14 @@ Window might flicker if there are other windows,
 """
 
 import os
-
 import matplotlib.pyplot as plt
 import numpy as np
 from dataIO.outliers import remove_outliers
 from plotting.add_clickable_markers import add_clickable_markers2
 from plotting.multiplots import find_grid_size, plot_difference, subplot_grid
-from pySurf.affine2D import find_affine, find_rototrans
+from pySurf.affine2D import find_affine
 from pySurf.data2D_class import Data2D
-from pySurf.readers.instrumentReader import fitsWFS_reader, read_data
-from utilities.imaging import fitting as fit
+from pySurf.readers.instrumentReader import fitsWFS_reader
 
 # add_markers and align_interactive from scripts.dlist
 

@@ -168,4 +168,4 @@ pySurf/readers/PyMDT
 make_build.bat
 *.bak
 *.stackdump
-.vscode/
+#.vscode/
