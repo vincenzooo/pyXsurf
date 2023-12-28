@@ -1,8 +1,10 @@
-import numpy as np
-from dataIO.span import span as span # rename to span to avoid conflict with argument.
-from typing import Callable
-import warnings
 import pdb
+import warnings
+from typing import Callable
+
+import numpy as np
+from dataIO.span import span  # rename to span to avoid conflict with argument.
+
 
 class EmptyRangeWarning(RuntimeWarning):
     pass
@@ -32,8 +34,8 @@ def remove_outliers(data: np.array,
     if span: # useless and was giving conflict, solved by workaround below.
         print("`span` argument is deprecated and it will be removed. Please update your code to use `from dataIO.span import span; span (remove_outliers(data,...))`.\n\nentering debugger, `c` to continue, `u` to see caller function, `l` list code.")
         pdb.set_trace()
-    get_span = span  #rename variable
-    from dataIO.span import span
+    # get_span = span  #rename variable
+    # overwrites variable
     
     if flattening_func is not None: data=flattening_func(data)
     
@@ -93,7 +95,7 @@ def filter_outliers(data: np.array,
         pdb.set_trace()
     get_span = span  #rename variable
     from dataIO.span import span
-    
+
     # --------------
     if flattening_func is not None: data=flattening_func(data)
     
