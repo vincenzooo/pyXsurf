@@ -1,11 +1,19 @@
 import os
-import subprocess
 import pdb
 import re
+import subprocess
 import sys
 
 
-def main(str1, str2=None):
+def fetch_and_place(str1, str2=None):
+    """checkout file str1 from remote repository path, then copy the file to str2, creating folder if needed.
+    
+    `str1`, `str2` are both filenames including extension.
+    if `str2` is not provided, it is generated adding a `prefix` folder to `str1` removed root
+    """
+    
+    prefix = "pyXsurf"
+    
     # Perform git checkout
     git_checkout_command = ["git", "checkout", "upstream/master", "--", str1]
     try:
@@ -16,7 +24,7 @@ def main(str1, str2=None):
 
     if str2 is None:
         # str2 = os.path.join(get_top_level_directory(str2),)
-        str2 = os.path.join("pyXsurf", *(str1.split(os.path.sep)[1:]))
+        str2 = os.path.join(prefix, *(str1.split(os.path.sep)[1:]))
     print(f"moving to {str2}")
     
     #pdb.set_trace()
@@ -41,7 +49,7 @@ def extract_and_format(input_string):
         module_path = module_name.replace('.', '\\')
         return f"{module_path}\\{function_name}.py"
     else:
-        return "Pattern not found"
+        return None #"Pattern not found"
     
 def extract_module_path(traceback_str):
     
@@ -99,9 +107,11 @@ def extract_failed_module(errstr):
         i = errstr.find(libtarget)
         modname = errstr[i+len(libtarget):].strip()
         modname = extract_and_format(modname)
-        print(f'Extracted module {modname} as libtarget')
-        pdb.set_trace()
-    
+        if modname is None:
+            print("failed to extract modname, set to None.")        
+        else:
+            print(f'Extracted module {modname} as libtarget')
+        
     return modname
 
 def run_cmd(cmnd):
@@ -118,8 +128,9 @@ def run_cmd(cmnd):
     except subprocess.CalledProcessError as exc:
         print("Status : FAIL") #, exc.returncode, '\nO:\n', exc.output)
         output = extract_failed_module(exc.output)
-        if len(output) == 0:
-            output = None
+        
+        # if len(output) == 0:
+        #     output = None
         #print('Extracted:\n',output)
         #pdb.set_trace()
         print('------------------------------------------')
@@ -141,7 +152,7 @@ if __name__ == "__main__":
             str2 = sys.argv[2]
         except IndexError:
             str2 = None
-        main(str1, str2)
+        fetch_and_place(str1, str2)
 
     # pyfile = r"docs\source\examples\rotate_and_diff.py"  # file to execute
     # result = subprocess.run(["python", pyfile], stderr=subprocess.PIPE)
@@ -152,7 +163,7 @@ if __name__ == "__main__":
         #cmnd = r"python simple.py"
         maxiter = 3
 
-        res = run_cmd(cmnd)
+        res = run_cmd(cmnd) 
         i=0
         #pdb.set_trace()
         while res and i<maxiter:
@@ -160,7 +171,7 @@ if __name__ == "__main__":
                 #pdb.set_trace()
                 basename = os.path.join('source',res)
                 fn = os.path.join(basename)
-                main(fn)
+                fetch_and_place(fn)
             else:
                 # check if it is module, must have been manually created.
                 if os.path.exists(basename):
