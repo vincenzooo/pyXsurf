@@ -1,4 +1,4 @@
-import pyXsurf.pyProfile.demo_module as ppdm
+import pyProfile.demo_module as ppdm
 
 """ Define three test functions that check the functionality of functions in the pyXsurf.pyProfile.demo_module module. """
 
