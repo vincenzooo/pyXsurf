@@ -21,9 +21,9 @@ from plotting.add_clickable_markers import add_clickable_markers2
 from plotting.backends import maximize
 from plotting.multiplots import plot_difference
 from pySurf.affine2D import find_affine
-from pySurf.data2D import align_interactive
 from pySurf.data2D_class import Data2D
 from pySurf.readers.instrumentReader import fitsWFS_reader
+from pySurf.scripts.dlist import align_interactive
 
 """INPUT SETTINGS"""
 plt.ion()
