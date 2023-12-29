@@ -1,12 +1,13 @@
 1. Clone the repository
 
 ```
-git clone --branch new-pyproject https://github.com/robeyes/pyXsurf.git
+git clone --branch new-pyproject-additions-plus git@github.com:robeyes/pyXsurf.git
 cd pyXsurf
 ```
 
 2. Install the package for development
 
+[comment]: <> (TODO: what is the function of `.[dev]`, rather than `.`?)
 ```
 pip install -e .[dev]
 ```
@@ -31,6 +32,9 @@ This is a demo implementation of couple of demo functions.
 - `data_function`: example of how to read data from file in the `pyXsurf/pySurf/data`. Note that these will functionality data files, and not the data files for testing. ie. the implementation wouldn't work without this data.
 
 - `common_data_function`: example of how to read a data file in `pyXsurf/data`. These data files will be used by multiple modules like `pySurf` and `pyProfile` etc. So, they are located in a the upper directory.
+
+- `image_generate_file`: example of generating binary file. And the corresponding test is in `test/units/pySurf/test_demo_module.py`
+shows how to test the binary file against a golden file.
 
 ## `test/units/pyProfile/test_demo_module.py` and `pyXsurf/pyProfile/demo_module.py`
 
@@ -59,4 +63,19 @@ Right now the way to run these scripts is run the script directly from the comma
 
 ```
 python test/scripts/pyGeo3D/test_standalone_demo.py
+```
+
+4. Guide to updating this pull request:
+
+```
+git clone --branch new-pyproject-additions-plus git@github.com:robeyes/pyXsurf.git
+cd pyXsurf
+```
+
+- Make changes and add files as needed.
+- Commit the changes to the local repository
+- Push the changes to the remote repository as usual with
+
+```
+git push --set-upstream origin new-pyproject-additions-plus
 ```
