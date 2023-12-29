@@ -31,7 +31,7 @@ or
 
 .. code:: bash
 
-    pip install "pyXsurf @ git+ssh://git@github.com/robeyes/pyXsurf.git"
+    pip install "pyXsurf @ git+https://github.com/robeyes/pyXsurf.git"
 
 or
 
