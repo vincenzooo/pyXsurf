@@ -41,7 +41,7 @@ or
 
     git clone https://github.com/robeyes/pyXsurf.git
     cd pyXsurf
-    pip install -e .[dev]
+    pip install -e .
 
 Uninstalling
 ============
