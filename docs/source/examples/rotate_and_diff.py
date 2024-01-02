@@ -3,15 +3,17 @@
 Align and diff two data sets based on user clicked markers.
 libraries download: https://github.com/vincenzooo/pyXTel
 
-INTERACTIVE MARKERS: 
+INTERACTIVE MARKERS:
     CTRL + left click: add marker
     CTRL + right click: add marker
     ENTER: continue and return transformation
-Window might flicker if there are other windows, 
+Window might flicker if there are other windows,
 """
 
 import os
 import pdb
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -25,14 +27,21 @@ from pySurf.data2D_class import Data2D
 from pySurf.readers.instrumentReader import fitsWFS_reader
 from pySurf.scripts.dlist import align_interactive
 
-"""INPUT SETTINGS"""
-plt.ion()
-# see https://stackoverflow.com/questions/59596264/defining-package-level-path-constants
-# infolder="G:\\My Drive\\materialsLabShared\\WFS_BONDING_TESTS\\181016_PCO2S06_Reproducibility"
-print("**",os.path.realpath('.'),"**")  # to understand why it works only from .
+script_dir = Path(__file__).parent.absolute()
 
-infolder =  r"..\..\..\test\data" #r"..\..\..\pySurf\test\input_data\fits\WFS"
-outfolder = r"..\..\..\test\results\rotate_and_diff"
+parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+parser.add_argument("-i", "--interactive", action="store_true", default=False)
+parser.add_argument("--indir", type=str, default=script_dir / "inputs")
+parser.add_argument("--outdir", type=str, default=script_dir / "outputs" / "rotate_and_diff")
+args = parser.parse_args()
+print(args)
+
+"""INPUT SETTINGS"""
+interactive = args.interactive
+infolder =  args.indir
+outfolder = args.outdir
+
+plt.ion()
 
 file1 = "181016_01_PCO2S06_1009_08.fits"
 file2 = "181016_02_PCO2S06_1009_08.fits"
@@ -40,7 +49,6 @@ scale = 101.6 / 116  # ratio between mm and pixels
 ytox = 220.0 / 200  # aspect ratio of pixel
 strip = True  # strip nan frame
 
-interactive = False
 """"""
 # Replace with updated code
 rfiles = [os.path.join(infolder, f) for f in [file1, file1]]
