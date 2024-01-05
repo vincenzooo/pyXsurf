@@ -53,7 +53,11 @@ def maximize(backend=None,fullscreen=False,verbose=False):
         elif backend == 'Qt4Agg' or backend == 'Qt5Agg':
             mng.window.showMaximized()
         elif backend == 'TkAgg':
-            mng.window.state('zoomed') #works fine on Windows!
+            try:
+                mng.window.state('zoomed') #works fine on Windows!
+            except:
+                m = mng.window.maxsize()
+                mng.window.geometry('{}x{}+0+0'.format(*m))
         elif backend == 'module://ipykernel.pylab.backend_inline':
             #it was mng.resize(xsi,ysi) 
             #added 2020/05/26
