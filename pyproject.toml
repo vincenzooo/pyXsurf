@@ -1,0 +1,38 @@
+[project]
+name = "pyXsurf"
+description = "Python library for X-Ray Optics, Metrology Data Analysis and Telescopes Design."
+authors = [{ name = "Vincenzo Cotroneo", email = "vincenzo.cotroneo@inaf.it" }]
+readme = "README.rst"
+requires-python = ">=3.7"
+dynamic = ["version"]
+dependencies = [
+    "astropy",
+    "importlib_resources",
+    "matplotlib",
+    "numpy",
+    "scipy",
+    "pytest",
+    "testbook",
+    "ipykernel",
+    "sphinx",
+]
+
+[project.optional-dependencies]
+# dev = ["pytest", "testbook", "ipykernel", "sphinx"]
+
+
+[tool.setuptools]
+package-dir = { "" = "pyXsurf" }
+
+[tool.setuptools.dynamic]
+version = { file = "VERSION" }
+
+[tool.setuptools.package-data]
+"data" = ["*"]
+"pyProfile.data" = ["*"]
+"pySurf.data" = ["*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["pyXsurf"]
+testpaths = ["test"]
+addopts = ["--import-mode=importlib"]
