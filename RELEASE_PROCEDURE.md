@@ -19,9 +19,10 @@ Patch releases are for bug fixes and other small changes to the package. These i
 
 1. We generally do development on the master branch. By making pull requests to master branch.
 2. When we want to release a new version, we start the release process. Typically once we have added a new feature that is ready for external users or we have fixed a bug that is affecting a released version.
+
 2.1.1. Run the tests and make sure they pass.
 2.1.2. Create and switch to a new branch from master named `release-<mm-version>`, where `<mm-version>` is the new version number without patch version. If we are creating a patch release, then just switch to the `release-<mm-version>` branch.
-2.1.3. If creating patch release, then cherry-pick the commits that are to be included in the patch release from master to the `release-<mm-version>` branch using `git cherry-pick <commit-hash>`. If creating a minor or major release, then skip this step.
+2.1.3. If creating a minor or major release, you can skip this step. Otherwise, if creating patch release, then cherry-pick the commits that are to be included in the patch release from master to the `release-<mm-version>` branch using `git cherry-pick <commit-hash>`. 
 2.1.4. Update the `<version>` number in the VERSION file where version is the full semver with patch version.
 2.1.5. Run
 ```
