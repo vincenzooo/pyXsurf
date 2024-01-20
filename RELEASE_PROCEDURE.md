@@ -22,7 +22,7 @@ Patch releases are for bug fixes and other small changes to the package. These i
 
 2.1.1. Run the tests and make sure they pass.
 2.1.2. Create and switch to a new branch from master named `release-<mm-version>`, where `<mm-version>` is the new version number without patch version. If we are creating a patch release, then just switch to the `release-<mm-version>` branch.
-2.1.3. If creating a minor or major release, you can skip this step. Otherwise, if creating patch release, then cherry-pick the commits that are to be included in the patch release from master to the `release-<mm-version>` branch using `git cherry-pick <commit-hash>`. 
+2.1.3. If creating a minor or major release, you can skip this step. Otherwise, if creating patch release, then cherry-pick the commits that are to be included in the patch release from master to the `release-<mm-version>` branch using `git cherry-pick <commit-hash>`.
 2.1.4. Update the `<version>` number in the VERSION file where version is the full semver with patch version.
 2.1.5. Run
 ```
@@ -31,10 +31,10 @@ git commit -a -m "Bump version number to <version>."
 git tag -a "release-<version>" -m "Tagging version <version>."
 git push origin
 git push origin "release-<version>"
-# TODO: Run commands to push the package to PyPI and conda-forge
-# TODO: Run commands to generate the documentation and push it to Github pages
 ```
 2.1.6. Now you should have tag and branch in your Github repo.
+
+3. Follow the procedures in Publish section to publish artifacts to Github, PyPI, and conda-forge.
 
 A Git tag is an immutable named reference to a commit in your Git repo.
 
@@ -43,3 +43,51 @@ A user that wants to run tests or explore examples of a specific version of the 
 ```
 git clone <repo_url> --branch "release-<version>"
 ```
+
+# Publish
+
+## Publish to Github
+
+1. Install the Github client: `conda install gh --channel conda-forge`
+2. Run `gh auth login` and follow the instructions to login to Github.
+
+```
+> gh auth login
+? What account do you want to log into? GitHub.com
+? What is your preferred protocol for Git operations on this host? HTTPS
+? Authenticate Git with your GitHub credentials? No
+? How would you like to authenticate GitHub CLI? Login with a web browser
+```
+
+3. Run `pip install build`
+4. Run to build the package: `python -m build`
+4. Run `gh release create release-<version> dist/pyXsurf-<version>-py3-none-any.whl dist/pyXsurf-<version>.tar.gz` to create a release on Github.
+
+```
+> gh release create release-2.0.0.dev1 dist/pyXsurf-2.0.0.dev1-py3-none-any.whl dist/pyXsurf-2.0.0.dev1.tar.gz
+? Title (optional) release-2.0.0.dev1
+? Release notes Leave blank
+? Is this a prerelease? No
+? Submit? Publish release
+https://github.com/robeyes/pyXsurf/releases/tag/release-2.0.0.dev1
+```
+
+## Publish to PyPI
+
+1. Create a PyPI account if you don't have one already.
+1.1. Follow instructions [here](https://packaging.python.org/tutorials/packaging-projects/#uploading-the-distribution-archives) to create auth tokens.
+2. Run `pip install build twine`
+3. Run to build the package: `python -m build`
+4. Upload to PyPI with: `twine upload dist/pyXsurf-<version>-py3-none-any.whl`
+
+## Publish to conda-forge
+
+1. Run `pip install build grayskull`
+2. Run to build the package: `python -m build`
+3. Run `grayskull pypi --tag release-<version> https://github.com/robeyes/pyXsurf`
+3.1. This will create a `meta.yaml` file in `pyXurf` directory.
+4. Using the `meta.yaml` created in above step, follow steps from step 4 in this guide: https://blog.gishub.org/how-to-publish-a-python-package-on-conda-forge
+
+## Publish docs to Github pages
+
+TODO
