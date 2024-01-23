@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import utilities.imaging.man as man
 import utilities.imaging.fitting as fit
 import scipy.ndimage as nd

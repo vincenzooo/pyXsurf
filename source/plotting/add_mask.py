@@ -4,7 +4,6 @@ import numpy as np
 import sys
 from matplotlib import pyplot as plt
 
-import matplotlib.patches as patches
 
 #2017/08/03 made some adjustments, mostly in interactivity. However plt.ion/ioff don't update immediately,
 #  it is necessary to close the window.

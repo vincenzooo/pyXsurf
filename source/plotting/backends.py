@@ -1,13 +1,11 @@
 import matplotlib
 import matplotlib.pyplot as plt
-import pdb
 
 
 
 def demo_display(testfunc):
     """A wrapper function that makes the wrapped function work independently on environment (Ipython, Jupyter notebook, or shell). Use as a decorator on test functions to generate an output appropriate for the situation."""
     
-    pass
 
 def test_demo_display():
     pass
@@ -116,7 +114,6 @@ def test_backend(gui_env=None):
         try:
             print ("testing", gui)
             matplotlib.use(gui,warn=False, force=True)
-            from matplotlib import pyplot as plt
             break
         except:
             continue

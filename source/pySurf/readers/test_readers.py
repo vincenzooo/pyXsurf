@@ -32,7 +32,6 @@ if __name__ == '__main__':
 
 import os
 import sys
-import numpy as np
 import matplotlib.pyplot as plt
 from pySurf.data2D import plot_data
 #from format_reader import read_sur

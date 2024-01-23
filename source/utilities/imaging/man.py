@@ -3,7 +3,6 @@ import numpy as np
 from scipy.interpolate import griddata
 from utilities.imaging.fitting import legendre2d
 
-import pdb
 
 def unpackimage(data,xlim=[-1,1],ylim=[-1,1],remove=True):
     """Convert a 2D image into x,y,z coordinates.

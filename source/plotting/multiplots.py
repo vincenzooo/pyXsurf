@@ -6,9 +6,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from dataIO.span import span
 from plotting.fignumber import fignumber
-from plotting.add_clickable_markers import add_clickable_markers2
 from pySurf.data2D import plot_data
-import pdb
 
 
 def smartcb(ax=None):
@@ -778,7 +776,6 @@ def associate_plots_tb2(ax1,ax2):
         else took care of details. need to keep under control side effects,
         for example must work on rescaling from code.
     """
-    from matplotlib.backend_bases import NavigationToolbar2
 
     def ondraw(event):
         print('------ ondraw --------')

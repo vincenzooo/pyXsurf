@@ -1,7 +1,7 @@
 import numpy as np
 import pdb
 from scipy.interpolate import griddata
-from imaging.man import stripnans,nearestNaN
+from imaging.man import stripnans
 from scipy.integrate import simps
 
 #This module contains Fourier analysis routine

@@ -2,7 +2,6 @@ print ("module moved, modify your import to use readers.instrumentReader")
 
 
 # from .readers import instrumentReader 
-from pySurf.readers.instrumentReader import *
 
 '''
 import sys

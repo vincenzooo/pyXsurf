@@ -32,17 +32,9 @@ get_ipython().run_line_magic('pylab', '')
 # In[2]:
 
 
-from pySurf.points import plot_points,matrix_to_points2
-from pySurf.points import subtract_points,level_points
-from pySurf.points import points_find_hull,crop_points,save_points,points_autoresample
 from pySurf.psd2d import calculatePSD #,plotPSDs,PSDplot
-from pyProfile.profile import polyfit_profile, level_profile
-from plotting.multiplots import compare_images
 from dataIO.fn_add_subfix import fn_add_subfix
 from dataIO.span import span
-import os
-from utilities.imaging import fitting as fit
-from plotting.add_clickable_markers import add_clickable_markers
 
 
 

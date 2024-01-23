@@ -1,4 +1,3 @@
-from pyGeneralRoutines.fn_add_subfix import fn_add_subfix
 """read a CMM program file saved as text and convert measured points to a x,y,z file."""
 def cmmconvert(filename,startline, step, outfile=None):
     l=open(filename,'r').readlines()

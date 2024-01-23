@@ -10,7 +10,6 @@ import numpy as np
 from PIL import ImageFont
 from PIL import ImageDraw
 from PIL import Image
-import pdb 
 
 def original_make_caption():
     if mode=='tagcode': #single string (e.g. for filenames)

@@ -1,5 +1,4 @@
 from collections import OrderedDict
-import numpy as np
 import matplotlib.pyplot as plt
 
 

@@ -3,7 +3,6 @@ from math import factorial
 from numpy.ma import masked_array
 import scipy
 from scipy.misc import factorial
-import scipy.stats as stat
 import pdb
 
 #Define Zernike radial polynomials

@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mpl_toolkits.mplot3d as m3d
 
 def fit_3D_line(points,plot=False):
     '''return direction vector and point for the fitting line.
