@@ -14,7 +14,6 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
-import pdb
 from dataIO.functions import update_docstring
 from scipy.stats import binned_statistic
 ## profile creation

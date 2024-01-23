@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-import pdb
 
 def fread(fid, nelements, dtype):
     if dtype is str:

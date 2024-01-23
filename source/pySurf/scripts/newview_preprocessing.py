@@ -24,7 +24,7 @@ while newview_plotter is removed as the only other thing done is plotting compar
 import os
 import copy as cp
 
-from pySurf.data2D_class import Data2D,PSD2D
+from pySurf.data2D_class import Data2D
 from pySurf.readers.instrumentReader import matrixZygo_reader
 from plotting.backends import maximize
 from plotting.fignumber import fignumber
@@ -32,18 +32,10 @@ from plotting.fignumber import fignumber
 
 import matplotlib.pyplot as plt
 import numpy as np
-from pyProfile.profile import polyfit_profile
 from IPython.display import display
 from dataIO.fn_add_subfix import fn_add_subfix
-from dataIO.span import span, span_from_pixels
 from dataIO.outliers import remove_outliers
-import logging
 import os
-import pdb
-from scipy.ndimage import map_coordinates
-from scipy import interpolate as ip
-from plotting.captions import legendbox
-from astropy.io import fits
 from plotting.backends import maximize
 
 from scripts.plot_surface_analysis import plot_surface_analysis

@@ -1,8 +1,6 @@
 import numpy as np
 from dataIO.span import span
 from itertools import product
-import pdb
-import logging
 import warnings
 
 warnings.simplefilter("once")

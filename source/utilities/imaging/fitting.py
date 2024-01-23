@@ -1,7 +1,6 @@
 import numpy as np
 import scipy
 import scipy.signal
-import pdb
 from astropy.modeling import models,fitting
 
 def legendre2d(d,x=None,y=None,xo=None,yo=None,xl=None,yl=None,

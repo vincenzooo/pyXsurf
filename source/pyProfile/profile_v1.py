@@ -9,7 +9,6 @@ It might be worth to recover it from backups.
 @email: vcotroneo@cfa.harvard.edu
 """
 from dataIO.span import span
-import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats

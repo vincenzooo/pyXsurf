@@ -22,7 +22,6 @@ import os
 from astropy.io import fits
 
 from pySurf.points import get_points
-from pySurf.points import crop_points
 from pySurf.points import points_find_grid
 from pySurf.points import resample_grid
 from pySurf.readers.read_sur_files import readsur
@@ -36,7 +35,6 @@ from IPython.display import display
 
 from .nid_reader import make_channel_tags, read_datablock
 
-import pdb
 
 
 def points_reader(wfile,header=False,*args,**kwargs):
@@ -416,7 +414,6 @@ def read_nid(file_name,index=0,header=False,read_tags=False):
             #breakpoint()
             logging.info('option '+cgtag+' not found')
             #print('option '+cgtag+' not found')
-            pass
         #breakpoint()
     if len (imgdic)==1: imgdic=imgdic[0] 
         
@@ -548,8 +545,7 @@ if __name__=='__main__':
         Zygo cannot be called directly with intensity keyword set to True without making a specific case from the other readers,
         while this can be done using read_data. """
 
-    from .test_readers import testfolder, testfiles
-    from pySurf.data2D import plot_data, read_data
+    from .test_readers import testfolder
     
     tests=[[sur_reader,
     os.path.join(testfolder,r'input_data\profilometer\04_test_directions\05_xysurf_pp_Intensity.sur')

@@ -8,7 +8,7 @@ from __future__ import print_function
 #matplotlib.rcParams['toolbar'] = 'toolmanager'
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.backend_tools import ToolBase, ToolToggleBase
+from matplotlib.backend_tools import ToolToggleBase
 
 class ViewMarkers(ToolToggleBase):
     '''Hide lines with a given gid'''

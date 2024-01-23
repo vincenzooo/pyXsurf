@@ -1,7 +1,5 @@
 """contains operations on dictionaries"""
-import warnings
 import inspect
-import os
 
 
 

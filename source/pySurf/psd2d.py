@@ -1,4 +1,4 @@
-from pyProfile.psd import plot_sig_psd, normPSD
+from pyProfile.psd import normPSD
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -18,7 +18,6 @@ from plotting.backends import maximize
 from pySurf.data2D import levellegendre, level_by_line
 from pySurf.data2D import get_data
 
-import pdb
 
 
 def psd2d(data, x, y, wfun=None, norm=1, rmsnorm=False, axis=1,includezerofreq=False):
@@ -879,7 +878,7 @@ def mwc(psd3,prange):
     #array([  5.03059356e-13,   4.11978017e-01])
 
 def test_prange_mwc():
-    from plotting.multiplots import compare_images,subplot_grid
+    pass
 
     ptest=[(1e-9,0.1),(1e-11,0.1),(1e-13,0.1)]
     datarange=np.array([  5.0e-13,   4e-01])
@@ -894,7 +893,7 @@ def test_prange_mwc():
     plt.tight_layout()
 
 def test_prange_mwc2():
-    from plotting.multiplots import compare_images,subplot_grid
+    pass
 
     #make data
     datarange=np.array([  5.0e-13,   4e-01])

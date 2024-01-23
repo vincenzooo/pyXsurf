@@ -2,7 +2,6 @@ import numpy as np
 import os
 from pySurf.data2D_class import Data2D
 from matplotlib import pyplot as plt
-from dataIO.fn_add_subfix import fn_add_subfix
 from itertools import product
 # All replaceable with Dlist methods
 
