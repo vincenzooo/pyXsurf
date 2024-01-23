@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.optimize import minimize
 from pySurf.points import *
-import mpl_toolkits.mplot3d as m3d
 from pyGeneralRoutines.fn_add_subfix import fn_add_subfix
 
 def closest_point_on_line(points,lVersor,lPoint):

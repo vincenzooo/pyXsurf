@@ -4,7 +4,6 @@
 #by fiducials
 import utilities.transformations as tr
 import numpy as np
-import matplotlib.pyplot as plt
 from . import man
 from scipy.optimize import minimize
 from .analysis import getPoints

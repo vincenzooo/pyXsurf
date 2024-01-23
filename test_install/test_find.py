@@ -1,4 +1,4 @@
-from setuptools import find_packages, setup
+from setuptools import find_packages
 
 """with this install works only if numpy is already installed, otherwise fails on wheel."""
 

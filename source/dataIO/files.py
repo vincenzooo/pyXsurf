@@ -125,7 +125,6 @@ def search_encoding(filename,encode_list=None, verbose = False):
         except Exception as e:
             if verbose:
                 print(f"error: {e}")
-            pass
 
     if nfound == 0:
         print('\n\nno encoding found.')

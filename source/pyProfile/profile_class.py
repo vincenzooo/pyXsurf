@@ -90,20 +90,16 @@ def __array_finalize__(self, obj):
 
 
 import os
-from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 from copy import deepcopy
-import pdb
 import inspect  # to use with importing docstring
 
 from dataIO.span import span
-from dataIO.fn_add_subfix import fn_add_subfix
 from dataIO.superlist import Superlist
 from dataIO.arrays import split_blocks, split_on_indices
 from dataIO.functions import update_docstring
 
-from pySurf.affine2D import find_affine
 from pyProfile.profile import crop_profile
 from pyProfile.profile import level_profile
 from pyProfile.profile import resample_profile
@@ -1092,9 +1088,6 @@ def test_plist():
   
 def test_class_init(wfile=None):
     """test init and plot"""
-    from dataIO.fn_add_subfix import fn_add_subfix
-    from pathlib import PureWindowsPath
-    from pySurf.data2D import load_test,data
     
     x1,y1 = load_test_data(wfile,*args,**kwargs)
 

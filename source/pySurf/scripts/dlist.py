@@ -4,34 +4,24 @@
 # turned into a class derived from list 2020/01/16, no changes to interface,
 # everything should work with no changes.
 
+import itertools
 import os
+from copy import deepcopy
+
 import matplotlib.pyplot as plt
 import numpy as np
-import pdb
-
-from pySurf.readers.format_reader import auto_reader
-from pySurf.data2D import plot_data,get_data, level_data, save_data, rotate_data, remove_nan_frame, resample_data
-from pySurf.data2D import read_data,sum_data, subtract_data, projection, crop_data, transpose_data, apply_transform, register_data
-from plotting.multiplots import find_grid_size, subplot_grid
-from pySurf.psd2d import psd2d,plot_psd2d,psd2d_analysis,plot_rms_power,rms_power
-from plotting.backends import maximize
-from plotting.add_clickable_markers import add_clickable_markers2
-
-from pySurf.points import matrix_to_points2
-from copy import deepcopy
-from dataIO.span import span
 from dataIO.fn_add_subfix import fn_add_subfix
-from pySurf.data2D import projection
-from pySurf.data2D_class import Data2D
-from pySurf.data2D import levellegendre
-from pySurf.affine2D import find_rototrans,find_affine
-from pySurf.readers.instrumentReader import fitsWFS_reader
-
-from IPython.display import display
+from dataIO.span import span
 from dataIO.superlist import Superlist
-import itertools
-from plotting.multiplots import commonscale
-from copy import deepcopy
+from IPython.display import display
+from plotting.add_clickable_markers import add_clickable_markers2
+from plotting.backends import maximize
+from plotting.multiplots import commonscale, find_grid_size, subplot_grid
+from pySurf.affine2D import find_affine
+from pySurf.data2D import levellegendre, plot_data, projection
+from pySurf.data2D_class import Data2D
+from pySurf.readers.format_reader import auto_reader
+from pySurf.readers.instrumentReader import fitsWFS_reader
 
 ## FUNCTIONS ##
 
@@ -367,6 +357,7 @@ def mark_data(datalist,outfile=None,deg=1,levelfunc=None,propertyname='markers',
     """plot all data in a set of subplots. Allows to interactively put markers
     on each of them. Return list of axis with attached property 'markers'"""
     import logging
+
     from matplotlib.widgets import MultiCursor
     from plotting.add_clickable_markers import add_clickable_markers2
 
@@ -538,15 +529,17 @@ def psd2d(dlist,ymax=None,subfix='_psd2d',*args,**kwargs):
 
 from dataIO.superlist import prep_kw
 
+
 class Dlist(Superlist):
     """A list of pySurf.Data2D objects on which unknown operations are performed serially."""           
     
-    '''
-    def __init__(self,reader=None,*args,**kwargs):
+    ''''''
+    def __init__(self, dlist, reader=None,*args,**kwargs):
         if reader is not None:
-            datalist = load_dlist(reader,*args,**kwargs)
+            datalist = load_dlist(dlist, reader = reader,*args,**kwargs)
+            
         super().__init__(*args,**kwargs)
-    '''
+    
         
     def topoints(self,level=True):
         """convert a dlist to single set of points containing all data."""
@@ -563,9 +556,9 @@ class Dlist(Superlist):
         if type == 'figures': 
             axes = [plt.figure(**prep_kw(plt.figure,kwargs)) for dummy in self]
         elif type == 'grid':
-            axes = subplot_grid(len(self))[1]
             from plotting.backends import maximize
             maximize()            
+            axes = subplot_grid(len(self))[1]
         for ax,d in zip(axes,self):
             plt.sca(ax)
             d.plot(*args,**prep_kw(plt.plot,kwargs))

@@ -8,9 +8,7 @@ import pandas as pd
 from plotting.captions import legendbox
 from pySurf.data2D import get_stats
 from dataIO.outliers import remove_outliers
-from pyProfile.profile import PSF_spizzichino,line
-from pySurf.data2D import plot_data, crop_data, level_data
-from plotting.multiplots import diff_images
+from pySurf.data2D import level_data
 from dataIO.span import span
 from dataIO.fn_add_subfix import fn_add_subfix
 from utilities.imaging import fitting as fit
@@ -58,7 +56,6 @@ def comp2(d1,d2,roi=None):
     plt.clf()
     maximize()
     
-    import pdb
     #pdb.set_trace()
     diff=d1-d2
     ax1=plt.subplot(141)
@@ -122,7 +119,6 @@ def simple_regressor(d1,d2):
     """Use analytical for simple regression formula to determine best fit scale factor.
        Data are leveled before calculation of fom, but note that leveling can be altered by nan. 
        The function is defined on 2D data (not on Data2D objects), d1 and d2 must have same shape."""
-    import pdb
     #pdb.set_trace()
     d2[np.isnan(d1)]=np.nan #this is to account in leveling for points that are nan in difference (and product, but non in d2)
     tbest=np.nansum(level_data(d1)[0]*level_data(d2)[0])/np.nansum(level_data(d2)[0]**2)

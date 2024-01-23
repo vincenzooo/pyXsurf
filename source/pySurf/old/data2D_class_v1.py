@@ -5,17 +5,16 @@ import numpy as np
 #from pySurf._instrument_reader import read_data, csvZygo_reader,csv4D_reader,sur_reader,auto_reader
 
 from pySurf._instrument_reader import read_data,auto_reader
-from pySurf.data2D import plot_data,get_data, level_data, save_data, rotate_data
+from pySurf.data2D import level_data, plot_data, rotate_data, save_data
 from pySurf.data2D import sum_data, subtract_data, projection, crop_data, transpose_data, apply_transform
 
-from pySurf.psd2d import psd2d,plot_psd2d,psd2d_analysis,plot_rms_power,rms_power
+from pySurf.psd2d import plot_psd2d, plot_rms_power, psd2d
 
 from pySurf.points import matrix_to_points2
 
 from copy import deepcopy
 from dataIO.span import span
 
-import pdb
 
 
 

@@ -7,20 +7,13 @@ functions to plot and compare data, to be removed.
 
 import numpy as np
 from matplotlib import pyplot as plt
-from pySurf.readers.instrumentReader import matrixZygo_reader
-from pySurf.data2D import plot_data,removelegendre,level_by_line,projection
-from pySurf.data2D import levellegendre,save_data,get_data
+from pySurf.data2D import level_by_line, plot_data, projection
+from pySurf.data2D import levellegendre, save_data
 # from pySurf.psd2d import psd2d_analysis,rms_power
 from utilities.imaging.fitting import legendre2d
 from dataIO.fn_add_subfix import fn_add_subfix
-from dataIO.span import filtered_span
 from dataIO.outliers import remove_outliers
-from plotting.multiplots import diff_images
-from plotting.fignumber import fignumber
-from dataIO.span import span
 import os
-import pdb
-from scipy.stats import ttest_ind
 # from pySurf.data2D import plot_surface_analysis
 # from pySurf.psd2d import psd_variability
 from  plotting.backends import maximize

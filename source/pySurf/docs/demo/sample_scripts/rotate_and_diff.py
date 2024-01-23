@@ -10,10 +10,9 @@ INTERACTIVE MARKERS:
 Window might flicker if there are other windows, 
 """
 
-from utilities.imaging import fitting as fit
-from pySurf.affine2D import find_rototrans, find_affine
+from pySurf.affine2D import find_affine
 from pySurf.data2D_class import Data2D
-from pySurf.readers.instrumentReader import fitsWFS_reader,read_data
+from pySurf.readers.instrumentReader import fitsWFS_reader
 import os 
 import numpy as np
 import matplotlib.pyplot as plt 

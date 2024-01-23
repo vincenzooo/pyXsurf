@@ -1,10 +1,7 @@
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from dataIO.span import span
 from scipy.interpolate import interp1d
-import copy
-import pdb
 
 def updating_plot(ax=None,title=None):
     """make the passed axis ax active (or the current one if not passed), such that

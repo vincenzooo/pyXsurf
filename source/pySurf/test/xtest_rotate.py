@@ -26,7 +26,6 @@ get_ipython().run_line_magic('reset', '')
 get_ipython().run_line_magic('load_ext', 'autoreload')
 get_ipython().run_line_magic('autoreload', '2')
 
-import matplotlib
 #matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
@@ -34,31 +33,17 @@ import numpy as np
 
 #from pySurf.points import *
 import os
-import logging
-import pdb
 
 
 # In[16]:
 
 
 from IPython.display import display
-from astropy.io import fits
 
-from dataIO.fn_add_subfix import fn_add_subfix
-from dataIO.span import span, span_from_pixels
-from dataIO.outliers import remove_outliers
-from dataIO.dicts import strip_kw,pop_kw
 
 from scipy import ndimage
-from scipy.ndimage import map_coordinates
-from scipy import interpolate as ip
 
-from plotting.captions import legendbox
-from plotting.add_clickable_markers import add_clickable_markers2
 
-from pySurf.testSurfaces import make_prof_legendre, make_surf_legendre
-from pySurf.points import points_in_poly
-from pySurf.find_internal_rectangle import find_internal_rectangle
 
 from pySurf.data2D import plot_data
 

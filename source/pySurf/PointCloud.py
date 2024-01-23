@@ -1,15 +1,10 @@
 import numpy as np
 from matplotlib import pyplot as plt
-import math
 from scipy import interpolate as ip
-from numpy import ma
-import os
-import pdb
 from copy import deepcopy
 from pyGeneralRoutines.span import span
 from matplotlib import pyplot as plt
 import numpy as np
-import os
 from pySurf import points as P
 
 method='linear' #default method for interpolation. It can be redefined with Points.method.
@@ -106,7 +101,6 @@ class Points(object):
         return rpoints
 
     def resample_grid(self,xgrid,ygrid):
-        from matplotlib.mlab import griddata
         """resample points [Npoints x 3] on the grid defined by two vectors xgrid [Nx] and ygrid [Ny].
         Return a [Nx * Ny , 3] vector of points, sorted in standard python order
         (x changes faster). To get a (plottable) matrix of data use:

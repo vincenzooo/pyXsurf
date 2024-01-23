@@ -1,9 +1,4 @@
-from matplotlib import pyplot as plt
-import numpy as np
-from cycler import cycler
-from collections import OrderedDict
 
-from pyProfile.psd import make_psd_plots as make_plots
 print ("WARNING: makenicePSDplots was moved in pyProfile.psd, it will be discontinued, modify your import.")
 
 """

@@ -3,10 +3,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 import math
 from scipy import interpolate as ip
-from numpy import ma
 import os
 import pdb
-from copy import deepcopy
 from dataIO.span import span,span_from_pixels
 from pySurf.plane_fit import plane_fit
 from astropy.io import fits
@@ -1102,7 +1100,6 @@ def plot_points(points,xgrid=None,ygrid=None,shape=None,units=None,resample=True
     from pySurf.data2D import plot_data #here to avoid circular import
 
 
-    import pdb
     #plot
     #plt.ioff()
     if np.size(units)==1:

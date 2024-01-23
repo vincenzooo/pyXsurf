@@ -55,19 +55,11 @@ Once interface is designed"""
 
 import numpy as np
 from pySurf.data2D import crop_data, remove_nan_frame, register_data
-from astropy.io import fits
-from pySurf.points import get_points
-from pySurf.points import crop_points
-from pySurf.points import points_find_grid
-from pySurf.points import resample_grid
-from .read_sur_files import readsur
 from pySurf.data2D import read_data
 
 #from utilities.imaging.man import stripnans
-from dataIO.read_pars_from_namelist import read_pars_from_namelist
 
 from pySurf.points import matrix_to_points2
-import pdb
 
 #from pySurf.readers._instrument_reader import *
 #from pySurf.readers._instrument_reader import read_data
@@ -376,7 +368,6 @@ def test_datzygo_reader (wfile=None):
     
     import os
     import matplotlib.pyplot as plt
-    from  pySurf.data2D import plot_data
     from pySurf.data2D_class import Data2D
     from pySurf.readers.format_reader import datzygo_reader
 

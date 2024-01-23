@@ -246,7 +246,6 @@ def add_clickable_markers2(ax=None,key='enter',propertyname='markers',modkey='co
         """proper way to implement press key with yield.
         see 
         https://gist.github.com/tacaswell/4545013"""
-        pass
         
     if hold:
         setattr(fig,'exit',False)

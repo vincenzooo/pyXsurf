@@ -22,34 +22,24 @@ example b.
 '''
 
 
-from dataIO.fn_add_subfix import fn_add_subfix
-import re
-import shutil
-import os
 import numpy as np
 import matplotlib.pyplot as plt
-from dataIO.span import span 
 import matplotlib
-import pdb
 
 
 tk_yes=False  #set to true if tkinter is present
 try:
     #http://effbot.org/tkinterbook/tkinter-file-dialogs.htm
     import tkinter as tk
-    import tkinter.filedialog as filedialog
     import tkinter.simpledialog
-    from tkinter import Frame,Label,Entry,Button
     import tkinter.messagebox
     matplotlib.use('TkAgg')
     tk_yes=True
 except ImportError:
     print("tkinter not laoded")
-    pass
 
 pe_yes=False  #set to true if piexif is present
 try:
-    import piexif
     pe_yes=True
 except ImportError:
     pass

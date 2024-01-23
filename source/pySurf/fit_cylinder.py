@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.optimize import minimize
 from pySurf.points import *
-import mpl_toolkits.mplot3d as m3d
 from dataIO.fn_add_subfix import fn_add_subfix
 
 def closest_point_on_line(points,lVersor,lPoint):
@@ -133,7 +132,6 @@ def cone_error3(odr=(0,220.,0,0),points=None,coeff=None,retall=False,extra=False
     extra is equivalent to retall, renamed 2018/02/15 kept for backward compatibility
     """
     
-    import pdb
     #pdb.set_trace()
     points=points[~np.isnan(points[:,2]),:]
     

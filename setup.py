@@ -1,4 +1,4 @@
-from setuptools import find_packages, setup
+from setuptools import setup
 
 """with this install works only if numpy is already installed, otherwise fails on wheel."""
 
@@ -27,10 +27,8 @@ setup(
 
 
 
-from setuptools import find_packages
 
 # or
-from setuptools import find_namespace_packages
 
 '''
 #from https://docs.pytho
