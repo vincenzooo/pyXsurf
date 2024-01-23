@@ -95,18 +95,21 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
         #pdb.set_trace()
         #vectorize all values
         for k,v in kwargs.items():
-            if (np.size(v) == 1):
-                kwargs[k]=[[] for dummy in rfiles]    
-            elif (len(v) != len(rfiles)):
+            if (np.size(v) == 1): 
+                kwargs[k]=[v for dummy in rfiles]    
+            #elif (len(v) != len(rfiles)):
+            else:
                 try:
                     kwargs[k]=[v.copy() for dummy in rfiles]
                 except AttributeError:  #fails e.g. if tuple which don't have copy method
                     kwargs[k]=[v for dummy in rfiles]  
-            #else:  #non funziona perche' ovviamente anche chiamando esplicitamente, sara'
-            #  sempre di lunghezza identica a rfiles.
+            # else:  #non funziona perche' ovviamente anche chiamando esplicitamente, sara'
+            # # sempre di lunghezza identica a rfiles.
             #    print ('WARNING: ambiguity detected, it is not possible to determine'+
-            #    'if `%s` values are intended as n-element value or n values for each data.\n'+
-            #    'To solve, call the function explicitly repeating the value.'%k)
+            #    'if `%s` values are intended as n-element value or n values for each data.\n'%k+
+            #    'To solve, call the function explicitly repeating the value, es. `units=[['um','um','nm']]*3.`')
+            # in realtà la forma "esplicità" fallisce al plot, mi fa temere che non funzioni anche se le immagini l'altra funziona. 
+            
     
         # 2020/07/10 args overwrite kwargs (try to avoid duplicates anyway).
         # args were ignored before.
