@@ -78,7 +78,6 @@ class proPlane(fig):
         ncy=(zc+yc/m-q)/(m+(1/m))
         ncz=ncy*m+q
         new_cen=punto(center.x,ncy,ncz,self.origin)
-        pass
         return new_cen
         
     def getTh(self):

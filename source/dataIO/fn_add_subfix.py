@@ -1,4 +1,3 @@
-import os
 
 def fn_add_subfix(fileName,subfix="",newext=None,strip=False,pre=""):
     """Add a subfix to a filename. A new extension can be defined (dot must be included).

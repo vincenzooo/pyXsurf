@@ -1,29 +1,25 @@
 import os
-import pdb
 from copy import deepcopy
 
 import matplotlib.pyplot as plt
 import numpy as np
+from dataIO import outliers
 from dataIO.fn_add_subfix import fn_add_subfix
 from dataIO.functions import update_docstring
-from dataIO import outliers  #necessary to avoid conflict 
 from dataIO.span import span
-from plotting.add_clickable_markers import add_clickable_markers2
-
+from pyProfile.profile_class import Profile
 from pySurf import data2D, points
 from pySurf.affine2D import find_affine
 from pySurf.data2D import apply_transform as apply_transform_data
 from pySurf.data2D import (crop_data, data_from_txt, data_histostats,
-                           level_data, plot_data, projection, read_data,
-                           register_data, resample_data, rotate_data,
-                           save_data, slope_2D, subtract_data, sum_data,
-                           transpose_data, get_stats)
+                           get_stats, level_data, plot_data, projection,
+                           read_data, register_data, resample_data,
+                           rotate_data, save_data, slope_2D, subtract_data,
+                           sum_data, transpose_data)
 from pySurf.points import matrix_to_points2, points_autoresample
 from pySurf.psd2d import (plot_psd2d, plot_rms_power, psd2d, psd2d_analysis,
                           rms_power)
 from pySurf.readers.format_reader import auto_reader
-
-from pyProfile.profile_class import Profile
 
 """
 2018/06/07 v1.3
@@ -836,10 +832,8 @@ def test_rot90():
 
 def test_class_init(wfile=None, *args, **kwargs):
     """test init and plot"""
-    from pathlib import PureWindowsPath
 
     from dataIO.fn_add_subfix import fn_add_subfix
-    
     from pySurf.data2D import load_test_data
 
     # from pySurf.data2D import data, load_test

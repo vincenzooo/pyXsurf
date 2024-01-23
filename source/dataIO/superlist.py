@@ -21,10 +21,7 @@ TODO: implement assignment, e.g. pl.x = 12.398/pl.x
 # turned into a class derived from list 2020/01/16, no changes to interface,
 # everything should work with no changes.
 
-import os, sys
-import matplotlib.pyplot as plt
 import numpy as np
-import pdb
 from dataIO.dicts import pop_kw,prep_kw  # to be imported from outside
 
 class xSuperlist(list):

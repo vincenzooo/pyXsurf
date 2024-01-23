@@ -1,9 +1,8 @@
 from numpy import *
 import numpy as np
 from matplotlib.pyplot import *
-from matplotlib import ticker,colors
-import pickle,pdb
-from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import colors
+import pickle
 
 def scatter3d(x,y,z,**args):
     """Make a 3d scatter plot"""

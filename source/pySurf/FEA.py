@@ -1,4 +1,3 @@
-import os
 from dataIO.fn_add_subfix import fn_add_subfix
 from dataIO.span import span
 from pySurf.points import get_points, resample_grid,rebin_points,subtract_points,plot_points,save_points

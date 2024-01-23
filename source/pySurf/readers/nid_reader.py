@@ -2,13 +2,10 @@
 This is a first prototype, format is not standard."""
 ## read_nid is OBSOLETE -> use format_reader.read_nid
 
-import numpy as npoints
-from configparser import ConfigParser
 import io
 import struct
 import numpy as np
 import logging
-from configparser import NoOptionError
 from dataIO.config.make_config import string_to_config
 import os 
 
@@ -168,7 +165,6 @@ def read_nid(file_name):
             except NoOptionError:
                 logging.info('option '+cgtag+' not found')
                 #print('option '+cgtag+' not found')
-                pass
             
     return imgdic
 

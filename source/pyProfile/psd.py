@@ -112,7 +112,6 @@ def psd_units(units=[None,None,None]):
         
     2020/07/16 moved to `pyProfile.psd` from `pySurf.psd2d`, making it valid for 2 or 3D units."""
     
-    import copy
     if units is not None:
         units = units.copy() #otherwise bizarre side effect
     flag2d = False  #flag to return 2-el vector
@@ -259,7 +258,6 @@ def xrealPSD(d,win=1,dx=1.,axis=None):
         c = c*np.sqrt(2.)
 
     return f,np.abs(c)**2    
-import pdb
 
 
 ## Here four different plot functions for PSD, 
@@ -315,7 +313,6 @@ def plot_psd(f,p,units=None,label=None,span=0,psdrange=None,
 from matplotlib import pyplot as plt
 import numpy as np
 from cycler import cycler
-from collections import OrderedDict
 
 def make_psd_plots(toplot,units=None,outfile=None): 
 

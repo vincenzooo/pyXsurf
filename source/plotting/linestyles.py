@@ -74,7 +74,6 @@ def make_styles(s1,cf,argsdic,legshow=None):
     for k,v in argsdic.items():   #iterate over column tags associated with the property
         if isinstance(v, collections.Mapping): #dictionary
             assert len(v.keys())==1            
-            import pdb
             for p,c in v.items(): #iterate over properties, anyway this will always be a single key,
                 newkeys=np.unique(cf[p].values)
                 if isinstance(c, collections.Mapping): #dictionary

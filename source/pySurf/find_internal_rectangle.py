@@ -7,18 +7,16 @@ https://stackoverflow.com/questions/2478447/find-largest-rectangle-containing-on
 """
 
 from collections import namedtuple
-from operator import mul
 import numpy as np
 import matplotlib.pyplot as plt
 
 from matplotlib import pyplot as plt
 from plotting.plot_positions import plot_poly
-from pySurf.points import points_find_hull,points_autoresample
-from pySurf.points import plot_points,matrix_to_points2
+from pySurf.points import matrix_to_points2
 #
 
 from dataIO.span import span
-from scipy.ndimage import label, generate_binary_structure 
+from scipy.ndimage import label 
 
 
 
@@ -114,7 +112,7 @@ def internal_nan_mask(a,x=None,y=None):
                 ssy[0] > sy[0] and 
                 ssy[1] < sy[1]):
                 #print(i,'internal')
-                import pdb
+                pass
                 #pdb.set_trace()
                 m_int=np.logical_or(m_int,c!=0)          
             #print(len(np.where(m_int!=0)[0]))
@@ -157,7 +155,6 @@ def find_internal_rectangle(data,x=None,y=None,continuous=False):
 
 def test_holes():
     from pySurf.data2D import plot_data
-    from pySurf.data2D_class import Data2D
     
     nx,ny=300,200
     a=np.random.random(nx*ny).reshape(ny,nx)

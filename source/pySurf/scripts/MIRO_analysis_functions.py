@@ -8,13 +8,12 @@ from pyProfile.profile import crop_profile, save_profile
 from pyProfile.psd import plot_psd, psd_units
 import os
 from scipy.stats import binned_statistic
-from pySurf.readers.instrumentReader import matrixdat_reader,matrixZygo_reader, matrix_reader, matrix4D_reader
+from pySurf.readers.instrumentReader import matrix4D_reader, matrixdat_reader
 #from pySurf.readers.nid_reader import read_nid
 from pySurf.readers.format_reader import read_nid
 from pySurf.data2D_class import Data2D
 from pyProfile.profile_class import Profile, Plist
 from plotting.backends import maximize
-import pdb
 
 from time import sleep
 

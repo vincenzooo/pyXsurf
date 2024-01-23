@@ -121,8 +121,5 @@ for d in compare_images(D,D2):
 
 
 # %%
-from pySurf.psd2d import calculatePSD
-from pySurf.psd2d import psd2d, plot_psd2d,avgpsd2d
-from pySurf.data2D import crop_data
 
 

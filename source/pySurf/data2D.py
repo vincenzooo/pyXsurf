@@ -18,16 +18,12 @@ from pyProfile.profile import polyfit_profile
 from dataIO.fn_add_subfix import fn_add_subfix
 from dataIO.span import span, span_from_pixels
 from dataIO.outliers import remove_outliers, EmptyRangeWarning
-from dataIO.dicts import strip_kw
-import logging
 import os
-import pdb
 from scipy.ndimage import map_coordinates
 from scipy import interpolate as ip
 from scipy import ndimage
 from plotting.captions import legendbox
 from astropy.io import fits
-from pySurf.testSurfaces import make_prof_legendre, make_surf_legendre
 from pySurf.points import points_find_grid
 from pySurf.points import resample_grid
 
@@ -282,7 +278,7 @@ def level_on_points(data,x,y, points):
         data,x,y = level_on_points(data,x,y,xy)
     """
     
-    from pySurf.points import _get_plane, level_points, matrix_to_points2, plot_points,extract_profile, points_autoresample
+    from pySurf.points import _get_plane, extract_profile, level_points, matrix_to_points2, points_autoresample
 
     if np.array(points).shape[1] == 2:
         psurf = matrix_to_points2(data,x,y) 
@@ -353,7 +349,7 @@ def rotate_data(data,x=None,y=None,ang=0,k=None,center=None,
 
     if usepoints:
         #doesn't work well for some reason (nan?)
-        from pySurf.points import matrix_to_points2,rotate_points,resample_grid
+        from pySurf.points import matrix_to_points2, rotate_points
         p=matrix_to_points2(data,x,y)
         p=rotate_points(p,ang/180*np.pi,center=center,*args,**kwargs)
         #res=resample_grid(p,x,y,matrix=True),x,y  #this is wrong, needs to rescale on grid on rotated range
@@ -892,7 +888,6 @@ def crop_data(data,x,y,xrange=None,yrange=None,zrange=None,mask=False,poly=None,
     zrange=span(data) if zrange is None else \
         np.where([xx is None for xx in zrange],span(data),zrange)
 
-    import pdb
     #spdb.set_trace()
     if poly:
         outmask=outmask & grid_in_poly(x,y,poly)
@@ -935,7 +930,6 @@ def crop_data0(data,x,y,xrange=None,yrange=None,zrange=None):
         zrange=span(data)
     else:
         zrange = np.where([xx is None for xx in zrange],span(data),zrange)
-    import pdb
 
     #spdb.set_trace()
     data=data[:,(x>=xrange[0]) & (x<=xrange[1])]
@@ -1413,7 +1407,6 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     2020/07/14 added flag ``contour`` to overplot contours, and colors,
     to be passed to ``plt.contour``"""
 
-    from mpl_toolkits.axes_grid1 import make_axes_locatable
     
     ## SET PLOT OPTIONS
     aspect=kwargs.pop('aspect','equal')
@@ -1619,7 +1612,6 @@ def compare_2images(data,ldata,x=None,y=None,fignum=None,titles=None,vmin=None,v
 def test_plot_stats(value=None):
     """Test plotting of legendbox in plot_data"""
     
-    import pprint as pprint
     
     if value is None:
         data,x,y = load_test_data()
@@ -1855,7 +1847,6 @@ def test_leveling(d=None):
     """plot a set of images, representative of data leveled with different combinations of parameters.
     d is Data2D object.
     """
-    from IPython import get_ipython
     from IPython.display import display
     #from pySurf.data2D import load_test_data,plot_data
     

@@ -1,5 +1,4 @@
 import logging
-from logging import config
 
 def logging_function():
     """A function which prints and log info. No return value"""

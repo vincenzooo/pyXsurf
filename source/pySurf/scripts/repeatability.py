@@ -7,39 +7,18 @@
 #v3 added functions all functions from repeatability.
 #v1 works, this v2 adds finer control of styles in make_styles with list value:symbol.
 
-import collections
 
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-from cycler import cycler
-from itertools import cycle
-import pdb
-import matplotlib.dates as mdates
-import matplotlib.patches as mpatches
-from matplotlib.lines import Line2D
-import json
-import pandas as pd
-from plotting.backends import maximize
-from pySurf.data2D_class import Data2D
-from pySurf.readers.instrumentReader import fitsWFS_reader
 from dataIO.fn_add_subfix import fn_add_subfix
-from utilities.imaging import fitting as fit
-from dateutil.parser import parse
 
-from dataIO.outliers import remove_outliers
-from plotting.add_clickable_markers import add_clickable_markers2
-from pySurf.affine2D import find_affine, find_rototrans
-from plotting.multiplots import find_grid_size, subplot_grid
-import itertools
 
-from IPython.display import display
 
 #from pySurf.data2D_class import align_interactive
 
 #from config.interface import conf_from_json
 
-from pySurf.scripts.dlist import plot_data_repeat 
 
 """2019/04/08 from messy script/repeatability, here sorted function that have been used. 
 When a function is needed by e.g. a notebook, move it here from repeatability_dev.
