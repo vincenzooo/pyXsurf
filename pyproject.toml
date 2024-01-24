@@ -12,10 +12,12 @@ dependencies = [
     "numpy",
     "scipy",
     "pytest",
-    "python-xlib",
     "testbook",
     "ipykernel",
     "sphinx",
+    # Graphics
+    'python-xlib ; platform_system == "Linux"',
+    'pywin32 ; platform_system == "Windows"',
 ]
 
 [project.optional-dependencies]
