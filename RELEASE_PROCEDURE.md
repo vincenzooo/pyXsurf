@@ -21,16 +21,16 @@ Patch releases are for bug fixes and other small changes to the package. These i
 2. When we want to release a new version, we start the release process. Typically once we have added a new feature that is ready for external users or we have fixed a bug that is affecting a released version.
 
 2.1.1. Run the tests and make sure they pass.
-2.1.2. Create and switch to a new branch from master named `release-<mm-version>`, where `<mm-version>` is the new version number without patch version. If we are creating a patch release, then just switch to the `release-<mm-version>` branch.
-2.1.3. If creating a minor or major release, you can skip this step. Otherwise, if creating patch release, then cherry-pick the commits that are to be included in the patch release from master to the `release-<mm-version>` branch using `git cherry-pick <commit-hash>`.
+2.1.2. Create and switch to a new branch from master named `releases/v<mm-version>`, where `<mm-version>` is the new version number without patch version. If we are creating a patch release, then just switch to the `release-<mm-version>` branch.
+2.1.3. If creating a minor or major release, you can skip this step. Otherwise, if creating patch release, then cherry-pick the commits that are to be included in the patch release from master to the `releases/v<mm-version>` branch using `git cherry-pick <commit-hash>`.
 2.1.4. Update the `<version>` number in the VERSION file where version is the full semver with patch version.
 2.1.5. Run
 ```
 git commit -a -m "Bump version number to <version>."
 # And then tag the commit with
-git tag -a "release-<version>" -m "Tagging version <version>."
+git tag -a "releases/v<version>" -m "Tagging version <version>."
 git push origin
-git push origin "release-<version>"
+git push origin "releases/v<version>"
 ```
 2.1.6. Now you should have tag and branch in your Github repo.
 
@@ -41,7 +41,7 @@ A Git tag is an immutable named reference to a commit in your Git repo.
 A user that wants to run tests or explore examples of a specific version of the package can checkout the tag and run the tests or explore the examples.
 
 ```
-git clone <repo_url> --branch "release-<version>"
+git clone <repo_url> --branch "releases/v<version>"
 ```
 
 # Publish
@@ -84,7 +84,7 @@ https://github.com/robeyes/pyXsurf/releases/tag/release-2.0.0.dev1
 
 1. Run `pip install build grayskull`
 2. Run to build the package: `python -m build`
-3. Run `grayskull pypi --tag release-<version> https://github.com/robeyes/pyXsurf`
+3. Run `grayskull pypi --tag "releases/v<version>" https://github.com/robeyes/pyXsurf`
 3.1. This will create a `meta.yaml` file in `pyXurf` directory.
 4. Using the `meta.yaml` created in above step, follow steps from step 4 in this guide: https://blog.gishub.org/how-to-publish-a-python-package-on-conda-forge
 
