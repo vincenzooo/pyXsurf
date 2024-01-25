@@ -1,0 +1,31 @@
+on:
+  push:
+    tags:
+      - "release/**"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/run_tests.yaml
+      - name: Check tag name
+        run: |
+          release_tag_version=$(echo $GITHUB_REF | sed -e 's,.*/\(.*\),\1,')
+          echo "Release tag version: $release_tag_version"
+          version_file=$(cat VERSION | tr -d '[:space:]')
+          echo "Version file: $version_file"
+          if [ "$release_tag_version" != "$version_file" ]; then
+            echo "Release tag version and version file do not match"
+            exit 1
+          fi
+      - name: Build
+        run: |
+          python -m pip install --upgrade build
+          python -m build
+      - name: Publish to PyPI
+        run: |
+          python -m pip install --upgrade twine
+          # python -m twine upload dist/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
