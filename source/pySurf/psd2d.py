@@ -229,10 +229,14 @@ def multipsd(datalist):
         result.append(((fw1,pw1avg),(fw1m,pw1mavg)))
     return result
     
-def plot_psd2d(f,p,x,prange=None,includezerofreq=False,units=None,*args,**kwargs):
+def plot_psd2d(f,p,x,prange=None,includezerofreq=False,units=None,linear = False, *args,**kwargs):
     """plots a 2d psd as a surface with logaritmic color scale on the current axis. Return axis.
+    
+    Note the different parameter order for coordinates in psd compared to data.
     If a zero frequency is present it is excluded by default from plot, unless includezerofreq is set to True.
     Units (3-el array) is units of lengths for data (not of PSD), can be None.
+    
+    2024/01/23 restored logaritmic y axis. Added linear option (it was linear by default, probably by mistake).
     2020/07/10 uncommented call to `pySurf.data2D.plot_data` (in "functions" module `data2D`).
     The "old" code segment called instead directly `plt.imshow`.  
     In some sense, replicates code in `plot_data` and was not necessarily in sync
@@ -264,7 +268,8 @@ def plot_psd2d(f,p,x,prange=None,includezerofreq=False,units=None,*args,**kwargs
     
     cbunits = psd_units(units)
     #pdb.set_trace()
-    #plt.yscale('log')
+    if not linear:
+        plt.yscale('log')
     plt.title('2D PSD')
     ax = plot_data(p,x,f,norm=LogNorm(vmin=prange[0],vmax=prange[1]),
     units=cbunits,aspect='auto',*args,**kwargs)
@@ -286,7 +291,7 @@ def plot_psd2d(f,p,x,prange=None,includezerofreq=False,units=None,*args,**kwargs
 
 def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,
     rmsrange=None,prange=None,fignum=5,rmsthr=None,includezerofreq=False,
-    aspect='auto', ax2f=None, units=None,outname=None,norm=1,rmsnorm=True):
+    aspect='auto', ax2f=None, units=None,outname=None,norm=1,rmsnorm=True,axis=0):
     """ Calculates 2D PSD as image obtained combining all profile PSDS calculated along vertical slices of data. Resulting image has size 
     If title is provided rms slice power is also calculated and plotted on three panels with figure and PSD.
     
@@ -347,6 +352,10 @@ def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,
             print("update IMMEDIATELY your code to call")
             print("psd2d(data,x,y)")
             x,y,wdata=wdata,x,y
+
+    if axis == 1:
+        wdata = wdata.transpose()
+        x,y = y,x
 
     f, p = psd2d(wdata, x, y, wfun=wfun, norm=norm, rmsnorm=rmsnorm, includezerofreq=includezerofreq)  # calculate PSD 2D
     
