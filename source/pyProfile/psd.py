@@ -37,7 +37,7 @@ def normPSD(N,L=None,form=1):
     """return a normalization factor for the PSD, calculated according to different definitions of `power`.
     The PSD is defined as PSD(f)=factor*np.abs(FFT)**2 where FFT is the fast fourier transform.
     Note that in case of rfft the doubling factor is not included in norm (because part of FFT definition).
-    Possible values are (ref. to Numerical recipes when possible):
+    Possible values are (ref. to Numerical recipes, NR, or Ryan Allured's functions, RA, when possible):
     1 - units: [Y**2] no normalization. "sum squared amplitude" in NR 13.4.1
     2 - units: [Y**2][X] This has the advantage that measurements on same range with different number of points match and it is the way it is usually plotted. The rms is the integral of PSD over frequency rather than the sum.
     3 - units: [Y**2] here rms is the sum of PSD, this is RA normalization (however it differs in RA when a window is used). 13.4.5 in NR.
@@ -85,7 +85,7 @@ def psd(x,y,retall=False,wfun=None,norm=1,rmsnorm=False):
     psd  = 2*normfactor*np.abs(yfft)**2
     psd[0]=psd[0]/2  #the first component is not doubled
     
-    freqs=np.fft.rfftfreq(N,np.float(L)/(N-1))
+    freqs=np.fft.rfftfreq(N,np.float32(L)/(N-1))
     if retall:
         return freqs,psd,np.angle(yfft)
     else:

@@ -4,6 +4,9 @@
 # turned into a class derived from list 2020/01/16, no changes to interface,
 # everything should work with no changes.
 
+## TODO: this module contains messy code from past analysis, especially in the psd section. The mechanism should be made consistent with Plist and Data2D and this code kept as legacy. Warnings to use updated methods should be added in all functions.
+# e.g. PSDlist should be made of data2D_class.PSD2D objects.
+
 import itertools
 import os
 from copy import deepcopy
@@ -59,7 +62,8 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
     2019/04/08 made function general from plot_repeat, moved to dlist.
     """
 
-    #pdb.set_trace()
+    # import pdb
+    # pdb.set_trace()
     if reader is None:
         #reader=auto_reader(rfiles[0])
         reader = [auto_reader(r) for r in rfiles]
@@ -536,13 +540,21 @@ from dataIO.superlist import prep_kw
 class Dlist(Superlist):
     """A list of pySurf.Data2D objects on which unknown operations are performed serially."""           
     
-    ''''''
+    '''  
+    # how to handle self here? How are values read from files loaded in self?
+    # es.: 
+    # # BUG: return empty dlist
+
+    # from pySurf.data2D_class import Data2D
+    # ff = [os.path.join(datafolder,f) for f in files]
+    # Dlist([Data2D(file=ff[0],reader=nid_reader)])
+    
     def __init__(self, dlist, reader=None,*args,**kwargs):
         if reader is not None:
             datalist = load_dlist(dlist, reader = reader,*args,**kwargs)
             
         super().__init__(*args,**kwargs)
-    
+    '''
         
     def topoints(self,level=True):
         """convert a dlist to single set of points containing all data."""
@@ -551,10 +563,14 @@ class Dlist(Superlist):
         
     def plot(self,type='figures',*args,**kwargs):
         """
-        types: grid - makes a grid of plots
-               separate - plot each graph in a separate window
+        types:
+        figures - plot each graph in a separate window
+        grid - makes a grid of plots
                
-        return a list of axis
+        return a list of axis.
+        
+        
+        N.B.: this is used also by Plist with an assignment.
         """
         if type == 'figures': 
             axes = [plt.figure(**prep_kw(plt.figure,kwargs)) for dummy in self]
@@ -562,9 +578,16 @@ class Dlist(Superlist):
             from plotting.backends import maximize
             maximize()            
             axes = subplot_grid(len(self))[1]
+        elif type == 'all':
+            # overlap on same ax, useful for partial maps or profiles.
+            axes = [plt.figure()] * len(self) # three references to same axis 
         for ax,d in zip(axes,self):
-            plt.sca(ax)
+            try:
+                plt.sca(ax)
+            except ValueError:
+                print("WARNING: axes not existing.")
             d.plot(*args,**prep_kw(plt.plot,kwargs))
         #print(args)
         
+        return axes
             

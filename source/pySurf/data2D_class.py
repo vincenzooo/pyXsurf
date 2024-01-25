@@ -7,7 +7,7 @@ from dataIO import outliers
 from dataIO.fn_add_subfix import fn_add_subfix
 from dataIO.functions import update_docstring
 from dataIO.span import span
-from pyProfile.profile_class import Profile
+# from pyProfile.profile_class import Profile
 from pySurf import data2D, points
 from pySurf.affine2D import find_affine
 from pySurf.data2D import apply_transform as apply_transform_data
@@ -705,10 +705,11 @@ class Data2D(object):  # np.ndarrays
     
     def projection(self, axis = 0, *args, **kwargs):
         """avg, returns f and p. Can use data2D.projection keywords `span` and `expand` to return PSD ranges."""
-        
-        # print(self)
-        return Profile(self.y, projection(self.data, axis=axis, *args, **kwargs), units = [self.units[1], self.units[2]]) 
+        from pyProfile.profile_class import Profile
+        res = Profile(self.y, projection(self.data, axis=axis, *args,**kwargs), units = [self.units[1], self.units[2]], name = " ".join([self.name,"avg along axis %i"%(axis)])) 
     
+        # print(self)
+        return res
     projection = update_docstring(projection, data2D.projection)
 
     def histostats(self, *args, **kwargs):
@@ -775,7 +776,11 @@ class PSD2D(Data2D):
         """avg, returns f and p. Can use data2D.projection keywords `span` and `expand` to return PSD ranges."""
         
         #return Profile(self.y, projection(self.data, axis=1, *args, **kwargs), units = [self.units[1], self.units[2]]) 
-        return self.projection(axis = 1, *args, **kwargs)
+        res = super().projection(axis = 1, *args, **kwargs)
+        from pyProfile.profile_class import PSD
+        
+        return PSD(res.x, res.y, units = res.units, name = res.name, *args, **kwargs)
+        
     
     def rms_power(self, plot=False, rmsrange=None, *args, **kwargs):
         """Calculate rms slice power by integrating .
@@ -800,6 +805,15 @@ class PSD2D(Data2D):
                     raise NotImplementedError
 
             return rms_power(self.y, self.data, rmsrange=rmsrange, *args, **kwargs)
+
+    def plot(self,linear = False,*args, **kwargs):
+        if linear:
+            return self.plot(*args, **kwargs)
+        else:
+            return plot_psd2d(self.y,self.data,
+                    self.x,
+                    units=self.units,
+                    *args,**kwargs)
 
 
 def test_rot90():

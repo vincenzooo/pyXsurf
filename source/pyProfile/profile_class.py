@@ -222,9 +222,6 @@ def read_mca(filename, encoding='iso-8859-1',*args,**kwargs):
     return profiles
 
 
-        
-    
-    
 class Profile(object):  #np.ndarrays
     """A class containing x,y data. It has a set of methods for analysis and visualization.
     Function methods: return a copy with new values.
@@ -239,7 +236,7 @@ class Profile(object):  #np.ndarrays
         scale = (1.,1.), units=["",""],name=None,*args,**kwargs):
         """can be initialized with data; x,y; file; file, x
         if x is provided, they override x from data if matching number of elements, 
-           or used as range if two element (error is raised in case of ambiguity)."""
+        or used as range if two element (error is raised in case of ambiguity)."""
         
         #from pySurf.readers.instrumentReader import reader_dic
         from pyProfile.profile import register_profile
@@ -273,7 +270,7 @@ class Profile(object):  #np.ndarrays
                 reader=auto_reader(file) #returns a reader
             """
             from pyProfile.profile import load_profile
-            x,y=load_profile(file,*args,**kwargs) #calling without arguments skips register, however skips also reader argumnets, temporarily arranged with pop in read_data to strip all arguments for
+            x,y=load_profile(file,*args,**kwargs) #calling without arguments skips register, however skips also reader arguments, temporarily arranged with pop in read_data to strip all arguments for
                 #register data and pass the rest to reader
             #pdb.set_trace()
             #TODO: Cleanup this part and compare with pySurf. Consider centering
@@ -303,16 +300,15 @@ class Profile(object):  #np.ndarrays
             if y is not None:
                 if len(y.shape) != 1:
                     #pdb.set_trace()
-                    print('WARNING: data are not uniidimensional, results can be unpredictable!')
+                    print('WARNING: data are not unidimensional, results can be unpredictable!')
                 if x is None:
-                    x=np.arange(np.size(y))
+                    x=np.arange(np.size(y))  
 
     #if data is not None:
+        self.x, self.y = x, y
         
-        x,y=register_profile(x,y,scale=scale,*args,**kwargs)# se load_profile calls register, this
+        self.x,self.y=register_profile(self.x,self.y,scale=scale,*args,**kwargs) # se load_profile calls register, this
         #goes indented.
-
-        self.x,self.y=x,y
 
         if np.size(units) == 1:
             units=[units,units]
@@ -342,7 +338,7 @@ class Profile(object):  #np.ndarrays
         if isinstance(other,self.__class__):
             res = sum_profiles(*self(),*other(),*args,**kwargs)
             #res = other()
-            res = Profile(*res,units=self.units,name=self.name + " + " + other.name)
+            res = self.__class__(*res,units=self.units,name=self.name + " + " + other.name)
         else:
             try:
                 res = self.copy()
@@ -396,9 +392,9 @@ class Profile(object):  #np.ndarrays
         
         #pdb.set_trace()
         
-        if isinstance(other,Profile):
+        if isinstance(other,self):
             res = subtract_profiles(*self(),*other(),*args,**kwargs)
-            res = Profile(*res,units=self.units,name=self.name + " - " + other.name)
+            res = self.__class__(*res,units=self.units,name=self.name + " - " + other.name)
         else:
             try:
                 res = self.copy()
@@ -414,7 +410,7 @@ class Profile(object):  #np.ndarrays
         
         ''' N.B.: you cannot retrieve and modify existing __repr__,
         the following gives infinite recursion, the only way is to recreate a new repr: 
-       
+
             class me():
                 def __repr__(self):
                     return self.__repr__()
@@ -570,7 +566,7 @@ class Profile(object):  #np.ndarrays
         
         res = self.copy()
         if np.size(other) == 1:
-            if isinstance(other,Profile):  # scalar
+            if isinstance(other,self):  # scalar
                 sel = (self.y != 0) 
                 res = self.copy()
                 res.y[sel] = other*(1./self.y[sel])
@@ -659,9 +655,10 @@ class Profile(object):  #np.ndarrays
     
     def plot(self,title=None,*args,**kwargs):
         """plot profile using and setting automatically labels.
-           Additional arguments are passed to `plt.plot`.
         
+        Additional arguments are passed to `plt.plot`.
         Quite useless for profile, can be plot with `plt.plot(*P(),*args,**kwargs)"""
+        
         #modeled over data2D.plot, non c'e' plot_profile
         from plotting.captions import legendbox
         from pyProfile.profile import get_stats
@@ -802,7 +799,7 @@ class Profile(object):  #np.ndarrays
 
         f,p=profpsd(self.x,self.y,wfun=wfun,norm=norm,rmsnorm=rmsnorm)
 
-        return PSD(p,self.x,f,units=self.units,name="")
+        return PSD(f,p,units=self.units,name="")
     psd=update_docstring(psd,profpsd)
 
     def remove_nan_ends(self,*args,**kwargs):
@@ -893,7 +890,7 @@ class PSD(Profile):
                 
     def plot(self,*args,**kwargs):
         u=kwargs.pop('units',self.units)
-        return plot_psd(self.y,self.x,units=u,*args,**kwargs)
+        return plot_psd(self.x,self.y,units=u,*args,**kwargs)
     
     def rms_power(self,plot=False,*args,**kwargs):
         """Calculate rms slice power as integral of psd. If plot is set also plot the whole thing."""
@@ -1033,8 +1030,12 @@ class Plist(Superlist):
             super().__init__(s)
         else:
             super().__init__(*args, **kwargs)        
-
-    """ N.B.> could use linecollections for plotting https://matplotlib.org/stable/api/collections_api.html#matplotlib.collections.LineCollection
+    
+    # assign method from dlist, which is sintactically identical
+    from pySurf.scripts.dlist import Dlist
+    plot = Dlist.plot
+    
+    """ N.B.: TODO: could use linecollections for plotting https://matplotlib.org/stable/api/collections_api.html#matplotlib.collections.LineCollection
     """
     
 def test_load_plist(rfiles = None):
