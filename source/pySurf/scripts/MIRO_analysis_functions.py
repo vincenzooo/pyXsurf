@@ -488,7 +488,7 @@ def trim_datadic(ranges,datadic_val,xrange=None,yrange=None,
 '''
 
 def plot_all_psds(pathlabels,outfolder=None,subfix='_psd',xrange=None,yrange=None):
-    """passing a datadic plots all psds for each key.
+    """passing a datadic plots all psds for each key. WARNING: units are hardcoded. 
     
     Generate a formatted plot (N.B.: units are fixed) of all PSDs for zipping pathlabel in a single graph 
     and prints their rms.
@@ -575,7 +575,7 @@ def psds_table(tdic,outfolder=None,subfix='_psdtable',ranges = None):
             print('attenzione')
             fs=fs[1:]
             ps=ps[1:]
-        rms_full = np.sqrt(np.trapz(ps,fs))
+        rms_full = np.sqrt(np.trapz(ps,fs)) 
         print (os.path.basename(name),' : ','full freq. range [%6.3f:%6.3f], rms %6.3f'%(*(span(fs)),rms_full))
         rmss.append([span(fs),rms_full])
         #pdb.set_trace()
