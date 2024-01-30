@@ -16,6 +16,8 @@ from pySurf.data2D import (crop_data, data_from_txt, data_histostats,
                            read_data, register_data, resample_data,
                            rotate_data, save_data, slope_2D, subtract_data,
                            sum_data, transpose_data)
+from .data2D import plot_slope_slice, plot_slope_2D
+from .psd2d import avgpsd2d
 from pySurf.points import matrix_to_points2, points_autoresample
 from pySurf.psd2d import (plot_psd2d, plot_rms_power, psd2d, psd2d_analysis,
                           rms_power)
@@ -109,24 +111,35 @@ def __array_finalize__(self, obj):
 
 class Data2D(object):  # np.ndarrays
     """A class containing 2D data with x and y coordinates and methods for analysis.
-    """ 
     
-    # Args:
-    #     object ([type]): [description]
+        Can be initialized with data | data, x, y | file | file, x, y.
+        if x and y are coordinates if match number of elements, 
+            or used as range if two element. 
+        If provided together with file, they override x and y 
+            read from file.
+        
+        Function methods return a copy with new values and don't alter original
+           object. Reassign to variable to use as modifier:
+           e.g. a=a.level( ... )
 
-    # Raises:
-    #     ValueError: [description]
-    #     ValueError: [description]
-    #     ValueError: [description]
-    #     ValueError: [description]
-    #     ValueError: [description]
-    #     ValueError: [description]
+        Args:
+            data (2D array or string): 2D data or file name (suitable reader must 
+            provided).
+            
+            x, y (array): coordinates or ranges.
+            
+            file (str): alternative way to provide a data file.
+            
+            units (str array): 3-element array with units symbols for `x`, `y`, `data`  
+            
+            reader (function): reader function (see `pySurf.readers.instrumentReader`).
+            
+            name (str): sets the name of created object.  
 
-    # Returns:
-    #     [type]: [description]
-       
+            *args, **kwargs: optional arguments for `pySurf.data2D.register_data`. 
+                        
+        """
 
-    """
     
     def __new__(subtype, shape, dtype=float, buffer=None, offset=0,
                 strides=None, order=None, info=None):
@@ -188,33 +201,7 @@ class Data2D(object):  # np.ndarrays
         *args,
         **kwargs
     ):
-        """
-        Can be initialized with data | data, x, y | file | file, x, y.
-        if x and y are coordinates if match number of elements, 
-            or used as range if two element. 
-        If provided together with file, they override x and y 
-            read from file.
-        
-        Function methods return a copy with new values and don't alter original
-           object. Reassign to variable to use as modifier:
-           e.g. a=a.level( ... )
 
-        Args:
-            data (2D array or string): 2D data or file name (suitable reader must 
-            provided).
-            
-            x, y (array): coordinates or ranges.
-            
-            file (str): alternative way to provide a data file.
-            
-            units (str array): 3-element array with units symbols for `x`, `y`, `data`  
-            
-            reader (function): reader function (see `pySurf.readers.instrumentReader`).
-            
-            name (str): sets the name of created object.  
-
-            *args, **kwargs: optional arguments for `pySurf.data2D.register_data`. 
-        """
 
         # from pySurf.readers.instrumentReader import reader_dic
 
@@ -696,10 +683,15 @@ class Data2D(object):  # np.ndarrays
 
     remove_outliers = update_docstring(remove_outliers, outliers.remove_outliers)
 
-    def extract_profile(self, *args, **kwargs):
+    def extract_profile(self, raw=False, *args, **kwargs):
+        """ Extract one or more profiles from start to end points. Return a `profile_class.Profile` object unless `raw` is True."""
+        
         p = self.topoints()
         prof = points.extract_profile(p,  *args, **kwargs)
-        return prof
+        if raw:
+            return prof
+        else:
+            return Profile(*prof,units=[self.units[0],self.units[2]])
 
     extract_profile = update_docstring(extract_profile, points.extract_profile)
     
@@ -753,7 +745,30 @@ class Data2D(object):  # np.ndarrays
 
     slope = update_docstring(slope, slope_2D)
 
+    def plot_slope(self, slice = False, scale = (1.,1.,1.) , *args, **kwargs):
+        """Use `data2D.plot_slope_2D` and `.plot_slope_slice` to ploto 4-panel x and y slopes.
+        
+        Plot surface, x and y slope maps (rms profile if `slice` is set) and slope (or rms) distribution.
+        Accept all keywords for `data2D.plot_slope_2D` and `.plot_slope_slice`."""
+        
+        # check for scale
+        if self.units is not None:
+            if len(set(self.units)) != 1 and len(set(scale)) == 1:
+                # more than one unit, but same scaling
+                print ("WARNING: units are different for axis, but scaling is uniform")
+                print ("units: ", self.units)
+                print ("scale: ", scale)
 
+        if slice:
+            plot_slope_slice(self.data, self.x, self.y, *args, **kwargs)
+        else:
+            plot_slope_2D(self.data, self.x, self.y, *args, **kwargs)
+
+    plot_slope = update_docstring(plot_slope, plot_slope_2D)
+    plot_slope = update_docstring(plot_slope, plot_slope_slice)
+
+    
+    
 class PSD2D(Data2D):
     """It is a type of data 2D with customized behavoiur and additional properties
     and methods.
@@ -780,7 +795,7 @@ class PSD2D(Data2D):
         from pyProfile.profile_class import PSD
         
         return PSD(res.x, res.y, units = res.units, name = res.name, *args, **kwargs)
-        
+    avgpsd = update_docstring(avgpsd, avgpsd2d)
     
     def rms_power(self, plot=False, rmsrange=None, *args, **kwargs):
         """Calculate rms slice power by integrating .

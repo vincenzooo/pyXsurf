@@ -148,12 +148,12 @@ def plot_rms_power(f,p,x=None,rmsrange=None,ax2f=None,units=None,*args,**kwargs)
     plt.plot(x,rms,*args,**kwargs)
     
     ax3=plt.gca()
-    tit1,tit2=(['Left y axis','Right y axis'] if np.any(ax2f) else [None,None]) #legend title headers
+    tit1,tit2=(['Left y axis','Right y axis'] if np.any(ax2f) else [None,None]) #legend title headers for multiple y axes if needed.
     l1=ax3.legend(loc=loc1,title=tit1)
 
     #plt.title('Total rms power=%6.3g'%(np.sqrt((rms**2).sum()))+((" "+units[2]) if units[2] is not None else ""))  #wrong math, forgets average?
     plt.title('Total rms power=%6.3g'%(np.sqrt(np.nansum(rms**2)/(np.sum(~np.isnan(rms)))))+((" "+units[2]) if units[2] is not None else ""))
-    c = plt.rcParams['axes.prop_cycle'] # c=plt.gca()._get_lines.prop_cycler
+    c=plt.gca()._get_lines.prop_cycler  # c = plt.rcParams['axes.prop_cycle'] # 2024/01/27 not working any more
 
     rms_v=rms
     if rmsrange is not None:

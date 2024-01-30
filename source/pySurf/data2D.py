@@ -240,11 +240,11 @@ def level_data(data,x=None,y=None,degree=1,axis=None,byline=False,fit=False,*arg
             raise ValueError("Degree must be scalar when leveling by line (axis != None): received {}".format(degree))
         return degree
 
-    def _level_by_line(data, degree):
+    def _level_by_line(data, degree, *args, **kwargs):
         leg = fitlegendre(y, data, degree, *args, **kwargs)
         return leg
 
-    def _level_plane(data, degree):
+    def _level_plane(data, degree, *args, **kwargs):
         xo, yo = degree if np.size(degree) == 2 else (degree, degree)
         xl, yl = [f.flatten() for f in np.meshgrid(np.arange(xo + 2), np.arange(yo + 1))]
         leg = legendre2d(data, x, y, xl=xl, yl=yl, *args, **kwargs)[0]
@@ -258,11 +258,11 @@ def level_data(data,x=None,y=None,degree=1,axis=None,byline=False,fit=False,*arg
     degree = _validate_degree(degree, axis)
 
     if axis == 0:
-        leg = _level_by_line(data, degree)
+        leg = _level_by_line(data, degree, *args, **kwargs)
     elif axis == 1:
-        leg = _level_by_line(data.T, degree).T
+        leg = _level_by_line(data.T, degree, *args, **kwargs).T
     elif axis is None:
-        leg = _level_plane(data, degree)
+        leg = _level_plane(data, degree, *args, **kwargs)
     else:
         raise ValueError("Invalid axis value: {}. Axis must be None, 0, or 1.".format(axis))
 
@@ -1686,6 +1686,7 @@ def plot_slope_slice(wdata,x,y,scale=(1.,1.,1.),vrange=None,srange=None,filter=F
     data outside of the range are also excluded from rms calculation.
     """
 
+    # TODO: plot of y axis slope (ax3) is not aligned with surface plot.
     #Note very important that filtering is made pointwise on the 2D slope figure:
     #  all values out of range are masked and all lines containing at least one value are
     #  excluded.

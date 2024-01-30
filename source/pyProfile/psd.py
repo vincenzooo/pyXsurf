@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 #from pySurf.data2D import projection
 
 def psd2prof(f,p,phase=None,N=None):
-    """build a profile from PSD, if phase (in rad) is not passed use random 
+    """build a signal from PSD, if phase (in rad) is not passed use random 
     values. A real profile of npoints is assumed. Note that profiles with 
     (len(p)-1)*2 and (len(p)-1)*2+1 points give psd with same number of points,
     so both reconstructions are possible. Odd number of points is the default,
@@ -45,10 +45,10 @@ def normPSD(N,L=None,form=1):
     """
         
     if form==0:
-        factor=1. #units: [Y**2] no normalization. "sum squared amplitude" in NR 13.4.1
+        factor=1. #units: [Y**2] no normalization. "sum squared amplitude" in NR 13.4.1. rms is the sum. 
     if form==1:
-        factor=1./N**2*L #[Y**2][X] This has the advantage that measurements on same range with different number of points match
-        #and it is the way it is usually plotted. The rms is the integral of PSD over frequency rather than the sum.
+        factor=1./N**2*L #[Y**2][X] This has the advantage that measurements on same range with different number of points match, since the PSD is actually normalized by the frequency interval.
+        #This is the default and the way it is usually plotted. The rms is the integral of PSD over frequency rather than the sum.
     elif form==2:
         factor=1./N**2 #[Y**2] here rms is the sum of PSD, this is RA normalization (however it differs in RA when a window is used).
         #"" 13.4.5 in NR
@@ -287,7 +287,7 @@ def plot_psd(f,p,units=None,label=None,span=0,psdrange=None,
     if units is None: units=['[X]','[Y]','[Z]']
     if len(units)==2: units = [None,units[0],units[1]]
     #print ("FIX THIS ROUTINE BEFORE USING IT, see newview_plotter")
-    plt.ylabel('axial PSD ('+units[2]+'$^2$ '+units[1]+')')
+    plt.ylabel('PSD ('+units[2]+'$^2$ '+units[1]+')')
     plt.xlabel('Freq. ('+units[1]+'$^{-1}$)')
     #pdb.set_trace()
     if len(p.shape)==2: #experimentally deals with 2D array automatically plotting average
