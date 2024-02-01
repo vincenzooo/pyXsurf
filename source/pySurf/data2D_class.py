@@ -140,17 +140,19 @@ class Data2D(object):  # np.ndarrays
                         
         """
 
-    
+    """
     def __new__(subtype, shape, dtype=float, buffer=None, offset=0,
                 strides=None, order=None, info=None):
         # Create the ndarray instance of our type, given the usual
         # ndarray input arguments.  This will call the standard
         # ndarray constructor, but return an object of our type.
         # It also triggers a call to InfoArray.__array_finalize__
-        obj = super(Data2D, subtype).__new__(subtype, shape, dtype,    
+        obj = super().__new__(subtype, shape, dtype,    
                                             #(InfoArray
                                                 buffer, offset, strides,
                                                 order)
+        import pdb
+        pdb.set_trace()
         # set the new 'info' attribute to the value passed
         #obj.info = info
         # Finally, we must return the newly created object:
@@ -182,13 +184,15 @@ class Data2D(object):  # np.ndarrays
         # arr.view(InfoArray).
         #self.info = getattr(obj, 'info', None)
         # We do not need to return anything
-    """
+    
+    
     #def __repr__(self):
         #breakpoint()
         #pass
         #repr(self)
         #return self
-
+    """
+    
     def __init__(
         self,
         data=None,
@@ -293,7 +297,7 @@ class Data2D(object):  # np.ndarrays
         return self.data, self.x, self.y
 
     def __add__(self, other, *args, **kwargs):
-        return Data2D(
+        return self.__class__(
             *sum_data(self(), other(), *args, **kwargs),
             units=self.units,
             name=self.name + " + " + other.name
@@ -331,7 +335,7 @@ class Data2D(object):  # np.ndarrays
 
     def __sub__(self, other, *args, **kwargs):
         assert self.units == other.units
-        res = Data2D(*subtract_data(self(), other(), *args, **kwargs), units=self.units)
+        res = self.__class__(*subtract_data(self(), other(), *args, **kwargs), units=self.units)
         res.name = self.name + " - " + other.name
         return res
 
@@ -340,7 +344,7 @@ class Data2D(object):  # np.ndarrays
         
     def __repr__(self):
     
-        return '<.Data2D "%s" at %s>'%(self.name,hex( id(self)))
+        return '<%s "%s" at %s>'%(type(self),self.name,hex( id(self)))
         
         ''' NSee notes in profile_class'''
 
@@ -359,7 +363,7 @@ class Data2D(object):  # np.ndarrays
             return res
 
         res = points_autoresample(res)
-        return Data2D(*res, units=self.units, name=self.name + " // " + other.name)
+        return self.__class__(*res, units=self.units, name=self.name + " // " + other.name)
 
     def plot(self, title=None, *args, **kwargs):
         """plot using data2d.plot_data and setting automatically labels and colorscales.
