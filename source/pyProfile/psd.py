@@ -756,7 +756,9 @@ def testPSDest(x,y):
 def test_psd_normalization(x,y,wfun=None,norm=1,**kwargs):
     """Calculate PSD with a given normalization and
     compare its integral over frequency and sum to
-    rms square and standard deviation (they differ for rms including also offset, while stddev being referred to mean."""
+    rms square and standard deviation (they differ for rms including also offset, while stddev being referred to mean).
+    
+    Return frequency and psd, including first component"""
     
     f,p=psd(x,y,wfun=wfun,norm=norm,**kwargs)
     
@@ -764,13 +766,13 @@ def test_psd_normalization(x,y,wfun=None,norm=1,**kwargs):
     print ("Profile Height PV %6.3g (min: %6.3g, max: %6.3g)"%
            (np.nanmax(y)-np.nanmin(y),np.nanmin(y),np.nanmax(y)))
     print ("Profile Height avg.: ",np.nanmean(y))
-    print ("devstd**2=",np.std(y)**2, '(devstd=%f5.3)'%np.std(y))
+    print ("devstd**2=",np.std(y)**2, '(devstd=%f)'%np.std(y))
     print ("rms**2=",(y**2/len(x)).sum())  #, '(rms=%f5.3)'%np.std(y)
     print ("\n== Quantities calculated from PSD ==")
     print ("sum of PSD is ",p[1:].sum())
     print ("integral of PSD (as sum*deltaf) is ",p[1:].sum()/span(x,1)) #span(x,size=1)=1/L
     print ("integral trapz: ",np.trapz(p[1:],f[1:]))
-    print ("psd[0]*deltaf=%f (integral including:%f)"%(p[0]*f[1],p.sum()/span(x,1)))
+    print ("psd[0]*deltaf=%f (integral including zero freq.:%f)"%(p[0]*f[1],p.sum()/span(x,1)))
     print ("#--------\n")
     
     return f,p          
