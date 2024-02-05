@@ -264,9 +264,10 @@ def plot_psd2d(f,p,x,prange=None,includezerofreq=False,units=None,linear = False
     if prange is None:
         prange=[None,None]
 
+
     # new:
-    
     cbunits = psd_units(units)
+    
     #pdb.set_trace()
     if not linear:
         plt.yscale('log')
