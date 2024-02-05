@@ -687,9 +687,12 @@ class Data2D(object):  # np.ndarrays
 
     remove_outliers = update_docstring(remove_outliers, outliers.remove_outliers)
 
-    def extract_profile(self, raw=False, *args, **kwargs):
+    def extract_profile(self, *args, raw=False, **kwargs):
         """ Extract one or more profiles from start to end points. Return a `profile_class.Profile` object unless `raw` is True."""
         
+        from pyProfile.profile_class import Profile
+        # import pdb
+        # pdb.set_trace()
         p = self.topoints()
         prof = points.extract_profile(p,  *args, **kwargs)
         if raw:
@@ -700,7 +703,7 @@ class Data2D(object):  # np.ndarrays
     extract_profile = update_docstring(extract_profile, points.extract_profile)
     
     def projection(self, axis = 0, *args, **kwargs):
-        """avg, returns f and p. Can use data2D.projection keywords `span` and `expand` to return PSD ranges."""
+        """avg, returns x and y. Can use data2D.projection keywords `span` and `expand` to return data ranges."""
         from pyProfile.profile_class import Profile
         res = Profile(self.y, projection(self.data, axis=axis, *args,**kwargs), units = [self.units[1], self.units[2]], name = " ".join([self.name,"avg along axis %i"%(axis)])) 
     
@@ -764,9 +767,9 @@ class Data2D(object):  # np.ndarrays
                 print ("scale: ", scale)
 
         if slice:
-            plot_slope_slice(self.data, self.x, self.y, *args, **kwargs)
+            plot_slope_slice(self.data, self.x, self.y, scale = scale, *args, **kwargs)
         else:
-            plot_slope_2D(self.data, self.x, self.y, *args, **kwargs)
+            plot_slope_2D(self.data, self.x, self.y, scale = scale,  *args, **kwargs)
 
     plot_slope = update_docstring(plot_slope, plot_slope_2D)
     plot_slope = update_docstring(plot_slope, plot_slope_slice)
