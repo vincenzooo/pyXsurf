@@ -581,6 +581,7 @@ class Dlist(Superlist):
         elif type == 'all':
             # overlap on same ax, useful for partial maps or profiles.
             axes = [plt.figure()] * len(self) # three references to same axis 
+        
         for ax,d in zip(axes,self):
             try:
                 plt.sca(ax)
