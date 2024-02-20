@@ -777,7 +777,7 @@ class Data2D(object):  # np.ndarrays
     
     
 class PSD2D(Data2D):
-    """It is a type of data 2D with customized behavoiur and additional properties
+    """It is a type of data 2D with customized behavior and additional properties
     and methods.
     """
 
@@ -788,12 +788,20 @@ class PSD2D(Data2D):
         super().__init__(*args,**kwargs)
         '''
         super().__init__(*args, **kwargs)
-
-    def plot(self, *args, **kwargs):
-        u = kwargs.pop("units", self.units)
-        # pdb.set_trace()
-        return plot_psd2d(self.y, self.data, self.x, units=u, *args, **kwargs)
-
+    
+    def plot(self,linear = False,*args, **kwargs):
+        if linear:
+            res = self.plot(*args, **kwargs)
+        else:
+            res = plot_psd2d(self.y,self.data,
+                    self.x,
+                    units=self.units,
+                    *args,**kwargs)
+        if self.name:
+            plt.title (self.name) #(" - ".join([self.name, plt.gca().get_title()]))
+        return res
+    
+    
     def avgpsd(self, *args, **kwargs):
         """avg, returns f and p. Can use data2D.projection keywords `span` and `expand` to return PSD ranges."""
         
@@ -801,7 +809,7 @@ class PSD2D(Data2D):
         res = super().projection(axis = 1, *args, **kwargs)
         from pyProfile.profile_class import PSD
         
-        return PSD(res.x, res.y, units = res.units, name = res.name, *args, **kwargs)
+        return PSD(res.x, res.y, units = res.units, name = self.name, *args, **kwargs)
     avgpsd = update_docstring(avgpsd, avgpsd2d)
     
     def rms_power(self, plot=False, rmsrange=None, *args, **kwargs):
@@ -828,14 +836,7 @@ class PSD2D(Data2D):
 
             return rms_power(self.y, self.data, rmsrange=rmsrange, *args, **kwargs)
 
-    def plot(self,linear = False,*args, **kwargs):
-        if linear:
-            return self.plot(*args, **kwargs)
-        else:
-            return plot_psd2d(self.y,self.data,
-                    self.x,
-                    units=self.units,
-                    *args,**kwargs)
+
 
 
 def test_rot90():

@@ -890,7 +890,7 @@ class PSD(Profile):
                 
     def plot(self,*args,**kwargs):
         u=kwargs.pop('units',self.units)
-        return plot_psd(self.x,self.y,units=u,*args,**kwargs)
+        return plot_psd(self.x,self.y,units=u,label=self.name,*args,**kwargs)
     
     def rms_power(self,plot=False,*args,**kwargs):
         """Calculate rms slice power as integral of psd. If plot is set also plot the whole thing."""
