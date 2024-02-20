@@ -534,7 +534,8 @@ def plot_all_psds(pathlabels,outfolder=None,subfix='_psd',xrange=None,yrange=Non
         if fs[0] == 0:
             fs = fs[1:]
             ps = ps[1:]
-        rms = np.sqrt(np.trapz(ps,fs))
+        rms = p[1:].sum()/span(x,1) # this is the correct way to obtain rms, see test_psd_normalization (note that none of the formulas is suitable for non-equally spaced values).
+        
         print (os.path.basename(d),l,' : ',rms)
         plot_psd(fs,ps,label=l+', rms = %6.2f nm'%rms,units=['$\mu$m','$\mu$m','nm'])
         psds.append((fs,ps))
@@ -575,7 +576,8 @@ def psds_table(tdic,outfolder=None,subfix='_psdtable',ranges = None):
             print('attenzione')
             fs=fs[1:]
             ps=ps[1:]
-        rms_full = np.sqrt(np.trapz(ps,fs)) 
+        rms_full = np.sqrt(p.sum()/span(x,1))
+        
         print (os.path.basename(name),' : ','full freq. range [%6.3f:%6.3f], rms %6.3f'%(*(span(fs)),rms_full))
         rmss.append([span(fs),rms_full])
         #pdb.set_trace()
@@ -590,7 +592,7 @@ def psds_table(tdic,outfolder=None,subfix='_psdtable',ranges = None):
                     rms = np.nan
                 else:
                     f,p = crop_profile(fs,ps,r)
-                    rms = np.sqrt(np.trapz(p,f))
+                    rms = np.sqrt(p.sum()/span(x,1))  #changed from trapz
                 print (os.path.basename(name),' : ','freq. range [%6.3f:%6.3f], rms %6.3f'%(r[0],r[1],rms))
                 rmss.append([r, rms])
         rdic[name] = rmss
