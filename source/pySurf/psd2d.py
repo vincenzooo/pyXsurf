@@ -436,23 +436,27 @@ def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,
         ax3.grid(1)
         #plt.tight_layout(rect=(0, 0.03, 1, 0.95) if title else (0, 0, 1, 1))
         
-        # replaced with more evolved interactive resize:
-        #  plt.colorbar().remove() #dirty trick to adjust size to other panels
-        def resize(event):
-            box1 = ax1.get_position()
-            box2 = ax2.get_position()
-            box3 = ax3.get_position()
-            ax2.set_position([box1.x0, box2.y0, box1.width , box2.height])
-            ax2.set_adjustable("box",share=True)
-            ax3.set_position([box1.x0, box3.y0, box1.width , box3.height])
-            ax3.set_adjustable("box",share=True)
+        # # replaced with more evolved interactive resize:
+        # #  plt.colorbar().remove() #dirty trick to adjust size to other panels
+        # def resize(event):
+        #     box1 = ax1.get_position()
+        #     box2 = ax2.get_position()
+        #     box3 = ax3.get_position()
+        #     ax2.set_position([box1.x0, box2.y0, box1.width , box2.height])
+        #     ax2.set_adjustable("box",share=True)
+        #     ax3.set_position([box1.x0, box3.y0, box1.width , box3.height])
+        #     ax3.set_adjustable("box",share=True)
 
-        plt.tight_layout()
+        # plt.tight_layout()
 
-        cid = fig.canvas.mpl_connect('draw_event', resize)
-        cid2 = fig.canvas.mpl_connect('resize_event', resize)
+        # cid = fig.canvas.mpl_connect('draw_event', resize)
+        # cid2 = fig.canvas.mpl_connect('resize_event', resize)
 
-        resize(None)
+        # resize(None)
+        
+        from plotting.multiplots import set_sync_shared
+        
+        set_sync_shared([ax1,ax2, ax3])
 
         if outname:    #kept for compatibility, will be removed in next version
             plt.savefig(fn_add_subfix(outname,'_2dpsd','.png'))

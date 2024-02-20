@@ -29,6 +29,66 @@ def align_axis_x(ax, ax_target):
     posn_old, posn_target = ax.get_position(), ax_target.get_position()
     ax.set_position([posn_target.x0, posn_old.y0, posn_target.width, posn_old.height])
 
+def set_sync_shared (axes, setevent = True):
+    """From a list of axis with shared x, align them independently of colorbars or other modifiers.
+    
+    This function was established starting from code in `psd2d.psd2d_analysis` for cases 
+        in which matplotlib misbehaves, in place of the much simpler previous alternative
+        `plt.colorbar().remove()`.
+    All axes are synchronized to the first of the list, 
+    setevent binds the resize to figure event, so that any future resize will not break the sychronization.
+    In case there are other conflicting events functions defined, it might be convenient not to 
+         activate the event handling by setting setevent = False, but this is not tested at all.
+    
+    usage:
+    
+        set_sync_shared ([ax1, ax2, ax3])
+        
+    or: 
+    
+        resize = set_sync_shared ([ax1, ax2, ax3], setevent = False)
+        # do some plotting
+        resize()
+        """
+        
+    #original code:
+    
+        # # replaced with more evolved interactive resize:
+        # #  plt.colorbar().remove() #dirty trick to adjust size to other panels
+        # def resize(event):
+        #     box1 = ax1.get_position()
+        #     box2 = ax2.get_position()
+        #     box3 = ax3.get_position()
+        #     ax2.set_position([box1.x0, box2.y0, box1.width , box2.height])
+        #     ax2.set_adjustable("box",share=True)
+        #     ax3.set_position([box1.x0, box3.y0, box1.width , box3.height])
+        #     ax3.set_adjustable("box",share=True)
+
+        # plt.tight_layout()
+
+        # cid = fig.canvas.mpl_connect('draw_event', resize)
+        # cid2 = fig.canvas.mpl_connect('resize_event', resize)
+
+        # resize(None)
+    
+    def resize(event = None):
+        boxes = [ax.get_position() for ax in axes]
+        box1 = boxes[0]
+        for ax, box in zip(axes[1:], boxes[1:]):
+            ax.set_position([box1.x0, box.y0, box1.width , box.height])
+            ax.set_adjustable("box",share=True)
+
+    plt.tight_layout()
+    
+    fig = plt.gcf()
+    cid = fig.canvas.mpl_connect('draw_event', resize)
+    cid2 = fig.canvas.mpl_connect('resize_event', resize)
+
+    resize(None)
+    
+    return resize
+
+
 def align_axis_y(ax, ax_target):
     """Make y-axis of `ax` aligned with `ax_target` in figure"""
     posn_old, posn_target = ax.get_position(), ax_target.get_position()
