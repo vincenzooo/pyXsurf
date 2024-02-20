@@ -38,10 +38,10 @@ def normPSD(N,L=None,form=1):
     The PSD is defined as PSD(f)=factor*np.abs(FFT)**2 where FFT is the fast fourier transform.
     Note that in case of rfft the doubling factor is not included in norm (because part of FFT definition).
     Possible values are (ref. to Numerical recipes, NR, or Ryan Allured's functions, RA, when possible):
-    1 - units: [Y**2] no normalization. "sum squared amplitude" in NR 13.4.1
-    2 - units: [Y**2][X] This has the advantage that measurements on same range with different number of points match and it is the way it is usually plotted. The rms is the integral of PSD over frequency rather than the sum.
-    3 - units: [Y**2] here rms is the sum of PSD, this is RA normalization (however it differs in RA when a window is used). 13.4.5 in NR.
-    4 - units: [Y**2] not sure what this is for, "mean squared amplitude" in NR 13.4.2 and in formula 12.1.10 as discrete form of Parsifal's theorem.
+    0 - units: [Y**2] no normalization. "sum squared amplitude" in NR 13.4.1
+    1 - units: [Y**2][X] This has the advantage that measurements on same range with different number of points match and it is the way it is usually plotted. The rms is the integral of PSD over frequency rather than the sum. N.B.: "integral" here means that each value needs to be multiplied by the frequency span, while in case 0 the values of the psd array are simply summed. Considered that we always deal with a finite number of points the mathematical operation of sum (of psd times the freq. interval) is numerically closer to the real value than the (e.g. np.trapz) integral. See  `test_psd_normalization`.
+    2 - units: [Y**2] here rms is the sum of PSD, this is RA normalization (however it differs in RA when a window is used). 13.4.5 in NR.
+    3 - units: [Y**2] not sure what this is for, "mean squared amplitude" in NR 13.4.2 and in formula 12.1.10 as discrete form of Parsifal's theorem.
     """
         
     if form==0:
@@ -54,7 +54,8 @@ def normPSD(N,L=None,form=1):
         #"" 13.4.5 in NR
     elif form==3:
         factor=1./N #[Y**2] not sure what this is for, "mean squared amplitude" in NR 13.4.2
-                    #and in formula 12.1.10 as discrete form of Parsifal's theorem
+        #and in formula 12.1.10 as discrete form of Parsifal's theorem
+        
     return factor
     
 def psd(x,y,retall=False,wfun=None,norm=1,rmsnorm=False):
