@@ -503,7 +503,8 @@ def merge_profile(x1,y1,x2,y2=None, range = None, mode = 'avgon1st', toll = 0):
         x1,y1 = merge_profile(x1,y1,xx2,yy2,mode = 'second') #joins x1,y1 below overlapping region with interpolated points on overlapped region
         x2,y2 = crop_profile(x2,y2,[max(x1),None], open = True)  # second segment is points of x2,y2 above overlapping         
         
-        
+    # elif mode == 'side':
+    #     xx,yy = resample_profile(x1,y1,x2,y2)     
         
     else: raise ValueError("Unreconginze merging mode")
 
