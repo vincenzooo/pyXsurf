@@ -1,3 +1,6 @@
+2024/02/21 after dlist modification. When restructuring the entire readers mechanism, it would be nice to implement also the right type in the output: a profile reads as Profile and a surface reads as Data2D.
+L'implementazione di dlist può probabilmente essere fatta con pari sforzo per input non omogenei (per es. una lista che contiene stringhe in diversi formati, superfici, profili), anche se probabilmente non e' un requisito necessario, anzi potrebbe essere rimosso in un secondo tempo se crea bug o ambiguita'.
+
 2020/03/18 ricordato di vecchia branch readers_dev e copiata in python folder. removed duplicate e copiati files con tests. Andrebbe creata una cartella 
 
 `readers`:

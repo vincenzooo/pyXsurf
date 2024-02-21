@@ -549,12 +549,20 @@ class Dlist(Superlist):
     # ff = [os.path.join(datafolder,f) for f in files]
     # Dlist([Data2D(file=ff[0],reader=nid_reader)])
     
-    def __init__(self, dlist, reader=None,*args,**kwargs):
-        if reader is not None:
-            datalist = load_dlist(dlist, reader = reader,*args,**kwargs)
-            
-        super().__init__(*args,**kwargs)
+    # test 2024/02/21 (implemented auto_reader) OK
+    # Dlist([Data2D(file=ff,reader=nid_reader) for ff in files]).plot(type='grid')
+    # Dlist(files,reader=nid_reader).plot(type='grid')
+    # Dlist(files).plot(type='grid')
+    
     '''
+        
+    def __init__(self, dlist, reader=None,*args,**kwargs):
+        
+        # Note that reader==None and vectorization are kept into account in load_dlist
+        if all(isinstance(item, str) for item in dlist):
+            dlist = load_dlist(dlist, reader = reader,*args,**kwargs)
+            
+        super().__init__(dlist,*args,**kwargs)
         
     def topoints(self,level=True):
         """convert a dlist to single set of points containing all data."""
