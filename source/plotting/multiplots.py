@@ -95,26 +95,31 @@ def align_axis_y(ax, ax_target):
     ax.set_position([posn_old.x0, posn_target.y0, posn_old.width, posn_target.height])
 
 def commonscale(fig=None,axis='xy'):
-    """set scale of all axes in a figure to the range that includes all axes data.
+    """set scale of all axes in a figure to the range that includes all axes data. Static command, needs to be called again if data are updated.
     
-    2022/11/23 axis can be set to 'x', 'y' or 'xy'."""
+    2022/11/23 axis can be set to 'x', 'y', 'z' or any combination like 'xy'."""
     
-    rx=[]
+    rx=[]   # ranges
     ry=[]
+    rz=[]
+    
     sax = [] #scalable axis
     if fig is None: fig=plt.gcf()
     for ax in fig.axes:
         if len(ax.images) + len(ax.lines) != 0:  #dirty way to exclude e.g. colorbars
             rx.append(ax.xaxis.get_data_interval())  #under the assumption it has both x and ylim
             ry.append(ax.yaxis.get_data_interval())
+            rz.append(ax.images[0].get_clim())
             sax.append(ax)
     
     commonlim=[[min([r[0] for r in rx]),max([r[1] for r in rx])],
-                [min([r[0] for r in ry]),max([r[1] for r in ry])]]
+                [min([r[0] for r in ry]),max([r[1] for r in ry])],
+                [min([r[0] for r in rz]),max([r[1] for r in rz])]]
     
     for ax in sax:
         if 'x' in axis: ax.set_xlim(*commonlim[0])
         if 'y' in axis: ax.set_ylim(*commonlim[1])
+        if 'z' in axis: ax.images[0].set_clim(*commonlim[2])
 
     plt.draw()
     
