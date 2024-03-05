@@ -55,6 +55,73 @@ def read_raw_nid (file_name):
     
     return header,data
 
+def get_channel_pointers(config):
+    """ Extract channel pointers as list of strings from a `ConfigParser.Config` object generated from a nid file header.  
+    
+    The config object can be generated from nid header by calling `dataIO.config.make_config.string_to_config`.
+    Pointers are retrieved by checking which channel key in form 'Gr%i-Ch%i' has an associated value in the [DataSet] ini-Group. The keys are generated up to the number of groups and channels obtained, respectively from GroupCount and 'Gr%i-Count' keys in [DataSet]. The value associated to each key data associated value is the string pointer(es. [DataSet-0:0]) which identify an ini-Group corresponding to the channel.
+    
+    results can be used to extract single channel data and metadata, e.g. with:
+
+        ids = make_channel_tags(meta)
+        config = string_to_config(meta)  # wrapper extract ConfigSParser.Config object
+        channel_data = config[ids[0]]
+        
+    2024/02/23 renamed from make_channel_tags to get_channel_pointers, modified interface for config input and itag output.
+    """
+    
+    # create pointers, a (ordered) list of frame keys
+    pointers=[]
+    ngroups = config.get('DataSet','GroupCount')
+    for g in range(int(ngroups)):    
+        grcount = config.get('DataSet','Gr%i-Count'%g )   
+        for c in range(0,int(grcount)):     # range(1,int(grcount)+1) why?
+            cgtag = 'Gr%i-Ch%i'%(g,c)    
+            pointers.append(cgtag)
+            
+    # only channels with data have a key in [DataSet]   
+    hasdata = [config.get('DataSet',t,fallback=None) is not None for t in pointers] 
+    pointers = [config.get('DataSet',i) for (i, hd) in zip(pointers, hasdata) if hd]    
+            
+    return pointers   
+
+def nid_find_index (config, ch_name = '', ch_frame = ''):
+    """return index for a given channel from string description in a version-independent manner.
+    
+    Return integer or list of integers representing the sequential index (starting from 0) of all channels matching the description, given as `Frame` and `Dim2Name` in channel metadata (the name of the z axis value), or as a two element tuple with same values.
+    Note that the full list of indices is returned if neither `ch_name` or `ch_frame` are provided.
+    
+    Possible values are: 
+        `ch_frame`: "Scan forward" or "Scan backward"
+        `Dim2Name`: "Amplitude", "Z-Axis", "Phase", "Z-Axis Sensor"
+    
+    """
+    
+    if not isinstance(ch_name,str):
+        ch_name,ch_frame = ch_name 
+    
+    channel_pointers = get_channel_pointers(config) 
+    scannames = [config.get(chp,'Dim2Name') for chp in channel_pointers]  
+    scanframes = [config.get(chp,'Frame') for chp in channel_pointers]  
+    
+    index = [i for i,x in enumerate(scannames) if x == ch_name or not ch_name]   # all indices if ch_name is undefined, otherwise only matching   
+    i = [i for i in index if scanframes[i] == ch_frame or not ch_frame]
+    
+    return i
+
+def channel_from_index (config, index):
+    """return string description from channel index in a version-independent manner, return two strings for name and direction, according to `Frame` and `Dim2Name` ìn header.
+    
+    e.g.:
+
+        >> channel_from_index (config, 6)
+        ('Phase', 'Scan backward')
+        
+    """
+    chp = get_channel_pointers(config)[index]
+    
+    return config.get(chp,'Dim2Name'),config.get(chp,'Frame')
+
 def read_datablock(data, npoints, nlines, nbits, nim=0, fmt = '<l'):
     """read image of index `nim` from binary data.
     
@@ -70,28 +137,12 @@ def read_datablock(data, npoints, nlines, nbits, nim=0, fmt = '<l'):
     img = np.array(a).reshape((nlines,npoints))
     return img
 
-def make_channel_tags(meta):
-    """ builds list of fixed format string with channel identifiers.
-    results can be used to extract single channel data and metadata, e.g. with:
-       
-    """
-    config = string_to_config(meta)
-    # create itag, a (ordered) list of frame keys
-    itag=[]
-    ngroups = config.get('DataSet','GroupCount')
-    for g in range(int(ngroups)):    
-        grcount = config.get('DataSet','Gr%i-Count'%g )   
-        for c in range(1,int(grcount)+1):     
-            cgtag = 'Gr%i-Ch%i'%(g,c)    
-            itag.append(cgtag)
-    return itag
-        
 
 def read_nid(file_name):
     """ 2021/07/02 OBSOLETE: This is function used in ICSO2020.
     It is replaced with standardize version in `format_reader`.
     To convert the old calls to the new:
-     
+    2024/02/23 This version also contains a bug, as it always read the first data block.
     
     read a file nid. Return a dictionary with keys `'Gr%i-Ch%i'%(g,c)`
     and `data,x,y` as values, one for each image included in nid file.
