@@ -113,6 +113,7 @@ from pyProfile.profile import save_profile
 
 from pyProfile import profile   # functions passed to update_docstring will be from here
 from pyProfile.psd import plot_psd
+from pyProfile.psd import psd_units
 
 '''
 def update_docstring(func,source):
@@ -906,10 +907,10 @@ class PSD(Profile):
             Part dealing with multiple ranges is in plot_rms_power, but should be moved to rms_power."""
             raise NotImplementedError
         '''
-
+        
     def save(self,filename,*args,**kwargs):
         """Save psd."""
-        self.save(filename,header='# f[%s] PSD[%s]'%self.units)
+        super().save(filename,header='# f[%s] PSD[%s]'%tuple(psd_units(self.units)))
 
 def load_from_blocks(file, *args, **kwargs):
     """read a list of profiles from a single file, extracting them using ``split_blocks``."""
