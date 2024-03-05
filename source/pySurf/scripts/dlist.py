@@ -41,7 +41,7 @@ def topoints(data,level=None):
     return np.vstack(plist)
 
 def load_dlist(rfiles,reader=None,*args,**kwargs):
-    """Extracted from plot_repeat. Read a set of rfiles to a dlist.
+    """Extracted from `plot_repeat`. Read a set of rfiles to a `dlist`.
     readers and additional arguments can be passed as scalars or lists.
 
     You can pass additional arguments to the reader in different ways:
@@ -83,6 +83,7 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
                 raise ValueError
     '''
     #pdb.set_trace()
+    '''
     if kwargs : #passed explicit parameters for each reader
         # Note, there is ambiguity when rfiles and a kwargs value have same
         # number of elements()
@@ -117,7 +118,9 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
         kwargs=[{k:deepcopy(v[i]) for k,v in kwargs.items()} for i in np.arange(len(rfiles))]
     else:
         kwargs = [{} for dummy in rfiles] 
-        
+    '''    
+    
+    '''
     if args:
         for a in args:
             if (np.size(a) == 1):
@@ -126,6 +129,14 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
                 args=[args for dummy in rfiles]  
     else:
         args=[args for dummy in rfiles]
+    '''
+    
+    
+    from dataIO import dicts
+    kwargs = dicts.vectorize(kwargs,len(rfiles))
+    
+    from dataIO import arrays
+    args = arrays.vectorize(args,len(rfiles))
         
     #kwargs here is a list of dictionaries {option:value}, matching the readers
     #dlist=[Data2D(file=wf1,reader=r,**{**k, **a}) for wf1,r,k,a in zip(rfiles,reader,args,kwargs)]

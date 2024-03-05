@@ -1,8 +1,50 @@
 """contains operations on dictionaries"""
 import inspect
 
+import numpy as np
+from copy import deepcopy
+
+
 
 filterByKey2 = lambda data,keys : {key: data[key] for key in keys if key in data}
+
+def vectorize(kwargs,n):
+    if kwargs : #passed explicit parameters for each reader
+        # Note, there is ambiguity when rfiles and a kwargs value have same
+        # number of elements()
+        #pdb.set_trace()
+        #vectorize all values
+        for k,v in kwargs.items():
+            if (np.size(v) == 1): 
+                kwargs[k]=[v for i in range(n)]    
+            #elif (len(v) != len(rfiles)):
+            else:
+                try:
+                    kwargs[k]=[v.copy() for i in range(n)]
+                except AttributeError:  #fails e.g. if tuple which don't have copy method
+                    kwargs[k]=[v for i in range(n)]  
+            # else:  #non funziona perche' ovviamente anche chiamando esplicitamente, sara'
+            # # sempre di lunghezza identica a rfiles.
+            #    print ('WARNING: ambiguity detected, it is not possible to determine'+
+            #    'if `%s` values are intended as n-element value or n values for each data.\n'%k+
+            #    'To solve, call the function explicitly repeating the value, es. `units=[['um','um','nm']]*3.`')
+            # in realtà la forma "esplicità" fallisce al plot, mi fa temere che non funzioni anche se le immagini l'altra funziona. 
+            
+    
+        # 2020/07/10 args overwrite kwargs (try to avoid duplicates anyway).
+        # args were ignored before.
+        
+        #if not args:  #assume is correct number of elements
+        #    args = [[]]*len(rfiles)   ## Non va fatto cosi'!! senno' duplica "by ref"
+        
+        #pdb.set_trace()
+        
+        #transform vectorized kwargs in list of kwargs
+        kwargs=[{k:deepcopy(v[i]) for k,v in kwargs.items()} for i in range(n)]
+    else:
+        kwargs = [{} for i in range(n)] 
+        
+    return kwargs
 
 def pop_kw(kws,defaults=None,keylist=None,exclude=None):
     """A multiple pop function for a dictionary, hopefully useful to filter kws and manage function **kwargs parameters.
