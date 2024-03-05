@@ -2,6 +2,11 @@ from ast import literal_eval
 import os
 import io
 
+"""A collection of functions acting as a simplified interface for `ConfigParser`. 
+
+It handles the different versions of `ConfigParser`."""
+
+
 try:
     from configparser import ConfigParser
 except ImportError:
@@ -56,6 +61,7 @@ def make_config(settingsFile):
 
 def string_to_config(header):
     """ convert a string to a config object. """
+    
     config = ConfigParser()
     buf = io.StringIO("\n".join(header))
     config.read_file(buf)

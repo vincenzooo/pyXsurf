@@ -647,6 +647,7 @@ class Data2D(object):  # np.ndarrays
         units = kwargs.pop('units',self.units)
         #breakpoint()
         return get_stats(self.data,self.x,self.y,units=units,*args,**kwargs)
+    stats = update_docstring(stats, get_stats)
 
     def printstats(self, label=None, fmt="%3.2g"):
         if label is not None:
