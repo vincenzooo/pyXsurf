@@ -610,4 +610,43 @@ class Dlist(Superlist):
         #print(args)
         
         return axes
-            
+
+'''            
+    def plot(self,type='figures',*args,**kwargs):
+        """
+        types:
+        figures - plot each graph in a separate window
+        grid - makes a grid of plots, parameters can be controlled with options as `multiplots.subplot_grid`
+               
+        return a list of axis.
+        
+        N.B.: this is used also by Plist with an assignment (Plist.plot = Dlist.plot).
+        """
+        
+        from dataIO import arrays, dicts
+        
+        args = arrays.vectorize(args,len(self))
+        kwargs = dicts.vectorize(kwargs,len(self))
+        
+        if type == 'figures': 
+            axes = [plt.figure(**prep_kw(plt.figure,kwargs)) for dummy in self]
+        elif type == 'grid':
+            from plotting.backends import maximize
+            maximize()            
+            axes = subplot_grid(len(self),**prep_kw(subplot_grid,kwargs))[1]
+        elif type == 'all':
+            # overlap on same ax, useful for partial maps or profiles.
+            axes = [plt.figure()] * len(self) # three references to same axis 
+        # import pdb
+        # pdb.set_trace()
+        for ax,d, aa, kk in zip(axes,self, *args,*kwargs):
+            try:
+                plt.sca(ax)
+            except ValueError:
+                print("WARNING: axes not existing.")
+            d.plot(*args,**prep_kw(d.plot,*aa,**kk))
+            #d.plot(*args,**kwargs)
+        #print(args)
+        
+        return axes
+'''
