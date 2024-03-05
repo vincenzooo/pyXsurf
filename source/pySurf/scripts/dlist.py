@@ -133,12 +133,12 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
     
     return dlist
 
-def test_load_dlist(rfiles):
+def test_load_dlist(rfiles,reader=fitsWFS_reader):
 
-    dlist=load_dlist(rfiles,reader=fitsWFS_reader,scale=(-1,-1,1),
+    dlist=load_dlist(rfiles,reader=reader,scale=(-1,-1,1),
             units=['mm','mm','um'])
 
-    dlist2=load_dlist(rfiles,fitsWFS_reader,[{'scale':(-1,-1,1),
+    dlist2=load_dlist(rfiles,reader,[{'scale':(-1,-1,1),
             'units':['mm','mm','um']},{'scale':(1,1,-1),
             'units':['mm','mm','um']},{'scale':(-1,-1,1),
             'units':['mm','mm','$\mu$m']}])
@@ -534,7 +534,7 @@ def psd2d(dlist,ymax=None,subfix='_psd2d',*args,**kwargs):
 
 # Minimal implementation, should broadcast properties
 
-from dataIO.superlist import prep_kw
+from dataIO.functions import prep_kw
 
 
 class Dlist(Superlist):
@@ -562,7 +562,7 @@ class Dlist(Superlist):
         if all(isinstance(item, str) for item in dlist):
             dlist = load_dlist(dlist, reader = reader,*args,**kwargs)
             
-        super().__init__(dlist,*args,**kwargs)
+        super().__init__(dlist,*args)
         
     def topoints(self,level=True):
         """convert a dlist to single set of points containing all data."""
