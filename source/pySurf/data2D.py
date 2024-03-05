@@ -413,9 +413,11 @@ def rotate_data(data,x=None,y=None,ang=0,k=None,center=None,
 def save_data(filename,data,x=None,y=None,fill_value=np.nan,addaxis=True,makedirs=False,**kwargs):
     """Save data as matrix on a file.
     
+    
+    
     Can save as fits if the extension is .fits,
     but this should be probably moved elsewhere,
-    otherwise uses np.saavetxt to save as text.
+    otherwise uses np.savetxt to save as text.
     kwargs are passed to np.savetxt or hdu.writeto
     """
     #2016/10/21 rewritten routine to use points_find_grid
@@ -1460,7 +1462,8 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     # and adjust ticks accordingly.
     sx=span_from_pixels(x,delta=delta)  #determines the extent of the plot from 
     sy=span_from_pixels(y,delta=delta)  #  coordinates of pixel centers.
-    #pdb.set_trace()
+    # import pdb
+    # pdb.set_trace()
     vmin=kwargs.pop('vmin',clim[0])
     vmax=kwargs.pop('vmax',clim[1])
     
@@ -1505,7 +1508,7 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     cb = plt.colorbar(axim,fraction=0.046*im_ratio, pad=0.04)
     '''
     
-    cb=plt.colorbar()
+    cb = plt.colorbar()
     '''
     divider = make_axes_locatable(plt.gca())
     bax = divider.append_axes("right", size="5%", pad=0.05) 
@@ -1536,11 +1539,13 @@ def plot_data(data,x=None,y=None,title=None,outfile=None,units=None,stats=False,
     # if vars is single scalar, use preset
     if stats:          
         s = get_stats(data,x,y,vars=stats,units=units,string=True,fmt=fmt)
-        l=legendbox(s,loc=loc,framealpha=framealpha)
+        l=legendbox(s,loc=loc,framealpha=framealpha,draggable=True)
     
     if title is not None:
         plt.title(title)
         
+    # import pdb
+    # pdb.set_trace()
     if outfile is not None: #useless, just call plt.savefig
         plt.savefig(outfile)
     
