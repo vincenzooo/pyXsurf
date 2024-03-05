@@ -10,7 +10,7 @@ from pySurf.data2D import plot_data
 
 
 def smartcb(ax=None):
-    """from different places online is a way to get colorbars same height than the plot."""
+    """from different places online. It is a way to get colorbars same height than the plot."""
     from mpl_toolkits.axes_grid1 import make_axes_locatable
     if ax is None: ax = plt.gca()
     divider = make_axes_locatable(ax)
@@ -284,7 +284,7 @@ def find_grid_size(number, smax=0, square = True, fill = False):
     return res
     
 
-def subplot_grid(number,size=0,smax=0,*args,**kwargs):
+def subplot_grid(number,size=0,smax=0, square = True, fill = False,*args,**kwargs):
     
     """
     Create a set of n=`number` subplots in a figure, automatically 
@@ -307,7 +307,8 @@ def subplot_grid(number,size=0,smax=0,*args,**kwargs):
 
             also axes=[a.plot(x,x**i) for i,a in enumerate(subplot_grid(3))]"""
 
-    gridsize = find_grid_size(number,smax) if size == 0 else size
+    gridsize = find_grid_size(number, smax = smax, square = square, fill = fill) if size == 0 else size
+    
     #fig = fignumber(fignum)
 
     """    if fignum==0:
