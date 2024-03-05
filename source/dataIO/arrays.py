@@ -2,6 +2,7 @@ import numpy as np
 from dataIO.span import span
 from itertools import product
 import warnings
+from copy import deepcopy
 
 warnings.simplefilter("once")
 
@@ -104,8 +105,36 @@ def split_on_indices(vector,indices,absolute=False):
 
     return result
 
+def vectorize(args, n):
+    """Vectorize a single array to length n, if not already.
+    
+    example:
+        
+        
+    to vectorize function arguments:
+    
+        args = [vectorize(a) for a in args]
+    
+    """
+    
+    if args:
+        for a in args:
+            if (np.size(a) == 1):
+                args=[[] for i in range(n)]    
+            elif (len(a) != n):
+                args=[args for i in range(n)]  
+    else:
+        args=[args for i in range(n)] 
+        
+    return args
 
 
+
+def test_vectorize():
+    
+    assert vectorize([1,2,3], 2) == [[1,2,3],[1,2,3]]
+    assert vectorize([], 3) == [[],[],[]]
+    assert vectorize([1,2,3], 3) == [[1,2,3],[1,2,3],[1,2,3]]
 
 def make_raster(*vectors, as_axis = False, extend = True):
     """Create a raster grid on the base of a list of vectors.
