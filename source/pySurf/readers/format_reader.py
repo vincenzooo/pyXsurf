@@ -33,7 +33,8 @@ from dataIO.read_pars_from_namelist import read_pars_from_namelist
 from dataIO.fn_add_subfix import fn_add_subfix
 from IPython.display import display
 
-from .nid_reader import make_channel_tags, read_datablock
+from .nid_reader import get_channel_pointers, read_datablock # get_channel_pointers was make_channel_tagss
+from .nid_reader import nid_find_index
 
 
 
@@ -306,28 +307,31 @@ def sur_reader(wfile,header=False,*args,**kwargs):
     del(head.points,head.xAxis,head.yAxis) #remove data after they are extracted from header to save memory.
     return data,x.flatten(),y.flatten()   #are returned as column vector  
         
-def read_nid(file_name,index=0,header=False,read_tags=False):
-    """read a file nid. Return a list of `data,x,y` for the scans of index in `index`.
+def read_nid(file_name,index=None,
+             ch_name="Z-Axis",ch_frame="Scan forward",
+             header=False): #,read_tags=False):
+    """read a file nid. Return a list of `data,x,y` for the channels (i.e. images) of index in `index`.
+    
+    `index` can be a numerical value or a string (preferred in newer version to maintain consistency between data with different channel ordering). Note that this is a non-standard interface e.g. for Data2D, where a single data is expected, however this interface allows to extract multiple data reading the data a single time (and can be used for a future implementation to read a Dlist from a single file). 
+    With default parameters, all channels are returned, which breaks old interface, where channel 0 was used. To restore consistency a default channel (e.g. ch_name="Z-Axis",ch_frame="Scan forward") can be in the caller code (i.e. Data2D).
     
     `data,x,y` are extracted from files and adjusted by using 
-     info from header. A file nid can contains several "scans" 
+     info from header. A file nid can contains several "channels" 
      (typically different AFM data: phase, amplitude, etc., having different
-     units). This function extracts a single scan.
+     units). This function extracts a single channel.
      
-    Metadata have a hyerarchical structure, with first level general settings,
-    then subfields for single scans
+    Metadata have a hierarchical structure, with first level [DataSet] general settings,
+    then subfields for single channels.
     if `header` is set, the full file metadata are returned "raw" as list of string,
     it is left to user to extract the subset of metadata corresponding to the 
     extracted data.
     A convenient way to explore the metadata is to convert them to a 
-    configparser object. This is already implemented in this routine, where
-    values should already include settings and conversions from metadata.
+    configparser object. This is already implemented in this routine, using convenience function `dataIO.config.make_config.string_to_config`.
     TODO: consider extracting only relevant metadata (if possible/convenient). 
     
-    `read_tags` if set, keys for channels with data are returned (to return also the empty ones call `make_channel_tags`)
+    2024/02/23 removed flag `read_tags` to return itags, can be obtained directly calling `make_channel_tags`
     
-    Of the old primitive routine `nid_reader.read_nid` and 
-    `nid_reader.read_raw_nid`:
+    Of the old primitive routine `nid_reader.read_nid` and `nid_reader.read_raw_nid`:
     `read_raw_nid` reads `header` as list of strings and `data` as
     single binary block. `read_datablock` is used to extract an image
     from the datablock. `dataIO.config.string_to_config` can be used by converting it to `config`
@@ -336,88 +340,90 @@ def read_nid(file_name,index=0,header=False,read_tags=False):
     from pySurf.readers.nid_reader import read_raw_nid  #,read_nid
     from dataIO.config.make_config import string_to_config
     import logging
-     
     
     # all columns of the matrix 
     #ngroups = config.get('DataSet','GroupCount') #number of groups 
-    imgdic=[]
+    ch_data=[]
 
     logging.info('reading '+file_name)
     #print('reading '+file_name)
     meta, data = read_raw_nid(file_name)
     if header: return meta
     
-    # build a config object `config` by merging the string.
-    config = string_to_config(meta)        
-    # create itag, a (ordered) list of frame keys, only for frames with data
-    itag = make_channel_tags(meta)
-    hasdata = [config.get('DataSet',t,fallback=None) is not None for t in itag]
-    itag = [i for (i, hd) in zip(itag, hasdata) if hd]
+    # import pdb
+    # pdb.set_trace()
     
-    if np.ndim(index) == 0:
-        if read_tags:  #return tags of subscans with data.
-            if index == 0:
-                return itag
-        else:
+    config = string_to_config(meta) # build a `ConfigParser.Config` object `config` by merging the string.
+    channel_pointers = get_channel_pointers(config)
+    
+    # vectorize index if scalar, default index is None
+    if index is not None:    
+        if np.ndim(index) == 0:   
             index=[index]
-    if read_tags: return [itag[i] for i in index]
-                    
+
+    # import pdb
+    # pdb.setq_trace()
+    # set index to select number of channels and, if index is provided, verify it matches. 
+    ch_ind = nid_find_index(config,ch_name=ch_name, ch_frame=ch_frame)
+         
+    if index is not None:
+        if ch_frame or ch_name:
+            assert ch_ind == index
+    else:
+        index = ch_ind 
+                
     for i in index:
-        #breakpoint()
-        cgtag = itag [i]   
-        # all raws of the actual column   
-        #pdb.set_trace() 
-        #print(cgtag)
-        logging.info('tag '+cgtag)
-        try:
-            datatag = config.get('DataSet',cgtag)
-            # then read the header, specially �Points� and �Lines� 
-            #ReadDataSetInfo(datatag)    
-            npoints = int(config.get(datatag,'Points'))
-            nlines = int(config.get(datatag,'Lines' ))
-            nbits = int(config.get(datatag,'SaveBits'))
-            sign = config.get(datatag,'SaveSign')
-            if (int(nbits) != 32) or sign !='Signed':
-                raise ValueError
-            else:
-                fmt = '<l'    
-            img = read_datablock(data, npoints, nlines, nbits)
-            
-            #npoints nlines might be inverted
-            Dim0Range = float(config.get(datatag,'Dim0Range'))
-            Dim0Min = float(config.get(datatag,'Dim0Min'))
-            x = np.arange(npoints) / (npoints-1)  * Dim0Range + Dim0Min
-            
-            Dim1Range = float(config.get(datatag,'Dim1Range'))
-            Dim1Min = float(config.get(datatag,'Dim1Min'))
-            y = np.arange(nlines) / (nlines-1) * Dim1Range + Dim1Min
-            
-            Dim2Range = float(config.get(datatag,'Dim2Range'))
-            Dim2Min = float(config.get(datatag,'Dim2Min'))
-            img = (img + 2**(nbits-1)) / (2**nbits-1) * Dim2Range + Dim2Min
-            # z_value = (z_data + 2^(SaveBits-1)) / (2^SaveBits-1)  * Dim2Range + Dim2Min
-            imgdic.append([img,x,y])
-            units = [config.get(datatag,'Dim0Unit'),
-                        config.get(datatag,'Dim1Unit'),
-                        config.get(datatag,'Dim2Unit')]
-            
-            #if units != ['m','m','m']: 
-                #raise NotImplementedError('unknown units in read_nid: ',units)
-            #print(units)
-            logging.info('units '+units)
-            #print(points)
-            #ReadBinData()
-            logging.info(cgtag+' read')
-            #print (cgtag+' read')
-        except:
-            
-            #breakpoint()
-            logging.info('option '+cgtag+' not found')
-            #print('option '+cgtag+' not found')
-        #breakpoint()
-    if len (imgdic)==1: imgdic=imgdic[0] 
         
-    return imgdic
+        chp = channel_pointers[i]
+        
+        logging.info('channel '+chp)
+        npoints = int(config.get(chp,'Points'))
+        nlines = int(config.get(chp,'Lines' ))
+        nbits = int(config.get(chp,'SaveBits'))
+        sign = config.get(chp,'SaveSign')
+        scanname = config.get(chp,'Dim2Name')  # as well as units, these are not used in standard format_reader interface.
+        scanframe = config.get(chp,'Frame')
+        
+        logging.info('read scan %s, %s for index %i'%(scanname,scanframe,i))
+                
+        if (int(nbits) != 32) or sign !='Signed':
+            raise ValueError
+        else:
+            fmt = '<l'    
+            
+        img = read_datablock(data, npoints, nlines, nbits, nim=i)
+        
+        #npoints nlines might be inverted
+        Dim0Range = float(config.get(chp,'Dim0Range'))
+        Dim0Min = float(config.get(chp,'Dim0Min'))
+        x = np.arange(npoints) / (npoints-1)  * Dim0Range + Dim0Min
+        
+        Dim1Range = float(config.get(chp,'Dim1Range'))
+        Dim1Min = float(config.get(chp,'Dim1Min'))
+        y = np.arange(nlines) / (nlines-1) * Dim1Range + Dim1Min
+        
+        Dim2Range = float(config.get(chp,'Dim2Range'))
+        Dim2Min = float(config.get(chp,'Dim2Min'))
+        img = (img + 2**(nbits-1)) / (2**nbits-1) * Dim2Range + Dim2Min
+        # z_value = (z_data + 2^(SaveBits-1)) / (2^SaveBits-1)  * Dim2Range + Dim2Min
+        # import pdb
+        # pdb.set_trace()
+        units = [config.get(chp,'Dim0Unit'),
+                    config.get(chp,'Dim1Unit'),
+                    config.get(chp,'Dim2Unit')]
+        #img.units = units ##-
+        ch_data.append([img,x,y])
+                    
+        #if units != ['m','m','m']: 
+            #raise NotImplementedError('unknown units in read_nid: ',units)
+        
+        logging.info('units ' + str(units))
+        #ReadBinData()
+        logging.info(chp + ' read')
+    
+    if len (ch_data)==1: ch_data=ch_data[0] 
+        
+    return ch_data
 
 def nid_reader(file,index=0,header=False,*args,**kwargs):
     """read .sur binary files. Incompleta."""
@@ -480,7 +486,9 @@ def test_read_nid(file_name=None):
     data,x,y = datadic['Gr0-Ch1']
     print("read data of shape",data.shape)
     
-    d = Data2D(data,x,y,units=['mm','mm','um'],scale=[1000.,1000.,1000000.]) 
+    d = Data2D(data,x,y,units=['mm','mm','um'],scale=[1000.,1000.,1000000.],
+               ch_name="Z-Axis",
+               ch_frame="Scan forward") 
 
     d.plot()
     plt.show()
@@ -572,6 +580,13 @@ if __name__=='__main__':
         plt.figure()
         test_reader(f,r,**o)    
 
+    # TODO: this fails because parameters are not assigned to the correct
+    # function. nsigma is passed to read_nid and not recognized. 
+    # Note also that can be acceptable word for more than one function.
+     
+    d = Data2D(files[1],
+        scale = (1e6,1e6,1e9),units = ['mm','mm','nm'],
+        center = (0,0), nsigma=1)
 
     '''
     for r,f,o in tests:  #reader,file,options
