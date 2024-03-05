@@ -4,7 +4,7 @@ import numpy as np
 import os
 from dataIO.span import span
 from dataIO.fn_add_subfix import fn_add_subfix
-from dataIO.dicts import strip_kw
+from dataIO.functions import strip_kw
 # from pyProfile.profile import line
 from pyProfile.psd import plot_psd
 from pyProfile.psd import psd_units

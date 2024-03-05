@@ -22,7 +22,8 @@ TODO: implement assignment, e.g. pl.x = 12.398/pl.x
 # everything should work with no changes.
 
 import numpy as np
-from dataIO.dicts import pop_kw,prep_kw  # to be imported from outside
+#from dataIO.functions import prep_kw  # to be imported from outside
+#from dataIO.dicts import pop_kw
 
 class xSuperlist(list):
     """A list of pySurf.Data2D objects on which unknown operations are performed serially."""    
