@@ -2,7 +2,6 @@
 import inspect
 
 
-
 filterByKey2 = lambda data,keys : {key: data[key] for key in keys if key in data}
 
 def pop_kw(kws,defaults=None,keylist=None,exclude=None):
@@ -82,99 +81,38 @@ def pop_kw(kws,defaults=None,keylist=None,exclude=None):
 
     return res
 
-    '''
-	def pop_kw(kws,defaults,keylist=None):
-    """A multiple pop function for a dictionary, hopefully useful to filter kws and manage function parameters.
+# 2024/02/26 strip_kw and prep_kw moved to dataIO.functions
+'''
+def pop_kw(kws,defaults,keylist=None):
+"""A multiple pop function for a dictionary, hopefully useful to filter kws and manage function parameters.
 
-    a copy of `defaults` is returned where values are stripped from kws if a key is present.
-    If **kws are passed to a function that calls two other subs, each one with optional arguments, it can be used as (see full example below):
-    res1=sub1(arg1,**pop_kw(kws,{'mes1':'blah!'}))
-    res2=sub2(arg1,**kws)
+a copy of `defaults` is returned where values are stripped from kws if a key is present.
+If **kws are passed to a function that calls two other subs, each one with optional arguments, it can be used as (see full example below):
+res1=sub1(arg1,**pop_kw(kws,{'mes1':'blah!'}))
+res2=sub2(arg1,**kws)
 
-    or values can be retrieved in variables (and sorted):
-    mes2,mes1=pop_kw(kws,{'mes1':'blah!'},['mes2','mes1'])
-    print (mes1,mes2)
+or values can be retrieved in variables (and sorted):
+mes2,mes1=pop_kw(kws,{'mes1':'blah!'},['mes2','mes1'])
+print (mes1,mes2)
 
-    Note however that only parameters explicitly listed in defaults are filtered. A safer version for filtering function parameters rather than generic dictionaries is strip_kw.
+Note however that only parameters explicitly listed in defaults are filtered. A safer version for filtering function parameters rather than generic dictionaries is strip_kw.
 
-    """
-    res={}
-    keys=list(defaults.keys())
-    for k in keys:
-        res[k]=kws.pop(k,defaults[k])
+"""
+res={}
+keys=list(defaults.keys())
+for k in keys:
+    res[k]=kws.pop(k,defaults[k])
 
-    if keylist is not None:
-        try:
-            res=[res[k] for k in keylist]
-        except KeyError as e:
-            print ("ignoring key invalid in dict %s:\n'"%(res))
-            warnings.warn(str(e),RuntimeWarning)
+if keylist is not None:
+    try:
+        res=[res[k] for k in keylist]
+    except KeyError as e:
+        print ("ignoring key invalid in dict %s:\n'"%(res))
+        warnings.warn(str(e),RuntimeWarning)
 
-    return res
-	'''
+return res
+'''
 
-def strip_kw(kws,funclist,split=False,exclude=None,**kwargs):
-    """ Enhanced version of pop_kw, kw can be extracted from inspection of a function (or a list  of functions).
-    Defaults can be passed as kwargs.
-    `exclude` is a list of keys that are kept in kws unchanged
-       and not returned.
-    
-    2020/05/26 added `exclude`.
-    Use case is presented from problems with psd_analysis.
-    `psd2d.psd_analysis` calls `strip_kw(kwargs,psd2d_analysis,title="")`. 
-    `ps2d_analysis` has keyword `units`, that is not used in this case (used, only if called with `analysis=True`). Here we want to preserve `units` to strip it later.
-    
-    Old notes:
-        was in theory a safer version of the first pop_kw.
-           I am not sure in what it was supposed to be "safer",
-       but it was accepting functions as input.
-	   It might have been used a negligible amount of times.
-
-       sub_kw=strip_kw(kws,[sub],def1=val1,def2=val2)"""
-
-    res=[]
-    if callable(funclist): #if scalar, makes funclist a one element list
-        funclist=[funclist]    
-        
-    for func in funclist:
-        f=inspect.getfullargspec(func)
-        defaults=kwargs
-        l = len(f.defaults) if f.defaults is not None else 0
-        fdic=dict(zip(f.args[-l:],f.defaults))
-        res.append(pop_kw(kws,fdic,exclude=exclude))
-
-    if not split:  #merge dictionaries, don't ask me how
-        tmp = {}
-        [tmp.update(d) for d in res]
-        res=tmp
-
-    return res
-    
-def prep_kw(function, kwargs, strip = False):
-    """
-    return a dictionary only of `kwargs` pertaining to `function`.
-    Arguments can be stripped from kwargs as they are used, if strip is set to True, otherwise kwargs is left unchanged.
-    This can be useful to check against extraneous args, e.g.:    
-    intended use (inside a function called with **kwargs):
-    
-    function (*args, **kwargs):
-    
-        kwargs = kwargs.copy() # this is copied to avoid modification as side effect, can be avoided if you don't need a final check, in that case, simply remove strip = True from subfunction calls
-
-        a = subfunction1(**prep_kw(function1, kwargs, strip=True))
-        b= subfunction2(**prep_kw(function2, kwargs, strip=True))
-        
-        if len(kwargs):  # check there are not unused keywords.
-            raise TypeError("invalid arguments in function.")
-    
-    see also https://stackoverflow.com/questions/26534134/python-pass-different-kwargs-to-multiple-functions
-    
-    There might be a problem with multiple-level nested functions, for example if instead of plt.plot there is a function which itself calls other functions which accept **kwargs."""
-    
-    if not strip:
-        kwargs = kwargs.copy()
-    kwlist = list(inspect.signature(function).parameters)
-    return {k: kwargs.pop(k) for k in dict(kwargs) if k in kwlist}
     
 def print_tree(tree, depth = 0, maxlen = None):
     """print dictionary as tree, recursively calling itself,
@@ -206,7 +144,11 @@ def test_filterByKey():
 	print(filterByKey(data,eegKeys))
 
 def example_pop_kw():
-
+    """Test of `pop_kw` coupled with a function. This mechanism is extended and used in `dataIO.functions`
+    to implement functions `strip_kw` and `prep_kw` which use `inspect` to automatically handle function keywords.
+    `pop_kw` works with generic dictionaries."""
+    
+    
     def f1(arg,mes1='--'):
         print (arg,mes1)
     def f2(arg,mes2='--'):
@@ -236,11 +178,11 @@ def example_pop_kw():
     print('**')
     function('This is:',mes1='mes1!',mes2='mese2!')
 
-#from dataIO.dicts import pop_kw, strip_kw
+
 def test_pop_kw(function=pop_kw):#function = None):
 
     """run a set of dict stripping tests using a function with interface compatible with `pop_kw`.
-    uses pop_kw if function is not provided."""
+    uses pop_kw if function is not provided. This is implemented in dataIO.functions.prep_kw` and `.strip_kw`."""
 
     from inspect import signature
     
