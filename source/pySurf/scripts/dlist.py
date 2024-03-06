@@ -31,6 +31,7 @@ from pySurf.readers.instrumentReader import fitsWFS_reader
 # Functions operating on a dlist as Python list of Data2D objects.
 # Can be used equally on a Dlist object.
 
+
     
 def topoints(data,level=None):
     """convert a dlist to single set of points containing all data.
@@ -41,25 +42,25 @@ def topoints(data,level=None):
     return np.vstack(plist)
 
 def load_dlist(rfiles,reader=None,*args,**kwargs):
-    """Extracted from `plot_repeat`. Read a set of rfiles to a `dlist`.
-    readers and additional arguments can be passed as scalars or lists.
+    """Extracted from `plot_repeat`. Read a set of `rfiles` to a `dlist`.
+    readers and additional parameters (args or kwargs) can be passed as scalars or lists of same len as `rfiles`.
 
-    You can pass additional arguments to the reader in different ways:
-     - pass them individually, they will be used for all readers
-         load_dlist(.. ,option1='a',option2=1000)
-     - to have individual reader parameters pass them as dictionaries (a same number as rfiles),
-         load_dlist(.. ,{option1='a',option2=1000},{option1='b',option3='c'},..)
-         in this case reader must be explicitly passed (None is acceptable value for auto).
-
-    Example:
-        dlist=load_dlist(rfiles,reader=fitsWFS_reader,scale=(-1,-1,1),
-                units=['mm','mm','um'])
-
-        dlist2=load_dlist(rfiles,fitsWFS_reader,[{'scale':(-1,-1,1),
-                'units':['mm','mm','um']},{'scale':(1,1,-1),
-                'units':['mm','mm','um']},{'scale':(-1,-1,1),
-                'units':['mm','mm','$\mu$m']}])
+    example:
+        dlist=load_dlist(rfiles,reader=reader,scale=(-1,-1,1),
+            units=['mm','mm','um'])
+    
+        #This is new interface, modified from the previous (intended) interface 2024/03/06:
+        dlist2=load_dlist(rfiles,reader,scale=[(-1,-1,1),(1,1,-1),(-1,-1,1)],
+            units=[['mm','mm','um'],['mm','mm','um'],['mm','mm','$\mu$m']])
+        # or, equivalently:
+        # dlist2=load_dlist(rfiles,reader,**{'scale':[(-1,-1,1),(1,1,-1),(-1,-1,1)],
+        #     'units':[['mm','mm','um'],['mm','mm','um'],['mm','mm','$\mu$m']]})
+        
+        # see test_load_dlist
+    
     2019/04/08 made function general from plot_repeat, moved to dlist.
+    
+    TODO: implement vectorization of parameters directly in dlist or Superlist. 
     """
 
     # import pdb
@@ -140,6 +141,8 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
         
     #kwargs here is a list of dictionaries {option:value}, matching the readers
     #dlist=[Data2D(file=wf1,reader=r,**{**k, **a}) for wf1,r,k,a in zip(rfiles,reader,args,kwargs)]
+    import pdb
+    pdb.set_trace()
     dlist=Dlist([Data2D(file=wf1,reader=r,*a,**k) for wf1,r,a,k in zip(rfiles,reader,args,kwargs)])
     
     return dlist
@@ -148,11 +151,29 @@ def test_load_dlist(rfiles,reader=fitsWFS_reader):
 
     dlist=load_dlist(rfiles,reader=reader,scale=(-1,-1,1),
             units=['mm','mm','um'])
-
-    dlist2=load_dlist(rfiles,reader,[{'scale':(-1,-1,1),
-            'units':['mm','mm','um']},{'scale':(1,1,-1),
-            'units':['mm','mm','um']},{'scale':(-1,-1,1),
-            'units':['mm','mm','$\mu$m']}])
+    
+    # what are possible vectorization? a list of args can be made of any number of elements,
+    #   es.:
+    #   var |     scalar  |   vector
+    # nsigma|        3    |    [1,3,5]
+    # clim  |   [0,100]   |    [[0,10],[1,8]]
+    #
+    # for args there is no key, and each arg can be single or multiple, the difference between the
+    #   two cases depends on what is expected as input.
+    # for kwargs must be the same, as {'var':scalar|vector,'nsigma':scalar|vector,...}.
+    #
+    # N.B.: the different form [{'scale':(-1,-1,1),
+    #       'units':['mm','mm','um']},{'scale':(1,1,-1),
+    #       'units':['mm','mm','um']}]
+    #   cannot work, as this is not distinguishable from args.
+    
+    # dlist2=load_dlist(rfiles,reader,[{'scale':(-1,-1,1),
+    #         'units':['mm','mm','um']},{'scale':(1,1,-1),
+    #         'units':['mm','mm','um']},{'scale':(-1,-1,1),
+    #         'units':['mm','mm','$\mu$m']}])
+    dlist2=load_dlist(rfiles,reader,{'scale':[(-1,-1,1),(1,1,-1),(-1,-1,1)],
+            'units':[['mm','mm','um'],['mm','mm','um'],['mm','mm','$\mu$m']]})
+    
     return dlist,dlist2
 
 def plot_data_repeat(dlist,name="",num=None,*args,**kwargs):
