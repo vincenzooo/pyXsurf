@@ -1786,13 +1786,13 @@ def plot_slope_2D(wdata,x,y,scale=(1.,1.,1.),vrange=None,srange=None,filter=Fals
     plt.imshow(slopeaz,extent=(span(x)[0],span(x)[1],span(y)[0],span(y)[1]),aspect='auto',origin='lower')
     plt.colorbar().set_label('arcsec', rotation=270)
     plt.clim(psrange)
-    plt.title('Azimuthal slope')
+    plt.title('Horizontal slope')
 
     ax3=plt.subplot(223,sharex=ax1)
     plt.imshow(slopeax,extent=(span(x)[0],span(x)[1],span(y)[0],span(y)[1]),aspect='auto',origin='lower')
     plt.colorbar().set_label('arcsec', rotation=270)
     plt.clim(psrange)
-    plt.title('Axial slope')
+    plt.title('Verticall slope')
 
     ax4=plt.subplot(224)
     #histogram

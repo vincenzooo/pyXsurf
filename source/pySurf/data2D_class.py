@@ -374,6 +374,7 @@ class Data2D(object):  # np.ndarrays
         units = self.units if self.units is not None else ["","",""]
         nsigma0 = 1  # default number of stddev for color scale
         # import pdb
+        # pdb.set_trace()
         # to change the default behavior
         if "stats" in kwargs:
             stats = kwargs.pop("stats")
