@@ -242,13 +242,13 @@ def vectorize(arg, n, force_if_n=False):
     
     """
     
-    if (np.size(arg) != n) or force_if_n:        
+    if (real_len(arg) != n) or force_if_n:        
         try:
             arg=[arg.deepcopy() for _ in range(n)]
-        except AttributeError:  # fails e.g. if tuple which don't have copy method
+        except AttributeError:  #fails e.g. if tuple which don't have copy method
             arg=[arg for _ in range(n)]  
     else:
-        if (n == 1) and len(np.shape(arg)) == 0: # distinguish between [1] and 1  
+        if (n == 1) and len(np.shape(arg)) == 0:
             arg = [arg]    
     return arg
 
@@ -276,6 +276,8 @@ def test_vectorize():
     
     assert vectorize([[1,2],[3,4]],2) == [[1,2],[3,4]]
     assert vectorize([[1,2],[3,4]],2,True) == [[[1,2],[3,4]],[[1,2],[3,4]]]
+    
+    print('All tests passed.')
 
 def make_raster(*vectors, as_axis = False, extend = True):
     """Create a raster grid on the base of a list of vectors.

@@ -65,12 +65,16 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
 
     # import pdb
     # pdb.set_trace()
+    # if reader is None:
+    #     #reader=auto_reader(rfiles[0])
+    #     reader = [auto_reader(r) for r in rfiles]
+        
+    # if np.size(reader) ==1:
+    #     reader=[reader]*len(rfiles)
+    
     if reader is None:
         #reader=auto_reader(rfiles[0])
         reader = [auto_reader(r) for r in rfiles]
-        
-    if np.size(reader) ==1:
-        reader=[reader]*len(rfiles)
         
     '''
     if kwargs : #passed explicit parameters for all readers
@@ -135,22 +139,26 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
     
     from dataIO import dicts
     kwargs = dicts.vectorize(kwargs,len(rfiles))
-    kwargs = [{'scale': (-1, -1, 1),'units': ['mm', 'mm', 'um']},
+    kwargs = [{'scale': (-1, -1, 1),'units': ['mm', 'mm', 'um']},     #correct result of vectorization
     {'scale': (1, 1, -1), 'units': ['mm', 'mm', 'um']},
     {'scale': (-1, -1, 1), 'units': ['mm', 'mm', '$\\mu$m']}]
     
     from dataIO import arrays
+    reader = arrays.vectorize(reader,len(rfiles))
     args = arrays.vectorize(args,len(rfiles))
         
     #kwargs here is a list of dictionaries {option:value}, matching the readers
     #dlist=[Data2D(file=wf1,reader=r,**{**k, **a}) for wf1,r,k,a in zip(rfiles,reader,args,kwargs)]
     # import pdb
     # pdb.set_trace()
-    # dlist=Dlist([Data2D(file=wf1,reader=r,*a,**k) for wf1,r,a,k in zip(rfiles,reader,args,kwargs)])
-    for wf1,r,a,k in zip(rfiles,reader,args,kwargs):
-        print("load %s with reader %s and args: %s, keywords:"%(os.path.basename(wf1),r,a),k)
-        print('-----------------------\n')
-    dlist = None
+    #dlist=Dlist([Data2D(file=wf1,reader=r,*a,**k) for wf1,r,a,k in zip(rfiles,reader,args,kwargs)])
+    
+    dlist=Dlist([Data2D(file=wf1,reader=r,*a,**k) for wf1,r,a,k in zip(rfiles,reader,args,kwargs)]) # OK
+    
+    # for wf1,r,a,k in zip(rfiles,reader,args,kwargs):
+    #     print("load %s with reader %s and args: %s, keywords:"%(os.path.basename(wf1),r,a),k)
+    #     print('-----------------------\n')
+    # dlist = None
     
     
     return dlist
