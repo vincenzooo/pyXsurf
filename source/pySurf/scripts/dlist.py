@@ -135,15 +135,23 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
     
     from dataIO import dicts
     kwargs = dicts.vectorize(kwargs,len(rfiles))
+    kwargs = [{'scale': (-1, -1, 1),'units': ['mm', 'mm', 'um']},
+    {'scale': (1, 1, -1), 'units': ['mm', 'mm', 'um']},
+    {'scale': (-1, -1, 1), 'units': ['mm', 'mm', '$\\mu$m']}]
     
     from dataIO import arrays
     args = arrays.vectorize(args,len(rfiles))
         
     #kwargs here is a list of dictionaries {option:value}, matching the readers
     #dlist=[Data2D(file=wf1,reader=r,**{**k, **a}) for wf1,r,k,a in zip(rfiles,reader,args,kwargs)]
-    import pdb
-    pdb.set_trace()
-    dlist=Dlist([Data2D(file=wf1,reader=r,*a,**k) for wf1,r,a,k in zip(rfiles,reader,args,kwargs)])
+    # import pdb
+    # pdb.set_trace()
+    # dlist=Dlist([Data2D(file=wf1,reader=r,*a,**k) for wf1,r,a,k in zip(rfiles,reader,args,kwargs)])
+    for wf1,r,a,k in zip(rfiles,reader,args,kwargs):
+        print("load %s with reader %s and args: %s, keywords:"%(os.path.basename(wf1),r,a),k)
+        print('-----------------------\n')
+    dlist = None
+    
     
     return dlist
 
@@ -171,8 +179,11 @@ def test_load_dlist(rfiles,reader=fitsWFS_reader):
     #         'units':['mm','mm','um']},{'scale':(1,1,-1),
     #         'units':['mm','mm','um']},{'scale':(-1,-1,1),
     #         'units':['mm','mm','$\mu$m']}])
-    dlist2=load_dlist(rfiles,reader,{'scale':[(-1,-1,1),(1,1,-1),(-1,-1,1)],
-            'units':[['mm','mm','um'],['mm','mm','um'],['mm','mm','$\mu$m']]})
+    # dlist2=load_dlist(rfiles,reader,{'scale':[(-1,-1,1),(1,1,-1),(-1,-1,1)],
+    #         'units':[['mm','mm','um'],['mm','mm','um'],['mm','mm','$\mu$m']]})
+    
+    dlist2=load_dlist(rfiles,reader, scale = [(-1,-1,1),(1,1,-1),(-1,-1,1)],
+            units=[['mm','mm','um'],['mm','mm','um'],['mm','mm','$\mu$m']])
     
     return dlist,dlist2
 
