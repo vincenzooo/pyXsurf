@@ -105,36 +105,177 @@ def split_on_indices(vector,indices,absolute=False):
 
     return result
 
-def vectorize(args, n):
-    """Vectorize a single array to length n, if not already.
-    
-    example:
+def compare_len(testval):
+    """Compare different methods related to  length of objects, useful for functions like `real_len`."""
+
+    testval = [ 1,
+    None,
+    [2],
+    [None],
+    [1,2],
+    [[1]],
+    [[1,2],[3,4]],
+    'aa',
+    ['aa'],
+    [1,2],
+    [[1,2]],       
+    ['abc','cde'],  
+    [['abc','cde']],
+    [],
+    np.array([[1,2]]),
+    np.array([1,2]),
+    [np.array([1,2]),np.array([3,4])]    
+    ]
+
+    for t in testval:
+        try:
+            s = np.size(t)
+        except TypeError:
+            s = '-'
+            
+        try:
+            sh = np.shape(t)
+        except TypeError:
+            sh = '-'
         
+        try:
+            l = len(t)
+        except TypeError:
+            l = '-'
+        
+        print(t,'|',s,sh,len(sh),l)
+        
+
+def real_len(x):
+    """Return the real length of an object, intended as the outer level number of elements (strings counts as single elements).
+    
+    assert real_len([1,2])  == 2
+    assert real_len([[1,2]] )== 1
+    assert real_len(1)    == 1
+    assert real_len([1])    == 1
+    assert real_len(None)  ==  1
+    assert real_len([None]) == 1
+    assert real_len('abc')           == 1
+    assert real_len(['abc'])          == 1
+    assert real_len(['abc','cde'])          == 2
+    assert real_len([['abc','cde']])          == 1
+    
+    assert real_len([1,2,3]) == 3
+    assert real_len([]) == 1
+    
+    assert real_len([[1,2],[3,4]]) == 2
+    
+    assert real_len(np.array([[1,2]]))== 1
+    assert real_len(np.array([1,2]))== 2
+    assert real_len([np.array([1,2]),np.array([3,4])])== 2
+    """
+    
+    if np.size(x)<=1:
+        return 1
+    
+    return np.shape(x)[0]
+
+    
+def test_real_len():
+    
+    assert real_len([1,2])  == 2
+    assert real_len([[1,2]] )== 1
+    assert real_len(1)    == 1
+    assert real_len([1])    == 1
+    assert real_len(None)  ==  1
+    assert real_len([None]) == 1
+    assert real_len('abc')           == 1
+    assert real_len(['abc'])          == 1
+    assert real_len(['abc','cde'])          == 2
+    assert real_len([['abc','cde']])          == 1
+    
+    assert real_len([1,2,3]) == 3
+    assert real_len([]) == 1
+    
+    assert real_len([[1,2],[3,4]]) == 2
+    
+    assert real_len(np.array([[1,2]]))== 1
+    assert real_len(np.array([1,2]))== 2
+    assert real_len([np.array([1,2]),np.array([3,4])])== 2
+    
+    print('all tests passed!')
+
+
+def vectorize(arg, n, force_if_n=False):
+    """Vectorize a single array `arg` to length `n`. Typically used for vectorization of arguments (e.g. `Dlist`).
+    
+    An example of usage is when 
+    
+    N.B.: There are two ambiguities which need to be solved:
+        1. n == len(arg)  (note that np.size is used instead of len to handle strings more correctly)
+            In this case it is not possible to understand if the arg provided is single or multiple value,
+            as this can be solved only understanding the expected input shape. 
+            e.g.: [1,2] for a two-element input, is 1 for the 1st and 2 for the 2nd, or needs to be replicated? 
+            By default `arg` is not replicated, the flag `force_if_n` overrides this behavior.
+            2. same problem in a more subtle way when n = 1 and arg is scalar, in this case you probably want to convert the scalar in a single-element list, to iterate over it. If a different need is ever found a flag will be added
+    
+    examples (see `test_vectorize`):
+        print(vectorize([1,2],3))  # [[1, 2], [1, 2], [1, 2]]
+        print(vectorize(1,3))      # [1, 1, 1]
+        print(vectorize(None,3))   # [None, None, None]
+        print(vectorize([None],3)) # [[None], [None], [None]]
+        print(vectorize([1],3))    # [[1], [1], [1]]
+        print(vectorize([[1,2]],3))  # [[[1, 2]], [[1, 2]], [[1, 2]]]
+        print(vectorize([1,2],2))   # [1, 2]
+        print(vectorize([1,2],2,True)) # [[1, 2], [1, 2]]
+        print(vectorize('abc',3))  # ['abc', 'abc', 'abc']
+        print(vectorize(['abc'],3)) #[['abc'], ['abc'], ['abc']]
+
+        print(vectorize(1,1))           # [1]
+        print(vectorize(1,1,True))      # [1]
+        print(vectorize([1],1))         # [1]
+        print(vectorize([1],1,True))    # [[1]]
         
     to vectorize function arguments:
     
         args = [vectorize(a) for a in args]
     
+    Note that force_if_n can be itself vectorized, e.g if this is passed together with a list of parameters and different behavior 
+        also want to be passed and used consistently.
+    
+        args = [vectorize(a,f) for a,f in zip(args,vectorize(force_flags))]
+    
     """
     
-    if args:
-        for a in args:
-            if (np.size(a) == 1):
-                args=[[] for i in range(n)]    
-            elif (len(a) != n):
-                args=[args for i in range(n)]  
+    if (np.size(arg) != n) or force_if_n:        
+        try:
+            arg=[arg.deepcopy() for _ in range(n)]
+        except AttributeError:  # fails e.g. if tuple which don't have copy method
+            arg=[arg for _ in range(n)]  
     else:
-        args=[args for i in range(n)] 
-        
-    return args
-
+        if (n == 1) and len(np.shape(arg)) == 0: # distinguish between [1] and 1  
+            arg = [arg]    
+    return arg
 
 
 def test_vectorize():
     
+    assert vectorize([1,2],3)  ==[[1, 2], [1, 2], [1, 2]]
+    assert vectorize(1,3)    ==[1, 1, 1]
+    assert vectorize(None,3)  ==[None, None, None]
+    assert vectorize([None],3) ==[[None], [None], [None]]
+    assert vectorize([1],3)    ==[[1], [1], [1]]
+    assert vectorize([[1,2]],3)== [[[1, 2]], [[1, 2]], [[1, 2]]]
+    assert vectorize([1,2],2)          == [1, 2]
+    assert vectorize([1,2],2,True)          == [[1, 2], [1, 2]]
+    assert vectorize('abc',3)           ==['abc', 'abc', 'abc']
+    assert vectorize(['abc'],3)          ==[['abc'], ['abc'], ['abc']]
+    assert vectorize(1,1)         ==   [1]
+    assert vectorize(1,1,True)           ==  [1]
+    assert vectorize([1],1)              ==   [1]
+    assert vectorize([1],1,True)           ==  [[1]]
+    
     assert vectorize([1,2,3], 2) == [[1,2,3],[1,2,3]]
     assert vectorize([], 3) == [[],[],[]]
-    assert vectorize([1,2,3], 3) == [[1,2,3],[1,2,3],[1,2,3]]
+    assert vectorize([1,2,3], 3, True) == [[1,2,3],[1,2,3],[1,2,3]]
+    
+    assert vectorize([[1,2],[3,4]],2) == [[1,2],[3,4]]
+    assert vectorize([[1,2],[3,4]],2,True) == [[[1,2],[3,4]],[[1,2],[3,4]]]
 
 def make_raster(*vectors, as_axis = False, extend = True):
     """Create a raster grid on the base of a list of vectors.
@@ -282,7 +423,7 @@ def test_is_nested_list():
 def is_iterable(obj):
     """ Check if an object is iterable.
     
-    Apparently there is no standard way of diung it in Python, so this function is created to introduce
+    Apparently there is no standard way of doing it in Python, so this function is created to introduce
     a consistent check. Note that this is the suggested way, as checkng an __iter__ method is not enough
     because it can be iterated by __get_items__"""
     
