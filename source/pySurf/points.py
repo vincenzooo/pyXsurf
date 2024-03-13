@@ -389,7 +389,7 @@ def matrix_to_points(data,xgrid,ygrid,transpose=False):
     return np.vstack([x.flatten(),y.flatten(),data.T.flatten()]).T
 
 
-def get_points(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,addaxis=False,scale=None,center=None,skip_header=None,delimiter=','):
+def get_points(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,addaxis=False,scale=None,center=None,skip_header=None,delimiter=',',*args,**kwargs):
     """
     Return a set of xyz points (N,3) from generic csv files in xyz or matrix format.
 
@@ -448,7 +448,7 @@ def get_points(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,addax
     else:
         skip=skip_header
 
-    mdata=np.genfromtxt(filename,skip_header=skip,delimiter=delimiter)
+    mdata=np.genfromtxt(filename,skip_header=skip,delimiter=delimiter,*args,**kwargs)
     if (matrix):
         if addaxis == True: addaxis = 'xy'
         
