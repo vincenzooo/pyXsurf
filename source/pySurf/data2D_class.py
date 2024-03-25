@@ -429,8 +429,10 @@ class Data2D(object):  # np.ndarrays
         """call data2D.rotate_data, which rotate array of an arbitrary angle in degrees in direction
         (from first to second axis)."""
         res = self.copy()
+        # FIXME: rotation doesn't work without conversion to points.
+        usepoints =  kwargs.pop("usepoints",True)
         res.data, res.x, res.y = rotate_data(
-            self.data, self.x, self.y, angle, *args, **kwargs
+            self.data, self.x, self.y, angle, usepoints=usepoints, *args, **kwargs
         )
         return res
 
@@ -529,7 +531,7 @@ class Data2D(object):  # np.ndarrays
     def crop(self, *args, **kwargs):
         """crop data making use of function data2D.crop_data, where data,x,y are taken from a"""
         res = self.copy()
-        res.data, res.x, res.y = crop_data(self.data, self.x, self.y, *args, **kwargs)
+        res.data, res.x, res.y = crop_data(res.data, res.x, res.y, *args, **kwargs)
         return res
 
     crop = update_docstring(crop, crop_data)
