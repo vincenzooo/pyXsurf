@@ -599,7 +599,8 @@ class Dlist(Superlist):
             axes = subplot_grid(len(self))[1]
         elif type == 'all':
             # overlap on same ax, useful for partial maps or profiles.
-            axes = [plt.figure()] * len(self) # three references to same axis 
+            fig, ax = plt.subplots(**prep_kw(plt.subplots,kwargs))
+            axes = [ax] * len(self) # three references to same axis 
         
         for ax,d in zip(axes,self):
             try:
