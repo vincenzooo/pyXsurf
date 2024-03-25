@@ -567,7 +567,7 @@ class Profile(object):  #np.ndarrays
         
         res = self.copy()
         if np.size(other) == 1:
-            if isinstance(other,self):  # scalar
+            if isinstance(other,self.__class__):  # scalar
                 sel = (self.y != 0) 
                 res = self.copy()
                 res.y[sel] = other*(1./self.y[sel])
