@@ -250,9 +250,9 @@ class Profile(object):  #np.ndarrays
             x=None
         else:
             if y is not None:
-                y=np.array(y) #onvert to array if not
-            
-        #pdb.set_trace()
+                y=np.array(y) #convert to array if not
+        # import pdb
+        # pdb.set_trace()
         self.file=file #initialized to None if not provided
         if file is not None:
             assert y is None
@@ -306,7 +306,7 @@ class Profile(object):  #np.ndarrays
                     x=np.arange(np.size(y))  
 
     #if data is not None:
-        self.x, self.y = x, y
+        self.x, self.y = np.array(x), np.array(y)
         
         self.x,self.y=register_profile(self.x,self.y,scale=scale,*args,**kwargs) # se load_profile calls register, this
         #goes indented.
@@ -637,7 +637,7 @@ class Profile(object):  #np.ndarrays
         if isinstance(other,self.__class__):
             #res = merge_profiles([[self.x,self.y],[other.x,other.y]],*args,**kwargs)
             res = merge_profile(self.x,self.y,other.x,other.y,*args,**kwargs)
-            res = Profile(*res,units=self.units,name=self.name + " // " + other.name)
+            res = self.__class__(*res,units=self.units,name=self.name + " // " + other.name)
         else:
             raise ValueError("Unrecognized type in merge")
         return res
@@ -1039,6 +1039,17 @@ class Plist(Superlist):
     
     """ N.B.: TODO: could use linecollections for plotting https://matplotlib.org/stable/api/collections_api.html#matplotlib.collections.LineCollection
     """
+    
+    def merge(self, mode='raw',*args,**kwargs):
+        res = self[0]
+        for p in self[1:]:
+            res = res.merge(p,*args,**kwargs)
+        return res
+    
+    def save(self,file, type= 'vstack', *args,**kwargs):
+        """save stacked or on separate files"""
+        pp = self.merge()
+        pp.save(file, *args,**kwargs)
     
 def test_load_plist(rfiles = None):
 
