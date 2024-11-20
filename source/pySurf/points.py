@@ -285,9 +285,11 @@ def points_find_hull(pts):
     plt.plot(hull[:,0], hull[:,1], 'r--', lw=2)."""
 
     from scipy.spatial import ConvexHull
-    if pts.shape[1] == 2:
+    
+    pts = np.array(pts)
+    if np.shape(pts)[1] == 2:
         xypts = pts
-    elif pts.shape[1] == 3:
+    elif np.shape(pts)[1] == 3:
         xypts=pts[~np.isnan(pts[:,2]),:2]
     else:
         raise ValueError("wrong shape for points in points_find_hull")
