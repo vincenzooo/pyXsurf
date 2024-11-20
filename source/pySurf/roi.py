@@ -1,4 +1,5 @@
 # 2020/10/25 moved here from dataIO, not sure why it was there.
+import numpy as np
 from dataIO.span import span
 
 def external_roi_rect(points):
@@ -8,7 +9,6 @@ def external_roi_rect(points):
     Points are passed as N x 2 array, returns two couples (x0,x1) (y0,y1)
     """
     return span(points,axis=0)
-
 
 def in_hull(p, hull):
     """
@@ -25,3 +25,4 @@ def in_hull(p, hull):
 
     return hull.find_simplex(p)>=0
     
+
