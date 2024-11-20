@@ -562,6 +562,32 @@ class Data2D(object):  # np.ndarrays
 
     resample = update_docstring(resample, resample_data)
 
+    def divide_and_crop(self, n, m):
+        """Divide data in n x m equal size data. Data, returned as Dlsit, are ordered as coordinates."""
+        
+        xmin,xmax = span(self.x)
+        ymin,ymax = span(self.y)
+        
+        # Width and height of each sub-rectangle
+        x_step = (xmax - xmin) / n
+        y_step = (ymax - ymin) / m
+        
+        dl = []
+        # Nested loops to iterate over each sub-rectangle
+        for j in range(m):
+            for i in range(n):
+                # Calculating the bounds for this sub-rectangle
+                x_start = xmin + i * x_step
+                x_end = xmin + (i + 1) * x_step
+                y_start = ymax - (j + 1) * y_step
+                y_end = ymax - j * y_step
+                dd = self.crop((x_start, x_end), (y_start, y_end))
+                dd.name = fn_add_subfix(dd.name, ' (%i,%i)'%(i,j))
+                # Call the crop function with the calculated bounds
+                dl.append(dd)
+                
+        return Dlist(dl)
+
     def add_markers(self, *args, **kwargs):
         #f = plt.figure()
         self.plot()
@@ -806,7 +832,7 @@ class PSD2D(Data2D):
     
     
     def avgpsd(self, *args, **kwargs):
-        """avg, returns f and p. Can use data2D.projection keywords `span` and `expand` to return PSD ranges."""
+        """avg, returns a PSD (linear) object. Can use data2D.projection keywords `span` and `expand` to return PSD ranges."""
         
         #return Profile(self.y, projection(self.data, axis=1, *args, **kwargs), units = [self.units[1], self.units[2]]) 
         res = super().projection(axis = 1, *args, **kwargs)
