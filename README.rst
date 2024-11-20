@@ -54,7 +54,9 @@ works without errors, you can now import and use the different modules (see desc
 
 .. code:: python
 
-    from pySurf.data2D import data2D
+    from pySurf.data2D_class import Data2D
+
+or try the library in a Jupyter notebook, you can start from the example `pySurf_demo.ipynb`, in the install folder.
 
 In addition to the `official documentation <https://pyxsurf.readthedocs.io>`_ , you can find examples and data in a ``test`` subfolder of each
 module and at the end of module files. Functions are usually documented with docstrings (but these might be in the wrong place, please be patient and look well in the code). 
