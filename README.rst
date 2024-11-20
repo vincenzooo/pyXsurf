@@ -44,7 +44,7 @@ If instead you plan to modify pyXsurf code, or want a non-permanente installatio
 Uninstalling
 ------------
 
-Code can be uninstalled calling ``pip uninstall pyXsurf`` from a command prompt, or from source code folder calling directly the setup file ``python setup.py develop  -u`` (if you installed as developer, deinstallation is expected to work only with most recent pip versions, at least >=19.1.1, otherwise it should be enough to delete the folder).
+Code can be uninstalled calling ``pip uninstall pyXsurf`` from a command prompt. N.B.: previous version can also be uninstalled from source code folder calling directly the setup file ``python setup.py develop  -u``, this is no more advised (if you installed as developer, deinstallation is expected to work only with most recent pip versions, at least >=19.1.1, otherwise it should be enough to delete the folder).
 
 How to use
 ==========
