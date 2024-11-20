@@ -32,8 +32,7 @@ You can get the most updated version by cloning the source code from github and 
 
 To do this:
 
-1. use the ``Code`` button at top of page, or clone from command-lineç
-``git clone https://github.com/vincenzooo/pyXSurf.git``. 
+1. use the ``Code`` button at top of page, or clone from command-line: ``git clone https://github.com/vincenzooo/pyXSurf.git``. 
 
 2. move to the folder with the code and call from command line ``pip install .`` (equivalent to ``python setup.py install``). 
 This will perform a "regular" installation  (meaning that the code is copied to ``site-packages`` folders, which holds all installed Python libraries, and made accessible to your system).
