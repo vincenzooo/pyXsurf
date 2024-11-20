@@ -251,6 +251,7 @@ class Profile(object):  #np.ndarrays
         else:
             if y is not None:
                 y=np.array(y) #convert to array if not
+                x=np.array(x)
         # import pdb
         # pdb.set_trace()
         self.file=file #initialized to None if not provided
@@ -306,9 +307,10 @@ class Profile(object):  #np.ndarrays
                     x=np.arange(np.size(y))  
 
     #if data is not None:
-        self.x, self.y = np.array(x), np.array(y)
+        # self.x, self.y = np.array(x), np.array(y)
         
-        self.x,self.y=register_profile(self.x,self.y,scale=scale,*args,**kwargs) # se load_profile calls register, this
+        breakpoint()
+        self.x,self.y=register_profile(np.array(x), np.array(y),scale=scale,*args,**kwargs) # se load_profile calls register, this
         #goes indented.
 
         if np.size(units) == 1:
