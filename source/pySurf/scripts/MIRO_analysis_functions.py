@@ -196,6 +196,7 @@ def mft_psd(files,outfolder=None,rmsthr=None,psdrange=None,frange=None):
     """read MFT file. Remove nan frame.
     PSD of data after individual line leveling along y.
     return list of Data2D objects.
+    TODO: replace with Plist.
     If outfolder is given, output files are genearted, adding _MFT subfix to each file name.
         This is needed to avoid name conflicts, data related to same sample are saved in same folder,
         even if instruments differ."""
@@ -231,7 +232,7 @@ def mft_psd(files,outfolder=None,rmsthr=None,psdrange=None,frange=None):
             plt.savefig(os.path.join(outfolder,fn_add_subfix(f,'_MFT_psd2d','.png',strip=True)))        
 
         # 1D PSD
-        fs,ps = p2.avgpsd()
+        fs,ps = p2.avgpsd()()
         plt.figure(3)
         plt.clf()
         plot_psd(fs,ps,units=p2.units)
@@ -534,7 +535,7 @@ def plot_all_psds(pathlabels,outfolder=None,subfix='_psd',xrange=None,yrange=Non
         if fs[0] == 0:
             fs = fs[1:]
             ps = ps[1:]
-        rms = p[1:].sum()/span(x,1) # this is the correct way to obtain rms, see test_psd_normalization (note that none of the formulas is suitable for non-equally spaced values).
+        rms = ps[1:].sum()/(fs[1]-fs[0]) #span(x,1) # this is the correct way to obtain rms, see test_psd_normalization (note that none of the formulas is suitable for non-equally spaced values).
         
         print (os.path.basename(d),l,' : ',rms)
         plot_psd(fs,ps,label=l+', rms = %6.2f nm'%rms,units=['$\mu$m','$\mu$m','nm'])
