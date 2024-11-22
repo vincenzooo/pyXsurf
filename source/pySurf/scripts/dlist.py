@@ -76,6 +76,8 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
         #reader=auto_reader(rfiles[0])
         reader = [auto_reader(r) for r in rfiles]
         
+    if len(np.shape(reader)) == 0: #vectorize #np.size(reader) == 1:
+        reader=[reader]*len(rfiles)
     '''
     if kwargs : #passed explicit parameters for all readers
         pdb.set_trace()
@@ -87,7 +89,7 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
             if np.size(args) != len(rfiles):
                 raise ValueError
     '''
-    #pdb.set_trace()
+    
     '''
     if kwargs : #passed explicit parameters for each reader
         # Note, there is ambiguity when rfiles and a kwargs value have same
@@ -639,7 +641,8 @@ class Dlist(Superlist):
             axes = subplot_grid(len(self))[1]
         elif type == 'all':
             # overlap on same ax, useful for partial maps or profiles.
-            axes = [plt.figure()] * len(self) # three references to same axis 
+            fig, ax = plt.subplots(**prep_kw(plt.subplots,kwargs))
+            axes = [ax] * len(self) # three references to same axis 
         
         for ax,d in zip(axes,self):
             try:

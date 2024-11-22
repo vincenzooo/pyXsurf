@@ -32,8 +32,7 @@ You can get the most updated version by cloning the source code from github and 
 
 To do this:
 
-1. use the ``Code`` button at top of page, or clone from command-lineç
-``git clone https://github.com/vincenzooo/pyXSurf.git``. 
+1. use the ``Code`` button at top of page, or clone from command-line: ``git clone https://github.com/vincenzooo/pyXSurf.git``. 
 
 2. move to the folder with the code and call from command line ``pip install .`` (equivalent to ``python setup.py install``). 
 This will perform a "regular" installation  (meaning that the code is copied to ``site-packages`` folders, which holds all installed Python libraries, and made accessible to your system).
@@ -44,7 +43,7 @@ If instead you plan to modify pyXsurf code, or want a non-permanente installatio
 Uninstalling
 ------------
 
-Code can be uninstalled calling ``pip uninstall pyXsurf`` from a command prompt, or from source code folder calling directly the setup file ``python setup.py develop  -u`` (if you installed as developer, deinstallation is expected to work only with most recent pip versions, at least >=19.1.1, otherwise it should be enough to delete the folder).
+Code can be uninstalled calling ``pip uninstall pyXsurf`` from a command prompt. N.B.: previous version can also be uninstalled from source code folder calling directly the setup file ``python setup.py develop  -u``, this is no more advised (if you installed as developer, deinstallation is expected to work only with most recent pip versions, at least >=19.1.1, otherwise it should be enough to delete the folder).
 
 How to use
 ==========
@@ -54,7 +53,9 @@ works without errors, you can now import and use the different modules (see desc
 
 .. code:: python
 
-    from pySurf.data2D import data2D
+    from pySurf.data2D_class import Data2D
+
+or try the library in a Jupyter notebook, you can start from the example `pySurf_demo.ipynb`, in the install folder.
 
 In addition to the `official documentation <https://pyxsurf.readthedocs.io>`_ , you can find examples and data in a ``test`` subfolder of each
 module and at the end of module files. Functions are usually documented with docstrings (but these might be in the wrong place, please be patient and look well in the code). 

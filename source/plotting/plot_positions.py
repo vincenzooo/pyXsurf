@@ -20,18 +20,29 @@ def plot_poly(v,ls='',ms=''):
     #plot lines
     return plt.plot(mh[:,0],mh[:,1],ls)[0]
 '''
-    
+ 
+import numpy as np
+
 def plot_poly(v,*args,**kwargs):
     """plot a polygon defined by a list of vertices `v` as coordinate couples.
-    Just a thin wrapper around `plt.plot`, it just accepts points in transpose form and adds a copy of first point at the."""
+    
+    Just a thin wrapper around `plt.plot`, it just accepts points in transpose form and adds a copy of first point at the end.
+   
+    Accept all matplotlib keywords, e.g.;
+        hatch = '/',
+        facecolor = 'none'
+        edgecolor = 'black'
+        
+    for line-filled black shape. The default is a filled shape with matplotlib next color (TODO: change it to empty shape with matplotlib color for lines). The three parameters in the example probabily need all to be set for hatched shapes. 
+    """
     
     v=np.array(v)
     # duplicate first point at the end: 
     v=np.vstack([v,v[0,:]]) 
     # plt.plot return a list of one element
     
-    #plot lines
-    return plt.plot(*v.T,*args,**kwargs)
+    # plot lines
+    return plt.fill(*v.T,*args,**kwargs) # plt.plot(*v.T,*args,**kwargs)
 
 def plot_rect(c1,c2,*args,**kwargs):
     """plot a polygon defined by a 2 element list with coordinates of opposite corners.

@@ -5,6 +5,31 @@ import os
 import warnings
 warnings.filterwarnings("error", category=np.VisibleDeprecationWarning) 
 
+def files_with_ext(base_folder, folder_glob_pattern= "", file_extension=".*"):
+    """
+    Find files with a given extension within folders matching a glob pattern.
+
+    :param base_folder: The base directory to start the search from.
+    :param folder_glob_pattern: The glob pattern to match folders.
+    :param file_extension: The extension of the files to find. Pass empty string for folders or files with no extension.
+    :return: A list of paths to files matching the given extension in folders matching the glob pattern.
+    """
+    from pathlib import Path
+
+    # Define the base path to start searching from
+    base_path = Path(base_folder)
+
+    # Initialize a list to hold the matched file paths
+    matched_files = []
+
+    # Find all folders matching the glob pattern
+    for folder in base_path.glob(folder_glob_pattern):
+        if folder.is_dir():  # Ensure the matched path is a directory
+            # Use rglob to find all files with the given extension in the current folder and its subfolders
+            matched_files.extend(str(f) for f in folder.rglob(f'*{file_extension}'))
+
+    return matched_files
+
 def read_blocks(filename,delimiter = '\n\n', comment = None,*args,**kwargs):
     """Read a file containing blocks of numerical data separated by a white line.
     
@@ -37,19 +62,18 @@ def read_blocks(filename,delimiter = '\n\n', comment = None,*args,**kwargs):
 
     return pList
     
-    
-def print_results(a, title):
-    '''pass result and descriptive title for a test.'''
-    
-    print('\n====== ',title, ' ======\n')
-    print('%i blocks read'%len(a))
-    print('block shapes: ',[aa.shape for aa in a])
-    print('block contents: ')
-    for i,aa in enumerate(a):
-        print('block #%i:\n'%(i+1),'[%s\n..\n..\n%s]\n'%(','.join(map(str,aa[:3])),','.join(map(str,aa[-2:]))))
-    return a
-    
 def test_read_blocks(filename=None):
+    
+    def print_results(a, title):
+        '''pass result and descriptive title for a test.'''
+        
+        print('\n====== ',title, ' ======\n')
+        print('%i blocks read'%len(a))
+        print('block shapes: ',[aa.shape for aa in a])
+        print('block contents: ')
+        for i,aa in enumerate(a):
+            print('block #%i:\n'%(i+1),'[%s\n..\n..\n%s]\n'%(','.join(map(str,aa[:3])),','.join(map(str,aa[-2:]))))
+        return a
     
     #infolder = r'C:\Users\kovor\Documents\python\pyXTel\source\pyProfile\test\input_data\'
     
