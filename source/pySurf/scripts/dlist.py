@@ -68,7 +68,7 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
         #reader=auto_reader(rfiles[0])
         reader = [auto_reader(r) for r in rfiles]
         
-    if np.size(reader) ==1:
+    if len(np.shape(reader)) == 0: #vectorize #np.size(reader) == 1:
         reader=[reader]*len(rfiles)
         
     '''
