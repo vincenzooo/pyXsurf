@@ -242,11 +242,25 @@ def vectorize(arg, n, force_if_n=False):
     
     """
     
+# <<<<<<< HEAD
     if (real_len(arg) != n) or force_if_n:        
         try:
             arg=[arg.deepcopy() for _ in range(n)]
         except AttributeError:  #fails e.g. if tuple which don't have copy method
             arg=[arg for _ in range(n)]  
+# =======
+#     #FIXME: this is still not a reliable mechanism, see extended tests below.
+#     # in other cases used len(np.shape), maybe works better, e.g.:
+#     # if len(np.shape(reader)) == 0: #vectorize #np.size(reader) == 1:
+#     # reader=[reader]*len(rfiles)
+    
+#     if args:
+#         for a in args:
+#             if (np.size(a) == 1):
+#                 args=[[] for i in range(n)]    
+#             elif (len(a) != n):
+#                 args=[args for i in range(n)]  
+# >>>>>>> 9984c47
     else:
         if (n == 1) and len(np.shape(arg)) == 0:
             arg = [arg]    
@@ -272,12 +286,50 @@ def test_vectorize():
     
     assert vectorize([1,2,3], 2) == [[1,2,3],[1,2,3]]
     assert vectorize([], 3) == [[],[],[]]
+
+    # <<<<<<< HEAD
     assert vectorize([1,2,3], 3, True) == [[1,2,3],[1,2,3],[1,2,3]]
     
     assert vectorize([[1,2],[3,4]],2) == [[1,2],[3,4]]
     assert vectorize([[1,2],[3,4]],2,True) == [[[1,2],[3,4]],[[1,2],[3,4]]]
     
     print('All tests passed.')
+    # =======
+    assert vectorize([1,2,3], 3) == [[1,2,3],[1,2,3],[1,2,3]]
+    
+    #extended test
+    a = []
+    b = 5
+    c = [3]
+    
+    print("(a,3) --> ",vectorize(a,3))
+    print("(a,1) --> ",vectorize(a,1))
+    print("(b,3) --> ",vectorize(b,3))
+    print("(b,1) --> ",vectorize(b,1))
+    print("(c,3) --> ",vectorize(c,3))
+    print("(c,1) --> ",vectorize(c,1))
+
+    b = 'cane'
+    c = ['cane']
+    
+    print("(b,3) --> ",vectorize(b,3))
+    print("(b,1) --> ",vectorize(b,1))
+    print("(c,3) --> ",vectorize(c,3))
+    print("(c,1) --> ",vectorize(c,1))
+    # >>>>>>> 9984c47
+
+
+def inspect_vector(obj):
+    """Print a set of dimensional information about the object.
+    
+    The returned information should be useful to discriminate between different lengths, dimensions and rank.
+    
+    """
+
+    print("len: ",len(obj))
+    print("np.size: ",np.size(obj))
+    print("np.shape: ",np.shape(obj))
+    print("len of shape: ",len(np.shape(obj)))
 
 def make_raster(*vectors, as_axis = False, extend = True):
     """Create a raster grid on the base of a list of vectors.

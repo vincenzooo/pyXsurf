@@ -285,9 +285,11 @@ def points_find_hull(pts):
     plt.plot(hull[:,0], hull[:,1], 'r--', lw=2)."""
 
     from scipy.spatial import ConvexHull
-    if pts.shape[1] == 2:
+    
+    pts = np.array(pts)
+    if np.shape(pts)[1] == 2:
         xypts = pts
-    elif pts.shape[1] == 3:
+    elif np.shape(pts)[1] == 3:
         xypts=pts[~np.isnan(pts[:,2]),:2]
     else:
         raise ValueError("wrong shape for points in points_find_hull")
@@ -389,7 +391,7 @@ def matrix_to_points(data,xgrid,ygrid,transpose=False):
     return np.vstack([x.flatten(),y.flatten(),data.T.flatten()]).T
 
 
-def get_points(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,addaxis=False,scale=None,center=None,skip_header=None,delimiter=','):
+def get_points(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,addaxis=False,scale=None,center=None,skip_header=None,delimiter=',',*args,**kwargs):
     """
     Return a set of xyz points (N,3) from generic csv files in xyz or matrix format.
 
@@ -448,7 +450,7 @@ def get_points(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,addax
     else:
         skip=skip_header
 
-    mdata=np.genfromtxt(filename,skip_header=skip,delimiter=delimiter)
+    mdata=np.genfromtxt(filename,skip_header=skip,delimiter=delimiter,*args,**kwargs)
     if (matrix):
         if addaxis == True: addaxis = 'xy'
         

@@ -272,8 +272,9 @@ def plot_psd2d(f,p,x,prange=None,includezerofreq=False,units=None,linear = False
     if not linear:
         plt.yscale('log')
     plt.title('2D PSD')
+    kwargs['aspect']=kwargs.get('aspect','auto') # set defaults
     ax = plot_data(p,x,f,norm=LogNorm(vmin=prange[0],vmax=prange[1]),
-    units=cbunits,aspect='auto',*args,**kwargs)
+    units=cbunits,*args,**kwargs)
     plt.ylabel('freq. ('+cbunits[1]+')')
     #pdb.set_trace()
     cb =  plt.gca().images[-1].colorbar

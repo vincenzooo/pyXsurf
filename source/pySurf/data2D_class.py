@@ -430,8 +430,10 @@ class Data2D(object):  # np.ndarrays
         """call data2D.rotate_data, which rotate array of an arbitrary angle in degrees in direction
         (from first to second axis)."""
         res = self.copy()
+        # FIXME: rotation doesn't work without conversion to points.
+        usepoints =  kwargs.pop("usepoints",True)
         res.data, res.x, res.y = rotate_data(
-            self.data, self.x, self.y, angle, *args, **kwargs
+            self.data, self.x, self.y, angle, usepoints=usepoints, *args, **kwargs
         )
         return res
 
@@ -530,7 +532,7 @@ class Data2D(object):  # np.ndarrays
     def crop(self, *args, **kwargs):
         """crop data making use of function data2D.crop_data, where data,x,y are taken from a"""
         res = self.copy()
-        res.data, res.x, res.y = crop_data(self.data, self.x, self.y, *args, **kwargs)
+        res.data, res.x, res.y = crop_data(res.data, res.x, res.y, *args, **kwargs)
         return res
 
     crop = update_docstring(crop, crop_data)
@@ -560,6 +562,32 @@ class Data2D(object):  # np.ndarrays
         return res
 
     resample = update_docstring(resample, resample_data)
+
+    def divide_and_crop(self, n, m):
+        """Divide data in n x m equal size data. Data, returned as Dlsit, are ordered as coordinates."""
+        
+        xmin,xmax = span(self.x)
+        ymin,ymax = span(self.y)
+        
+        # Width and height of each sub-rectangle
+        x_step = (xmax - xmin) / n
+        y_step = (ymax - ymin) / m
+        
+        dl = []
+        # Nested loops to iterate over each sub-rectangle
+        for j in range(m):
+            for i in range(n):
+                # Calculating the bounds for this sub-rectangle
+                x_start = xmin + i * x_step
+                x_end = xmin + (i + 1) * x_step
+                y_start = ymax - (j + 1) * y_step
+                y_end = ymax - j * y_step
+                dd = self.crop((x_start, x_end), (y_start, y_end))
+                dd.name = fn_add_subfix(dd.name, ' (%i,%i)'%(i,j))
+                # Call the crop function with the calculated bounds
+                dl.append(dd)
+                
+        return Dlist(dl)
 
     def add_markers(self, *args, **kwargs):
         #f = plt.figure()
@@ -805,7 +833,7 @@ class PSD2D(Data2D):
     
     
     def avgpsd(self, *args, **kwargs):
-        """avg, returns f and p. Can use data2D.projection keywords `span` and `expand` to return PSD ranges."""
+        """avg, returns a PSD (linear) object. Can use data2D.projection keywords `span` and `expand` to return PSD ranges."""
         
         #return Profile(self.y, projection(self.data, axis=1, *args, **kwargs), units = [self.units[1], self.units[2]]) 
         res = super().projection(axis = 1, *args, **kwargs)
