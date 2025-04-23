@@ -98,7 +98,8 @@ import inspect  # to use with importing docstring
 from dataIO.span import span
 from dataIO.superlist import Superlist
 from dataIO.arrays import split_blocks, split_on_indices
-from dataIO.functions import update_docstring
+#from dataIO.functions import update_docstring
+from dataIO.functions import append_doc_from
 
 from pyProfile.profile import crop_profile
 from pyProfile.profile import level_profile
@@ -114,26 +115,6 @@ from pyProfile.profile import save_profile
 from pyProfile import profile   # functions passed to update_docstring will be from here
 from pyProfile.psd import plot_psd
 from pyProfile.psd import psd_units
-
-'''
-def update_docstring(func,source):
-    """given a current function and a source function, update current function docstring
-     appending signature and docstring of source.
-
-     It provides a decorator @update_docstring(source) update the decorated
-       function docstring. User should take care to create docstring of decorated function
-       only as preamble to source docstrings, e.g.:
-       this is func function, derived from source function by modifying the usage of parameter foo.
-       parameter foo is changed of sign."""
-    doc0="" if func.__doc__ is None else func.__doc__
-    func.__doc__='\n'.join([doc0,source.__name__+str(inspect.signature(source)),source.__doc__])
-    return func
-
-def doc_from(source):
-    """intent is to use partial to obtain a decorator from update_docstring.
-    not sure it is the right way."""
-    partial(update_docstring,func=func)
-'''
 
 def read_xyz(filename,*args,**kwargs):
     """temptative routine to read xyz files.
@@ -395,7 +376,7 @@ class Profile(object):  #np.ndarrays
         
         #pdb.set_trace()
         
-        if isinstance(other,self):
+        if isinstance(other,self.__class__):
             res = subtract_profiles(*self(),*other(),*args,**kwargs)
             res = self.__class__(*res,units=self.units,name=self.name + " - " + other.name)
         else:
@@ -695,17 +676,16 @@ class Profile(object):  #np.ndarrays
         plt.title(title)
         
         return res
-        
-    plot=update_docstring(plot,plt.plot)
 
-
+    @append_doc_from(np.genfromtxt)
     def load(self,filename,*args,**kwargs):
         """A simple file loader using np.genfromtxt.
         Load columns from file in self.x and self.y."""
         #pdb.set_trace()
         self.x,self.y = np.genfromtxt(filename,unpack=True,*args,**kwargs)
-    load=update_docstring(load,np.genfromtxt)
+    #load=update_docstring(load,np.genfromtxt)
 
+    @append_doc_from(save_profile)
     def save(self,filename,*args,**kwargs):
         """Save data using `pyProfile.profile.save_profile`."""
         
@@ -714,26 +694,16 @@ class Profile(object):  #np.ndarrays
         h = kwargs.pop('header',delimiter.join(self.units) if self.units else None) 
         res = save_profile(filename,self.x,self.y,header = h,*args,**kwargs)
         return res
-    save.__doc__=save_profile.__doc__
+    #save.__doc__=save_profile.__doc__
     
-
+    @append_doc_from(register_profile)
     def register(self,filename,*args,**kwargs):
         """Use pyProfile.profile.register_profile to rescale."""
         #pdb.set_trace()
         self.x,self.y = register_profile(x,y,*args,**kwargs)
     register=update_docstring(register,register_profile)
 
-    '''
-    from functools import update_wrapper
-    #@update_wrapper(rotate_data)  #this doesn't work as I would like
-    def rotate(self,angle,*args,**kwargs):
-        """call data2D.rotate_data, which rotate array of an arbitrary angle in degrees in direction
-        (from first to second axis)."""
-        res = self.copy()
-        res.data,res.x,res.y=rotate_data(self.data,self.x,self.y,angle,*args,**kwargs)
-        return res
-    rotate=update_docstring(rotate,rotate_data)
-    '''
+
 
     '''
     def apply_to_data(self,func,*args,**kwargs):
@@ -875,7 +845,7 @@ class Profile(object):  #np.ndarrays
         return Data2D(*sax,units=[self.units[0],self.units[1],'arcsec'],name=self.name + ' xslope'),Data2D(*say,units=[self.units[0],self.units[1],'arcsec'],name=self.name + ' yslope')
     slope=update_docstring(slope,slope_2D)
     '''
-
+plot=update_docstring(plot,plt.plot)
 #from pySurf.psd2d import psd2d,plot_psd2d
 
         
