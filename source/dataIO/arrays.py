@@ -233,12 +233,12 @@ def vectorize(arg, n, force_if_n=False):
         
     to vectorize function arguments:
     
-        args = [vectorize(a) for a in args]
+        arg = [vectorize(a) for a in arg]
     
     Note that force_if_n can be itself vectorized, e.g if this is passed together with a list of parameters and different behavior 
         also want to be passed and used consistently.
     
-        args = [vectorize(a,f) for a,f in zip(args,vectorize(force_flags))]
+        arg = [vectorize(a,f) for a,f in zip(arg,vectorize(force_flags))]
     
     """
     
@@ -254,16 +254,16 @@ def vectorize(arg, n, force_if_n=False):
 #     # if len(np.shape(reader)) == 0: #vectorize #np.size(reader) == 1:
 #     # reader=[reader]*len(rfiles)
     
-#     if args:
-#         for a in args:
+#     if arg:
+#         for a in arg:
 #             if (np.size(a) == 1):
-#                 args=[[] for i in range(n)]    
+#                 arg=[[] for i in range(n)]    
 #             elif (len(a) != n):
-#                 args=[args for i in range(n)]  
-# >>>>>>> 9984c47
-    else:
-        if (n == 1) and len(np.shape(arg)) == 0:
-            arg = [arg]    
+#                 arg=[arg for i in range(n)]  
+# # >>>>>>> 9984c47
+#     else:
+#         if (n == 1) and len(np.shape(arg)) == 0:
+#             arg = [arg]    
     return arg
 
 

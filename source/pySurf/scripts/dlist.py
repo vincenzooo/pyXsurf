@@ -75,7 +75,8 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
     if reader is None:
         #reader=auto_reader(rfiles[0])
         reader = [auto_reader(r) for r in rfiles]
-        
+    
+    #FIXME: qui implemento alla buona e funziona, dovrebbe usare vectorize per maggiore pulizia
     if len(np.shape(reader)) == 0: #vectorize #np.size(reader) == 1:
         reader=[reader]*len(rfiles)
     '''
@@ -141,9 +142,9 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
     
     from dataIO import dicts
     kwargs = dicts.vectorize(kwargs,len(rfiles))
-    kwargs = [{'scale': (-1, -1, 1),'units': ['mm', 'mm', 'um']},     #correct result of vectorization
-    {'scale': (1, 1, -1), 'units': ['mm', 'mm', 'um']},
-    {'scale': (-1, -1, 1), 'units': ['mm', 'mm', '$\\mu$m']}]
+    # kwargs = [{'scale': (-1, -1, 1),'units': ['mm', 'mm', 'um']},     #correct result of vectorization
+    # {'scale': (1, 1, -1), 'units': ['mm', 'mm', 'um']},
+    # {'scale': (-1, -1, 1), 'units': ['mm', 'mm', '$\\mu$m']}]
     
     from dataIO import arrays
     reader = arrays.vectorize(reader,len(rfiles))
