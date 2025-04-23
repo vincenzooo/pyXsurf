@@ -153,8 +153,9 @@ def plot_rms_power(f,p,x=None,rmsrange=None,ax2f=None,units=None,*args,**kwargs)
 
     #plt.title('Total rms power=%6.3g'%(np.sqrt((rms**2).sum()))+((" "+units[2]) if units[2] is not None else ""))  #wrong math, forgets average?
     plt.title('Total rms power=%6.3g'%(np.sqrt(np.nansum(rms**2)/(np.sum(~np.isnan(rms)))))+((" "+units[2]) if units[2] is not None else ""))
-    c=plt.gca()._get_lines.prop_cycler  # c = plt.rcParams['axes.prop_cycle'] # 2024/01/27 not working any more
-
+    #c=plt.gca()._get_lines.prop_cycler  # 2025/04/22 matplotlib 3.9.2 not working any more # c = plt.rcParams['axes.prop_cycle'] # 2024/01/27 not working any more
+    c = plt.rcParams['axes.prop_cycle']  # 2025/04/22 matplotlib 3.9.2, works again
+    
     rms_v=rms
     if rmsrange is not None:
         rms_v=[rms_v]
