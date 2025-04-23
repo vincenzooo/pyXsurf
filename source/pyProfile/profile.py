@@ -14,7 +14,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
-import dataIO.functions
+from dataIO.functions import update_docstring
 from scipy.stats import binned_statistic
 ## profile creation
 
@@ -363,7 +363,7 @@ def movingaverage(values,window,method='same',*args,**kwargs):
         smas[-i]=np.mean(values[-2*i-1:])
     return smas # as a numpy array
 
-@append_doc_from(dataIO.functions.stats.binned_statistics)
+@append_doc_from(binned_statistics)
 def rebin_profile(x,y,statistic='mean',*args,**kwargs):
     """ Flexible rebin of a profile. Reduces number of points without losing information.
     Uses `stats.binned_statistics` of which keeps the interface. """

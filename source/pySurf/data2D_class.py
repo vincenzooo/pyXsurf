@@ -10,14 +10,6 @@ from dataIO.span import span
 # from pyProfile.profile_class import Profile
 from pySurf import data2D, points
 from pySurf.affine2D import find_affine
-from pySurf.data2D import apply_transform as apply_transform_data
-from pySurf.data2D import (crop_data, data_from_txt, data_histostats,
-                           get_stats, level_data, plot_data, projection,
-                           read_data, register_data, resample_data,
-                           rotate_data, save_data, slope_2D, subtract_data,
-                           sum_data, transpose_data)
-from .data2D import plot_slope_slice, plot_slope_2D
-from .psd2d import avgpsd2d
 from pySurf.points import matrix_to_points2, points_autoresample
 from pySurf.psd2d import (plot_psd2d, plot_rms_power, psd2d, psd2d_analysis,
                           rms_power)
@@ -227,7 +219,7 @@ class Data2D(object):  # np.ndarrays
             if reader is None:
                 reader = auto_reader(file)  # returns a reader
             # calling without arguments skips register, however skips also reader argumnets, temporarily arranged with pop in read_data to strip all arguments for
-            data, x, y = read_data(file, reader, *args, **kwargs)
+            data, x, y = data2D.read_data(file, reader, *args, **kwargs)
             # register data and pass the rest to reader
             # pdb.set_trace()
 
@@ -279,7 +271,7 @@ class Data2D(object):  # np.ndarrays
 
                 # if data is not None:
                 # se read_data calls register, this
-                data, x, y = register_data(data, x, y, *args, **kwargs)
+                data, x, y = data2D.register_data(data, x, y, *args, **kwargs)
                 # goes indented.
 
         self.data, self.x, self.y = data, x, y
@@ -298,7 +290,7 @@ class Data2D(object):  # np.ndarrays
 
     def __add__(self, other, *args, **kwargs):
         return self.__class__(
-            *sum_data(self(), other(), *args, **kwargs),
+            *data2D.sum_data(self(), other(), *args, **kwargs),
             units=self.units,
             name=self.name + " + " + other.name
         )
@@ -335,7 +327,7 @@ class Data2D(object):  # np.ndarrays
 
     def __sub__(self, other, *args, **kwargs):
         assert self.units == other.units
-        res = self.__class__(*subtract_data(self(), other(), *args, **kwargs), units=self.units)
+        res = self.__class__(*data2D.subtract_data(self(), other(), *args, **kwargs), units=self.units)
         res.name = self.name + " - " + other.name
         return res
 
@@ -365,7 +357,7 @@ class Data2D(object):  # np.ndarrays
         res = points_autoresample(res)
         return self.__class__(*res, units=self.units, name=self.name + " // " + other.name)
 
-    @append_doc_from(plot_data)
+    @append_doc_from(data2D.plot_data)
     def plot(self, title=None, *args, **kwargs):
         """plot using data2d.plot_data and setting automatically labels and colorscales.
         by default data are filtered at 3 sigma with 2 iterations for visualization, pass nsigma = None to include all data.
@@ -392,7 +384,7 @@ class Data2D(object):  # np.ndarrays
         nsigma = kwargs.pop("nsigma", nsigma0)
         m = self.data
         #pdb.set_trace()
-        res = plot_data(
+        res = data2D.plot_data(
             self.data,
             self.x,
             self.y,
@@ -409,38 +401,38 @@ class Data2D(object):  # np.ndarrays
         plt.title(title)
         return res
 
-    @append_doc_from(data_from_txt)
+    @append_doc_from(data2D.data_from_txt)
     def load(self, filename, *args, **kwargs):
         """A simple file loader using data_from_txt"""
-        self.data, self.x, self.y = data_from_txt(filename, *args, **kwargs)
+        self.data, self.x, self.y = data2D.data_from_txt(filename, *args, **kwargs)
 
 
     def save(self, filename, *args, **kwargs):
         """Save data using data2d.save_data"""
-        return save_data(filename, self.data, self.x, self.y, *args, **kwargs)
+        return data2D.save_data(filename, self.data, self.x, self.y, *args, **kwargs)
 
-    save.__doc__ = save_data.__doc__
+    save.__doc__ = data2D.save_data.__doc__
 
 
 
-    @append_doc_from(rotate_data)
+    @append_doc_from(data2D.rotate_data)
     def rotate(self, angle, *args, **kwargs):
         """call data2D.rotate_data, which rotate array of an arbitrary angle in degrees in direction
         (from first to second axis)."""
         res = self.copy()
         # FIXME: rotation doesn't work without conversion to points.
         usepoints =  kwargs.pop("usepoints",True)
-        res.data, res.x, res.y = rotate_data(
+        res.data, res.x, res.y = data2D.rotate_data(
             self.data, self.x, self.y, angle, usepoints=usepoints, *args, **kwargs
         )
         return res
 
-    @append_doc_from(rotate_data)
+    @append_doc_from(data2D.rotate_data)
     def rot90(self, k=1, *args, **kwargs):
         """call data2D.rotate_data, which uses numpy.rot90 to rotate array of an integer multiple of 90 degrees in direction
         (from first to second axis)."""
         res = self.copy()
-        res.data, res.x, res.y = rotate_data(*res(), k=k, *args, **kwargs)
+        res.data, res.x, res.y = data2D.rotate_data(*res(), k=k, *args, **kwargs)
 
         return res
 
@@ -503,14 +495,14 @@ class Data2D(object):  # np.ndarrays
 
     def transpose(self):
         res = self.copy()
-        res.data, res.x, res.y = transpose_data(self.data, self.x, self.y)
+        res.data, res.x, res.y = data2D.transpose_data(self.data, self.x, self.y)
         return res
 
-    @append_doc_from(apply_transform_data)
+    @append_doc_from(data2D.apply_transform)
     def apply_transform(self, *args, **kwargs):
         res = self.copy()
         # pdb.set_trace()
-        res.data, res.x, res.y = apply_transform_data(
+        res.data, res.x, res.y = data2D.apply_transform(
             self.data, self.x, self.y, *args, **kwargs
         )
         return res
@@ -521,20 +513,20 @@ class Data2D(object):  # np.ndarrays
         res.data = func(self.data, *args, **kwargs)
         return res
 
-    @append_doc_from(crop_data)
+    @append_doc_from(data2D.crop_data)
     def crop(self, *args, **kwargs):
         """crop data making use of function data2D.crop_data, where data,x,y are taken from a"""
         res = self.copy()
-        res.data, res.x, res.y = crop_data(res.data, res.x, res.y, *args, **kwargs)
+        res.data, res.x, res.y = data2D.crop_data(res.data, res.x, res.y, *args, **kwargs)
         return res
 
-    @append_doc_from(level_data)
+    @append_doc_from(data2D.level_data)
     def level(self, *args, **kwargs):
         res = self.copy()
-        res.data, res.x, res.y = level_data(self.data, self.x, self.y, *args, **kwargs)
+        res.data, res.x, res.y = data2D.level_data(self.data, self.x, self.y, *args, **kwargs)
         return res
 
-    @append_doc_from(resample_data)
+    @append_doc_from(data2D.resample_data)
     def resample(self, other, *args, **kwargs):
         """TODO, add option to pass x and y instead of other as an object."""
         res = self.copy()
@@ -544,9 +536,9 @@ class Data2D(object):  # np.ndarrays
                     raise ValueError(
                         "If units are defined they must match in Data2D resample."
                     )
-            resampled = resample_data(res(), other(), *args, **kwargs)
+            resampled = data2D.resample_data(res(), other(), *args, **kwargs)
         else:
-            resampled = resample_data(res(), other, *args, **kwargs)
+            resampled = data2D.resample_data(res(), other, *args, **kwargs)
             
         res.data, res.x, res.y = resampled
         
@@ -660,12 +652,12 @@ class Data2D(object):  # np.ndarrays
         """copy.deepcopy should work well."""
         return deepcopy(self)
 
-    @append_doc_from(get_stats)
+    @append_doc_from(data2D.get_stats)
     def stats(self,*args,**kwargs):
         
         units = kwargs.pop('units',self.units)
         #breakpoint()
-        return get_stats(self.data,self.x,self.y,units=units,*args,**kwargs)
+        return data2D.get_stats(self.data,self.x,self.y,units=units,*args,**kwargs)
 
     def printstats(self, label=None, fmt="%3.2g"):
         if label is not None:
@@ -723,20 +715,20 @@ class Data2D(object):  # np.ndarrays
     def projection(self, axis = 0, *args, **kwargs):
         """avg, returns x and y. Can use data2D.projection keywords `span` and `expand` to return data ranges."""
         from pyProfile.profile_class import Profile
-        res = Profile(self.y, projection(self.data, axis=axis, *args,**kwargs), units = [self.units[1], self.units[2]], name = " ".join([self.name,"avg along axis %i"%(axis)])) 
+        res = Profile(self.y, data2D.projection(self.data, axis=axis, *args,**kwargs), units = [self.units[1], self.units[2]], name = " ".join([self.name,"avg along axis %i"%(axis)])) 
     
         # print(self)
         return res
 
-    @append_doc_from(data_histostats, "\n------------------\n")
+    @append_doc_from(data2D.data_histostats, "\n------------------\n")
     def histostats(self, *args, **kwargs):
-        res = data_histostats(
+        res = data2D.data_histostats(
             self.data, self.x, self.y, units=self.units, *args, **kwargs
         )
         plt.title(self.name)
         return res
 
-    @append_doc_from(slope_2D)
+    @append_doc_from(data2D.slope_2D)
     def slope(self, *args, **kwargs):
         # import pdb
         # pdb.set_trace()
@@ -755,7 +747,7 @@ class Data2D(object):  # np.ndarrays
             scale = (1.0, 1.0, 1.0)
             u = ["", "", "arcsec"]
 
-        say, sax = slope_2D(self.data, self.x, self.y, scale=scale, *args, **kwargs)
+        say, sax = data2D.slope_2D(self.data, self.x, self.y, scale=scale, *args, **kwargs)
 
         return Data2D(
             *sax,
@@ -767,8 +759,8 @@ class Data2D(object):  # np.ndarrays
             name=self.name + " yslope"
         )
 
-    @append_doc_from(plot_slope_2D)
-    @append_doc_from(plot_slope_slice)
+    @append_doc_from(data2D.plot_slope_2D)
+    @append_doc_from(data2D.plot_slope_slice)
     def plot_slope(self, slice = False, scale = (1.,1.,1.) , *args, **kwargs):
         """Use `data2D.plot_slope_2D` and `.plot_slope_slice` to ploto 4-panel x and y slopes.
         
@@ -784,9 +776,9 @@ class Data2D(object):  # np.ndarrays
                 print ("scale: ", scale)
 
         if slice:
-            plot_slope_slice(self.data, self.x, self.y, scale = scale, *args, **kwargs)
+            data2D.plot_slope_slice(self.data, self.x, self.y, scale = scale, *args, **kwargs)
         else:
-            plot_slope_2D(self.data, self.x, self.y, scale = scale,  *args, **kwargs)
+            data2D.plot_slope_2D(self.data, self.x, self.y, scale = scale,  *args, **kwargs)
 
     
     
@@ -895,7 +887,7 @@ def test_class_init(wfile=None, *args, **kwargs):
     plt.clf()
     # plt.suptitle(relpath)
     plt.title("use plot_data function")
-    plot_data(d1, x1, y1, aspect="equal")
+    data2D.plot_data(d1, x1, y1, aspect="equal")
 
     a = Data2D(d1, x1, y1)
     plt.figure(2)
