@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from dataIO import outliers
 from dataIO.fn_add_subfix import fn_add_subfix
-from dataIO.functions import update_docstring
+from dataIO.functions import append_doc_from
 from dataIO.span import span
 # from pyProfile.profile_class import Profile
 from pySurf import data2D, points
@@ -365,6 +365,7 @@ class Data2D(object):  # np.ndarrays
         res = points_autoresample(res)
         return self.__class__(*res, units=self.units, name=self.name + " // " + other.name)
 
+    @append_doc_from(plot_data)
     def plot(self, title=None, *args, **kwargs):
         """plot using data2d.plot_data and setting automatically labels and colorscales.
         by default data are filtered at 3 sigma with 2 iterations for visualization, pass nsigma = None to include all data.
@@ -408,13 +409,11 @@ class Data2D(object):  # np.ndarrays
         plt.title(title)
         return res
 
-    plot = update_docstring(plot, plot_data)
-
+    @append_doc_from(data_from_txt)
     def load(self, filename, *args, **kwargs):
         """A simple file loader using data_from_txt"""
         self.data, self.x, self.y = data_from_txt(filename, *args, **kwargs)
 
-    load = update_docstring(load, data_from_txt)
 
     def save(self, filename, *args, **kwargs):
         """Save data using data2d.save_data"""
@@ -422,10 +421,9 @@ class Data2D(object):  # np.ndarrays
 
     save.__doc__ = save_data.__doc__
 
-    from functools import update_wrapper
 
-    # @update_wrapper(rotate_data)  #this doesn't work as I would like
 
+    @append_doc_from(rotate_data)
     def rotate(self, angle, *args, **kwargs):
         """call data2D.rotate_data, which rotate array of an arbitrary angle in degrees in direction
         (from first to second axis)."""
@@ -437,8 +435,7 @@ class Data2D(object):  # np.ndarrays
         )
         return res
 
-    rotate = update_docstring(rotate, rotate_data)
-
+    @append_doc_from(rotate_data)
     def rot90(self, k=1, *args, **kwargs):
         """call data2D.rotate_data, which uses numpy.rot90 to rotate array of an integer multiple of 90 degrees in direction
         (from first to second axis)."""
@@ -446,8 +443,6 @@ class Data2D(object):  # np.ndarrays
         res.data, res.x, res.y = rotate_data(*res(), k=k, *args, **kwargs)
 
         return res
-
-    rot90 = update_docstring(rot90, rotate_data)
 
     def shift(self, xoffset=None, yoffset=None, zoffset=None):
         """Shift data of given offsets along one or more axes.
@@ -511,8 +506,7 @@ class Data2D(object):  # np.ndarrays
         res.data, res.x, res.y = transpose_data(self.data, self.x, self.y)
         return res
 
-    transpose = update_docstring(transpose, transpose_data)
-
+    @append_doc_from(apply_transform_data)
     def apply_transform(self, *args, **kwargs):
         res = self.copy()
         # pdb.set_trace()
@@ -521,29 +515,26 @@ class Data2D(object):  # np.ndarrays
         )
         return res
 
-    apply_transform = update_docstring(apply_transform, apply_transform_data)
-
     def apply_to_data(self, func, *args, **kwargs):
         """apply a function from 2d array to 2d array to data."""
         res = self.copy()
         res.data = func(self.data, *args, **kwargs)
         return res
 
+    @append_doc_from(crop_data)
     def crop(self, *args, **kwargs):
         """crop data making use of function data2D.crop_data, where data,x,y are taken from a"""
         res = self.copy()
         res.data, res.x, res.y = crop_data(res.data, res.x, res.y, *args, **kwargs)
         return res
 
-    crop = update_docstring(crop, crop_data)
-
+    @append_doc_from(level_data)
     def level(self, *args, **kwargs):
         res = self.copy()
         res.data, res.x, res.y = level_data(self.data, self.x, self.y, *args, **kwargs)
         return res
 
-    level = update_docstring(level, level_data)
-
+    @append_doc_from(resample_data)
     def resample(self, other, *args, **kwargs):
         """TODO, add option to pass x and y instead of other as an object."""
         res = self.copy()
@@ -560,8 +551,6 @@ class Data2D(object):  # np.ndarrays
         res.data, res.x, res.y = resampled
         
         return res
-
-    resample = update_docstring(resample, resample_data)
 
     def divide_and_crop(self, n, m):
         """Divide data in n x m equal size data. Data, returned as Dlsit, are ordered as coordinates."""
@@ -671,12 +660,12 @@ class Data2D(object):  # np.ndarrays
         """copy.deepcopy should work well."""
         return deepcopy(self)
 
+    @append_doc_from(get_stats)
     def stats(self,*args,**kwargs):
         
         units = kwargs.pop('units',self.units)
         #breakpoint()
         return get_stats(self.data,self.x,self.y,units=units,*args,**kwargs)
-    stats = update_docstring(stats, get_stats)
 
     def printstats(self, label=None, fmt="%3.2g"):
         if label is not None:
@@ -705,6 +694,7 @@ class Data2D(object):  # np.ndarrays
         else:
             return self.apply_transform(trans)
 
+    @append_doc_from(outliers.remove_outliers)
     def remove_outliers(self, fill_value=np.nan, mask=False, *args, **kwargs):
         """use dataIO.remove_outliers to remove outliers from data. return a new Data2D object with outliers replaced by `fill_value`. If `mask` is set returns mask (easier than extracting it from returned object)."""
         res = self.copy()
@@ -715,8 +705,7 @@ class Data2D(object):  # np.ndarrays
         res.data[~m] = fill_value
         return res
 
-    remove_outliers = update_docstring(remove_outliers, outliers.remove_outliers)
-
+    @append_doc_from(points.extract_profile)
     def extract_profile(self, *args, raw=False, **kwargs):
         """ Extract one or more profiles from start to end points. Return a `profile_class.Profile` object unless `raw` is True."""
         
@@ -730,8 +719,7 @@ class Data2D(object):  # np.ndarrays
         else:
             return Profile(*prof,units=[self.units[0],self.units[2]])
 
-    extract_profile = update_docstring(extract_profile, points.extract_profile)
-    
+    @append_doc_from(data2D.projection)
     def projection(self, axis = 0, *args, **kwargs):
         """avg, returns x and y. Can use data2D.projection keywords `span` and `expand` to return data ranges."""
         from pyProfile.profile_class import Profile
@@ -739,8 +727,8 @@ class Data2D(object):  # np.ndarrays
     
         # print(self)
         return res
-    projection = update_docstring(projection, data2D.projection)
 
+    @append_doc_from(data_histostats, "\n------------------\n")
     def histostats(self, *args, **kwargs):
         res = data_histostats(
             self.data, self.x, self.y, units=self.units, *args, **kwargs
@@ -748,8 +736,7 @@ class Data2D(object):  # np.ndarrays
         plt.title(self.name)
         return res
 
-    histostats = update_docstring(histostats, data_histostats, "\n-------------\n")
-
+    @append_doc_from(slope_2D)
     def slope(self, *args, **kwargs):
         # import pdb
         # pdb.set_trace()
@@ -780,8 +767,8 @@ class Data2D(object):  # np.ndarrays
             name=self.name + " yslope"
         )
 
-    slope = update_docstring(slope, slope_2D)
-
+    @append_doc_from(plot_slope_2D)
+    @append_doc_from(plot_slope_slice)
     def plot_slope(self, slice = False, scale = (1.,1.,1.) , *args, **kwargs):
         """Use `data2D.plot_slope_2D` and `.plot_slope_slice` to ploto 4-panel x and y slopes.
         
@@ -800,9 +787,6 @@ class Data2D(object):  # np.ndarrays
             plot_slope_slice(self.data, self.x, self.y, scale = scale, *args, **kwargs)
         else:
             plot_slope_2D(self.data, self.x, self.y, scale = scale,  *args, **kwargs)
-
-    plot_slope = update_docstring(plot_slope, plot_slope_2D)
-    plot_slope = update_docstring(plot_slope, plot_slope_slice)
 
     
     
@@ -832,6 +816,7 @@ class PSD2D(Data2D):
         return res
     
     
+    @append_doc_from(avgpsd2d)
     def avgpsd(self, *args, **kwargs):
         """avg, returns a PSD (linear) object. Can use data2D.projection keywords `span` and `expand` to return PSD ranges."""
         
@@ -840,7 +825,6 @@ class PSD2D(Data2D):
         from pyProfile.profile_class import PSD
         
         return PSD(res.x, res.y, units = res.units, name = self.name, *args, **kwargs)
-    avgpsd = update_docstring(avgpsd, avgpsd2d)
     
     def rms_power(self, plot=False, rmsrange=None, *args, **kwargs):
         """Calculate rms slice power by integrating .

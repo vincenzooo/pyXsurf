@@ -32,7 +32,6 @@ from plotting.add_clickable_markers import add_clickable_markers2
 from pySurf.find_internal_rectangle import find_internal_rectangle
 import itertools
 
-from dataIO.functions import update_docstring
 from dataIO.arrays import stats, is_nested_list
 
 from pyProfile.profile import PSF_spizzichino,line

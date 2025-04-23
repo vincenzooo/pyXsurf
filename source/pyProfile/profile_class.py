@@ -101,23 +101,13 @@ from dataIO.arrays import split_blocks, split_on_indices
 #from dataIO.functions import update_docstring
 from dataIO.functions import append_doc_from
 
-from pyProfile.profile import crop_profile
-from pyProfile.profile import level_profile
-from pyProfile.profile import resample_profile
-from pyProfile.profile import sort_profile
-from pyProfile.profile import sum_profiles, subtract_profiles, multiply_profiles
+from pyProfile import profile
 from pyProfile.psd import psd as profpsd
-from pyProfile.profile import movingaverage, rebin_profile
-from pyProfile.profile import merge_profile
-from pyProfile.profile import register_profile
-from pyProfile.profile import save_profile
-
-from pyProfile import profile   # functions passed to update_docstring will be from here
 from pyProfile.psd import plot_psd
 from pyProfile.psd import psd_units
 
 def read_xyz(filename,*args,**kwargs):
-    """temptative routine to read xyz files.
+    """tentative routine to read xyz files.
     Use by reading the data and then passing them to profile.
     It will be incorporated in some form of reader in a 
     more mature version"""
@@ -125,7 +115,7 @@ def read_xyz(filename,*args,**kwargs):
     raise NotImplementedError
     
 def read_mx_profiles(filename,*args,**kwargs):
-    """temptative routine to read xyz files. Return a list of all profiles
+    """tentative routine to read xyz files. Return a list of all profiles
         with names from 3rd column (files are in format x,y,profilename).
     Use by reading the data and then passing them to profile.
     It will be incorporated in some form of reader in a 
@@ -677,73 +667,59 @@ class Profile(object):  #np.ndarrays
         
         return res
 
-    @append_doc_from(np.genfromtxt)
-    def load(self,filename,*args,**kwargs):
-        """A simple file loader using np.genfromtxt.
-        Load columns from file in self.x and self.y."""
-        #pdb.set_trace()
-        self.x,self.y = np.genfromtxt(filename,unpack=True,*args,**kwargs)
-    #load=update_docstring(load,np.genfromtxt)
-
-    @append_doc_from(save_profile)
+    @append_doc_from(profile.save_profile)
     def save(self,filename,*args,**kwargs):
         """Save data using `pyProfile.profile.save_profile`."""
         
         # if not explicitly set, header is built joining units with the proper delimiter
         delimiter = kwargs.pop('delimiter','\t')
         h = kwargs.pop('header',delimiter.join(self.units) if self.units else None) 
-        res = save_profile(filename,self.x,self.y,header = h,*args,**kwargs)
+        res = profile.save_profile(filename,self.x,self.y,header = h,*args,**kwargs)
         return res
     #save.__doc__=save_profile.__doc__
     
-    @append_doc_from(register_profile)
+    @append_doc_from(profile.register_profile)
     def register(self,filename,*args,**kwargs):
         """Use pyProfile.profile.register_profile to rescale."""
         #pdb.set_trace()
-        self.x,self.y = register_profile(x,y,*args,**kwargs)
-    register=update_docstring(register,register_profile)
+        self.x,self.y = profile.register_profile(x,y,*args,**kwargs)
+    #register=update_docstring(register,register_profile)
 
-
-
-    '''
-    def apply_to_data(self,func,*args,**kwargs):
-        """apply a function from 2d array to 2d array to data."""
-        res = self.copy()
-        res.data=func(self.data,*args,**kwargs)
-        return res
-    '''
-    
+    append_doc_from(profile.crop_profile)
     def crop(self,*args,**kwargs):
         """crop profile making use of function profile.crop_data, where x,y are taken from self."""
         
         res=self.copy()
-        res.x,res.y=crop_profile(self.x,self.y,*args,**kwargs)
+        res.x,res.y=profile.crop_profile(self.x,self.y,*args,**kwargs)
         return res #
-    crop=update_docstring(crop,crop_profile)
+    #crop=update_docstring(crop,crop_profile)
     
+    @append_doc_from(profile.movingaverage)
     def movingaverage(self,*args,**kwargs):
         """moving average using function profile.movingaverage, where x,y are taken from self."""
         
         res = self.copy()
-        res.y = movingaverage(self.y,*args,**kwargs)
+        res.y = profile.movingaverage(self.y,*args,**kwargs)
         return res #
-    movingaverage = update_docstring(movingaverage,movingaverage)
+    #movingaverage = update_docstring(movingaverage,movingaverage)
         
+    @append_doc_from(profile.rebin_profile)
     def rebin(self,*args,**kwargs):
         """rebin using function profile.rebin_profile, where x,y are taken from self."""
         
         res=self.copy()
-        res.x,res.y=rebin_profile(self.x,self.y,*args,**kwargs)
+        res.x,res.y=profile.rebin_profile(self.x,self.y,*args,**kwargs)
         return res #
     
-    rebin=update_docstring(rebin,rebin_profile)
+    #rebin=update_docstring(rebin,rebin_profile)
     
+    @append_doc_from(profile.level_profile)
     def level(self,degree=1,zero='mean',*args,**kwargs):
         """return a leveled profile calling profile.level_profile.
 `zero option can be 'top', 'bottom' or 'mean', and is a facility to shift curves so that their min or max value is aligned to zero."""
         
         res=self.copy()
-        res.x,res.y=level_profile(self.x,self.y,degree=degree,*args,**kwargs)
+        res.x,res.y=profile.level_profile(self.x,self.y,degree=degree,*args,**kwargs)
         if zero == 'top':
             res.y = res.y - np.nanmax(res.y)
         elif zero == 'bottom':
@@ -751,8 +727,9 @@ class Profile(object):  #np.ndarrays
         elif zero != 'mean':
             raise ValueError ("wrong value for `zero` option in level")
         return res
-    level=update_docstring(level,level_profile)
+    #level=update_docstring(level,level_profile)
 
+    @append_doc_from(profile.resample_profile)
     def resample(self,other,*args,**kwargs):
         """TODO, add option to pass x and y instead of other as an object."""
         res=self.copy()
@@ -760,26 +737,28 @@ class Profile(object):  #np.ndarrays
             if self.units is not None and other.units is not None:
                 if self.units[0] != other.units[0]:
                     raise ValueError('If units are defined they must match in Profile.resample.')
-            res.x,res.y=resample_profile(*res(),*other(),*args,**kwargs)   
+            res.x,res.y=profile.resample_profile(*res(),*other(),*args,**kwargs)   
         except AttributeError: #assume other is an array
-            res.x,res.y=resample_profile(*res(),other,*args,**kwargs) #try with other array of x points
+            res.x,res.y=profile.resample_profile(*res(),other,*args,**kwargs) #try with other array of x points
         return res        
-    resample=update_docstring(resample,resample_profile)
+    #resample=update_docstring(resample,resample_profile)
 
 
+    @append_doc_from(profile.profpsd)
     def psd(self,wfun=None,rmsnorm=True,norm=1):
         """return a PSD object with psd of self. """
 
-        f,p=profpsd(self.x,self.y,wfun=wfun,norm=norm,rmsnorm=rmsnorm)
+        f,p=profile.profpsd(self.x,self.y,wfun=wfun,norm=norm,rmsnorm=rmsnorm)
 
         return PSD(f,p,units=self.units,name="")
-    psd=update_docstring(psd,profpsd)
+    #psd=update_docstring(psd,profpsd)
 
+    @append_doc_from(profile.remove_nan_ends)
     def remove_nan_ends(self,*args,**kwargs):
         res = self.copy()
         res.x,res.y=profile.remove_nan_ends(self.x,self.y,*args,**kwargs)
         return res
-    remove_nan_ends=update_docstring(remove_nan_ends,profile.remove_nan_ends)
+    #remove_nan_ends=update_docstring(remove_nan_ends,profile.remove_nan_ends)
 
     def std(self):
         """return standard deviation of data excluding nans.
@@ -1003,7 +982,7 @@ class Plist(Superlist):
             s = load_plist(files, *args, **kwargs)   # return a list
             super().__init__(s)
         else:
-            super().__init__(*args, **kwargs)        
+            super().__init__(*args,**kwargs)        
     
     # assign method from dlist, which is sintactically identical
     from pySurf.scripts.dlist import Dlist
