@@ -284,22 +284,36 @@ class Superlist6(list):
         else:
             return attr
 
+from functools import wraps
+from dataIO.arrays import vectorize
+
+# Decorator to mark methods as vectorizable
+def vectorizable(*vectorized_args):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            for arg_name in vectorized_args:
+                if arg_name in kwargs:
+                    kwargs[arg_name] = vectorize(kwargs[arg_name], len(self))
+            return func(self, *args, **kwargs)
+        return wrapper
+    return decorator
+
 class Superlist(list):
-    """Working version from Superlist6. Returns a superlist."""   
-    # A problem was that if a list is returned, not a superlist, for example calling
+    """Working version from Superlist6. Returns a superlist."""
+# A problem was that if a list is returned, not a superlist, for example calling
     #   s.crop([2,10]) returns a list of objects, but I cannot apply a second time about
     #   method. 
-    
-    
-    def __getattr__(self,name,*args,**kwargs): 
+
+    def __getattr__(self, name, *args, **kwargs):
         attr = [object.__getattribute__(name) for object in self]
-        
+
         if hasattr(attr[0], '__call__'):
-            # builds a function that, taken a list object oggetto
-            # return a list of the results obtained applying function to each item.
+            # builds a function that, taken a list object
+            # returns a list of the results obtained applying the function to each item.
             def newfunc(*args, **kwargs):
                 attr = [object.__getattribute__(name) for object in self]
-                # 2023/01/17 replaced:
+# 2023/01/17 replaced:
                 #result = Superlist()
                 #result.extend([a(*args, **kargs) for a in attr])
                 # which was returning a Superlist, now returns the right type (e.g. Dlist).
@@ -309,8 +323,8 @@ class Superlist(list):
         else:
             # return list of attributes
             return attr
-    
-    def __getattribute__(self,name):
+
+    def __getattribute__(self, name):
         attr = object.__getattribute__(self, name)
         if hasattr(attr, '__call__'):
             def newfunc(*args, **kwargs):
@@ -320,14 +334,19 @@ class Superlist(list):
             return newfunc
         else:
             return attr
-        
+
     def __getitem__(self, index):
         """This implements slicing, according to chatGPT suggestions."""
-        
+
         result = super().__getitem__(index)
         if isinstance(result, list):
-            return self.__class__(result) #Superlist(result)
+            return self.__class__(result)  # Superlist(result)
         return result
+
+    @vectorizable('example_arg')
+    def example_method(self, *args, **kwargs):
+        """Example method to demonstrate vectorization."""
+        return [item.example_method(*args, **kwargs) for item in self]
 
 
 def test_superlist_dlist(D):
