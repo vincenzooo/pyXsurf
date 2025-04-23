@@ -430,6 +430,7 @@ def psd2d_analysis(wdata,x,y,title=None,wfun=None,vrange=None,
             mask = mask & (rms  < rmsthr)
             ax3.hlines(rmsthr,*ax2.get_xlim()) #plot markers on rms chart
             ax2.plot(x[~mask],np.repeat(ax2.get_ylim()[1],len(x[~mask])),'rx') #plot markers on psd2d chart
+            p[:, ~mask] = np.nan  # Apply mask to PSD data to exclude invalid lines
         
         #pdb.set_trace()
         #questa era qui, ma dava errore perche' mask e' lineare
