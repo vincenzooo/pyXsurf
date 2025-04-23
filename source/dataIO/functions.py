@@ -10,11 +10,51 @@ def update_docstring(func,source,delimiter=''):
        this is func function, derived from source function by modifying the usage of parameter foo.
        parameter foo is changed of sign."""
        
-       
+    print("Using `update_docstring` which is supeseded by decorator `append_doc_from`")
     doc0="" if func.__doc__ is None else func.__doc__  # retrieve current docstring
     func.__doc__='\n'.join([doc0,delimiter,source.__name__+str(inspect.signature(source)),source.__doc__])
     return func
   
+
+def append_doc_from(reference_func,delimiter=''):
+    """
+    Decorator that appends the docstring of `reference_func` to the docstring of the decorated function. supersed update_docstring.
+    
+    Usage:
+    
+        import matplotlib.pyplot as plt
+
+        @append_doc_from(plt.plot)
+        def plot(x, y, **kwargs):
+            """Plot x and y using custom logic."""
+            return plt.plot(x, y, **kwargs)
+
+        help(plot)  # Will show your docstring plus the original plt.plot doc
+        
+    """
+    def decorator(func):
+        ref_doc = reference_func.__doc__ or ""
+        func_doc = func.__doc__ or ""
+        func.__doc__='\n'.join([ref_doc,delimiter,reference_func.__name__+str(inspect.signature(reference_func))])
+        func.__doc__ = func_doc.rstrip() + "\n\n---\nOriginal docstring from `{}`:\n\n{}".format(
+            reference_func.__name__, ref_doc.strip()
+        )
+        return func
+    return decorator
+
+    '''
+    # Note also this attempts
+    
+    from functools import update_wrapper
+    #@update_wrapper(rotate_data)  #this doesn't work as I would like
+    def rotate(self,angle,*args,**kwargs):
+        """call data2D.rotate_data, which rotate array of an arbitrary angle in degrees in direction
+        (from first to second axis)."""
+        res = self.copy()
+        res.data,res.x,res.y=rotate_data(self.data,self.x,self.y,angle,*args,**kwargs)
+        return res
+    rotate=update_docstring(rotate,rotate_data)
+    '''
 
 def strip_kw(kws,funclist,split=False,exclude=None,**kwargs):
     """ Enhanced version of pop_kw, kw can be extracted from inspection of a function (or a list  of functions).
