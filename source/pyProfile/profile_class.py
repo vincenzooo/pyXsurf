@@ -827,6 +827,11 @@ class Profile(object):  #np.ndarrays
 plot=update_docstring(plot,plt.plot)
 #from pySurf.psd2d import psd2d,plot_psd2d
 
+    def __eq__(self, other):
+        """Compare two profiles for equality based on their x and y attributes."""
+        if not isinstance(other, Profile):
+            return NotImplemented
+        return np.array_equal(self.x, other.x) and np.array_equal(self.y, other.y)
         
         
 class PSD(Profile):
