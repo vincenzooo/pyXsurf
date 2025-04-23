@@ -578,6 +578,8 @@ class Data2D(object):  # np.ndarrays
         #plt.close(f)
         return markers
 
+    @append_doc_from(data2D.psd, "\n------------------\n")
+    @append_doc_from(data2D.psd_analysis, "\n------------------\n")
     def psd(
         self,
         wfun=None,
@@ -588,15 +590,41 @@ class Data2D(object):  # np.ndarrays
         name=None,
         *args,
         **kwargs):
-        """return a PSD2D object with 2D psd of self.
-        If analysis is set True, `psd2d_analysis` function is called to generate plots.
-        Parameters proper of this function are passed as args. 
-        You need to pass also title, it generates output,
-          this is subject to change, at the moment, pass empty string to generate plots
-          or string to create output graphics.
-        subfix and name are used to control the name of returned object.
-        units are set in units of self because of the ambiguity mentioned in
-        pySurf.psd2d.psd_units, and consistently with functions in `pySurf.psd2d`.
+        """Compute the 2D Power Spectral Density (PSD) of the current Data2D object as a PSD2D object.
+                
+        This method calculates the 2D PSD of the object's data and returns a PSD2D object.
+        Optionally, it can perform additional analysis and generate plots or output graphics. If you want to use additional analysis parameters (e.g. `rmsthr`), use `analysis=True` (and 'title = `None` if you want to avoid plotting)
+        Parameters:
+        -----------
+        wfun : callable, optional
+            A window function to apply to the data before computing the PSD.
+        rmsnorm : bool, default=True
+            If True, normalize the PSD by the RMS value of the data.
+        norm : int, default=1
+            Normalization factor for the PSD.
+        analysis : bool, default=False
+            If True, perform additional analysis using the `psd2d_analysis` function.
+        subfix : str, default=""
+            A suffix to append to the name of the returned PSD2D object.
+        name : str, optional
+            Name for the returned PSD2D object. If None, a name is generated automatically.
+        *args : tuple
+            Additional positional arguments passed to the `psd2d` or `psd2d_analysis` functions.
+        **kwargs : dict
+            Additional keyword arguments passed to the `psd2d` or `psd2d_analysis` functions.
+        Returns:
+        --------
+        PSD2D
+            A PSD2D object containing the computed 2D PSD, frequency data, and metadata.
+            
+        Notes:
+        ------
+        - If `analysis` is True, the `psd2d_analysis` function is called to generate plots or
+          output graphics. Parameters proper of this function are passed as args. The `title` parameter can be passed via `kwargs` to control the output, generated if anything is passed (this is subject to change, at the moment, pass empty string to generate plots or string to create output graphics.).
+        - The units of the PSD are consistent with the object's units and the conventions in
+          `pySurf.psd2d`, meaning they are set in units of self because of the ambiguity mentioned in pySurf.psd2d.psd_units, and consistently with functions in `pySurf.psd2d`.
+        - The `subfix` and `name` parameters control the naming of the returned PSD2D object.
+        
         """
 
         if analysis:
@@ -628,9 +656,10 @@ class Data2D(object):  # np.ndarrays
         newname = name if name is not None else fn_add_subfix(self.name, subfix)
         return PSD2D(p, self.x, f, units=self.units, name=newname)
 
-    psd = update_docstring(psd, psd2d)
-    psd = update_docstring(psd, psd2d_analysis)
+    # psd = update_docstring(psd, psd2d)
+    # psd = update_docstring(psd, psd2d_analysis)
 
+    @append_doc_from( data2D.remove_nan_frame)
     def remove_nan_frame(self, *args, **kwargs):
         res = self.copy()
         res.data, res.x, res.y = data2D.remove_nan_frame(
@@ -638,7 +667,7 @@ class Data2D(object):  # np.ndarrays
         )
         return res
 
-    remove_nan_frame = update_docstring(remove_nan_frame, data2D.remove_nan_frame)
+    # remove_nan_frame = update_docstring(remove_nan_frame, data2D.remove_nan_frame)
 
     def topoints(self):
         """convenience function to get points using matrix_to_points2."""
