@@ -744,7 +744,7 @@ class Profile(object):  #np.ndarrays
     #resample=update_docstring(resample,resample_profile)
 
 
-    @append_doc_from(profile.profpsd)
+    @append_doc_from(profpsd)
     def psd(self,wfun=None,rmsnorm=True,norm=1):
         """return a PSD object with psd of self. """
 
@@ -824,8 +824,8 @@ class Profile(object):  #np.ndarrays
         return Data2D(*sax,units=[self.units[0],self.units[1],'arcsec'],name=self.name + ' xslope'),Data2D(*say,units=[self.units[0],self.units[1],'arcsec'],name=self.name + ' yslope')
     slope=update_docstring(slope,slope_2D)
     '''
-plot=update_docstring(plot,plt.plot)
-#from pySurf.psd2d import psd2d,plot_psd2d
+    # plot=update_docstring(plot,plt.plot)
+    # #from pySurf.psd2d import psd2d,plot_psd2d
 
     def __eq__(self, other):
         """Compare two profiles for equality based on their x and y attributes."""

@@ -26,7 +26,7 @@ def append_doc_from(reference_func,delimiter=''):
 
         @append_doc_from(plt.plot)
         def plot(x, y, **kwargs):
-            """Plot x and y using custom logic."""
+            '''Plot x and y using custom logic.'''
             return plt.plot(x, y, **kwargs)
 
         help(plot)  # Will show your docstring plus the original plt.plot doc
