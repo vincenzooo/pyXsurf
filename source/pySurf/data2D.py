@@ -25,7 +25,7 @@ from scipy import ndimage
 from plotting.captions import legendbox
 from astropy.io import fits
 from pySurf.points import points_find_grid
-from pySurf.points import resample_grid
+from pySurf.points import resample_grid, rebin_points
 
 from pySurf.points import points_in_poly, points_autoresample
 from plotting.add_clickable_markers import add_clickable_markers2
@@ -747,8 +747,8 @@ def data_from_txt(filename,x=None,y=None,xrange=None,yrange=None,matrix=False,
 def resample_data(d1,d2,method='mc',onfirst=False):
     """Resample d1 [Ny' x Nx'] on x and y from d2[Nx x Ny].
     
-    d1 and d2 are passed as list of data,x,y.
-    Return a [Nx x Ny] data.
+    d1 and d2 are passed as list of data,x,y. 
+    Return a [Nx x Ny] data, only x and y are used from d2, pass (None, x, y) if you want to resample on a grid.
     onfirst allow to resample second array on first (same as swapping args).
     To get a (plottable) matrix of data use:
     plt.imshow(rpoints[:,2].reshape(ygrid.size,xgrid.size)).
@@ -812,6 +812,35 @@ def resample_data(d1,d2,method='mc',onfirst=False):
         z=map_coordinates(data1,np.meshgrid(xind,yind)[::-1],cval=np.nan,order=1)
 
     return z,x2,y2
+
+def rebin_data(d1,d2,method='mc',onfirst=False,*args,**kwargs):
+    """Rebin data from d1 to d2. Return a sequence of resampled data `data`, `x`, `y`.
+    
+    Rebin d1 [Ny' x Nx'] on x and y from d2[Nx x Ny] using `stats.binned_statistic_2d` (additional args can be passed).
+    d1 and d2 are passed as list of data,x,y.
+    Return a [Nx x Ny] data, only x and y are used from d2, pass (None, x, y) if you want to rebin on a grid.
+    
+    onfirst allow to resample second array on first (same as swapping args).
+    It can give rise to artifacts if you are not careful with the lateral sampling (x and y) because it can have empty bins.
+    
+    Uses rebin_points from pySurf.points.
+    This is a wrapper for rebin_points, that uses stats.binned_statistic_2d.
+    
+    Example of usage:
+    
+        d1 = np.random.rand(100, 100)
+        d2 = np.random.rand(50, 50)
+        data, x, y = rebin_data(d1, d2)
+    
+    """        
+    from pySurf.points import matrix_to_points2
+    
+    if onfirst:
+        if d2 is None: raise ValueError("d2 must be set if you use ``onfirst`` flag.")
+        d1,d2=d2,d1
+    
+    return rebin_points(matrix_to_points2(*d1), matrix=True, bins=[d2[1],d2[2]],*args,**kwargs)
+
 
 def subtract_data(d1,d2,xysecond=False,resample=True):
     """d1 and d2 are triplets (data,x,y), second array is automatically resampled
