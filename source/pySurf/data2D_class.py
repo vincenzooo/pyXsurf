@@ -572,9 +572,7 @@ class Data2D(object):  # np.ndarrays
                     raise ValueError(
                         "If units are defined they must match in Data2D resample."
                     )
-            resampled = rebin_data(res(), other(), *args, **kwargs)
-        else:
-            resampled = rebin_data(res(), other, *args, **kwargs)
+        resampled = rebin_data(res(), other(), *args, **kwargs)
             
         res.data, res.x, res.y = resampled
         
