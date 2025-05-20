@@ -13,7 +13,7 @@ from pySurf.affine2D import find_affine
 from pySurf.data2D import apply_transform as apply_transform_data
 from pySurf.data2D import (crop_data, data_from_txt, data_histostats,
                            get_stats, level_data, plot_data, projection,
-                           read_data, register_data, resample_data,
+                           read_data, register_data, resample_data, rebin_data,
                            rotate_data, save_data, slope_2D, subtract_data,
                            sum_data, transpose_data)
 from .data2D import plot_slope_slice, plot_slope_2D
@@ -545,7 +545,7 @@ class Data2D(object):  # np.ndarrays
     level = update_docstring(level, level_data)
 
     def resample(self, other, *args, **kwargs):
-        """TODO, add option to pass x and y instead of other as an object."""
+        """TODO, add option to pass x and y instead of other as an object (also in rebin)."""
         res = self.copy()
         if isinstance(other,Data2D):
             if self.units is not None and other.units is not None:
@@ -560,8 +560,26 @@ class Data2D(object):  # np.ndarrays
         res.data, res.x, res.y = resampled
         
         return res
-
     resample = update_docstring(resample, resample_data)
+    
+    def rebin(self, other, *args, **kwargs):
+        """TODO, add option to pass x and y instead of other as an object, similarly to resample."""
+        
+        res = self.copy()
+        if isinstance(other,Data2D):
+            if self.units is not None and other.units is not None:
+                if self.units != other.units:
+                    raise ValueError(
+                        "If units are defined they must match in Data2D resample."
+                    )
+            resampled = rebin_data(res(), other(), *args, **kwargs)
+        else:
+            resampled = rebin_data(res(), other, *args, **kwargs)
+            
+        res.data, res.x, res.y = resampled
+        
+        return res
+    resample = update_docstring(rebin, rebin_data)
 
     def divide_and_crop(self, n, m):
         """Divide data in n x m equal size data. Data, returned as Dlsit, are ordered as coordinates."""
