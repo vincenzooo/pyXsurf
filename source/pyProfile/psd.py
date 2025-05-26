@@ -251,7 +251,7 @@ def xrealPSD(d,win=1,dx=1.,axis=None):
         c[0,:] = c[0,:]/np.sqrt(2.)
         c[:,0] = c[:,0]/np.sqrt(2.)
         
-    elif np.size(np.shape(c)) is 1:
+    elif np.size(np.shape(c)) == 1:
         f = np.fft.fftfreq(np.size(c),d=dx)
         f = f[:np.size(c)/2]
         c = c[:np.size(c)/2]
