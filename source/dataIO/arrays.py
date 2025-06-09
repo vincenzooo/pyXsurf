@@ -87,6 +87,39 @@ def stats (data=None,units=None,string=False,fmt=None,vars=None):
     
     return st
 
+def regular_grid(vector, precision = 8, average = False, step = False):
+    
+    """
+    Calculates a regular grid based on the input vector.
+
+    Parameters:
+    vector (array-like): A 1D array of positions representing the grid points.
+    precision (int, optional): The number of decimal places to consider when rounding the differences. Default is 8.
+    average (bool, optional): If True, the step size is calculated as the mean of the differences; 
+                               if False, the step size is calculated as the median of the differences. Default is False.
+    step (bool, optional): If True, returns the calculated step size as a float; 
+                           if False, returns a regular grid as a numpy array. Default is False.
+
+    Returns:
+    float or numpy.ndarray: The calculated step size if `step` is True, or the regular grid as a numpy array if `step` is False.
+    """
+    
+    x = np.array([...])             # your 1D array of positions
+    dx = np.diff(x)                 # differences between successive points
+    #print(dx)                       # see all spacings
+    #print("Median step:", np.median(dx))
+    #print("Unique steps:", np.unique(np.round(dx, precision)))
+    if average:
+        dx = np.mean(dx)
+    else:
+        dx = np.median(dx)
+    
+    if step:
+        return dx
+    else:
+        return np.arange(x.min(), x.max() + dx/2, dx)
+
+    
 def split_on_indices(vector,indices,absolute=False):
     """Split an array on a list of lengths (indices represent the number of items in each block). 
     Return a list of splitted sub-arrays.
