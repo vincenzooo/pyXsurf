@@ -60,10 +60,10 @@ def datzygo_reader(wfile,header=False,*args,**kwargs):
     """
     
     '''from manual: Complete maps of the header formats can be obtained by running the dat_test.exe 
-program that is included with MetroPro in folder r"C:\MetroPro\Bin". Type the following at 
-a command prompt: 
-dat_test  –maps  >  maps.txt 
-File maps.txt will contain the output. '''
+    program that is included with MetroPro in folder r"C:\MetroPro\Bin". Type the following at 
+    a command prompt: 
+    dat_test  –maps  >  maps.txt 
+    File maps.txt will contain the output. '''
 
     d1,head,d3,d4=readMetroProData(wfile,*args,**kwargs)
     #pdb.set_trace()

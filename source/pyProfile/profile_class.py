@@ -144,7 +144,7 @@ def read_xyz(filename,*args,**kwargs):
     raise NotImplementedError
     
 def read_mx_profiles(filename,*args,**kwargs):
-    """temptative routine to read xyz files. Return a list of all profiles
+    """tentative routine to read xyz files. Return a list of all profiles
         with names from 3rd column (files are in format x,y,profilename).
     Use by reading the data and then passing them to profile.
     It will be incorporated in some form of reader in a 
