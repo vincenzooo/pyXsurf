@@ -21,7 +21,7 @@ def vectorize(kwargs,n):
         #   to be replicated for n files.
         
         for k,v in kwargs.items():
-            vvec = arrays.vectorize(v,n)
+            vvec = arrays.vectorize(v,n,force_if_n=True)
             for r,val in zip(res,vvec):
                 r[k]=val
                         
