@@ -5,7 +5,7 @@ import os
 import warnings
 warnings.filterwarnings("error", category=np.VisibleDeprecationWarning) 
 
-def files_with_ext(base_folder, folder_glob_pattern= "", file_extension=".*"):
+def files_with_ext(base_folder, folder_glob_pattern= "*", file_extension=".*"):
     """
     Find files with a given extension within folders matching a glob pattern.
 
@@ -13,6 +13,8 @@ def files_with_ext(base_folder, folder_glob_pattern= "", file_extension=".*"):
     :param folder_glob_pattern: The glob pattern to match folders.
     :param file_extension: The extension of the files to find. Pass empty string for folders or files with no extension.
     :return: A list of paths to files matching the given extension in folders matching the glob pattern.
+    
+    N.B.: doesn't return files in the base_folder itself, but only in subfolders.
     """
     from pathlib import Path
 
