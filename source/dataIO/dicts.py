@@ -11,13 +11,14 @@ filterByKey2 = lambda data,keys : {key: data[key] for key in keys if key in data
 from dataIO import arrays
 
 def vectorize(kwargs,n):
+    """Vectorize a dictionary of parameters, replicating each value for n times."""    
+    
+    res = [{} for _ in range(n)]
     if kwargs : #passed explicit parameters for each reader
         # Note, there is ambiguity when rfiles and a kwargs value have same
         # number of elements. This cannot be easily solved:
         #   it's impossible to say if n values are intended for n files or as n-value parameter,
         #   to be replicated for n files.
-        
-        res = [{} for _ in range(n)]
         
         for k,v in kwargs.items():
             vvec = arrays.vectorize(v,n)
@@ -28,6 +29,10 @@ def vectorize(kwargs,n):
 
 def test_vectorize():
 
+    kwargs = {}
+    
+    assert vectorize(kwargs,3) == [{}, {}, {}]
+    
     kwargs = {'scale':[(-1,-1,1),(1,1,-1),(-1,-1,1)],
                 'units':[['mm','mm','um'],['mm','mm','um'],['mm','mm','$\mu$m']]}
 
