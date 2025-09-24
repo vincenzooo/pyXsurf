@@ -16,8 +16,9 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from dataIO.functions import update_docstring
 from scipy.stats import binned_statistic
-## profile creation
+from dataIO.arrays import is_monotonic
 
+## profile creation
 def line(x,y=None):
     """return line through end points of x,y.
 	x and y are vectors, can be of different length (e.g. y can be a 2-elements vector).
@@ -431,11 +432,9 @@ def resample_profile(x1,y1,x2,y2=None, trim = True,*args,**kwargs):
         xx1,yy1 = resample_profile(x1,y1,xx2) # gives points of x1 on overlap.
      
     """
-    if np.any(np.diff(x1) <= 0): 
-        if np.any(np.diff(x1) >= 0): 
+    if not is_monotonic(x1): 
             raise ValueError ('x1 must be monotonic for interpolation')
-    if np.any(np.diff(x2) <= 0): 
-        if np.any(np.diff(x1) >= 0): 
+    if not is_monotonic(x2): 
             raise ValueError ('x2 must be monotonic for interpolation')    
     
     y2 = np.interp(x2,x1,y1,*args,**kwargs) # this is same length than x2     
