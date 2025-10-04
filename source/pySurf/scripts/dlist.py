@@ -638,7 +638,7 @@ class Dlist(Superlist):
         elif type == 'grid':
             from plotting.backends import maximize
             maximize()            
-            axes = subplot_grid(len(self))[1]
+            axes = subplot_grid(len(self),*args,**kwargs)[1]
         elif type == 'all':
             # overlap on same ax, useful for partial maps or profiles.
             fig, ax = plt.subplots(**prep_kw(plt.subplots,kwargs))
