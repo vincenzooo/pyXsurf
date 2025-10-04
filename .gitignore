@@ -9,6 +9,7 @@ make_build.bat
 *.bak
 *.stackdump
 **/desktop.ini
+!G:\My Drive\progetti\pySurf\packaging_project\install_test\pyXsurf\source\pyProfile\test\test_merge_P01.ipynb
 
 __pycache__/
 
