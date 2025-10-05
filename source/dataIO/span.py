@@ -108,8 +108,85 @@ def span(array:np.array,
         # it was before 2019/04/01
         # return np.stack([min,max]).squeeze()  #?
 
+def spans_from_centers(centers):
+    
+    """
+    Convert n bin centers to n+1 bin edges.
+
+    Interior edges are midpoints between adjacent centers.
+    The two outer edges are extrapolated by half of the adjacent spacing:
+    left_edge  = c0 - (c1 - c0)/2
+    right_edge = cn-1 + (cn-1 - cn-2)/2
+
+    Parameters
+    ----------
+    centers : array_like of shape (n,)
+        Strictly increasing 1D sequence of bin centers (n >= 2).
+
+    Returns
+    -------
+    edges : ndarray of shape (n+1,)
+        Bin edges, strictly increasing.
+
+    Raises
+    ------
+    ValueError
+        If centers has fewer than 2 points or is not strictly increasing.
+
+    Examples
+    --------
+    >>> edges_from_centers([1.0, 2.0, 3.0])
+    array([0.5, 1.5, 2.5, 3.5])
+    """
+    
+    c = np.asarray(centers, dtype=float)
+    if c.ndim != 1 or c.size < 2:
+        raise ValueError("centers must be a 1D array with at least 2 elements.")
+    if not np.all(np.diff(c) > 0):
+        raise ValueError("centers must be strictly increasing.")
+
+    interior = 0.5 * (c[:-1] + c[1:])
+    left = c[0] - 0.5 * (c[1] - c[0])
+    right = c[-1] + 0.5 * (c[-1] - c[-2])
+    return np.concatenate(([left], interior, [right]))
+    
+def centers_from_spans(edges):
+    """
+    Convert n+1 bin edges to n bin centers.
+
+    Each center is the midpoint of two consecutive edges.
+
+    Parameters
+    ----------
+    edges : array_like of shape (n+1,)
+        Strictly increasing 1D sequence of bin edges (n+1 >= 2).
+
+    Returns
+    -------
+    centers : ndarray of shape (n,)
+        Bin centers.
+
+    Raises
+    ------
+    ValueError
+        If edges has fewer than 2 points or is not strictly increasing.
+
+    Examples
+    --------
+    >>> centers_from_edges([0.0, 1.0, 3.0, 6.0])
+    array([0.5, 2. , 4.5])
+    """
+    e = np.asarray(edges, dtype=float)
+    if e.ndim != 1 or e.size < 2:
+        raise ValueError("edges must be a 1D array with at least 2 elements.")
+    if not np.all(np.diff(e) > 0):
+        raise ValueError("edges must be strictly increasing.")
+
+    return 0.5 * (e[:-1] + e[1:])
+
+
 def span_from_pixels(p,n=None,delta = 0):
-    """From an array with positions of (same-size) pixel centers `p`, returns the entire range for pixels from side to side. Useful to adjust plot extent in imshow.
+    """From an array with positions of (same-size, increasing values) pixel centers `p`, returns the entire range for pixels from side to side. Useful to adjust plot extent in imshow.
 
     `p` is the center position of pixels **see notes at the end for `p` and `n` description
     
@@ -130,7 +207,7 @@ def span_from_pixels(p,n=None,delta = 0):
     note that np.linspace has flag retsteps to return step size.
     
     ---
-    2022/11/28 previous documentation seems unanderstendable, tried to rewrite from what I understand from examples. Previous version is:
+    2022/11/28 previous documentation seems ununderstendable, tried to rewrite from what I understand from examples. Previous version is:
     
     def span_from_pixels(p,n=None,delta = 0):
     
@@ -166,7 +243,7 @@ def test_span_from_pixels():
     print (span_from_pixels([0,1,2])) #[-0.5,2.5]
     print (span_from_pixels([0,0.5,1,1.5,2])) #[-0.25,2.25]
     #new
-    print (span_from_pixels([3],4)) #[3,3]
+    print (span_from_pixels([3],4)) #[3.0,3.0]
     print (span_from_pixels([100],1,delta=0.1))  #[99.9, 100.1]
     print (span_from_pixels([100],3,delta=-0.1))  #[85., 115.] 
     print (span_from_pixels([100],2,delta=1))  #(98.0, 102.0)
