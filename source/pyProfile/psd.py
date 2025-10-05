@@ -76,6 +76,9 @@ def psd(x,y,retall=False,wfun=None,norm=1,rmsnorm=False):
     N = len(y)
     L=span(x,True)
     
+    if len (np.unique(x)) != N:
+        raise ValueError('x values must be unique and same length as y, you can use profile_rebin to adjust len.')
+    
     yfft  = np.fft.rfft(y*win) #note that rfft return exact values as fft (needs to be doubled after squaring amplitude)
     
     normfactor=normPSD(N,L,form=norm)
