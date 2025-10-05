@@ -140,10 +140,10 @@ def load_dlist(rfiles,reader=None,*args,**kwargs):
     
     
     from dataIO import dicts
-    kwargs = dicts.vectorize(kwargs,len(rfiles))
-    kwargs = [{'scale': (-1, -1, 1),'units': ['mm', 'mm', 'um']},     #correct result of vectorization
-    {'scale': (1, 1, -1), 'units': ['mm', 'mm', 'um']},
-    {'scale': (-1, -1, 1), 'units': ['mm', 'mm', '$\\mu$m']}]
+    kwargs = dicts.vectorize(kwargs,len(rfiles),force_if_n=True)
+    # kwargs = [{'scale': (-1, -1, 1),'units': ['mm', 'mm', 'um']},     #correct result of vectorization
+    # {'scale': (1, 1, -1), 'units': ['mm', 'mm', 'um']},
+    # {'scale': (-1, -1, 1), 'units': ['mm', 'mm', '$\\mu$m']}]
     
     from dataIO import arrays
     reader = arrays.vectorize(reader,len(rfiles))
@@ -638,7 +638,7 @@ class Dlist(Superlist):
         elif type == 'grid':
             from plotting.backends import maximize
             maximize()            
-            axes = subplot_grid(len(self))[1]
+            axes = subplot_grid(len(self),*args,**kwargs)[1]
         elif type == 'all':
             # overlap on same ax, useful for partial maps or profiles.
             fig, ax = plt.subplots(**prep_kw(plt.subplots,kwargs))

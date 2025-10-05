@@ -135,6 +135,29 @@ def doc_from(source):
     partial(update_docstring,func=func)
 '''
 
+
+
+def read_chr(fn):
+    """ Read data from a crocodile file.
+    
+    Accept a string as filename, read 2nd and 3rd columns, replace ',' with '.' and convert to float.
+    """
+
+    def comma_to_float(s):
+        return float(s.replace(',', '.'))
+
+    data = np.genfromtxt(
+        fn,
+        delimiter='\t',
+        skip_header=1,
+        usecols=(2, 3),
+        converters={2: comma_to_float, 3: comma_to_float},
+        dtype=float,
+        encoding='latin1',unpack=True
+    )
+
+    return data
+
 def read_xyz(filename,*args,**kwargs):
     """temptative routine to read xyz files.
     Use by reading the data and then passing them to profile.
@@ -1045,7 +1068,7 @@ class Plist(Superlist):
     def merge(self, mode='raw',*args,**kwargs):
         res = self[0]
         for p in self[1:]:
-            res = res.merge(p,*args,**kwargs)
+            res = res.merge(p,mode=mode,*args,**kwargs)
         return res
     
     def save(self,file, type= 'vstack', *args,**kwargs):

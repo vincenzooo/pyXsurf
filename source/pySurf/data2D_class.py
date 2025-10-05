@@ -23,6 +23,8 @@ from pySurf.psd2d import (plot_psd2d, plot_rms_power, psd2d, psd2d_analysis,
                           rms_power)
 from pySurf.readers.format_reader import auto_reader
 
+"""TODO: add decorators for methods returning a copy of self. Add to all of them a 'name' argument to set the name of the returned object. Maybe also a 'plot' flag to plot the result."""
+
 """
 2018/06/07 v1.3
 v1.2 was not convenient, switch back to same interface as 1.1:
@@ -619,6 +621,7 @@ class Data2D(object):  # np.ndarrays
         rmsnorm=True,
         norm=1,
         analysis=False,
+        axis=1,
         subfix="",
         name=None,
         *args,
@@ -634,6 +637,11 @@ class Data2D(object):  # np.ndarrays
         pySurf.psd2d.psd_units, and consistently with functions in `pySurf.psd2d`.
         """
 
+        if axis == 0:
+            self = self.transpose()  # transpose to have x as first axis
+            # N.B.: psd2d works well with axis, but it was failing because the assignment of x to PSD2D
+            # was not switched. e.g.: d.psd(axis=0) was failing on non square data.
+            
         if analysis:
             title = kwargs.pop("title", (name if name is not None else ""))
             f, p = psd2d_analysis(
