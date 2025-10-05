@@ -17,6 +17,7 @@ from scipy import stats
 from dataIO.functions import update_docstring
 from scipy.stats import binned_statistic
 from dataIO.arrays import is_monotonic
+from dataIO.span import spans_from_centers, centers_from_spans
 
 ## profile creation
 def line(x,y=None):
@@ -364,11 +365,19 @@ def movingaverage(values,window,method='same',*args,**kwargs):
         smas[-i]=np.mean(values[-2*i-1:])
     return smas # as a numpy array
 
-def rebin_profile(x,y,statistic='mean',*args,**kwargs):
-    """ Flexible rebin of a profile. Reduces number of points without losing information.
-    Uses `stats.binned_statistics` of which keeps the interface. """
-    ss=stats.binned_statistic(x,y,statistic=statistic,*args,**kwargs)
-    x2=np.array([(x+y)/2. for x,y in zip(ss[1][:-1],ss[1][1:])])  #centra su punto centrale
+def rebin_profile(x,y,bins=None,*args,**kwargs):
+    """ Flexible rebin of a profile. Reduces number of points without losing information. Uses `stats.binned_statistics` of which keeps the interface.
+Differently from binned_statistics (default for bin =10), if 'bins' is not provided, uses unique values for x (might return unchanged array)."""
+
+    bins = kwargs.pop('bins',None)
+    
+    if bins is None:
+        bins = sorted(np.unique(x))
+        bins = spans_from_centers(bins)
+    
+    ss=stats.binned_statistic(x,y,bins=bins,*args,**kwargs) #returns stats, edges, binnumbers
+    #x2=np.array([(x+y)/2. for x,y in zip(ss[1][:-1],ss[1][1:])])  #centra su punto centrale
+    x2=centers_from_spans(bins)  #centra su punto centrale
     y2=ss[0]
     return x2,y2  
     rebin_profile = update_docstring(rebin_profile, stats.binned_statistics)
