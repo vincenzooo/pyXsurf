@@ -831,8 +831,7 @@ def rebin_points(tpoints,matrix=False,steps=None,*args,**kwargs):
     (default) or binned statistics options can be used to obtain result values.
     
     It is theoretically the best way to create a surface on a grid with minimal loss of information,
-    however it can be tricky, both for estimating errors (or values on empty bins) and for 
-    transformations (e.g. crop )."""
+    however it can be tricky, both for estimating errors (or values on empty bins) and for transformations (e.g. crop )."""
     
     
     x,y,z=list(zip(*tpoints))
