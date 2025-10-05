@@ -6,6 +6,70 @@ from copy import deepcopy
 
 warnings.simplefilter("once")
 
+from typing import Iterable, TypeVar
+
+T = TypeVar("T")
+
+def is_monotonic(seq: Iterable[T], *, strict: bool = False) -> bool:
+    """
+    Return True if `seq` is monotonic (non-decreasing or non-increasing).
+    If `strict` is True, require it to be strictly monotonic (no equal neighbors).
+
+    Notes:
+    - Empty or single-element sequences are considered monotonic.
+    - For strict=True, a single-element sequence is still True
+      (there are no equal consecutive values to violate strictness).
+
+    Examples
+    --------
+    >>> is_monotonic([1, 1, 2])               # non-decreasing
+    True
+    >>> is_monotonic([1, 1, 2], strict=True)  # equal neighbors => not strictly monotone
+    False
+    >>> is_monotonic([3, 2, 2])               # non-increasing
+    True
+    >>> is_monotonic([1, 3, 2])               # changes direction
+    False
+    >>> is_monotonic([], strict=True)
+    True
+    >>> is_monotonic([5], strict=True)
+    True
+    """
+    
+    it = iter(seq)
+    try:
+        prev = next(it)
+    except StopIteration:
+        return True  # empty
+
+    direction = 0   # +1 for increasing, -1 for decreasing, 0 unknown yet
+
+    for x in it:
+        # Handle equality
+        if x == prev:
+            if strict:
+                return False
+            prev = x
+            continue
+
+        # Decide or check direction
+        if x > prev:
+            if direction == -1:
+                return False
+            direction = 1
+        elif x < prev:
+            if direction == 1:
+                return False
+            direction = -1
+        else:
+            # Non-comparable case (e.g., NaN with numbers): treat as not monotonic
+            return False
+
+        prev = x
+
+    return True
+
+
 def stats (data=None,units=None,string=False,fmt=None,vars=None):
     """ Return selected statistics on data as numerical array or list of strings (one for each stats).  
     

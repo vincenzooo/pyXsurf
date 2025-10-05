@@ -10,8 +10,9 @@ filterByKey2 = lambda data,keys : {key: data[key] for key in keys if key in data
 
 from dataIO import arrays
 
-def vectorize(kwargs,n):
-    """Vectorize a dictionary of parameters, replicating each value for n times."""    
+def vectorize(kwargs,n, force_if_n=False):
+    """Vectorize a dictionary of parameters, replicating each value for n times."""  
+
     
     res = [{} for _ in range(n)]
     if kwargs : #passed explicit parameters for each reader
@@ -19,9 +20,13 @@ def vectorize(kwargs,n):
         # number of elements. This cannot be easily solved:
         #   it's impossible to say if n values are intended for n files or as n-value parameter,
         #   to be replicated for n files.
+        # 
+        # 2025/07/08 added `force_if_n` using same scheme as arrays, but maybe
+        # this should be vectorized itself,
+        # because one might want a different behavior for each argument.. 
         
         for k,v in kwargs.items():
-            vvec = arrays.vectorize(v,n,force_if_n=True)
+            vvec = arrays.vectorize(v,n,force_if_n=force_if_n)
             for r,val in zip(res,vvec):
                 r[k]=val
                         
@@ -33,13 +38,9 @@ def test_vectorize():
     
     assert vectorize(kwargs,3) == [{}, {}, {}]
     
+    # the next two tests are incompatible.
     kwargs = {'scale':[(-1,-1,1),(1,1,-1),(-1,-1,1)],
                 'units':[['mm','mm','um'],['mm','mm','um'],['mm','mm','$\mu$m']]}
-
-    # # deve essere:
-    # kwargs == [{'scale': (-1, -1, 1),'units': ['mm', 'mm', 'um']},
-    #  {'scale': (1, 1, -1), 'units': ['mm', 'mm', 'um']},
-    #  {'scale': (-1, -1, 1), 'units': ['mm', 'mm', '$\\mu$m']}]
     
     assert vectorize(kwargs,3) == [{'scale': (-1, -1, 1),'units': ['mm', 'mm', 'um']},
      {'scale': (1, 1, -1), 'units': ['mm', 'mm', 'um']},
