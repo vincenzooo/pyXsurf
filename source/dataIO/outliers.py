@@ -26,8 +26,9 @@ def remove_outliers(data: np.array,
         
         `span` argument is deprecated and it will be removed. Please update your code to use `from dataIO.span import span; span (remove_outliers(data,...))`.
 
+        See also generator version `dataIO.span.filtered_span`
         """
-        #see also dataIO.span.filtered_span
+        #
         
     if span: # useless and was giving conflict, solved by workaround below.
         print("`span` argument is deprecated and it will be removed. Please update your code to use `from dataIO.span import span; span (remove_outliers(data,...))`.\n\nentering debugger, `c` to continue, `u` to see caller function, `l` list code.")
@@ -86,7 +87,8 @@ def filter_outliers(data: np.array,
         `span` argument is deprecated and it will be removed. Please update your code to use `from dataIO.span import span; span (remove_outliers(data,...))`.
 
         """
-        #see also dataIO.span.filtered_span
+        
+    # 2025/10/07 not sure why this is needed and why not embed in (or viceversa) remove_outliers.        
         
     if span: # useless and was giving conflict, solved by workaround below.
         print("`span` argument is deprecated and it will be removed. Please update your code to use `from dataIO.span import span; span (remove_outliers(data,...))`.\n\nentering debugger, `c` to continue, `u` to see caller function, `l` list code.")
