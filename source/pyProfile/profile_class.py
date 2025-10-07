@@ -95,6 +95,7 @@ import numpy as np
 from copy import deepcopy
 import inspect  # to use with importing docstring
 
+import dataIO
 from dataIO.span import span
 from dataIO.superlist import Superlist
 from dataIO.arrays import split_blocks, split_on_indices
@@ -114,6 +115,7 @@ from pyProfile.profile import save_profile
 from pyProfile import profile   # functions passed to update_docstring will be from here
 from pyProfile.psd import plot_psd
 from pyProfile.psd import psd_units
+from pyProfile.profile import fill_mask
 
 '''
 def update_docstring(func,source):
@@ -850,6 +852,23 @@ class Profile(object):  #np.ndarrays
                              np.nanstd(self.y))
         print(s)
         return s
+    
+    
+    def remove_outliers(self,fill_value=np.nan,correct=False,*args,**kwargs):
+        """use dataIO.outliers.remove_outliers to remove outliers.
+        If correct is True, replace outliers with interpolated values (fill_value is ignored)."""
+        res=self.copy()
+        m = dataIO.outliers.remove_outliers(res.y,*args,**kwargs)
+        # import pdb
+        # pdb.set_trace()
+        
+        if correct:
+            res.y = fill_mask(res.y,res.x,mask=m,extrapolate= True)
+        else:
+            res.y[~m] = fill_value
+        return res
+        
+    remove_outliers=update_docstring(remove_outliers,dataIO.outliers.remove_outliers)
 
     '''
     def align_interactive(self,other,find_transform=find_affine):
@@ -862,15 +881,6 @@ class Profile(object):  #np.ndarrays
         m1,m2=add_markers([self,other])
         trans=find_transform(m1,m2)
         return self.apply_transform(trans)
-
-    def remove_outliers(self,fill_value=np.nan,*args,**kwargs):
-        """use dataIO.remove_outliers to remove outliers"""
-        res=self.copy()
-        m = remove_outliers(res.data,*args,**kwargs)
-        res.data[~m] = fill_value
-        return res
-        
-    remove_outliers=update_docstring(remove_outliers,dataIO.outliers.remove_outliers)
 
     def histostats(self,*args,**kwargs):
         res =data_histostats(self.data,self.x,self.y,units=self.units,*args,**kwargs)
@@ -901,7 +911,7 @@ class Profile(object):  #np.ndarrays
 
 #from pySurf.psd2d import psd2d,plot_psd2d
 
-        
+
         
 class PSD(Profile):
     """It is a type of profile with customized behavoiur and additional properties

@@ -161,6 +161,55 @@ def remove_nan_ends(x,y=None,internal=False):
 
     return x,y
     
+    import numpy as np
+from scipy.interpolate import interp1d
+
+def fill_mask(y, x=None, mask=None, extrapolate=False):
+    """
+    Linearly interpolate masked points in a 1D array using only NumPy/SciPy.
+
+    Parameters
+    ----------
+    y : array-like, shape (n,)
+        Data with NaNs to fill.
+    x : array-like or None
+        Coordinates; must be increasing if provided. If None, uses 0..n-1.
+    mask : array-like of bool or None
+    extrapolate : bool
+        If True, also linearly extrapolate leading/trailing NaNs.
+        If False, edge NaNs are left as NaN.
+
+    Returns
+    -------
+    np.ndarray
+        Copy of y with NaNs filled where possible.
+    """
+    y = np.asarray(y, dtype=float).copy()
+    n = y.size
+    x = np.arange(n, dtype=float) if x is None else np.asarray(x, dtype=float)
+
+    if mask is None:
+        mask = ~np.isnan(y)
+    if mask.sum() < 2:
+        return y  # not enough data to interpolate
+
+    x_valid = x[mask]
+    y_valid = y[mask]
+    out = y.copy()
+
+    if extrapolate:
+        f = interp1d(x_valid, y_valid, kind="linear",
+                     fill_value="extrapolate", bounds_error=False, assume_sorted=True)
+        out[~mask] = f(x[~mask])
+    else:
+        # Fill only *inside* the known range; keep edge NaNs
+        inside = (~mask) & (x >= x_valid[0]) & (x <= x_valid[-1])
+        out[inside] = np.interp(x[inside], x_valid, y_valid)
+
+    return out
+
+    
+    
 #profile fitting
 
 def polyfit_profile (x,y=None,degree=1,P=np.polynomial.Legendre):
