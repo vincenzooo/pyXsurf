@@ -853,7 +853,7 @@ class Profile(object):  #np.ndarrays
         print(s)
         return s
     
-    
+    # this fails on first function call, error at 871 with 'module 'dataIO' has no attribute 'outliers'
     def remove_outliers(self,fill_value=np.nan,correct=False,*args,**kwargs):
         """use dataIO.outliers.remove_outliers to remove outliers.
         If correct is True, replace outliers with interpolated values (fill_value is ignored)."""
