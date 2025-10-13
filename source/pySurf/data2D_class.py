@@ -286,7 +286,10 @@ class Data2D(object):  # np.ndarrays
 
         self.data, self.x, self.y = data, x, y
 
-        self.units = units
+        if np.size(units) == 1:
+            if units is not None:
+                units=[units,units,units]
+        self.units = units  # can be None, string, or 3-element array
         if name is not None:
             self.name = name
         elif file is not None:
@@ -759,7 +762,10 @@ class Data2D(object):  # np.ndarrays
     def projection(self, axis = 0, *args, **kwargs):
         """avg, returns x and y. Can use data2D.projection keywords `span` and `expand` to return data ranges."""
         from pyProfile.profile_class import Profile
-        res = Profile(self.y, projection(self.data, axis=axis, *args,**kwargs), units = [self.units[1], self.units[2]], name = " ".join([self.name,"avg along axis %i"%(axis)])) 
+        u = self.units if self.units is not None else ["","",""]
+        res = Profile(self.y, projection(self.data, axis=axis, *args,**kwargs), 
+                      units = ([u[1], u[2]] if self.units is not None else None), 
+                      name = " ".join([self.name,"avg along axis %i"%(axis)])) 
     
         # print(self)
         return res

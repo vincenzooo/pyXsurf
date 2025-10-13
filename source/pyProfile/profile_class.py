@@ -259,7 +259,7 @@ class Profile(object):  #np.ndarrays
 
 
     def __init__(self,x=None,y=None,file=None,reader=None,
-        scale = (1.,1.), units=["",""],name=None,*args,**kwargs):
+        scale = (1.,1.), units=None,name=None,*args,**kwargs):
         """can be initialized with data; x,y; file; file, x
         if x is provided, they override x from data if matching number of elements, 
         or used as range if two element (error is raised in case of ambiguity)."""
@@ -339,7 +339,8 @@ class Profile(object):  #np.ndarrays
         #goes indented.
 
         if np.size(units) == 1:
-            units=[units,units]
+            if units is not None:
+                units=[units,units]
         self.units=units
         if name is not None:
             self.name=name
@@ -853,10 +854,11 @@ class Profile(object):  #np.ndarrays
         print(s)
         return s
     
-    
+    from dataIO.outliers import remove_outliers as _remout
     def remove_outliers(self,fill_value=np.nan,correct=False,*args,**kwargs):
         """use dataIO.outliers.remove_outliers to remove outliers.
         If correct is True, replace outliers with interpolated values (fill_value is ignored)."""
+        
         res=self.copy()
         m = dataIO.outliers.remove_outliers(res.y,*args,**kwargs)
         # import pdb
@@ -868,7 +870,7 @@ class Profile(object):  #np.ndarrays
             res.y[~m] = fill_value
         return res
         
-    remove_outliers=update_docstring(remove_outliers,dataIO.outliers.remove_outliers)
+    remove_outliers=update_docstring(remove_outliers,_remout)
 
     '''
     def align_interactive(self,other,find_transform=find_affine):
