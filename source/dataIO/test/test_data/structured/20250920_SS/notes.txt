@@ -1,0 +1,8 @@
+2025/09/19 VC 
+First use of profilometer after training by Mauro.
+
+01-10 Sample Run08 (SS) with fiducial on top- Top border at about 45, do scans 80-140, speed 0.5
+11-20 Mandrel SS02 (CXM08) after the first slumping run, with fiducial zero on top. Take pictures of focal spot in initial, final, center position. It encompasses the largest spot location.
+21-23 repeats scans with longer x range 50-170 to go out of spotted area. I notice in these scans that there is flickering in distance read on CHR electronics (probably also present in shorter data). It is present along all scan, except maybe the very end. It might also be needed to increase sampling rate, as the mandrel is shinier.
+24-27 Mandrel LMSS01 pristine, scan 80-140 after setting 1000 Hz, it worked to eliminate flickering on static data, only partially on scan.
+
