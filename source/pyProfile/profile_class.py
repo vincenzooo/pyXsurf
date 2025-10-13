@@ -853,12 +853,12 @@ class Profile(object):  #np.ndarrays
         print(s)
         return s
     
-    # this fails on first function call, error at 871 with 'module 'dataIO' has no attribute 'outliers'
+    from dataIO import outliers #now it fails on second call: NameError: name 'outliers' is not defined
     def remove_outliers(self,fill_value=np.nan,correct=False,*args,**kwargs):
         """use dataIO.outliers.remove_outliers to remove outliers.
         If correct is True, replace outliers with interpolated values (fill_value is ignored)."""
         res=self.copy()
-        m = dataIO.outliers.remove_outliers(res.y,*args,**kwargs)
+        m = outliers.remove_outliers(res.y,*args,**kwargs)
         # import pdb
         # pdb.set_trace()
         
@@ -868,7 +868,7 @@ class Profile(object):  #np.ndarrays
             res.y[~m] = fill_value
         return res
         
-    remove_outliers=update_docstring(remove_outliers,dataIO.outliers.remove_outliers)
+    remove_outliers=update_docstring(remove_outliers,outliers.remove_outliers)
 
     '''
     def align_interactive(self,other,find_transform=find_affine):
