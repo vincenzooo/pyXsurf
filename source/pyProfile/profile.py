@@ -503,10 +503,10 @@ def resample_profile(x1,y1,x2,y2=None, trim = True,*args,**kwargs):
      
     return x2,y2
 
-def merge_profile(x1,y1,x2,y2):
-    """stitch profiles
-    20221129 see implementation below, was before (original file cannot be found):"""
-    raise NotImplementedError(r"see example of psd merging in G:\My Drive\progetti\read_nid.ipynb")
+# def merge_profile(x1,y1,x2,y2):
+#     """stitch profiles
+#     20221129 see implementation below, was before (original file cannot be found):"""
+#     raise NotImplementedError(r"see example of psd merging in G:\My Drive\progetti\read_nid.ipynb")
 
 def merge_profile(x1,y1,x2,y2=None, range = None, mode = 'avgon1st', toll = 0):
     
