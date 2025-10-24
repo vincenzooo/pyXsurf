@@ -1057,6 +1057,7 @@ class Plist(Superlist):
 '''
         
 from dataIO.superlist import Superlist
+from dataIO.arrays import vectorize
 
 
 class Plist(Superlist):
@@ -1078,9 +1079,10 @@ class Plist(Superlist):
     """
     
     def merge(self, mode='raw',*args,**kwargs):
+        mode = vectorize(mode, len(self)-1,force_if_n=True)
         res = self[0]
-        for p in self[1:]:
-            res = res.merge(p,mode=mode,*args,**kwargs)
+        for p,m in zip(self[1:],mode):
+            res = res.merge(p,mode=m,*args,**kwargs)
         return res
     
     def save(self,file, type= 'vstack', *args,**kwargs):
