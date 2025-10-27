@@ -100,6 +100,7 @@ from dataIO.span import span
 from dataIO.superlist import Superlist
 from dataIO.arrays import split_blocks, split_on_indices
 from dataIO.functions import update_docstring
+from dataIO.fn_add_subfix import fn_add_subfix
 
 from pyProfile.profile import crop_profile
 from pyProfile.profile import level_profile
@@ -161,7 +162,7 @@ def read_chr(fn):
     return data
 
 def read_xyz(filename,*args,**kwargs):
-    """temptative routine to read xyz files.
+    """tentative routine to read xyz files.
     Use by reading the data and then passing them to profile.
     It will be incorporated in some form of reader in a 
     more mature version"""
@@ -201,7 +202,7 @@ def get_header_field(db, tag, header='<<PMCA SPECTRUM>>'):
 def read_mca(filename, encoding='iso-8859-1',*args,**kwargs):
     """ Given a .mca file, return a `Profile` object.
     
-    temptative routine to read mca files from amptek energy sensitive detector. Return a profile with metadata information in a `.header` property (temporarily a dictionary obtained from string blocks) of all profiles.
+    tentative routine to read mca files from amptek energy sensitive detector. Return a profile with metadata information in a `.header` property (temporarily a dictionary obtained from string blocks) of all profiles.
     Like all other readers will be incorporated in some form of reader in a more mature version.
     Normally the header contains keys
     ['<<CALIBRATION>>', 
@@ -1079,16 +1080,39 @@ class Plist(Superlist):
     """
     
     def merge(self, mode='raw',*args,**kwargs):
+        
         mode = vectorize(mode, len(self)-1,force_if_n=True)
         res = self[0]
         for p,m in zip(self[1:],mode):
             res = res.merge(p,mode=m,*args,**kwargs)
         return res
     
-    def save(self,file, type= 'vstack', *args,**kwargs):
+    def save(self,file, mode= 'vstack', *args,**kwargs):
         """save stacked or on separate files"""
-        pp = self.merge()
-        pp.save(file, *args,**kwargs)
+        
+        if 'type' in kwargs:
+            mode = kwargs.pop('type')
+            print("`type` keyword is deprecated, use `mode` instead.")
+            sleep(5)
+        
+        if mode == 'separate':
+            outfiles=[]
+            for p in self:
+                name=fn_add_subfix(file,p.name)
+                outfiles.append(name)
+                p.save(name, *args,**kwargs)
+            return outfiles
+        elif mode == 'blocks':   #vstack or merged
+            pp = self.merge()
+            print("blocks mode not implemented yet")
+            raise NotImplementedError('blocks mode not implemented yet in Plist.save')
+        elif mode == 'vstack':
+            pp = self.merge()
+            pp.save(file, *args,**kwargs)
+        else:
+            raise ValueError('Unknown mode %s in Plist.save'%mode)
+        
+        return file    
     
 def test_load_plist(rfiles = None):
 
