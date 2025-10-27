@@ -247,7 +247,7 @@ def mft_psd(files,outfolder=None,rmsthr=None,psdrange=None,frange=None):
         
     
 def trim_psds_group(ranges, datafiles, labels, xrange=None,yrange=None,
-                    outname=None):
+                    outname=None, addsubfix= True):
     """ Makes a single psd trimming and averaging multiple ones according to selection. 
         An equivalent updated version (or an attempt to it) in trim_psds_group2
     
@@ -271,7 +271,9 @@ def trim_psds_group(ranges, datafiles, labels, xrange=None,yrange=None,
     plt.figure(figsize=(12,6))
     for ran,fn,lab in zip(ranges,datafiles,labels):
         if ran is not None:
-            x,y = np.genfromtxt(fn_add_subfix(fn,'_psd','.dat'),unpack=True,skip_header=1, comments='#')  
+            if addsubfix:
+                fn = fn_add_subfix(fn,'_psd','.dat')
+            x,y = np.genfromtxt(fn,unpack=True,skip_header=1, comments='#')  
             if len(x)==0:
                 raise ValueError('No data read from file '+fn_add_subfix(fn,'_psd','.dat'))      
             if x[0] == 0:
@@ -353,7 +355,7 @@ def trim_psds_group(ranges, datafiles, labels, xrange=None,yrange=None,
 
 
 def trim_psds_group2(ranges, datafiles, labels,xrange=None,yrange=None,
-                    outname=None):
+                    outname=None, addsubfix= True):
     """ Makes a single psd trimming and averaging multiple ones according to selection.
     
     2022/11/25 attempt to create from previous version above, a function which uses profile functions 
@@ -380,7 +382,9 @@ def trim_psds_group2(ranges, datafiles, labels,xrange=None,yrange=None,
         
         Pl = []
         for fn in datafiles:
-            x,y = np.genfromtxt(fn_add_subfix(fn,'_psd','.dat'),unpack=True,skip_header=1)
+            if addsubfix:
+                fn = fn_add_subfix(fn,'_psd','.dat')
+            x,y = np.genfromtxt(fn,unpack=True,skip_header=1)
             if x[0] == 0:
                 x=x[1:]
                 y=y[1:]
