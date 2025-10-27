@@ -9,6 +9,7 @@
 
 import itertools
 import os
+import time
 from copy import deepcopy
 
 import matplotlib.pyplot as plt
@@ -603,9 +604,9 @@ class Dlist(Superlist):
     # Dlist([Data2D(file=ff[0],reader=nid_reader)])
     
     # test 2024/02/21 (implemented auto_reader) OK
-    # Dlist([Data2D(file=ff,reader=nid_reader) for ff in files]).plot(type='grid')
-    # Dlist(files,reader=nid_reader).plot(type='grid')
-    # Dlist(files).plot(type='grid')
+    # Dlist([Data2D(file=ff,reader=nid_reader) for ff in files]).plot(mode='grid')
+    # Dlist(files,reader=nid_reader).plot(mode='grid')
+    # Dlist(files).plot(mode='grid')
     
     '''
         
@@ -622,9 +623,9 @@ class Dlist(Superlist):
         plist = topoints(self.data,level = None)
         return plist  
         
-    def plot(self,type='figures',*args,**kwargs):
+    def plot(self,mode='figures',*args,**kwargs):
         """
-        types:
+        modes:
         figures - plot each graph in a separate window
         grid - makes a grid of plots
                
@@ -633,13 +634,20 @@ class Dlist(Superlist):
         
         N.B.: this is used also by Plist with an assignment.
         """
-        if type == 'figures': 
+        
+        if 'type' in kwargs:
+            mode = kwargs.pop('type')
+            print("`type` keyword is deprecated, use `mode` instead.")
+            time.sleep(5)
+            
+        
+        if mode == 'figures': 
             axes = [plt.figure(**prep_kw(plt.figure,kwargs)) for dummy in self]
-        elif type == 'grid':
+        elif mode == 'grid':
             from plotting.backends import maximize
             maximize()            
             axes = subplot_grid(len(self),*args,**kwargs)[1]
-        elif type == 'all':
+        elif mode == 'all':
             # overlap on same ax, useful for partial maps or profiles.
             #fig, ax = plt.subplots(**prep_kw(plt.subplots,kwargs))
             ax  = plt.gca()
@@ -656,9 +664,9 @@ class Dlist(Superlist):
         return axes
 
 '''            
-    def plot(self,type='figures',*args,**kwargs):
+    def plot(self,mode='figures',*args,**kwargs):
         """
-        types:
+        modes:
         figures - plot each graph in a separate window
         grid - makes a grid of plots, parameters can be controlled with options as `multiplots.subplot_grid`
                
@@ -672,13 +680,13 @@ class Dlist(Superlist):
         args = arrays.vectorize(args,len(self))
         kwargs = dicts.vectorize(kwargs,len(self))
         
-        if type == 'figures': 
+        if mode == 'figures': 
             axes = [plt.figure(**prep_kw(plt.figure,kwargs)) for dummy in self]
-        elif type == 'grid':
+        elif mode == 'grid':
             from plotting.backends import maximize
             maximize()            
             axes = subplot_grid(len(self),**prep_kw(subplot_grid,kwargs))[1]
-        elif type == 'all':
+        elif mode == 'all':
             # overlap on same ax, useful for partial maps or profiles.
             axes = [plt.figure()] * len(self) # three references to same axis 
         # import pdb
